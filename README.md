@@ -1,7 +1,26 @@
 # ft_transcendence
 
-start command:
-
+up:
 ```
-docker-compose up -d
+make
+```
+
+down:
+```
+make down
+```
+
+delete images:
+```
+make clean
+```
+
+clear volume folders:
+```
+make vclean
+```
+
+check status:
+```
+make status
 ```

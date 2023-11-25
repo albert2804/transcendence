@@ -1,0 +1,57 @@
+version: '3'
+
+### Services ###
+services:
+  frontend:
+    build: ./requirements/frontend
+    volumes:
+      - frontend-data:/code
+    ports:
+      - "8080:8080"
+    networks:
+      - transcendencenet
+  backend:
+    build: ./requirements/backend
+    volumes:
+      - backend-data:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - transcendencenet
+  db:
+    image: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=django_db
+      - POSTGRES_USER=django
+      - POSTGRES_PASSWORD=django
+    networks:
+      - transcendencenet
+
+### Networks ###
+networks:
+  transcendencenet:
+
+### Volumes ###
+volumes:
+  frontend-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/frontend-data
+  backend-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/backend-data
+  db-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/db-data

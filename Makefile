@@ -10,7 +10,7 @@ clean:
 
 vclean:	
 	rm -rf srcs/volumes/*
-	mkdir srcs/volumes/db_data srcs/volumes/backend-data srcs/volumes/frontend-data
+	mkdir srcs/volumes/db_data srcs/volumes/backend_data srcs/volumes/frontend_data
 	@docker volume rm $$(docker volume ls -q)
 
 status:

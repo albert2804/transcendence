@@ -2,32 +2,55 @@ version: '3'
 
 ### Services ###
 services:
+  nginx:
+    build:
+      context: .
+      dockerfile: requirements/nginx/Dockerfile
+      args:
+        - DOMAIN
+        - CERT_PATH
+        - CERT_KEY_PATH
+    restart: always
+    volumes:
+      - frontend_data:/code
+    ports:
+      - "443:443"
+    networks:
+      - transcendencenet
   frontend:
     build: ./requirements/frontend
+    restart: always
     volumes:
-      - frontend-data:/code
+      - frontend_data:/code
     ports:
-      - "8080:8080"
+      - "8080:8080" # needed for development server only
     networks:
       - transcendencenet
   backend:
     build: ./requirements/backend
+    restart: always
     volumes:
-      - backend-data:/code
-    ports:
-      - "8000:8000"
+      - backend_data:/code
+    # ports:
+    #   - "8000:8000" # not needed ! nginx redirects all /api requests to backend
     depends_on:
       - db
     networks:
       - transcendencenet
   db:
     image: postgres
+    restart: always
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=django_db
       - POSTGRES_USER=django
       - POSTGRES_PASSWORD=django
+    networks:
+      - transcendencenet
+  adminer:
+    image: adminer
+    restart: always
     networks:
       - transcendencenet
 
@@ -37,21 +60,21 @@ networks:
 
 ### Volumes ###
 volumes:
-  frontend-data:
+  frontend_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./volumes/frontend-data
-  backend-data:
+      device: ./volumes/frontend_data
+  backend_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./volumes/backend-data
-  db-data:
+      device: ./volumes/backend_data
+  db_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./volumes/db-data
+      device: ./volumes/db_data

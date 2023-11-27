@@ -1,4 +1,2 @@
-- Set Database credentials in .env file
-- Set Volume paths in .env file
 - Configure and start the backend server
 - NGINX and Frontend in one container ? (vuejs dev server is only needed for development)

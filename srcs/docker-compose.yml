@@ -43,9 +43,9 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=django_db
-      - POSTGRES_USER=django
-      - POSTGRES_PASSWORD=django
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
     networks:
       - transcendencenet
   adminer:
@@ -65,16 +65,16 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ./volumes/frontend_data
+      device: $FRONTEND_DATA_PATH
   backend_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./volumes/backend_data
+      device: $BACKEND_DATA_PATH
   db_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./volumes/db_data
+      device: $DB_DATA_PATH

@@ -5,13 +5,17 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /code
 
-COPY ./conf/requirements.txt .
+COPY ./files/ .
+# COPY ./files/ /code/
 
 RUN pip install -r requirements.txt
 
-COPY ./files .
-
 EXPOSE 8000
 
-CMD ["tail", "-f", "/dev/null"]
-# CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# CMD ["tail", "-f", "/dev/null"]
+WORKDIR /code/backend
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+# for production-server we can use for example gunicorn
+# but we need to add gunicorn to requirements.txt ;)
+# CMD ["gunicorn", "--bind", 0.0.0.0:8000, "backend.wsgi:application"]

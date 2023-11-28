@@ -1,2 +1,1 @@
-- Configure and start the backend server
 - NGINX and Frontend in one container ? (vuejs dev server is only needed for development)

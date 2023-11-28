@@ -26,8 +26,10 @@ SECRET_KEY = 'django-insecure-0q20k#atx@vql74=j^5=hijw2@=+s0e4gv4wnltw--94#-*yi=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# Get the domain name from the docker containers environment variable
+# Set allowed hosts from environment variable
 ALLOWED_HOSTS = os.environ['DOMAIN'].split()
+# Set trusted origins for CSRF from environment variable
+CSRF_TRUSTED_ORIGINS = ['https://' + host for host in os.environ['DOMAIN'].split()]
 
 # Application definition
 
@@ -73,14 +75,17 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'django_db',
+        'USER': 'django',
+        'PASSWORD': 'django',
+        'HOST': 'db',
+        'PORT': '5432',
     }
 }
+
 
 
 # Password validation
@@ -123,3 +128,7 @@ STATIC_URL = 'endpoint/static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Use X-Forwarded-Host and X-Forwarded-Port headers because of reverse proxy
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True

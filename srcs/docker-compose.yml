@@ -19,7 +19,7 @@ services:
       - transcendencenet
   frontend:
     build: ./requirements/frontend
-    restart: always
+    # restart: always
     volumes:
       - frontend_data:/code
     ports:
@@ -28,11 +28,13 @@ services:
       - transcendencenet
   backend:
     build: ./requirements/backend
+    environment:
+      - DOMAIN=$DOMAIN
     restart: always
     volumes:
       - backend_data:/code
-    # ports:
-    #   - "8000:8000" # not needed ! nginx redirects all /api requests to backend
+    ports:
+      - "8000:8000" # not needed ! nginx redirects all /api requests to backend
     depends_on:
       - db
     networks:

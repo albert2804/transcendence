@@ -19,6 +19,8 @@ services:
       - transcendencenet
   frontend:
     build: ./requirements/frontend
+    depends_on:
+      - backend
     # restart: always
     volumes:
       - frontend_data:/code
@@ -28,15 +30,21 @@ services:
       - transcendencenet
   backend:
     build: ./requirements/backend
+    # this command writes the necessary things to the database, creates a superuser for the admin panel and starts the server
+    # I think later we should import the database for django from a file (to PostgreSQL-container) instead of creating it here
+    command: bash -c "python manage.py migrate && python manage.py createsuperuser --noinput && python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - db # wait for db to be ready
     environment:
       - DOMAIN=$DOMAIN
+      - DJANGO_SUPERUSER_USERNAME=$DJANGO_SUPERUSER_USERNAME
+      - DJANGO_SUPERUSER_PASSWORD=$DJANGO_SUPERUSER_PASSWORD
+      - DJANGO_SUPERUSER_EMAIL=$DJANGO_SUPERUSER_EMAIL
     restart: always
     volumes:
       - backend_data:/code
     ports:
       - "8000:8000" # not needed ! nginx redirects all /api requests to backend
-    depends_on:
-      - db
     networks:
       - transcendencenet
   db:
@@ -52,6 +60,8 @@ services:
       - transcendencenet
   adminer:
     image: adminer
+    depends_on:
+      - db 
     restart: always
     networks:
       - transcendencenet

@@ -47,5 +47,6 @@ _Bisher wird vue.js mit Bootstrap als Frontend verwendet. Kann natürlich sobald
 ## Backend-Development
 - Django-Server should normally restart itself on changes in the backend volume but sometimes you need to restart the container manually with:
 `docker restart [backend-container]`
+
 - Until now, the Django development-server is used. This should be changed in the future to a production server (e.g. gunicorn)
 

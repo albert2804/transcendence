@@ -4,5 +4,7 @@ Django==4.2.7
 psycopg2-binary==2.9.9
 # Rest Framework
 djangorestframework==3.14.0
-# CORS (maybe needed for Rest-API)
+# Postgre DB Adapter
+psycopg2==2.9.9
+# CORS (maybe needed for Rest-API ??)
 # django-cors-headers==4.3.1

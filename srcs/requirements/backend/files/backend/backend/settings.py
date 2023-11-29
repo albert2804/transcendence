@@ -74,13 +74,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 
-# Database
+# Database (PostgreSQL from db-container)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'django_db',
-        'USER': 'django',
-        'PASSWORD': 'django',
+        'NAME': os.environ['POSTGRES_DB'],
+        'USER': os.environ['POSTGRES_USER'],
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
         'HOST': 'db',
         'PORT': '5432',
     }

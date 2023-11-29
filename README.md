@@ -1,5 +1,8 @@
 # ft_transcendence
 
+## Warning
+- The Makefile (make clean and make vclean) deletes all images and volumes in your docker environment. Not only the ones from this project.
+
 ## Project setup
  - You need to set the DOMAIN from .env file in your /etc/hosts file
 

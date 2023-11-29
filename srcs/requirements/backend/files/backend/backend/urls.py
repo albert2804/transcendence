@@ -14,10 +14,16 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
 from django.contrib import admin
 from django.urls import path, include
 
+
 urlpatterns = [
-    path('endpoint/admin/', admin.site.urls),
     path('endpoint/api/', include('api.urls')),
 ]
+
+# Enable admin panel if ADMIN_PANEL_ENABLED is set to True
+admin_panel = os.environ.get('ADMIN_PANEL_ENABLED', 'False').lower() == 'true'
+if admin_panel:
+    urlpatterns.append(path('endpoint/admin/', admin.site.urls))

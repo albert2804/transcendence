@@ -41,10 +41,17 @@ make status
 - DOMAIN/endpoint/admin     -> Django-Admin-Panel
 - DOMAIN/adminer            -> Adminer (Database-Management)
 
+## Useful for development
+- All containers are named after their service name in the docker-compose.yml file. So you can easily access them with their name.
+    - For example:
+        - docker restart nginx
+        - docker exec -it frontend sh
+        - docker logs backend
+        - etc.
+
 ## Frontend-Development
 _The frontend is build with vue.js and bootstrap. This can be changed when we know which framework we want to use._
 - Development-Server updates live on changes in the frontend volume. So you can just change the code and see the changes in the browser.
 
 ## Backend-Development
-- Development-Server should normally restart itself on changes in the backend volume but sometimes you need to restart the container manually with:
-`docker restart [backend-container]`
+- Development-Server should normally restart itself on changes in the backend volume but sometimes you need to restart the container manually (docker restart backend)

@@ -1,1 +1,2 @@
-- NGINX and Frontend in one container ? (vuejs dev server is only needed for development)
+- frontend and backend containers should be possible to run deployment servers (gunicorn?)
+-

@@ -3,6 +3,7 @@ version: '3'
 ### Services ###
 services:
   nginx:
+    container_name: nginx
     build:
       context: .
       dockerfile: requirements/nginx/Dockerfile
@@ -13,15 +14,19 @@ services:
     env_file:
       - .env
     restart: always
+    volumes:
+      - nginx_data:/etc/nginx/conf.d
     networks:
       - transcendencenet
     ports:
       - "443:443"
   frontend:
+    container_name: frontend
     build:
       context: .
       dockerfile: requirements/frontend/Dockerfile
       args:
+        - DOMAIN
         - CERT_PATH
         - CERT_KEY_PATH
     restart: always
@@ -30,6 +35,7 @@ services:
     networks:
       - transcendencenet
   backend:
+    container_name: backend
     build: ./requirements/backend
     env_file:
       - .env
@@ -39,6 +45,7 @@ services:
     networks:
       - transcendencenet
   db:
+    container_name: db
     image: postgres
     env_file:
       - .env
@@ -48,6 +55,7 @@ services:
     networks:
       - transcendencenet
   adminer:
+    container_name: adminer
     image: adminer
     restart: always
     networks:
@@ -77,3 +85,10 @@ volumes:
       type: none
       o: bind
       device: $DB_DATA_PATH
+  # This volume isn't necessary, but it's useful to easily edit nginx config file during development
+  nginx_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: $NGINX_DATA_PATH

@@ -28,4 +28,5 @@ EXPOSE 8080
 # starts development server on port 8080: (needs open port 8080 in docker-compose.yml)
 # CMD ["npm", "run", "serve", "--host", "0.0.0.0"]
 # ENV HOST 0.0.0.0
-CMD ["npm", "run", "serve", "--", "--host", "0.0.0.0"]
+CMD [ "npm", "run", "serve" ]
+# CMD ["npm", "run", "serve", "--", "--host", "0.0.0.0"]

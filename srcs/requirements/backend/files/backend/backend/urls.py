@@ -18,8 +18,9 @@ import os
 from django.contrib import admin
 from django.urls import path, include
 
-
+# All main URLs for the backend also needs to be set in the nginx.conf file from the NGINX Container
 urlpatterns = [
+    # Path to REST API
     path('endpoint/api/', include('api.urls')),
 ]
 

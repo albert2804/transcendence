@@ -13,8 +13,6 @@ services:
     env_file:
       - .env
     restart: always
-    # volumes:
-    #   - frontend_data:/code
     networks:
       - transcendencenet
     ports:
@@ -26,13 +24,11 @@ services:
       args:
         - CERT_PATH
         - CERT_KEY_PATH
-    # restart: always
+    restart: always
     volumes:
       - frontend_data:/code
     networks:
       - transcendencenet
-    ports:
-      - "8080:8080" # needed for development server only
   backend:
     build: ./requirements/backend
     env_file:

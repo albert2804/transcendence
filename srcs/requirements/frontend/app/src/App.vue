@@ -1,30 +1,3 @@
-<!-- <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
-</template>
-
-<script>
-import HelloWorld from './components/HelloWorld.vue'
-
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
-</script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style> -->
-
 <template>
   <div class="center">
     <button class="btn btn-success" @click="fetchData">Click me</button>
@@ -56,14 +29,14 @@ export default {
   },
   methods: {
     fetchData() {
-      console.log('Button wurde geklickt');
-      axios.get('/endpoint/api/?format=json')
+      console.log('You clicked the button!');
+      axios.get('/endpoint/api/test?format=json')
         .then(response => {
           this.data = response.data;
           this.showModal = true;
         })
         .catch(error => {
-          console.error('Fehler bei der API-Anfrage:', error);
+          console.error('Error:', error);
         });
     },
     closeModal() {

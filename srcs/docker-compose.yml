@@ -10,22 +10,29 @@ services:
         - DOMAIN
         - CERT_PATH
         - CERT_KEY_PATH
+    env_file:
+      - .env
     restart: always
-    volumes:
-      - frontend_data:/code
-    ports:
-      - "443:443"
+    # volumes:
+    #   - frontend_data:/code
     networks:
       - transcendencenet
+    ports:
+      - "443:443"
   frontend:
-    build: ./requirements/frontend
+    build:
+      context: .
+      dockerfile: requirements/frontend/Dockerfile
+      args:
+        - CERT_PATH
+        - CERT_KEY_PATH
     # restart: always
     volumes:
       - frontend_data:/code
-    ports:
-      - "8080:8080" # needed for development server only
     networks:
       - transcendencenet
+    ports:
+      - "8080:8080" # needed for development server only
   backend:
     build: ./requirements/backend
     env_file:
@@ -37,13 +44,11 @@ services:
       - transcendencenet
   db:
     image: postgres
+    env_file:
+      - .env
     restart: always
     volumes:
       - db_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=$POSTGRES_DB
-      - POSTGRES_USER=$POSTGRES_USER
-      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
     networks:
       - transcendencenet
   adminer:

@@ -1,32 +1,32 @@
-include srcs/.env
+include .env
 
 all:
-	@docker-compose -f ./srcs/docker-compose.yml up -d
+	@docker-compose up -d
 	@echo "\033[32mContainers are up and running\033[0m"
 
 build:
-	@docker-compose -f ./srcs/docker-compose.yml build
+	@docker-compose build
 	@echo "\033[32mContainers built\033[0m"
 
 stop:
-	@docker-compose -f ./srcs/docker-compose.yml stop
+	@docker-compose stop
 	@echo "\033[32mStopped all containers\033[0m"
 
 down:
-	@docker-compose -f ./srcs/docker-compose.yml down
+	@docker-compose down
 	@echo "\033[32mRemoved all containers\033[0m"
 
 iclean:
-	-@docker-compose -f ./srcs/docker-compose.yml down 
-	-@docker image rm ${COMPOSE_PROJECT_NAME}_nginx ${COMPOSE_PROJECT_NAME}_frontend ${COMPOSE_PROJECT_NAME}_backend ${COMPOSE_PROJECT_NAME}_db ${COMPOSE_PROJECT_NAME}_adminer
+	-@docker-compose down 
+	-@docker image rm ${COMPOSE_PROJECT_NAME}_nginx ${COMPOSE_PROJECT_NAME}_frontend ${COMPOSE_PROJECT_NAME}_backend postgres adminer
 	@echo "\033[32mRemoved all images\033[0m"
 
 vclean:
 	@echo "\033[32mRemoving volumes...\033[0m"
 	-@docker volume rm ${COMPOSE_PROJECT_NAME}_frontend_data ${COMPOSE_PROJECT_NAME}_backend_data ${COMPOSE_PROJECT_NAME}_db_data ${COMPOSE_PROJECT_NAME}_nginx_data
 	@echo "\033[32mCleaning volumes directory...\033[0m"
-	-rm -rf srcs/${NGINX_DATA_PATH} srcs/${FRONTEND_DATA_PATH} srcs/${BACKEND_DATA_PATH} srcs/${DB_DATA_PATH}
-	-mkdir -p srcs/${NGINX_DATA_PATH} srcs/${FRONTEND_DATA_PATH} srcs/${BACKEND_DATA_PATH} srcs/${DB_DATA_PATH}
+	-rm -rf ${NGINX_DATA_PATH} ${FRONTEND_DATA_PATH} ${BACKEND_DATA_PATH} ${DB_DATA_PATH}
+	-mkdir -p ${NGINX_DATA_PATH} ${FRONTEND_DATA_PATH} ${BACKEND_DATA_PATH} ${DB_DATA_PATH}
 
 status:
 	@echo "\033[34m### Status ${COMPOSE_PROJECT_NAME} ###\033[0m"

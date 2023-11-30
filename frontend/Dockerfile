@@ -10,7 +10,7 @@ ENV NODE_ENV development
 
 WORKDIR /code
 
-COPY ./requirements/frontend/app/ .
+COPY ./frontend/app/ .
 
 # copy ssl certificates for https
 # (needed for development server because of https for websockets for live reload)

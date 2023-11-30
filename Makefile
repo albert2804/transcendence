@@ -4,6 +4,10 @@ all:
 	@docker-compose -f ./srcs/docker-compose.yml up -d
 	@echo "\033[32mContainers are up and running\033[0m"
 
+build:
+	@docker-compose -f ./srcs/docker-compose.yml build
+	@echo "\033[32mContainers built\033[0m"
+
 stop:
 	@docker-compose -f ./srcs/docker-compose.yml stop
 	@echo "\033[32mStopped all containers\033[0m"

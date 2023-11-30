@@ -6,8 +6,7 @@ ARG CERT_KEY_PATH
 
 # vue only reads variables with prefix VUE_APP_
 ENV VUE_APP_DOMAIN ${DOMAIN}
-
-# RUN npm install -g @vue/cli
+ENV NODE_ENV development
 
 WORKDIR /code
 
@@ -19,7 +18,8 @@ COPY ${CERT_PATH} /etc/ssl/certs/cert.crt
 COPY ${CERT_KEY_PATH} /etc/ssl/certs/key.key
 
 # install dependencies (package.json)
-RUN npm install
+RUN npm install -g @vue/cli
+RUN npm -g install
 
 EXPOSE 8080
 

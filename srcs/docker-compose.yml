@@ -85,7 +85,6 @@ volumes:
       type: none
       o: bind
       device: $DB_DATA_PATH
-  # This volume isn't necessary, but it's useful to easily edit nginx config file during development
   nginx_data:
     driver: local
     driver_opts:

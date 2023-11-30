@@ -7,7 +7,7 @@ ARG CERT_KEY_PATH
 # inject nginx config
 COPY requirements/nginx/conf/nginx.conf /etc/nginx/conf.d
 # manipulate nginx config
-RUN sed -i "s/TRANSCENDENCE/${DOMAIN}/g" /etc/nginx/conf.d/nginx.conf
+RUN sed -i "s/DOMAIN/${DOMAIN}/g" /etc/nginx/conf.d/nginx.conf
 
 # create ssl directory
 RUN mkdir /etc/nginx/ssl

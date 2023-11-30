@@ -1,3 +1,6 @@
-<a href="/">
-	<h1>LOGO</h1>
-</a>
+{% for tab in tabs %}
+	<div>
+		<a href="{{ tab.dir }}"> {{ tab.name }}</a>
+	</div>
+{% endfor %}
+

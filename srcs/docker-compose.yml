@@ -15,7 +15,8 @@ services:
       - .env
     restart: always
     volumes:
-      - ./${NGINX_DATA_PATH}:/etc/nginx/conf.d
+      - ${PWD}/srcs/requirements/nginx/conf/nginx.conf:/etc/nginx/nginx.conf.d/nginx.conf
+      #- ${PWD}/srcs/${NGINX_DATA_PATH}:/etc/nginx/conf.d
     networks:
       - transcendencenet
     ports:
@@ -31,7 +32,8 @@ services:
         - CERT_KEY_PATH
     restart: always
     volumes:
-      - ${PWD}/srcs/${FRONTEND_DATA_PATH}:/code
+      - ${PWD}/srcs/requirements/frontend/app:/code
+      #- ${PWD}/srcs/${FRONTEND_DATA_PATH}:/code
     networks:
       - transcendencenet
   backend:
@@ -51,7 +53,7 @@ services:
       - .env
     restart: always
     volumes:
-      - ${PWD}/srcs/${DB_DATA}:/var/lib/postgresql/data
+      - ${PWD}/srcs/${DB_DATA_PATH}:/var/lib/postgresql/data
     networks:
       - transcendencenet
   adminer:

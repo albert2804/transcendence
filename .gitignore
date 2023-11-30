@@ -1,4 +1,9 @@
 # srcs/.env
-srcs/volumes/frontend_data/
-srcs/volumes/backend_data/
-srcs/volumes/db_data/
+
+srcs/volumes
+
+backend/src/transcendence/transcendence/__pycache__/
+
+backend/src/transcendence/dbconnect/__pycache__/
+
+backend/src/transcendence/dbconnect/migrations/__pycache__/

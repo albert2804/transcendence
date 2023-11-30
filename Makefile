@@ -18,7 +18,7 @@ down:
 
 iclean:
 	-@docker-compose -f ./srcs/docker-compose.yml down 
-	-@docker image rm ${COMPOSE_PROJECT_NAME}-nginx ${COMPOSE_PROJECT_NAME}-frontend ${COMPOSE_PROJECT_NAME}-backend ${COMPOSE_PROJECT_NAME}-db ${COMPOSE_PROJECT_NAME}-adminer
+	-@docker image rm ${COMPOSE_PROJECT_NAME}_nginx ${COMPOSE_PROJECT_NAME}_frontend ${COMPOSE_PROJECT_NAME}_backend ${COMPOSE_PROJECT_NAME}_db ${COMPOSE_PROJECT_NAME}_adminer
 	@echo "\033[32mRemoved all images\033[0m"
 
 vclean:

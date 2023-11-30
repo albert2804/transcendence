@@ -16,6 +16,11 @@ Stop all containers:
 make stop
 ```
 ---
+Build containers:
+```
+make build
+```
+---
 Remove all containers:
 ```
 make down

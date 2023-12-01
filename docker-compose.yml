@@ -43,7 +43,8 @@ services:
 
   db:
     container_name: db
-    image: postgres
+    image: postgres:15.5-bookworm
+    restart: unless-stopped
     env_file:
       - .env
     restart: always

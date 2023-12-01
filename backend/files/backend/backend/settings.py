@@ -41,6 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'social_django',
+	'test_db.apps.TestDbConfig',
     # 'websocket',
 ]
 
@@ -114,6 +117,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Social Auth config for OAuth
+# https://python-social-auth.readthedocs.io/en/latest/configuration/django.html
+
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -141,3 +148,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Use X-Forwarded-Host and X-Forwarded-Port headers because of reverse proxy
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'social_core.backends.oauth.BaseOAuth2',
+    'auth.Intra42OAuth2',
+]

@@ -23,9 +23,14 @@ from channels.auth import AuthMiddlewareStack
 
 urlpatterns = [
     path('endpoint/api/', include('api.urls')),
+    path('endpoint/test_db/', include('test_db.urls')),
+    path('endpoint/auth/', include("auth.urls")),
 ]
 
 # Enable admin panel if ADMIN_PANEL_ENABLED (in .env-file) is set to True
 admin_panel = os.environ.get('ADMIN_PANEL_ENABLED', 'False').lower() == 'true'
 if admin_panel:
     urlpatterns.append(path('endpoint/admin/', admin.site.urls))
+
+
+url(r'', include('social_django.urls', namespace='social'))

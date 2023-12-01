@@ -48,7 +48,7 @@ services:
       - .env
     restart: always
     volumes:
-      - ${PWD}/${DB_DATA_PATH}:/var/lib/postgresql/data
+      - ${PWD}/postgres:/var/lib/postgresql/data
 
   adminer:
     container_name: adminer

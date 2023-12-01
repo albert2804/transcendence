@@ -20,8 +20,8 @@ COPY ${CERT_PATH} /etc/ssl/certs/cert.crt
 COPY ${CERT_KEY_PATH} /etc/ssl/certs/key.key
 
 # install dependencies (package.json)
-RUN npm install -g @vue/cli
-RUN npm -g install
+# RUN npm install -g @vue/cli
+# RUN npm -g install
 
 EXPOSE 8080
 

@@ -37,16 +37,18 @@ services:
     build: ./backend
     env_file:
       - .env
+    depends_on:
+      - db
     restart: always
     volumes:
       - ${PWD}/backend/files:/code
 
   db:
     container_name: db
-    image: postgres
+    image: postgres:15.5-bookworm
+    restart: unless-stopped
     env_file:
       - .env
-    restart: always
     volumes:
       - postgres:/var/lib/postgresql/data
 

@@ -1,0 +1,3 @@
+- frontend and backend containers should be possible to run deployment servers (gunicorn?)
+- switch to nuxt.js for frontend (SSR and SEO)
+- improve Makefile

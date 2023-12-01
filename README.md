@@ -31,12 +31,6 @@ Remove all self created images:
 make iclean
 ```
 ---
-Remove all volumes and clear their directories:  
- _Be careful with it while developing inside the docker volumes. You will lose your data if you delete the volumes and not saved your progress somewhere else._ 
-```
-make vclean
-```
----
 Check the status of the project:
 ```
 make status

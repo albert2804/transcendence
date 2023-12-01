@@ -7,5 +7,5 @@ backend/transcendence/dbconnect/__pycache__/
 
 backend/transcendence/dbconnect/migrations/__pycache__/
 frontend/app/package-lock.json
-frontend/app/node_modules/
-# postgres/
+frontend/app/node-modules/
+*.pyc

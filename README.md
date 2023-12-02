@@ -26,7 +26,7 @@ Remove all containers:
 make down
 ```
 ---
-Remove all self created images:
+Remove all self created images (nginx, frontend, backend):
 ```
 make iclean
 ```

@@ -1,3 +1,1 @@
 - frontend and backend containers should be possible to run deployment servers (gunicorn?)
-
-- remove temp/ folder from gitingore

@@ -1,4 +1,4 @@
-FROM node:lts-alpine
+FROM node:lts-alpine3.18
 
 ARG DOMAIN
 ARG CERT_PATH
@@ -9,8 +9,6 @@ ENV NODE_ENV development
 
 WORKDIR /code
 
-# COPY ./frontend/start.sh /
-# RUN chmod +x /start.sh
 COPY ./frontend/app/ .
 
 # copy ssl certificates for https

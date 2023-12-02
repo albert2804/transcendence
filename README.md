@@ -1,7 +1,7 @@
 # ft_transcendence
 
 ## Project setup
- - You need to set the DOMAIN from .env file in your /etc/hosts file, so that it points to 127.0.0.1
+ - You need to set the DOMAIN from .env file in your /etc/hosts file, so that it points to 127.0.0.1 (or use localhost as DOMAIN)
 
 ## Project run
 After all containers are up and running you maybe need to wait a few more seconds until the frontend is available.
@@ -61,9 +61,8 @@ make status
         - etc.
 
 ## Frontend-Development
-_The frontend is build with vue.js and bootstrap. This can be changed when we know which framework we want to use.
-Maybe nuxt.js is a good alternative because it supports SSR and SEO_
 - Development-Server updates live on changes in the frontend volume. So you can just change the code and see the changes in the browser.
+- Fix many ESLint errors automatically: `docker exec -it frontend npm run lintfix`
 
 ## Backend-Development
 - Development-Server should normally restart itself on changes in the backend volume but sometimes you need to restart the container manually (docker restart backend)

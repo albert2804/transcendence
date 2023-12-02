@@ -1,5 +1,5 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
@@ -32,7 +32,7 @@ export default {
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
     // https://go.nuxtjs.dev/eslint
-    '@nuxtjs/eslint-module',
+    '@nuxtjs/eslint-module'
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
@@ -47,7 +47,7 @@ export default {
   axios: {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
     baseURL: '/',
-    browserBaseURL: 'https://' + process.env.NUXT_ENV_DOMAIN,
+    browserBaseURL: 'https://' + process.env.NUXT_ENV_DOMAIN
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
@@ -59,8 +59,8 @@ export default {
     port: 3000,
     https: {
       key: fs.readFileSync(path.resolve(__dirname, '/etc/ssl/certs/key.key')),
-      cert: fs.readFileSync(path.resolve(__dirname, '/etc/ssl/certs/cert.crt')),
-    },
-  },
+      cert: fs.readFileSync(path.resolve(__dirname, '/etc/ssl/certs/cert.crt'))
+    }
+  }
 
 }

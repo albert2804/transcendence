@@ -18,7 +18,7 @@ down:
 
 iclean:
 	-@docker-compose down 
-	-@docker image rm ${COMPOSE_PROJECT_NAME}-nginx ${COMPOSE_PROJECT_NAME}-frontend ${COMPOSE_PROJECT_NAME}-backend postgres adminer
+	-@docker image rm ${COMPOSE_PROJECT_NAME}-nginx ${COMPOSE_PROJECT_NAME}-frontend ${COMPOSE_PROJECT_NAME}-backend
 	@echo "\033[32mRemoved all images\033[0m"
 
 vclean:

@@ -11,14 +11,14 @@ Start all containers:
 make
 ```
 ---
-Stop all containers:
-```
-make stop
-```
----
 Build containers:
 ```
 make build
+```
+---
+Stop all containers:
+```
+make stop
 ```
 ---
 Remove all containers:
@@ -29,6 +29,16 @@ make down
 Remove all self created images:
 ```
 make iclean
+```
+---
+Remove volumes (database):
+```
+make vclean
+```
+---
+Remove all containers, images and volumes:
+```
+make fclean
 ```
 ---
 Check the status of the project:

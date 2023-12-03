@@ -1,7 +1,9 @@
 <template>
-  <!-- Here I replaced the <Tutorial /> component with the <BackendButton /> component to test the backend connection -->
   <!-- <Tutorial /> -->
-  <BackendButton />
+  <div>
+    <NavBar />
+    <BackendButton />
+  </div>
 </template>
 
 <script>

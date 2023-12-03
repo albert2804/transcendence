@@ -47,7 +47,7 @@ export default {
   axios: {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
     baseURL: '/',
-    browserBaseURL: 'https://' + process.env.NUXT_ENV_DOMAIN
+    // browserBaseURL: 'https://' + process.env.NUXT_ENV_DOMAIN
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
@@ -60,7 +60,7 @@ export default {
     https: {
       key: fs.readFileSync(path.resolve(__dirname, '/etc/ssl/certs/key.key')),
       cert: fs.readFileSync(path.resolve(__dirname, '/etc/ssl/certs/cert.crt'))
-    }
+    },
   }
 
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="center">
-    <button class="btn btn-success" @click="fetchData">
-      Click me
+    <button class="btn btn-primary" @click="fetchData">
+      Click me!
     </button>
     <div v-if="showModal" class="modal-background">
       <div class="modal-content">

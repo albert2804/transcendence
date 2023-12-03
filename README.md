@@ -61,8 +61,11 @@ make status
         - etc.
 
 ## Frontend-Development
+- At the first start of the frontend container you need to wait a while until the node_modules folder is created after container start. (check with docker logs frontend)
+- If you want to rebuild the frontend container completely, you need to remove the node_modules folder in the frontend first. (npm install will create a new one on container start)
 - Development-Server updates live on changes in the frontend volume. So you can just change the code and see the changes in the browser.
 - Fix many ESLint errors automatically: `docker exec -it frontend npm run lintfix`
+
 
 ## Backend-Development
 - Development-Server should normally restart itself on changes in the backend volume but sometimes you need to restart the container manually (docker restart backend)

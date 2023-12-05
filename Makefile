@@ -18,7 +18,8 @@ down:
 
 iclean:
 	-@docker-compose down 
-	-@docker image rm ${COMPOSE_PROJECT_NAME}_nginx ${COMPOSE_PROJECT_NAME}_frontend ${COMPOSE_PROJECT_NAME}_backend postgres adminer
+#	-@docker image prune -a --filter "label=com.docker.compose.project=${COMPOSE_PROJECT_NAME}" -f
+	-@docker image rm transcendence_backend:latest transcendence_frontend:latest transcendence_nginx:latest
 	@echo "\033[32mRemoved all images\033[0m"
 
 vclean:
@@ -32,6 +33,6 @@ status:
 	@echo "\033[34m### Status ${COMPOSE_PROJECT_NAME} ###\033[0m"
 	@echo "\033[32mContainers:\033[0m"
 	-@docker ps -a --filter "name=nginx" --filter "name=frontend" --filter "name=backend" --filter "name=db" --filter "name=adminer"
-	@echo "\033[32mImages (only self-built):\033[0m"
+	@echo "\033[32mImages:\033[0m"
 	-@docker image ls
 

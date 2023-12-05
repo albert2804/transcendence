@@ -9,3 +9,5 @@ backend/transcendence/dbconnect/migrations/__pycache__/
 frontend/app/package-lock.json
 frontend/app/node-modules/
 *.pyc
+
+temp/

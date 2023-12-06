@@ -22,9 +22,10 @@ from django.urls import path, include
 urlpatterns = [
     # Path to REST API
     path('endpoint/api/', include('api.urls')),
+    path('endpoint/test_db/', include('test_db.urls')),
 ]
 
 # Enable admin panel if ADMIN_PANEL_ENABLED is set to True
-admin_panel = os.environ.get('ADMIN_PANEL_ENABLED', 'False').lower() == 'true'
+admin_panel = os.environ.get('ADMIN_PANEL_ENABLED', 'True').lower() == 'true'
 if admin_panel:
     urlpatterns.append(path('endpoint/admin/', admin.site.urls))

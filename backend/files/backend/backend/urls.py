@@ -21,10 +21,12 @@ from django.urls import path, re_path, include
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 
+#All main URLs for the backend also needs to be set in the nginx.conf file from the NGINX Container
 urlpatterns = [
     path('endpoint/api/', include('api.urls')),
     path('endpoint/test_db/', include('test_db.urls')),
     path('endpoint/auth/', include("auth.urls")),
+    re_path(r'^endpoint/oauth/', include('social_django.urls', namespace='social')),
 ]
 
 # Enable admin panel if ADMIN_PANEL_ENABLED (in .env-file) is set to True
@@ -33,4 +35,4 @@ if admin_panel:
     urlpatterns.append(path('endpoint/admin/', admin.site.urls))
 
 
-url(r'', include('social_django.urls', namespace='social'))
+SOCIAL_AUTH_URL_NAMESPACE = 'social'

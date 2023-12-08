@@ -17,3 +17,4 @@ daphne==4.0.0
 
 # Authentication/OAuth
 social-auth-app-django
+python-social-auth[django]

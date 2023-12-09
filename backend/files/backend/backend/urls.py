@@ -26,7 +26,8 @@ urlpatterns = [
     path('endpoint/api/', include('api.urls')),
     path('endpoint/test_db/', include('test_db.urls')),
     path('endpoint/auth/', include("auth.urls")),
-    re_path(r'^endpoint/oauth/', include('social_django.urls', namespace='social')),
+    path('endpoint/oauth/', include('social_django.urls', namespace='social')),
+    re_path(r"^endpoint/oauth/", include('social_django.urls', namespace='social')),
 ]
 
 # Enable admin panel if ADMIN_PANEL_ENABLED (in .env-file) is set to True

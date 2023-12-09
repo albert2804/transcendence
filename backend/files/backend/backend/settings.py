@@ -165,3 +165,5 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
+
+LOGIN_URL = 'auth/login/'

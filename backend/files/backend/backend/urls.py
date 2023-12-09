@@ -25,7 +25,7 @@ from channels.auth import AuthMiddlewareStack
 urlpatterns = [
     path('endpoint/api/', include('api.urls')),
     path('endpoint/test_db/', include('test_db.urls')),
-    path('endpoint/auth/', include("auth.urls")),
+    path('endpoint/auth/', include("custom_auth.urls")),
     path('endpoint/oauth/', include('social_django.urls', namespace='social')),
     re_path(r"^endpoint/oauth/", include('social_django.urls', namespace='social')),
 ]

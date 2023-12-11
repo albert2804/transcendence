@@ -14,7 +14,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 export default {
   name: 'BackendButton',
   data () {
@@ -25,11 +24,13 @@ export default {
   },
   methods: {
     fetchData () {
-      axios.get('/endpoint/api/test?format=json')
-        .then((response) => {
-          this.data = response.data
+      fetch('/endpoint/api/test')
+        .then(response => response.json())
+        .then((data) => {
+          this.data = data
           this.showModal = true
         })
+        .catch(error => console.error('Error:', error))
     }
   }
 }

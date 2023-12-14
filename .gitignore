@@ -11,3 +11,4 @@ frontend/app/node-modules/
 *.pyc
 
 temp/
+*.DS_Store

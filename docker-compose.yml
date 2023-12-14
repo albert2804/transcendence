@@ -49,6 +49,8 @@ services:
     volumes:
       - ${PWD}/backend/files:/code
       - static_django_files:/static
+    ports:
+      - 8000:8000
 
   db:
     container_name: db

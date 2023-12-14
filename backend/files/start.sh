@@ -21,6 +21,9 @@ python manage.py shell -c "from django.contrib.auth.models import User; User.obj
 # Create the superuser from .env file
 python manage.py createsuperuser --noinput
 
+# Create an app
+python manage.py startapp custom_auth
+
 # Run the development server
 # python manage.py runserver 0.0.0.0:8000
 

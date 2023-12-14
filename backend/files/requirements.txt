@@ -14,3 +14,9 @@ channels==4.0.0
 daphne==4.0.0
 # http2 and tls Twisted extras to support http2 with daphne
 # twisted[tls,http2]==23.10.0
+
+# Authentication/OAuth
+social-auth-app-django
+python-social-auth[django]
+django-crispy-forms
+#django-allauth==0.43.0

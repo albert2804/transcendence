@@ -18,7 +18,7 @@ down:
 
 iclean:
 	-@docker-compose down 
-#	-@docker image prune -a --filter "label=com.docker.compose.project=${COMPOSE_PROJECT_NAME}" -f
+	-@docker image prune -a --filter "label=com.docker.compose.project=${COMPOSE_PROJECT_NAME}" -f
 	-@docker image rm transcendence_backend:latest transcendence_frontend:latest transcendence_nginx:latest
 	@echo "\033[32mRemoved all images\033[0m"
 

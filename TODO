@@ -1,1 +1,1 @@
-- frontend and backend containers should be possible to run deployment servers (gunicorn?)
+- frontend container should be possible to run deployment server (gunicorn?)

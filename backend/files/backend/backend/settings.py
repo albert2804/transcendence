@@ -34,18 +34,26 @@ CSRF_TRUSTED_ORIGINS = ['https://' + host for host in os.environ['DOMAIN'].split
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'crispy_forms',
     'rest_framework',
-	
+    'social_django',
 	'test_db.apps.TestDbConfig',
-	# 'test_db',
-	    
+    'custom_auth',
+    # 'websocket',
 ]
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -55,6 +63,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -62,7 +71,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'test_db' / 'templates'],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -70,6 +79,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -77,6 +88,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
+ASGI_APPLICATION = 'backend.asgi.application'
 
 # Database (PostgreSQL from db-container)
 DATABASES = {
@@ -110,13 +122,17 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Social Auth config for OAuth
+# https://python-social-auth.readthedocs.io/en/latest/configuration/django.html
+
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Paris'
 
 USE_I18N = True
 
@@ -127,6 +143,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'endpoint/static/'
+STATIC_ROOT = BASE_DIR / '../../static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -136,3 +153,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Use X-Forwarded-Host and X-Forwarded-Port headers because of reverse proxy
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
+
+AUTHENTICATION_BACKENDS = [
+    #'social_core.backends.open_id.OpenIdAuth',
+    #'social_core.backends.google.GoogleOpenId',     #deprecated, remove after testing
+    'social_core.backends.github.GithubOAuth2',
+    'social_core.backends.google.GoogleOAuth2',
+    #'social_core.backends.google.GoogleOAuth',
+    'social_core.backends.twitter.TwitterOAuth',
+    'django.contrib.auth.backends.ModelBackend',
+    'social_core.backends.oauth.BaseOAuth2',
+    #'auth.Intra42OAuth2'
+]
+
+SOCIAL_AUTH_GITHUB_KEY='e989ab105c9b8c40d3f6'
+SOCIAL_AUTH_GITHUB_SECRET='9a6ca7f1e6106dccf4564dc626fa43c4167e1aeb'
+
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
+
+LOGIN_URL = 'auth/login/'
+LOGIN_REDIRECT_URL='/endpoint/auth'

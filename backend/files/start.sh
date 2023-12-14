@@ -21,10 +21,15 @@ python manage.py shell -c "from django.contrib.auth.models import User; User.obj
 # Create the superuser from .env file
 python manage.py createsuperuser --noinput
 
+# Create an app
+python manage.py startapp custom_auth
+
 # Run the development server
-python manage.py runserver 0.0.0.0:8000
+# python manage.py runserver 0.0.0.0:8000
 
-# for production-server we can use for example gunicorn
-# but we need to add gunicorn to requirements.txt ;)
-# gunicorn --bind 0.0.0.0:8000 backend.wsgi:application
+# Collect static files (needed for serving static files with daphne)
+python manage.py collectstatic --noinput
+# Start the ASGI server (Daphne in this case)
+daphne -b 0.0.0.0 -p 8000 backend.asgi:application
 
+# tail -f /dev/null

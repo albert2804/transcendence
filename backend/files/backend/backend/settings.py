@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crispy_forms',
-    'rest_framework',
+#    'rest_framework',
     'social_django',
 	'test_db.apps.TestDbConfig',
     'custom_auth',

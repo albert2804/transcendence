@@ -16,16 +16,16 @@ Including another URLconf
 """
 import os
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, re_path, include
 
-# All main URLs for the backend also needs to be set in the nginx.conf file from the NGINX Container
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+
 urlpatterns = [
-    # Path to REST API
     path('endpoint/api/', include('api.urls')),
-    path('endpoint/test_db/', include('test_db.urls')),
 ]
 
-# Enable admin panel if ADMIN_PANEL_ENABLED is set to True
-admin_panel = os.environ.get('ADMIN_PANEL_ENABLED', 'True').lower() == 'true'
+# Enable admin panel if ADMIN_PANEL_ENABLED (in .env-file) is set to True
+admin_panel = os.environ.get('ADMIN_PANEL_ENABLED', 'False').lower() == 'true'
 if admin_panel:
     urlpatterns.append(path('endpoint/admin/', admin.site.urls))

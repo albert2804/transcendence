@@ -2,7 +2,15 @@
 Django==4.2.7
 # Postgre DB Adapter
 psycopg2-binary==2.9.9
+# Rest Framework
+# djangorestframework==3.14.0
 # Postgre DB Adapter
 psycopg2==2.9.9
 # CORS (maybe needed for Rest-API ??)
 # django-cors-headers==4.3.1
+# Channels (for Websockets)
+channels==4.0.0
+# Daphne webserver for Django Channels (for Websockets)
+daphne==4.0.0
+# http2 and tls Twisted extras to support http2 with daphne
+# twisted[tls,http2]==23.10.0

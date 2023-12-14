@@ -16,6 +16,7 @@ services:
     restart: always
     volumes:
       - ${PWD}/nginx/conf/nginx.conf:/etc/nginx/nginx.conf.d/nginx.conf
+      - static_django_files:/static
     ports:
       - "443:443"
 
@@ -34,7 +35,12 @@ services:
 
   backend:
     container_name: backend
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      args:
+        - CERT_PATH
+        - CERT_KEY_PATH
     env_file:
       - .env
     depends_on:
@@ -42,6 +48,7 @@ services:
     restart: always
     volumes:
       - ${PWD}/backend/files:/code
+      - static_django_files:/static
 
   db:
     container_name: db
@@ -59,3 +66,4 @@ services:
 
 volumes:
   postgres:
+  static_django_files:

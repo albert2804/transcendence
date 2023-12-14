@@ -70,4 +70,4 @@ make status
 - Development-Server updates live on changes in the frontend volume. So you can just change the code and see the changes in the browser.
 
 ## Backend-Development
-- Development-Server should normally restart itself on changes in the backend volume but sometimes you need to restart the container manually (docker restart backend)
+- Daphne server doesn't update live on changes in the backend volume. So you need to restart the backend container after changes in the backend code.

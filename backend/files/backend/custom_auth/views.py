@@ -15,5 +15,5 @@ def home(request):
     }
     return render(request, 'auth_view.html', context)
 
-def social_login(request):
-    return render(request,'auth_view.html')
+# def social_login(request):
+#     return render(request,'auth_view.html')

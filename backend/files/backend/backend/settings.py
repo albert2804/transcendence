@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'social_django',
 	'test_db.apps.TestDbConfig',
     'custom_auth',
-    # 'websocket',
+    'api',
 ]
 
 CHANNEL_LAYERS = {
@@ -101,7 +101,8 @@ DATABASES = {
     }
 }
 
-
+# use custom user model for authentication
+AUTH_USER_MODEL = 'api.CustomUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

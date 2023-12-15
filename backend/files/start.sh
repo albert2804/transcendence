@@ -16,13 +16,14 @@ wait_for_db
 python manage.py migrate
 
 # Delete all existing superusers
-python manage.py shell -c "from django.contrib.auth.models import User; User.objects.filter(is_superuser=True).delete()"
+# python manage.py shell -c "from django.contrib.auth.models import User; User.objects.filter(is_superuser=True).delete()"
+python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(is_superuser=True).delete()"
 
 # Create the superuser from .env file
 python manage.py createsuperuser --noinput
 
 # Create an app
-python manage.py startapp custom_auth
+# python manage.py startapp custom_auth
 
 # Run the development server
 # python manage.py runserver 0.0.0.0:8000

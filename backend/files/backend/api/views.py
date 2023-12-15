@@ -1,7 +1,14 @@
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.backends import ModelBackend
+from .models import CustomUser
+from .forms import CustomUserCreationForm
 from django.middleware.csrf import get_token
+from django.db import IntegrityError
 import json
+# from django.contrib.auth import get_user_model
+# from django.contrib.auth.models import CustomUser
+
 
 ################
 ### EXAMPLES ###
@@ -16,11 +23,12 @@ def getTestJsonData(request):
 def getTestTextData(request):
     return HttpResponse("Hello World")
 
+
 ################
 ### SECURITY ###
 ################
 
-# Set csrf token cookie
+# set csrf token cookie
 # get_token() is a django function that sets a csrf token cookie in the clients browser
 # This gets called automatically from Index.vue
 def get_csrf(request):
@@ -38,14 +46,17 @@ def get_csrf(request):
 # 200: successfull request
 def get_auth_status(request):
     if request.user.is_authenticated:
-        return JsonResponse({'authenticated': True}, status=200)
+        return JsonResponse({
+            'authenticated': True,
+            # 'username': request.user.username,
+            }, status=200)
     else:
         return JsonResponse({'authenticated': False}, status=200)
 
-# userlogin
+# login user
 # 400: invalid json data
 # 200: user is authenticated
-# 401: user is not authenticated
+# 403: user is not authenticated
 def userlogin(request):
     if request.method == 'POST':
         # validate json data
@@ -54,22 +65,66 @@ def userlogin(request):
             username = data.get('username')
             password = data.get('password')
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+            return JsonResponse({'error': 'Something went wrong'}, status=400)
         # check if user is already logged in
         if request.user.is_authenticated:
-            return JsonResponse({'message': 'You are already logged in'}, status=200)
+            return JsonResponse({
+                'message': 'You are already logged in',
+                # 'username': request.user.username,
+                }, status=200)
         # try to authenticate and login user
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return JsonResponse({'message': 'Successfully logged in'}, status=200)
-    return JsonResponse({'error': 'Invalid credentials'}, status=401)
+            return JsonResponse({
+                'message': 'Successfully logged in as ' + request.user.username,
+                # 'username': request.user.username,
+                }, status=200)
+    return JsonResponse({'error': 'Invalid credentials'}, status=403)
 
-# userlogout
+# logout user
 # 200: user logged out
 def userlogout(request):
     if request.user.is_authenticated:
         logout(request)
         return JsonResponse({'message': 'Successfully logged out'}, status=200)
     return JsonResponse({'message': 'You are already logged out'}, status=200)
+
+# register user
+# 200: user registered
+# 400: an error occured
+# 403: invalid credentials
+def userregister(request):
+    if request.user.is_authenticated:
+        logout(request)
+    if request.method == 'POST':
+        # check input with CustomUserCreationForm
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            # save user to database and login
+            form.save()
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return JsonResponse({
+                    'message': 'Successfully registered as ' + request.user.username,
+                    # 'username': request.user.username,
+                    }, status=200)
+            else:
+                return JsonResponse({'error': 'Something went wrong'}, status=400)
+        else:
+            # check if username already exists
+            if CustomUser.objects.filter(username=request.POST['username']).exists():
+                return JsonResponse({'error': 'Username already exists'}, status=403)
+            # check othe username errors
+            if 'username' in form.errors:
+                return JsonResponse({'error': 'invalid username'}, status=403)
+            # check form.errors for password errors
+            if 'password1' or 'password2' in form.errors:
+                return JsonResponse({'error': 'invalid password'}, status=403)
+            # other form validation errors
+            return JsonResponse({'error': 'invalid credentials'}, status=403)
+    return JsonResponse({'error': 'Something went wrong'}, status=400)
 

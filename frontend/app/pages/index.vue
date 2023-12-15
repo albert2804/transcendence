@@ -27,7 +27,7 @@ export default {
       } catch (error) {
         console.error('Error:', error)
       }
-      // check if user is logged in an set a cookie
+      // check if user is logged in an set as cookie
       // this cookie can be used to show/hide components...
       // see components/Login.vue for an example
       try {

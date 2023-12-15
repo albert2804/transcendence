@@ -31,6 +31,6 @@ python manage.py createsuperuser --noinput
 # Collect static files (needed for serving static files with daphne)
 python manage.py collectstatic --noinput
 # Start the ASGI server (Daphne in this case)
-daphne -b 0.0.0.0 -p 8000 backend.asgi:application
+# daphne -b 0.0.0.0 -p 8000 backend.asgi:application
 
-# tail -f /dev/null
+tail -f /dev/null

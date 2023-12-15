@@ -25,6 +25,10 @@ python manage.py createsuperuser --noinput
 # Create an app
 # python manage.py startapp custom_auth
 
+# Create migrations for the app (only needed if a model is created or changed)
+# python manage.py makemigrations
+# python manage.py migrate
+
 # Run the development server
 # python manage.py runserver 0.0.0.0:8000
 

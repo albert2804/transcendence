@@ -155,13 +155,14 @@ USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
 
 AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    #
     #'social_core.backends.open_id.OpenIdAuth',
     #'social_core.backends.google.GoogleOpenId',     #deprecated, remove after testing
     'social_core.backends.github.GithubOAuth2',
     'social_core.backends.google.GoogleOAuth2',
     #'social_core.backends.google.GoogleOAuth',
     'social_core.backends.twitter.TwitterOAuth',
-    'django.contrib.auth.backends.ModelBackend',
     'social_core.backends.oauth.BaseOAuth2',
     #'auth.Intra42OAuth2'
 ]

@@ -4,14 +4,14 @@
     <h1>hello world</h1>
     <div style="display: flex; justify-content: center; margin-top: 20vh;">
       <ul>
-        <FetchButton :fetchUrl="'/endpoint/api/test_json'" :showErrModal=true @data-received="openJsonModal">get json!</FetchButton>
+        <!-- <FetchButton :fetchUrl="'/endpoint/api/test_json'" :showErrModal=true @data-received="openJsonModal">get json!</FetchButton>
         <br>
         <FetchButton :fetchUrl="'/endpoint/api/test_text'" :showErrModal=true @data-received="openTextModal">get text!</FetchButton>
-        <br>
+        <br> -->
         <Login />
       </ul>
     </div>
-    <SimpleModal v-show="modalContent" :content="modalContent" :modalTitle="'Response:'" modalId="exampleModal" ariaLabel="A simple modal to show html content" />
+    <!-- <SimpleModal v-show="modalContent" :content="modalContent" :modalTitle="'Response:'" modalId="exampleModal" ariaLabel="A simple modal to show html content" /> -->
   </div>
 </template>
 
@@ -27,8 +27,8 @@ export default {
       } catch (error) {
         console.error('Error:', error)
       }
-      // check if user is logged in an set as cookie
-      // this cookie can be used to show/hide components...
+      // check if user is logged in and set as cookie
+      // this cookie can be used for example to show/hide components...
       // see components/Login.vue for an example
       try {
         const response = await fetch('/endpoint/api/auth_status ', {
@@ -53,20 +53,20 @@ export default {
     };
   },
   methods: {
-    openJsonModal(data) {
-      this.modalContent = Object.entries(data)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join('<br>');
-      this.$nextTick(() => {
-        new bootstrap.Modal(document.getElementById('exampleModal')).show();
-      });
-    },
-    openTextModal(data) {
-      this.modalContent = data;
-      this.$nextTick(() => {
-        new bootstrap.Modal(document.getElementById('exampleModal')).show();
-      });
-    },
+    // openJsonModal(data) {
+    //   this.modalContent = Object.entries(data)
+    //     .map(([key, value]) => `${key}: ${value}`)
+    //     .join('<br>');
+    //   this.$nextTick(() => {
+    //     new bootstrap.Modal(document.getElementById('exampleModal')).show();
+    //   });
+    // },
+    // openTextModal(data) {
+    //   this.modalContent = data;
+    //   this.$nextTick(() => {
+    //     new bootstrap.Modal(document.getElementById('exampleModal')).show();
+    //   });
+    // },
   },
 };
 </script>

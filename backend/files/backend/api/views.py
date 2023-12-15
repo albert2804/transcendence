@@ -1,5 +1,5 @@
 from django.http import JsonResponse, HttpResponse
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 import json
 
@@ -27,6 +27,9 @@ def get_auth_status(request):
         return JsonResponse({'authenticated': False})
 
 # login user
+#
+# TODO: check if user is already logged in
+# 
 def userlogin(request):
     if request.method == 'POST':
         try:
@@ -39,4 +42,9 @@ def userlogin(request):
         if user is not None:
             login(request, user)
             return JsonResponse({'authenticated': True})
+    return JsonResponse({'authenticated': False})
+
+# logout user
+def userlogout(request):
+    logout(request)
     return JsonResponse({'authenticated': False})

@@ -18,13 +18,31 @@
 <script>
 export default {
   setup() {
-    // initate the csrf token!
-    // this calls django to create a csrf token as cookie
     onMounted(async () => {
+      // initate the csrf token!
+      // this calls django to create a csrf token as cookie
+      // this token is needed for POST requests to django
       try {
         const response = await fetch('/endpoint/api/csrf')
       } catch (error) {
         console.error('Error:', error)
+      }
+      // check if user is logged in an set a cookie
+      // this cookie can be used to show/hide components...
+      // see components/Login.vue for an example
+      try {
+        const response = await fetch('/endpoint/api/auth_status ', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const data = await response.json();
+        useCookie('isLoggedIn', { sameSite: 'strict' }).value = data.authenticated
+      } catch (error) {
+        console.error('Error:', error);
+        useCookie('isLoggedIn', { sameSite: 'strict' }).value = false
       }
     })
   },

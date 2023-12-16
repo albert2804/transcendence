@@ -6,8 +6,6 @@ from .forms import CustomUserCreationForm
 from django.middleware.csrf import get_token
 from django.db import IntegrityError
 import json
-# from django.contrib.auth import get_user_model
-# from django.contrib.auth.models import CustomUser
 
 
 ################
@@ -29,8 +27,9 @@ def getTestTextData(request):
 ################
 
 # set csrf token cookie
+# you need to send your csrf token with every POST request (e.g. login, register)
 # get_token() is a django function that sets a csrf token cookie in the clients browser
-# This gets called automatically from Index.vue
+# This gets called from onMounted() in Index.vue !
 def get_csrf(request):
     get_token(request)
     return JsonResponse({'csrfToken': get_token(request)})
@@ -108,6 +107,7 @@ def userregister(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
+                # print(user.username + ' registered and logged in')
                 return JsonResponse({
                     'message': 'Successfully registered as ' + request.user.username,
                     # 'username': request.user.username,
@@ -115,16 +115,17 @@ def userregister(request):
             else:
                 return JsonResponse({'error': 'Something went wrong'}, status=400)
         else:
+            # print(form.errors)
             # check if username already exists
             if CustomUser.objects.filter(username=request.POST['username']).exists():
                 return JsonResponse({'error': 'Username already exists'}, status=403)
-            # check othe username errors
+            # check form.errors for other username errors
             if 'username' in form.errors:
                 return JsonResponse({'error': 'invalid username'}, status=403)
             # check form.errors for password errors
             if 'password1' or 'password2' in form.errors:
                 return JsonResponse({'error': 'invalid password'}, status=403)
-            # other form validation errors
+            # any other errors
             return JsonResponse({'error': 'invalid credentials'}, status=403)
     return JsonResponse({'error': 'Something went wrong'}, status=400)
 

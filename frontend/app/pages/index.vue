@@ -27,7 +27,7 @@ export default {
       } catch (error) {
         console.error('Error:', error)
       }
-      // check if user is logged in and set as cookie
+      // check if user is logged in and set as cookie "loggedIn"
       // this cookie can be used for example to show/hide components...
       // see components/Login.vue for an example
       try {
@@ -39,10 +39,10 @@ export default {
           },
         });
         const data = await response.json();
-        useCookie('isLoggedIn', { sameSite: 'strict' }).value = data.authenticated
+        useCookie('loggedIn', { sameSite: 'strict' }).value = data.authenticated
       } catch (error) {
         console.error('Error:', error);
-        useCookie('isLoggedIn', { sameSite: 'strict' }).value = false
+        useCookie('loggedIn', { sameSite: 'strict' }).value = false
       }
     })
   },

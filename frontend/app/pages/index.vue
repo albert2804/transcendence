@@ -16,6 +16,8 @@
 </template>
 
 <script>
+// import isLoggedin from store/index.js
+import { isLoggedIn } from '~/store';
 export default {
   setup() {
     onMounted(async () => {
@@ -27,11 +29,10 @@ export default {
       } catch (error) {
         console.error('Error:', error)
       }
-      // check if user is logged in and set as cookie "loggedIn"
-      // this cookie can be used for example to show/hide components...
-      // see components/Login.vue for an example
+      // check if user is logged in and set isLoggedIn in store/index.js
+      // so other components can use or listen to it
       try {
-        const response = await fetch('/endpoint/api/auth_status ', {
+        const response = await fetch('/endpoint/api/auth_status', {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -39,10 +40,13 @@ export default {
           },
         });
         const data = await response.json();
-        useCookie('loggedIn', { sameSite: 'strict' }).value = data.authenticated
+        console.log('data.authenticated', data.authenticated)
+        // set the isLoggedIn from store/index.js
+        isLoggedIn.value = data.authenticated
       } catch (error) {
         console.error('Error:', error);
-        useCookie('loggedIn', { sameSite: 'strict' }).value = false
+        // set the isLoggedIn from store/index.js
+        isLoggedIn.value = false
       }
     })
   },

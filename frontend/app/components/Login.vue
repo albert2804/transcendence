@@ -1,3 +1,14 @@
+<script setup>
+// this script is a listener for the "loggedIn" cookie
+// watchEffect() gets triggered when the cookie changes
+// so this component can react to the cookie change
+let isLoggedIn = ref(null)
+const { set: setCookie, remove: removeCookie } = useCookie('loggedIn', { sameSite: 'strict' })
+watchEffect(() => {
+  isLoggedIn.value = useCookie('loggedIn', { sameSite: 'strict' }).value
+})
+</script>
+
 <template>
   <div class="card card-size">
     <div class="card-header">Login / Register</div>
@@ -69,7 +80,6 @@ export default {
       message: '',
       error: '',
       reg_form: false,
-      isLoggedIn: useCookie('isLoggedIn', { sameSite: 'strict' }).value,
     }
   },
   methods: {
@@ -92,14 +102,12 @@ export default {
         });
         const data = await response.json()
         if (response.status === 200) {
-          useCookie('isLoggedIn', { sameSite: 'strict' }).value = true
+          useCookie('loggedIn', { sameSite: 'strict' }).value = true
           this.password = ''
-          this.isLoggedIn = true
           this.message = data.message
         } else if (response.status === 403 || response.status === 400) {
-          useCookie('isLoggedIn', { sameSite: 'strict' }).value = false
+          useCookie('loggedIn', { sameSite: 'strict' }).value = false
           this.password = ''
-          this.isLoggedIn = false
           this.error = data.error
         }
         this.wait = false
@@ -123,8 +131,7 @@ export default {
         const data = await response.json()
         this.wait = false
         if (response.status === 200) {
-          useCookie('isLoggedIn', { sameSite: 'strict' }).value = false
-          this.isLoggedIn = false
+          useCookie('loggedIn', { sameSite: 'strict' }).value = false
           this.username = ''
           this.password = ''
           this.message = data.message
@@ -149,17 +156,15 @@ export default {
           body: `username=${encodeURIComponent(this.username)}&password1=${encodeURIComponent(this.password)}&password2=${encodeURIComponent(this.password2)}`,
         });
         if (response.status === 200) {
-          useCookie('isLoggedIn', { sameSite: 'strict' }).value = true
+          useCookie('loggedIn', { sameSite: 'strict' }).value = true
           this.password = ''
           this.password2 = ''
-          this.isLoggedIn = true
           const data = await response.json()
           this.message = data.message
         } else if (response.status === 403 || response.status === 400) {
-          useCookie('isLoggedIn', { sameSite: 'strict' }).value = false
+          useCookie('loggedIn', { sameSite: 'strict' }).value = false
           this.password = ''
           this.password2 = ''
-          this.isLoggedIn = false
           const data = await response.json()
           this.error = data.error
         }

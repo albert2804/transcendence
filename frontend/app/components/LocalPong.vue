@@ -5,6 +5,14 @@
 
 <template>
 	<div>
+	  <div class="score-container">
+		<div class="player-score">
+		  Player 1: {{ numberOfWinsP1 }}
+		</div>
+		<div class="player-score">
+		  Player 2: {{ numberOfWinsP2 }}
+		</div>
+	  </div>
 	  <canvas ref="pongCanvas" width="800" height="400"></canvas>
 	</div>
   </template>
@@ -193,11 +201,28 @@
   };
   </script>
   
-  <style>
+  <style scoped>
   canvas {
 	display: block;
 	margin: auto;
 	background-color: black;
+  }
+  .score-container {
+    display: flex;
+    justify-content: space-between;
+    color: blue;
+    font-size: 18px;
+    margin-top: 10px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+  }
+
+  .player-score {
+    flex: 1;
+    text-align: center;
   }
   </style>
   

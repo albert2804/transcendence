@@ -17,6 +17,8 @@
 		context: null,
 		initialSpeed: 3,
 		currentSpeed: 3,
+		numberOfWinsP1: 0,
+		numberOfWinsP2: 0,
 		canvasWidth: 800,
 		canvasHeight: 400,
 		paddleWidth: 10,
@@ -104,11 +106,20 @@
 		}
 		// check for scoring
 		if (this.ball.x - this.ball.radius < 0 || this.ball.x + this.ball.radius > 800) {
+		  if (this.ball.x + this.ball.radius > 800) {
+			  this.numberOfWinsP1 += 1;
+			  console.log('score player 1:', this.numberOfWinsP1);
+		  }  
+		  else if (this.ball.x - this.ball.radius < 0){
+			  this.numberOfWinsP2 += 1;
+			  console.log('score player 2:', this.numberOfWinsP2);
+		  }
 		  // reset ball position	
 		  this.ball.x = 400;
 		  this.ball.y = 200;
   
 		  this.currentSpeed += 1;
+		  this.numberOfGames +=1;
 		  if (this.currentSpeed > this.initialSpeed + 3) {
 			//reset speed to inital speed after reaching a certain threshold
 			this.currentSpeed = this.initialSpeed;
@@ -138,9 +149,17 @@
 	  },
 	  //main game loop
 	  gameLoop() {
-		this.updateGame();
-		this.draw();
-		requestAnimationFrame(this.gameLoop);
+  		// Check if the maximum number of games has been reached
+  		if (this.numberOfWinsP1 < 10 && this.numberOfWinsP2 < 10) {
+    	  this.updateGame();
+    	  this.draw();
+    	  requestAnimationFrame(() => this.gameLoop());
+  	  	}
+	  	else {
+    	  console.log("Maximum number of games reached. Game loop stopped.");
+		  this.numberOfWinsP1 = 0;
+		  this.numberOfWinsP2 = 0;
+  		}
 	  },
 	  handleKeyDown(e) {
 		switch (e.key) {

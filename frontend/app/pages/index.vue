@@ -17,6 +17,7 @@
 
 <script>
 // import isLoggedin from store/index.js
+// so we can use it in setup()->onMounted()
 import { isLoggedIn } from '~/store';
 export default {
   setup() {
@@ -40,13 +41,14 @@ export default {
           },
         });
         const data = await response.json();
-        console.log('data.authenticated', data.authenticated)
-        // set the isLoggedIn from store/index.js
-        isLoggedIn.value = data.authenticated
+        if (data.authenticated) {
+          isLoggedIn.value = 1
+        } else {
+          isLoggedIn.value = 0
+        }
       } catch (error) {
         console.error('Error:', error);
-        // set the isLoggedIn from store/index.js
-        isLoggedIn.value = false
+        isLoggedIn.value = 0
       }
     })
   },

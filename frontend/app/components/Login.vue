@@ -14,7 +14,7 @@
       <div v-if="message" class="alert alert-success" role="alert">{{ message }}</div>
       <div v-if="error" class="alert alert-danger" role="alert">{{ error }}</div>
       <!-- LOGIN FORM -->
-      <form v-if="!isLoggedIn && !reg_form">
+      <form v-if="isLoggedIn != 1 && !reg_form">
         <div class="mb-3">
           <label for="InputUsername" class="form-label">Username</label>
           <input v-model="username" @keyup.enter="$refs.loginpwfield.focus()" ref="loginnamefield" type="text" class="form-control" id="InputUsername" aria-describedby="usernameHelp">
@@ -29,7 +29,7 @@
         </div>
       </form>
       <!-- REGISTRATION FORM -->
-      <form v-if="!isLoggedIn && reg_form">
+      <form v-if="isLoggedIn == 0 && reg_form">
         <div class="mb-3">
           <label for="InputUsername" class="form-label">Username</label>
           <input v-model="username" @keyup.enter="$refs.regpwfield.focus()" ref="regnamefield" type="text" class="form-control" id="InputUsername" aria-describedby="usernameHelp">
@@ -48,32 +48,31 @@
         </div>
       </form>
       <!-- LOGGED IN -->
-      <div v-if="isLoggedIn">
+      <div v-if="isLoggedIn == 1">
         <div class="button-list">
           <button type="button" class="btn btn-primary" @click="logout">Logout</button>
         </div>
       </div>
       <!-- LOADING SPINNER -->
-      <div v-if="wait">
-        <div v-if="wait" class="d-flex align-items-center justify-content-center shade-bg">
+        <div v-if="isLoggedIn == 2" class="d-flex align-items-center justify-content-center shade-bg">
           <div class="spinner-border" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
         </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script>
+// import isLoggedin from store/index.js
+import { isLoggedIn } from '~/store';
 export default {
   name: 'Login',
-  data() {
+    data() {
     return {
       username: '',
       password: '',
       password2: '',
-      wait: false,
       message: '',
       error: '',
       reg_form: false,
@@ -81,7 +80,7 @@ export default {
   },
   methods: {
     async login() {
-      this.wait = true
+      isLoggedIn.value = 2
       this.message = ''
       this.error = ''
       try {
@@ -99,22 +98,20 @@ export default {
         });
         const data = await response.json()
         if (response.status === 200) {
-          isLoggedIn.value = true
+          isLoggedIn.value = 1
           this.password = ''
           this.message = data.message
         } else if (response.status === 403 || response.status === 400) {
-          isLoggedIn.value = false
+          isLoggedIn.value = 0 
           this.password = ''
           this.error = data.error
         }
-        this.wait = false
       } catch (error) {
-        this.wait = false
         console.error('Error:', error)
       }
     },
     async logout() {
-      this.wait = true
+      isLoggedIn.value = 2
       this.message = ''
       this.error = ''
       try {
@@ -126,20 +123,18 @@ export default {
           },
         });
         const data = await response.json()
-        this.wait = false
         if (response.status === 200) {
-          isLoggedIn.value = false
+          isLoggedIn.value = 0
           this.username = ''
           this.password = ''
           this.message = data.message
         }
       } catch (error) {
-        this.wait = false
         console.error('Error:', error)
       }
     },
     async register() {
-      this.wait = true
+      isLoggedIn.value = 2
       this.message = ''
       this.error = ''
       try {
@@ -153,21 +148,19 @@ export default {
           body: `username=${encodeURIComponent(this.username)}&password1=${encodeURIComponent(this.password)}&password2=${encodeURIComponent(this.password2)}`,
         });
         if (response.status === 200) {
-          isLoggedIn.value = true
+          isLoggedIn.value = 1
           this.password = ''
           this.password2 = ''
           const data = await response.json()
           this.message = data.message
         } else if (response.status === 403 || response.status === 400) {
-          isLoggedIn.value = false
+          isLoggedIn.value = 0
           this.password = ''
           this.password2 = ''
           const data = await response.json()
           this.error = data.error
         }
-        this.wait = false
       } catch (error) {
-        this.wait = false
         console.error('Error:', error)
       }
     },
@@ -177,7 +170,7 @@ export default {
 
 <style>
   .card-size {
-    min-width: 300px;
+    min-width: px;
     max-width: 400px;
   }
   .button-list {

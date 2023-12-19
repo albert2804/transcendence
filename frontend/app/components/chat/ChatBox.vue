@@ -10,24 +10,7 @@
       </div>
       <ul class="contacts-list">
         <p class="text-center">Online:</p>
-        <button class="btn btn-primary send-button" @click="this.chatid = 4">open</button>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
-        <p class="text-center">Offline:</p>
+        <button class="btn" @click="this.chatid = 4">test</button>
         <p class="text-center">Offline:</p>
       </ul>
       <!-- CHATBOX -->
@@ -69,17 +52,16 @@ export default {
   data () {
     return {
       socket: null,
-      // socketOpen: false,
       messages: [],
       unseen: 0,
       showScrollButton: false,
       scrollEventListenerAdded: false,
       newMessage: '',
-      chatid: 4
+      chatid: null,
     }
   },
   mounted () {
-    // watch for changes in isLoggedIn
+    // watch for changes in isLoggedIn from store/index.js
     watchEffect(() => {
       if (isLoggedIn.value === 1) {
         this.createWebSocket();
@@ -117,12 +99,10 @@ export default {
       this.socket.onopen = () => {
         console.log('opened chat websocket')
         this.$emit('connected')
-        // this.socketOpen = true
       }
 
       this.socket.onclose = () => {
         console.log('closed chat websocket')
-        // this.socketOpen = false
       }
 
       this.socket.onerror = (error) => {
@@ -148,7 +128,6 @@ export default {
       }
     },
     closeWebSocket () {
-      // if (this.socketOpen) {
       if (this.socket) {
         this.socket.close()
       }
@@ -168,7 +147,6 @@ export default {
 </script>
 
 <style>
-
 /* CONTACTS-CARD */
 
 .contacts-container {
@@ -176,7 +154,7 @@ export default {
   display: flex;
   min-width: 250px;
   width: 350px;
-  height: 80vh;
+  height: 90vh;
   border: 1px solid #ced4da;
   border-radius: 5px;
   overflow: hidden;

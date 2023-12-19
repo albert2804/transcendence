@@ -3,8 +3,9 @@
 		<div v-if="socketOpen" class="chat-container">
 			<div class="chat-header">
 				<p class="m-0">
-				WebSocket open
+        Online
 				</p>
+        <button type="button" class="btn-close" @click="this.$emit('closeChat')" aria-label="Close"></button>
 			</div>
 			<ul class="chat-messages">
 				<li v-for="(message, index) in messages" :key="index" :class="getMessageType(message)">
@@ -13,7 +14,6 @@
 				</span>
 				</li>
 			</ul>
-
 			<div v-show="showScrollButton === true" class="scroll-button" style="cursor: pointer;" @click="scrollDown">
 				⬇️{{ unseen }}
 			</div>
@@ -24,13 +24,13 @@
 				</button>
 			</div>
 			</div>
-			<div v-else class="chat-container">
+			<!-- <div v-else class="chat-container">
 			<div class="chat-header">
 				<p class="m-0">
 				WebSocket closed
 				</p>
 			</div>
-		</div>
+		</div> -->
 	</div>
 </template>
   
@@ -82,6 +82,7 @@ export default {
       const currentDomain = window.location.hostname;
       const sockurl = 'wss://' + currentDomain + '/endpoint/chat/';
       this.socket = new WebSocket(sockurl)
+      this.$emit('connected')
 
       this.socket.onopen = () => {
         this.socketOpen = true
@@ -142,7 +143,8 @@ export default {
   background-color: #007bff;
   color: #fff;
   padding: 10px;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
 }
 
 /* the scrollable box with the messages */

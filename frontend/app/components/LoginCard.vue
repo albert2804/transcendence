@@ -67,7 +67,7 @@
 // import isLoggedin from store/index.js
 import { isLoggedIn } from '~/store';
 export default {
-  name: 'Login',
+  name: 'LoginCard',
     data() {
     return {
       username: '',

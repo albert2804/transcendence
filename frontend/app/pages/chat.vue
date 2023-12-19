@@ -2,9 +2,9 @@
     <div>
       <NavBar />
       <div style="display: flex; justify-content: center; margin-top: 20vh;">
-          <LoginCard />
+          <!-- <wsTest /> -->
+          <ChatButton />
       </div>
-      <ChatButton />
     </div>
   </template>
 

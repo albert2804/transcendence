@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 	'test_db.apps.TestDbConfig',
     'custom_auth',
     'api',
+    'chat',
 ]
 
 CHANNEL_LAYERS = {

@@ -1,29 +1,63 @@
 <template>
 	<div>
-		<div v-if="socketOpen" class="chat-container">
-			<div class="chat-header">
-				<p class="m-0">
-        Online
-				</p>
+    <!-- CONTAINER WITH CONTACTS... -->
+    <div class="contacts-container">
+      <div class="header-bar">
+        <p class="m-0">
+        Chat
+        </p>
         <button type="button" class="btn-close" @click="this.$emit('closeChat')" aria-label="Close"></button>
-			</div>
-			<ul class="chat-messages">
-				<li v-for="(message, index) in messages" :key="index" :class="getMessageType(message)">
-				<span class="message">
-					{{ JSON.parse(message).message }}
-				</span>
-				</li>
-			</ul>
-			<div v-show="showScrollButton === true" class="scroll-button" style="cursor: pointer;" @click="scrollDown">
-				⬇️{{ unseen }}
-			</div>
-			<div class="chat-input-container">
-				<input v-model="newMessage" type="text" placeholder="Type your message..." class="form-control chat-input" @keyup.enter="sendMessage" />
-				<button class="btn btn-primary send-button" @click="sendMessage">
-				Send
-				</button>
-			</div>
-			</div>
+      </div>
+      <ul class="contacts-list">
+        <p class="text-center">Online:</p>
+        <button class="btn btn-primary send-button" @click="this.chatid = 4">open</button>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+        <p class="text-center">Offline:</p>
+      </ul>
+      <!-- CHATBOX -->
+      <div v-show="chatid !== null" style="padding: 5px;">
+        <div class="chat-container">
+          <div class="header-bar">
+            <p class="m-0">
+            Online
+            </p>
+            <button type="button" class="btn-close" @click="this.chatid = null" aria-label="Close"></button>
+          </div>
+          <ul class="chat-messages">
+            <li v-for="(message, index) in messages" :key="index" :class="getMessageType(message)">
+            <span class="message">
+              {{ JSON.parse(message).message }}
+            </span>
+            </li>
+          </ul>
+          <div v-show="showScrollButton === true" class="scroll-button" style="cursor: pointer;" @click="scrollDown">
+            ⬇️{{ unseen }}
+          </div>
+          <div class="chat-input-container">
+            <input v-model="newMessage" type="text" placeholder="Type your message..." class="form-control chat-input" @keyup.enter="sendMessage" />
+            <button class="btn btn-primary send-button" @click="sendMessage">
+            Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 	</div>
 </template>
   
@@ -35,12 +69,13 @@ export default {
   data () {
     return {
       socket: null,
-      socketOpen: false,
+      // socketOpen: false,
       messages: [],
       unseen: 0,
       showScrollButton: false,
       scrollEventListenerAdded: false,
-      newMessage: ''
+      newMessage: '',
+      chatid: 4
     }
   },
   mounted () {
@@ -82,12 +117,12 @@ export default {
       this.socket.onopen = () => {
         console.log('opened chat websocket')
         this.$emit('connected')
-        this.socketOpen = true
+        // this.socketOpen = true
       }
 
       this.socket.onclose = () => {
         console.log('closed chat websocket')
-        this.socketOpen = false
+        // this.socketOpen = false
       }
 
       this.socket.onerror = (error) => {
@@ -113,7 +148,8 @@ export default {
       }
     },
     closeWebSocket () {
-      if (this.socketOpen) {
+      // if (this.socketOpen) {
+      if (this.socket) {
         this.socket.close()
       }
       this.messages = []
@@ -132,34 +168,54 @@ export default {
 </script>
 
 <style>
-.chat-container {
+
+/* CONTACTS-CARD */
+
+.contacts-container {
   background-color: #fff;
-  position: relative;
+  display: flex;
   min-width: 250px;
-  height: 400px;
+  width: 350px;
+  height: 80vh;
   border: 1px solid #ced4da;
   border-radius: 5px;
   overflow: hidden;
   margin-bottom: 10px;
+  flex-direction: column;
+}
+
+.contacts-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* CHAT-CARD */
+
+.chat-container {
+  background-color: #fff;
+  position: relative;
+  min-width: 250px;
+  height: 50vh;
+  flex-shrink: 1;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-.chat-header {
-  background-color: #007bff;
-  color: #fff;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-}
-
-/* the scrollable box with the messages */
 .chat-messages {
   list-style-type: none;
   padding: 0;
   margin: 0;
-  height: 400px;
+  height: 100%;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -204,6 +260,7 @@ export default {
 }
 
 .chat-input-container {
+  background-color: #ebeaea;
   display: flex;
   align-items: center;
   padding: 8px;
@@ -217,4 +274,16 @@ export default {
 .send-button {
   width: 70px;
 }
+
+
+/* GENERAL */
+
+.header-bar {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
 </style>

@@ -61,14 +61,14 @@
 	methods: {
 	
 	  setupGame() {
-		this.handleKeyDown = this.handleKeyDown.bind(this);
-		this.handleKeyUp = this.handleKeyUp.bind(this);
-		window.addEventListener('keydown', this.handleKeyDown);
-		window.addEventListener('keyup', this.handleKeyUp);
-		this.draw();
-	  },
-
+		  this.draw();
+		},
+		
 	  startGame() {
+		  this.handleKeyDown = this.handleKeyDown.bind(this);
+		  this.handleKeyUp = this.handleKeyUp.bind(this);
+		  window.addEventListener('keydown', this.handleKeyDown);
+		  window.addEventListener('keyup', this.handleKeyUp);
         this.resetGame();
 		this.isGamePaused = false;
 		this.gameLoop();
@@ -172,12 +172,12 @@
 	  exitGame() {
 		console.log('Exiting the game');
 		this.isGameExited = true;
-		this.resetGame();
 	  },
 
 	  resetGame() {
 		this.numberOfWinsP1 = 0;
 		this.numberOfWinsP2 = 0;
+		this.isGameExited = false;
 		// Reset paddles
 		this.leftPaddle.x = 0;
     	this.leftPaddle.y = 160;
@@ -197,8 +197,8 @@
 	  //main game loop
 	  gameLoop() {
 		if (this.isGameExited == true) {
-			console.log("Game exited.");
 			this.resetGame();
+			// return;
 		}
   		// Check if the maximum number of games has been reached
   		else if (this.numberOfWinsP1 < 10 && this.numberOfWinsP2 < 10) {

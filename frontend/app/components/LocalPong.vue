@@ -5,15 +5,12 @@
 
 <template>
 	<div>
-	  <div class="score-container">
-		<div class="player-score">
-		  Player 1: {{ numberOfWinsP1 }}
-		</div>
-		<div class="player-score">
-		  Player 2: {{ numberOfWinsP2 }}
-		</div>
-	  </div>
+	  <button @click="startGame" class="start-button">Start Game</button>
 	  <canvas ref="pongCanvas" width="800" height="400"></canvas>
+	  <div class="score-container">
+		<div class="player-score">Player 1: {{ numberOfWinsP1 }}</div>
+		<div class="player-score">Player 2: {{ numberOfWinsP2 }}</div>
+	  </div>
 	</div>
   </template>
   
@@ -31,6 +28,8 @@
 		canvasHeight: 400,
 		paddleWidth: 10,
 		paddleHeight: 80,
+		isGamePaused: false,
+		isGameExited: false,
 		leftPaddle: {
 		  x: 0,
 		  y: 160,
@@ -60,17 +59,26 @@
 	  this.setupGame();
 	},
 	methods: {
+	
 	  setupGame() {
 		this.handleKeyDown = this.handleKeyDown.bind(this);
 		this.handleKeyUp = this.handleKeyUp.bind(this);
 		window.addEventListener('keydown', this.handleKeyDown);
 		window.addEventListener('keyup', this.handleKeyUp);
-		this.gameLoop();
+		this.draw();
 	  },
+
+	  startGame() {
+        this.resetGame();
+		this.isGamePaused = false;
+		this.gameLoop();
+      },
+
 	  drawPaddle(x, y, width, height) {
 		this.context.fillStyle = 'white';
 		this.context.fillRect(x, y, width, height);
 	  },
+
 	  drawBall(x, y, radius) {
 		this.context.beginPath();
 		this.context.arc(x, y, radius, 0, Math.PI * 2, false);
@@ -78,65 +86,71 @@
 		this.context.fill();
 		this.context.closePath();
 	  },
+
 	  updateGame() {
+		// if game is paused, game will not be updated
+		if (this.isGamePaused) {
+			return;
+		}
 		//update paddle position
 		this.leftPaddle.y += this.leftPaddle.dy;
 		this.rightPaddle.y += this.rightPaddle.dy;
 		
 		// ensure paddles stay within canvas
-		this.leftPaddle.y = Math.max(0, Math.min(400 - this.leftPaddle.height, this.leftPaddle.y));
-		this.rightPaddle.y = Math.max(0, Math.min(400 - this.rightPaddle.height, this.rightPaddle.y));
+		this.leftPaddle.y = Math.max(0, Math.min(this.canvasHeight - this.leftPaddle.height, this.leftPaddle.y));
+		this.rightPaddle.y = Math.max(0, Math.min(this.canvasHeight - this.rightPaddle.height, this.rightPaddle.y));
   
 		// move ball
 		this.ball.x += this.ball.dx;
 		this.ball.y += this.ball.dy;
   
 		// bounce off top or bottom of canvas
-		if (this.ball.y - this.ball.radius < 0 || this.ball.y + this.ball.radius > 400) {
+		if (this.ball.y - this.ball.radius < 0 || this.ball.y + this.ball.radius > this.canvasHeight) {
 		  this.ball.dy = -this.ball.dy;
 		}
 		
-		// bounce off paddles
+		// bounce off paddles and increase ball speed
 		if (
 		  this.ball.x - this.ball.radius < this.leftPaddle.x + this.leftPaddle.width &&
-		  this.ball.y > this.leftPaddle.y &&
-		  this.ball.y < this.leftPaddle.y + this.leftPaddle.height
+		  this.ball.y > this.leftPaddle.y && this.ball.y < this.leftPaddle.y + this.leftPaddle.height
 		) {
-		  this.ball.dx = -this.ball.dx;
+			this.currentSpeed += 1;
+			this.ball.dy = -this.currentSpeed;
+			this.ball.dx = this.currentSpeed;
+		  	console.log('current speed:', this.currentSpeed);
 		}
   
 		if (
 		  this.ball.x + this.ball.radius > this.rightPaddle.x &&
-		  this.ball.y > this.rightPaddle.y &&
-		  this.ball.y < this.rightPaddle.y + this.rightPaddle.height
+		  this.ball.y > this.rightPaddle.y && this.ball.y < this.rightPaddle.y + this.rightPaddle.height
 		) {
-		  this.ball.dx = -this.ball.dx;
+			this.currentSpeed += 1;
+			this.ball.dy = this.currentSpeed;
+			this.ball.dx = -this.currentSpeed;
+		  	console.log('current speed:', this.currentSpeed);
 		}
 		// check for scoring
-		if (this.ball.x - this.ball.radius < 0 || this.ball.x + this.ball.radius > 800) {
-		  if (this.ball.x + this.ball.radius > 800) {
+		if (this.ball.x - this.ball.radius < 0 || this.ball.x + this.ball.radius > this.canvasWidth) {
+		  if (this.ball.x + this.ball.radius > this.canvasWidth) {
 			  this.numberOfWinsP1 += 1;
+			  // set new speed and direction
+			  this.currentSpeed = this.initialSpeed;
+			  this.ball.dx = -this.currentSpeed;
 			  console.log('score player 1:', this.numberOfWinsP1);
 		  }  
 		  else if (this.ball.x - this.ball.radius < 0){
 			  this.numberOfWinsP2 += 1;
+			  // set new speed and direction
+			  this.currentSpeed = this.initialSpeed;
+			  this.ball.dx = this.currentSpeed;
 			  console.log('score player 2:', this.numberOfWinsP2);
 		  }
-		  // reset ball position	
-		  this.ball.x = 400;
-		  this.ball.y = 200;
-  
-		  this.currentSpeed += 1;
-		  this.numberOfGames +=1;
-		  if (this.currentSpeed > this.initialSpeed + 3) {
-			//reset speed to inital speed after reaching a certain threshold
-			this.currentSpeed = this.initialSpeed;
-		  }
-		  // set new speed
-		  this.ball.dx = this.currentSpeed;
-		  this.ball.dy = this.currentSpeed;
+		  // reset ball position to center	
+		  this.ball.x = this.canvasWidth/2;
+		  this.ball.y = this.canvasHeight/2;
 		}
 	  },
+
 	  draw() {
 		this.context.clearRect(0, 0, 800, 400);
   
@@ -152,13 +166,42 @@
 		this.context.strokeStyle = 'white';
 		this.context.stroke();
 		this.context.closePath();
-  
 		this.context.setLineDash([]);
+	  },
+
+	  exitGame() {
+		console.log('Exiting the game');
+		this.isGameExited = true;
+		this.resetGame();
+	  },
+
+	  resetGame() {
+		this.numberOfWinsP1 = 0;
+		this.numberOfWinsP2 = 0;
+		// Reset paddles
+		this.leftPaddle.x = 0;
+    	this.leftPaddle.y = 160;
+    	this.rightPaddle.x = 790;
+    	this.rightPaddle.y = 160;
+		// Reset ball
+		this.ball.x = this.canvasWidth/2;
+		this.ball.y = this.canvasHeight/2;
+		this.ball.dx = this.initialSpeed;
+		this.ball.dy = this.initialSpeed;
+
+		// Reset speed values
+		this.initialSpeed = 3;
+		this.currentSpeed = 3;
+		this.draw();
 	  },
 	  //main game loop
 	  gameLoop() {
+		if (this.isGameExited == true) {
+			console.log("Game exited.");
+			this.resetGame();
+		}
   		// Check if the maximum number of games has been reached
-  		if (this.numberOfWinsP1 < 10 && this.numberOfWinsP2 < 10) {
+  		else if (this.numberOfWinsP1 < 10 && this.numberOfWinsP2 < 10) {
     	  this.updateGame();
     	  this.draw();
     	  requestAnimationFrame(() => this.gameLoop());
@@ -183,8 +226,15 @@
 		  case 's':
 			this.leftPaddle.dy = 5;
 			break;
+		  case 'p':
+			this.isGamePaused = !this.isGamePaused;
+			break;
+		  case 'Escape':
+			this.exitGame();
+			break;
 		}
 	  },
+	  // method to stop movement of handles when keys are released
 	  handleKeyUp(e) {
 		switch (e.key) {
 		  case 'ArrowUp':
@@ -202,6 +252,12 @@
   </script>
   
   <style scoped>
+  .start-button {
+	display: block;
+    margin: 10px auto; /* Center the button horizontally */
+    padding: 10px;
+    font-size: 16px;
+  }
   canvas {
 	display: block;
 	margin: auto;

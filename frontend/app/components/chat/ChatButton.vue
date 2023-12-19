@@ -45,4 +45,16 @@ export default {
   right: 20px;
   z-index: 2;
 }
+
+@media (max-width: 600px) {
+  .chat-box {
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
 </style>

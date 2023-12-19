@@ -1,6 +1,5 @@
 <template>
   <div>
-    <NavBar />
     <h1>hello world</h1>
     <div style="display: flex; justify-content: center; margin-top: 20vh;">
       <ul>

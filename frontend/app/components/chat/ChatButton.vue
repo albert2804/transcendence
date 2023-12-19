@@ -1,6 +1,14 @@
+<script setup>
+  // Listen to changes of the isLoggedIn from store/index.js
+  import { isLoggedIn } from '~/store';
+  watchEffect(() => {
+    isLoggedIn.value = isLoggedIn.value
+  })
+</script>
+
 <template>
-  <div>
-    <ChatBox v-show="showChatBox" class="chat-box" @closeChat="toggleChatBox" @connected="connected = true" />
+  <div v-show="isLoggedIn === 1">
+    <ChatBox v-show="showChatBox" class="chat-box" @closeChat="toggleChatBox" @connected="connected = true" @disconnected="connected = false" />
     <button v-show="!showChatBox" class="btn btn-primary round-button" @click="toggleChatBox">
       <div v-if="connected">
         <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-chat" viewBox="0 0 16 16">
@@ -27,7 +35,9 @@ export default {
   },
   methods: {
     toggleChatBox() {
-      this.showChatBox = !this.showChatBox;
+      if (this.connected === true) {
+        this.showChatBox = !this.showChatBox;
+      }
     },
   }
 }

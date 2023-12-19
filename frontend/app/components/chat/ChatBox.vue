@@ -24,19 +24,14 @@
 				</button>
 			</div>
 			</div>
-			<!-- <div v-else class="chat-container">
-			<div class="chat-header">
-				<p class="m-0">
-				WebSocket closed
-				</p>
-			</div>
-		</div> -->
 	</div>
 </template>
   
 <script>
+import { isLoggedIn } from '~/store';
 export default {
   name: 'ChatBox',
+
   data () {
     return {
       socket: null,
@@ -49,13 +44,14 @@ export default {
     }
   },
   mounted () {
-    this.createWebSocket()
-  },
-  beforeDestroy () {
-    this.socket.close()
-    if (this.$el.querySelector('.chat-messages')) {
-      this.$el.querySelector('.chat-messages').removeEventListener('scroll', this.checkScroll)
-    }
+    // watch for changes in isLoggedIn
+    watchEffect(() => {
+      if (isLoggedIn.value === 1) {
+        this.createWebSocket();
+      } else if (isLoggedIn.value === 0) {
+        this.closeWebSocket();
+      }
+    });
   },
   methods: {
     getMessageType (message) {
@@ -82,13 +78,15 @@ export default {
       const currentDomain = window.location.hostname;
       const sockurl = 'wss://' + currentDomain + '/endpoint/chat/';
       this.socket = new WebSocket(sockurl)
-      this.$emit('connected')
 
       this.socket.onopen = () => {
+        console.log('opened chat websocket')
+        this.$emit('connected')
         this.socketOpen = true
       }
 
       this.socket.onclose = () => {
+        console.log('closed chat websocket')
         this.socketOpen = false
       }
 
@@ -112,6 +110,15 @@ export default {
             console.log('added scroll event listener')
           }
         }
+      }
+    },
+    closeWebSocket () {
+      if (this.socketOpen) {
+        this.socket.close()
+      }
+      this.messages = []
+      if (this.$el.querySelector('.chat-messages')) {
+        this.$el.querySelector('.chat-messages').removeEventListener('scroll', this.checkScroll)
       }
     },
     sendMessage () {

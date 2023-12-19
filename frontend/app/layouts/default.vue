@@ -18,3 +18,41 @@ Example:
     <slot />
   </div>
 </template>
+
+<script>
+  import { isLoggedIn } from '~/store';
+  export default {
+    setup() {
+    onMounted(async () => {
+      // initate the csrf token!
+      // this calls django to create a csrf token as cookie
+      // this token is needed for POST requests to django
+      try {
+        const response = await fetch('/endpoint/api/csrf')
+      } catch (error) {
+        console.error('Error:', error)
+      }
+      // check if user is logged in and set isLoggedIn in store/index.js
+      // so other components can use or listen to it
+      try {
+        const response = await fetch('/endpoint/api/auth_status', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const data = await response.json();
+        if (data.authenticated) {
+          isLoggedIn.value = 1
+        } else {
+          isLoggedIn.value = 0
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        isLoggedIn.value = 0
+      }
+    })
+  },
+  }
+</script>

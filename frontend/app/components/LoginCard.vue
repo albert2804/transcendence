@@ -64,8 +64,6 @@
 </template>
 
 <script>
-// import isLoggedin from store/index.js
-import { isLoggedIn } from '~/store';
 export default {
   name: 'LoginCard',
     data() {

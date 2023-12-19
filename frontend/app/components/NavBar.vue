@@ -46,46 +46,7 @@
 </template>
 
 <script>
-// import isLoggedin from store/index.js
-// so we can use it in setup()->onMounted() to get the csrf token and auth status from django
-import { isLoggedIn } from '~/store';
 export default {
   name: 'NavBar',
-  setup() {
-    onMounted(async () => {
-      // return if login status already checked
-      if (isLoggedIn.value !== 2) {
-        return
-      }
-      // initate the csrf token!
-      // this calls django to create a csrf token as cookie
-      // this token is needed for POST requests to django
-      try {
-        const response = await fetch('/endpoint/api/csrf')
-      } catch (error) {
-        console.error('Error:', error)
-      }
-      // check if user is logged in and set isLoggedIn in store/index.js
-      // so other components can use or listen to it
-      try {
-        const response = await fetch('/endpoint/api/auth_status', {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        const data = await response.json();
-        if (data.authenticated) {
-          isLoggedIn.value = 1
-        } else {
-          isLoggedIn.value = 0
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        isLoggedIn.value = 0
-      }
-    })
-  },
 }
 </script>

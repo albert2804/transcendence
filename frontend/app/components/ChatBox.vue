@@ -79,7 +79,9 @@ export default {
       this.showScrollButton = false
     },
     createWebSocket () {
-      this.socket = new WebSocket('wss://localhost/endpoint/chat/')
+      const currentDomain = window.location.hostname;
+      const sockurl = 'wss://' + currentDomain + '/endpoint/chat/';
+      this.socket = new WebSocket(sockurl)
 
       this.socket.onopen = () => {
         this.socketOpen = true

@@ -18,7 +18,7 @@ COPY ./backend/files/ .
 RUN pip install -r requirements.txt
 
 # install daphne for websockets
-# RUN pip install daphne
+RUN pip install daphne
 
 # COPY ${CERT_PATH} /etc/ssl/certs/cert.crt
 # COPY ${CERT_KEY_PATH} /etc/ssl/certs/key.key

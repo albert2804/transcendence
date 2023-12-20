@@ -42,11 +42,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crispy_forms',
-#    'rest_framework',
     'social_django',
 	'test_db.apps.TestDbConfig',
     'custom_auth',
-    # 'websocket',
+    'api',
+    'chat',
 ]
 
 CHANNEL_LAYERS = {
@@ -102,7 +102,8 @@ DATABASES = {
     }
 }
 
-
+# use custom user model for authentication
+AUTH_USER_MODEL = 'api.CustomUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -155,13 +156,14 @@ USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
 
 AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    #
     #'social_core.backends.open_id.OpenIdAuth',
     #'social_core.backends.google.GoogleOpenId',     #deprecated, remove after testing
     'social_core.backends.github.GithubOAuth2',
     'social_core.backends.google.GoogleOAuth2',
     #'social_core.backends.google.GoogleOAuth',
     'social_core.backends.twitter.TwitterOAuth',
-    'django.contrib.auth.backends.ModelBackend',
     'social_core.backends.oauth.BaseOAuth2',
     #'auth.Intra42OAuth2'
 ]

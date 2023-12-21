@@ -4,21 +4,51 @@
     <div class="contacts-container">
       <div class="header-bar">
         <p class="m-0">
-        Chat
+        Contacts
         </p>
         <button type="button" class="btn-close" @click="this.$emit('closeChat')" aria-label="Close"></button>
       </div>
       <ul class="contacts-list">
-        <p class="text-center">Online:</p>
-        <button class="btn" @click="this.chatid = 4">test</button>
-        <p class="text-center">Offline:</p>
+        <div class="accordion" id="contactListAccordion" v-if="userlist && userlist.length > 0">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
+                <span class="online-dot"/>&nbsp;Online
+              </button>
+            </h2>
+            <div id="collapseOnline" class="accordion-collapse collapse show">
+                  <ul v-for="(user, index) in userlist" :key="index" class="list-group">
+                    <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" v-if="user.chat_online" style="cursor: pointer;" @click="this.chatid = user.id">
+                      {{ user.username }}
+                      <!-- <span class="badge bg-primary rounded-pill">23</span> -->
+                    </li>
+                </ul>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffline" aria-expanded="true" aria-controls="collapseOffline">
+                <span class="offline-dot"/>&nbsp;Offline
+              </button>
+            </h2>
+            <div id="collapseOffline" class="accordion-collapse collapse show">
+                <ul class="contacts-list">
+                  <ul v-for="(user, index) in userlist" :key="index" class="list-group">
+                    <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" v-if="!user.chat_online" style="cursor: pointer;" @click="this.chatid = user.id">
+                      {{ user.username }}
+                    </li>
+                  </ul>
+                </ul>
+            </div>
+          </div>
+        </div>
       </ul>
       <!-- CHATBOX -->
       <div v-show="chatid !== null" style="padding: 5px;">
         <div class="chat-container">
           <div class="header-bar">
             <p class="m-0">
-            Online
+            <!-- {{ userlist.find(user => user.id === chatid).username }} -->
             </p>
             <button type="button" class="btn-close" @click="this.chatid = null" aria-label="Close"></button>
           </div>
@@ -52,12 +82,14 @@ export default {
   data () {
     return {
       socket: null,
+      userlist: [],
       messages: [],
       unseen: 0,
       showScrollButton: false,
       scrollEventListenerAdded: false,
       newMessage: '',
       chatid: null,
+      own_id: null
     }
   },
   mounted () {
@@ -74,7 +106,7 @@ export default {
     getMessageType (message) {
       const parsedMessage = JSON.parse(message)
       // console.log(parsedMessage.sender_id)
-      return parsedMessage.sender_id === '0' ? 'message-item-sent' : 'message-item-received'
+      return parsedMessage.sender_id === this.own_id ? 'message-item-sent' : 'message-item-received'
     },
     checkScroll (event) {
       const container = event.target
@@ -110,19 +142,37 @@ export default {
       }
 
       this.socket.onmessage = (event) => {
-        const container = this.$el.querySelector('.chat-messages')
-        const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 1
-        this.messages.push(event.data)
-        // console.log(event.data)
-        if (isScrolledToBottom) {
-          this.scrollDown()
-        } else {
-          this.showScrollButton = true
-          this.unseen += 1
-          if (!this.scrollEventListenerAdded) {
-            this.$el.querySelector('.chat-messages').addEventListener('scroll', this.checkScroll)
-            this.scrollEventListenerAdded = true
-            console.log('added scroll event listener')
+        // check if type is user_list
+        var data = JSON.parse(event.data);
+        if (data.type === 'user_list') {
+          // console.log('user list received');
+          // get own_id from user_list and put rest of user_list in userlist
+          this.own_id = data.own_id
+          this.userlist = data.users.filter(user => user.id != this.own_id)
+          // this.userlist = data.users
+          // console.log(data.users)
+          console.log('user list received');
+        } else if (data.type === 'chat_message') {
+          let sender_id = data.sender_id
+          // console.log(sender_id)
+          if (sender_id !== this.own_id) {
+            let sender_username = this.userlist.find(user => user.id == sender_id).username
+            console.log('message received from ' + sender_username)
+          }
+          const container = this.$el.querySelector('.chat-messages')
+          const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 1
+          this.messages.push(event.data)
+          // console.log(event.data)
+          if (isScrolledToBottom) {
+            this.scrollDown()
+          } else {
+            this.showScrollButton = true
+            this.unseen += 1
+            if (!this.scrollEventListenerAdded) {
+              this.$el.querySelector('.chat-messages').addEventListener('scroll', this.checkScroll)
+              this.scrollEventListenerAdded = true
+              console.log('added scroll event listener')
+            }
           }
         }
       }
@@ -172,6 +222,21 @@ export default {
   flex-direction: column;
 }
 
+.online-dot {
+  height: 10px;
+  width: 10px;
+  background-color: #02ce02;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.offline-dot {
+  height: 10px;
+  width: 10px;
+  background-color: #FF0000;
+  border-radius: 50%;
+  display: inline-block;
+}
 
 /* CHAT-CARD */
 

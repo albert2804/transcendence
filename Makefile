@@ -1,7 +1,7 @@
 include .env
 
 all:
-	@docker-compose up
+	@docker-compose up -d
 	@echo "\033[32mContainers are up and running\033[0m"
 
 build:

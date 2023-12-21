@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+from custom_auth.models import Intra42OAuth2
 from pathlib import Path
 import os
 
@@ -165,7 +166,7 @@ AUTHENTICATION_BACKENDS = [
     #'social_core.backends.google.GoogleOAuth',
     'social_core.backends.twitter.TwitterOAuth',
     'social_core.backends.oauth.BaseOAuth2',
-    #'auth.Intra42OAuth2'
+    'custom_auth.models.Intra42OAuth2'
 ]
 
 SOCIAL_AUTH_GITHUB_KEY='e989ab105c9b8c40d3f6'
@@ -175,3 +176,13 @@ SOCIAL_AUTH_URL_NAMESPACE = 'social'
 
 LOGIN_URL = 'auth/login/'
 LOGIN_REDIRECT_URL='/endpoint/auth'
+
+SOCIAL_AUTH_PROVIDERS = {
+    '42_intra_oauth': {
+        'KEY': 'u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da',
+        'SECRET': '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',
+        'AUTHORIZATION_URL': 'https://api.intra.42.fr/oauth/authorize',
+        'ACCESS_TOKEN_URL': 'https://api.intra.42.fr/oauth/token',
+        'ACCESS_TOKEN_METHOD': 'POST',
+    },
+}

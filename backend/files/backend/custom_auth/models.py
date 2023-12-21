@@ -7,7 +7,7 @@ from social_core.backends.oauth import BaseOAuth2
 class Intra42OAuth2(BaseOAuth2):
     """GitHub OAuth authentication backend"""
     name = '42_intra_oauth'
-    AUTHORIZATION_URL = 'https://api.intra.42.fr/oauth/authorize'
+    #AUTHORIZATION_URL = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da&redirect_uri=http%3A%2F%2Fwww.google.com&response_type=code'
     ACCESS_TOKEN_URL = 'https://api.intra.42.fr/oauth/token'
     ACCESS_TOKEN_METHOD = 'POST'
     SCOPE_SEPARATOR = ','

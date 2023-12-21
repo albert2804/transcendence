@@ -26,8 +26,8 @@ python manage.py createsuperuser --noinput
 # python manage.py startapp custom_auth
 
 # Create migrations for the app (only needed if a model is created or changed)
-# python manage.py makemigrations
-# python manage.py migrate
+python manage.py makemigrations
+python manage.py migrate
 
 # Run the development server
 # python manage.py runserver 0.0.0.0:8000
@@ -35,5 +35,5 @@ python manage.py createsuperuser --noinput
 # Collect static files (needed for serving static files with daphne)
 python manage.py collectstatic --noinput
 # Start the ASGI server (Daphne in this case)
-daphne -b 0.0.0.0 -p 8000 backend.asgi:application
-#tail -f /dev/null
+# daphne -b 0.0.0.0 -p 8000 backend.asgi:application
+tail -f /dev/null

@@ -175,13 +175,12 @@ SOCIAL_AUTH_GITHUB_SECRET='9a6ca7f1e6106dccf4564dc626fa43c4167e1aeb'
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 
 LOGIN_URL = 'auth/login/'
-LOGIN_REDIRECT_URL='https://localhost/endpoint/auth'
 
 SOCIAL_AUTH_PROVIDERS = {
     '42_intra_oauth': {
         'KEY': 'u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da',
         'SECRET': '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',
-        'AUTHORIZATION_URL': 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da&response_type=code',
+        'AUTHORIZATION_URL': 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da&redirect_uri=https%3A%2F%2Flocalhost%2Fendpoint%2Fauth&response_type=code',
         'ACCESS_TOKEN_URL': 'https://api.intra.42.fr/oauth/token',
         'ACCESS_TOKEN_METHOD': 'POST',
     },

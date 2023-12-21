@@ -16,7 +16,11 @@ class Intra42OAuth2(BaseOAuth2):
     ACCESS_TOKEN_METHOD = 'POST'
     LOGIN_REDIRECT_URL='https://localhost/endpoint/auth/'
     KEY='u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da'
-    SECRET='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'
+    # old secret
+    #SECRET='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'
+
+    # next secret, valid after 29/12/2023
+    SECRET='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'
 
     # SCOPE_SEPARATOR = ','
     # ID_KEY = 'id'

@@ -17,10 +17,9 @@
               </button>
             </h2>
             <div id="collapseOnline" class="accordion-collapse collapse show">
-                  <ul v-for="(user, index) in userlist" :key="index" class="list-group">
-                    <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" v-if="user.chat_online" style="cursor: pointer;" @click="this.chatid = user.id">
+                  <ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
+                    <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
                       {{ user.username }}
-                      <!-- <span class="badge bg-primary rounded-pill">23</span> -->
                     </li>
                 </ul>
             </div>
@@ -33,8 +32,8 @@
             </h2>
             <div id="collapseOffline" class="accordion-collapse collapse show">
                 <ul class="contacts-list">
-                  <ul v-for="(user, index) in userlist" :key="index" class="list-group">
-                    <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" v-if="!user.chat_online" style="cursor: pointer;" @click="this.chatid = user.id">
+                  <ul v-for="(user, index) in offlineUsers" :key="index" class="list-group">
+                    <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
                       {{ user.username }}
                     </li>
                   </ul>
@@ -48,15 +47,14 @@
         <div class="chat-container">
           <div class="header-bar">
             <p class="m-0">
-            <!-- {{ userlist.find(user => user.id === chatid).username }} -->
             </p>
             <button type="button" class="btn-close" @click="this.chatid = null" aria-label="Close"></button>
           </div>
           <ul class="chat-messages">
-            <li v-for="(message, index) in messages" :key="index" :class="getMessageType(message)">
-            <span class="message">
-              {{ JSON.parse(message).message }}
-            </span>
+            <li v-for="(message, index) in filteredMessages" :key="index" :class="getMessageType(message)">
+                <span class="message">
+                    {{ JSON.parse(message).message }}
+                </span>
             </li>
           </ul>
           <div v-show="showScrollButton === true" class="scroll-button" style="cursor: pointer;" @click="scrollDown">
@@ -92,6 +90,17 @@ export default {
       own_id: null
     }
   },
+  computed: {
+    filteredMessages() {
+      return this.messages.filter(message => JSON.parse(message).chat_id == this.chatid);
+    },
+    onlineUsers() {
+      return this.userlist.filter(user => user.chat_online);
+    },
+    offlineUsers() {
+      return this.userlist.filter(user => !user.chat_online);
+    }
+  },
   mounted () {
     // watch for changes in isLoggedIn from store/index.js
     watchEffect(() => {
@@ -105,7 +114,6 @@ export default {
   methods: {
     getMessageType (message) {
       const parsedMessage = JSON.parse(message)
-      // console.log(parsedMessage.sender_id)
       return parsedMessage.sender_id === this.own_id ? 'message-item-sent' : 'message-item-received'
     },
     checkScroll (event) {
@@ -122,6 +130,10 @@ export default {
       })
       this.unseen = 0
       this.showScrollButton = false
+    },
+    selectUser (user) {
+      this.chatid = user.id
+      this.scrollDown()
     },
     createWebSocket () {
       const currentDomain = window.location.hostname;
@@ -142,27 +154,14 @@ export default {
       }
 
       this.socket.onmessage = (event) => {
-        // check if type is user_list
         var data = JSON.parse(event.data);
         if (data.type === 'user_list') {
-          // console.log('user list received');
-          // get own_id from user_list and put rest of user_list in userlist
           this.own_id = data.own_id
           this.userlist = data.users.filter(user => user.id != this.own_id)
-          // this.userlist = data.users
-          // console.log(data.users)
-          console.log('user list received');
         } else if (data.type === 'chat_message') {
-          let sender_id = data.sender_id
-          // console.log(sender_id)
-          if (sender_id !== this.own_id) {
-            let sender_username = this.userlist.find(user => user.id == sender_id).username
-            console.log('message received from ' + sender_username)
-          }
           const container = this.$el.querySelector('.chat-messages')
           const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 1
           this.messages.push(event.data)
-          // console.log(event.data)
           if (isScrolledToBottom) {
             this.scrollDown()
           } else {
@@ -174,6 +173,8 @@ export default {
               console.log('added scroll event listener')
             }
           }
+        } else {
+          console.log('unknown message type received')
         }
       }
     },
@@ -188,7 +189,7 @@ export default {
     },
     sendMessage () {
       if (this.newMessage.trim() !== '') {
-        this.socket.send(JSON.stringify({ message: this.newMessage }))
+        this.socket.send(JSON.stringify({ message: this.newMessage, receiver_id: this.chatid }))
         this.newMessage = ''
       }
     }

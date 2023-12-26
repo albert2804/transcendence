@@ -99,8 +99,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         User = get_user_model()
         receiver = User.objects.get(id=int(receiver_id))
         ChatMessage.objects.create(sender=sender, receiver=receiver, message=message)
-        # print(f"Message saved: {message} from {sender} to {receiver}")
 
+    # get all saved messages for the user (sent and received) from the database
     @database_sync_to_async
     def get_saved_messages(self, user):
         from .models import ChatMessage
@@ -109,12 +109,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         ))
         return messages
     
-    @database_sync_to_async
-    def is_user_online(self, user_id):
-        User = get_user_model()
-        user = User.objects.get(id=int(user_id))
-        return user.chat_online
+    # check if user is online
+    # @database_sync_to_async
+    # def is_user_online(self, user_id):
+    #     User = get_user_model()
+    #     user = User.objects.get(id=int(user_id))
+    #     return user.chat_online
 
+    # get messages from database and send them to the user
     async def send_saved_messages(self, user):
         messages = await self.get_saved_messages(user)
         for message in messages:
@@ -130,20 +132,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
         if self.scope["user"].is_authenticated:
-            # 
+            # add user to his own group
             await self.channel_layer.group_add(
                 f"chat_{self.scope['user'].id}",
                 self.channel_name
             )
-            # 
+            # add user to chat group (general group to update user list etc.)
+            await self.channel_layer.group_add(
+                "chat",
+                self.channel_name
+            )
+            # update user status
             await self.update_user_status(self.scope["user"], True)
-            reg_users = await self.get_registered_users()
-            users = [{'username': user.username, 'id': user.id, 'chat_online': user.chat_online} for user in reg_users]
-            await self.send(text_data=json.dumps({
-                'type': 'user_list',
-                'users': users,
-                'own_id': self.scope["user"].id.__str__(),
-            }))
+            # send new user list to all users
+            await self.channel_layer.group_send("chat",{'type': 'user_list',})
+            # send saved messages to user
             await self.send_saved_messages(self.scope["user"])
 
     async def disconnect(self, close_code):
@@ -153,6 +156,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
         await self.update_user_status(self.scope["user"], False)
+        await self.channel_layer.group_send("chat",{'type': 'user_list',})
 
     async def receive(self, text_data):
         try:
@@ -161,37 +165,46 @@ class ChatConsumer(AsyncWebsocketConsumer):
             receiver = text_data_json.get('receiver_id')
             if message and receiver:
                 await self.save_message(self.scope["user"], receiver, message)
-                # send message to the sender himself...............
-                await self.send(text_data=json.dumps({
-                    'type': 'chat_message',
-                    'message': message,
-                    'sender_id': self.scope["user"].id.__str__(),
-                    'chat_id': receiver,
-                }))
+                # send message to the sender itself
+                await self.channel_layer.group_send(
+                    f"chat_{self.scope['user'].id}",
+                    {
+                        'type': 'chat_message',
+                        'message': message,
+                        'sender_id': self.scope["user"].id.__str__(),
+                        'chat_id': receiver,
+                    }
+                )
                 # if receiver is online, send message to the receiver
-                if await self.is_user_online(receiver):
-                    receiver_channel_name = f"chat_{receiver}"
-                    await self.channel_layer.group_send(
-                        receiver_channel_name,
-                        {
-                            'type': 'chat_message',
-                            'message': message,
-                            'sender_id': self.scope["user"].id.__str__(),
-                            'chat_id': self.scope["user"].id.__str__(),
-                        }
-                    )
+                # if await self.is_user_online(receiver):
+                await self.channel_layer.group_send(
+                    f"chat_{receiver}",
+                    {
+                        'type': 'chat_message',
+                        'message': message,
+                        'sender_id': self.scope["user"].id.__str__(),
+                        'chat_id': self.scope["user"].id.__str__(),
+                    }
+                )
         except json.JSONDecodeError:
             print(f"Ungültiges JSON erhalten: {text_data}")
     
-    # group message handler for chat messages
+    
+    # group message handlers:
+            
     async def chat_message(self, event):
-        message = event['message']
-        sender_id = event['sender_id']
-        chat_id = event['chat_id']
-
         await self.send(text_data=json.dumps({
             'type': 'chat_message',
-            'message': message,
-            'sender_id': sender_id,
-            'chat_id': chat_id,
+            'message': event['message'],
+            'sender_id': event['sender_id'],
+            'chat_id': event['chat_id'],
+        }))
+    
+    async def user_list(self, event):
+        reg_users = await self.get_registered_users()
+        users = [{'username': user.username, 'id': user.id, 'chat_online': user.chat_online} for user in reg_users]
+        await self.send(text_data=json.dumps({
+            'type': 'user_list',
+            'users': users,
+            'own_id': self.scope["user"].id.__str__(),
         }))

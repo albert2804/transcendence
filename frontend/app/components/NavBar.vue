@@ -13,6 +13,9 @@
             <NuxtLink class="nav-link active" to="/">Home</NuxtLink>
           </li>
           <li class="nav-item">
+            <NuxtLink class="nav-link active" to="/localGame">Local Game</NuxtLink>
+          </li>
+          <li class="nav-item">
             <NuxtLink class="nav-link active" to="/login">Login</NuxtLink>
           </li>
           <li class="nav-item dropdown">

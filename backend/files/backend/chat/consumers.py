@@ -132,7 +132,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
         if self.scope["user"].is_authenticated:
-            # add user to his own group
+            # add user to his own group / create group for the user
             await self.channel_layer.group_add(
                 f"chat_{self.scope['user'].id}",
                 self.channel_name

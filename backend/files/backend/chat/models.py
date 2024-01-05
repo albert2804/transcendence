@@ -7,6 +7,7 @@ class ChatMessage(models.Model):
     message = models.TextField()
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    unread = models.BooleanField(default=True)
 
     def __str__(self):
         return f'Message from {self.sender} to {self.receiver} at {self.created_at}'

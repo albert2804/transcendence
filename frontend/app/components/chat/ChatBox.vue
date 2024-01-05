@@ -19,6 +19,9 @@
             <div id="collapseOnline" class="accordion-collapse collapse show">
                   <ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
                     <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
+                      <span class="badge rounded-pill bg-danger" v-if="unreadMessageCountMap.get(String(user.id)) != 0">
+                        {{ unreadMessageCountMap.get(String(user.id)) }}
+                      </span>
                       {{ user.username }}
                     </li>
                 </ul>
@@ -34,6 +37,9 @@
                 <ul class="contacts-list">
                   <ul v-for="(user, index) in offlineUsers" :key="index" class="list-group">
                     <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
+                      <span class="badge rounded-pill bg-danger" v-if="unreadMessageCountMap.get(String(user.id)) != 0">
+                        {{ unreadMessageCountMap.get(String(user.id)) }}
+                      </span>
                       {{ user.username }}
                     </li>
                   </ul>
@@ -57,9 +63,6 @@
                 </span>
             </li>
           </ul>
-          <div v-show="showScrollButton === true" class="scroll-button" style="cursor: pointer;" @click="scrollDown">
-            ⬇️{{ unseen }}
-          </div>
           <div class="chat-input-container">
             <input v-model="newMessage" type="text" placeholder="Type your message..." class="form-control chat-input" @keyup.enter="sendMessage" />
             <button class="btn btn-primary send-button" @click="sendMessage">
@@ -82,9 +85,7 @@ export default {
       socket: null,
       userlist: [],
       messages: [],
-      unseen: 0,
-      showScrollButton: false,
-      scrollEventListenerAdded: false,
+      unreadMessageCountMap: new Map(),
       newMessage: '',
       chatid: null,
       own_id: null
@@ -92,6 +93,7 @@ export default {
   },
   computed: {
     filteredMessages() {
+      // console.log('getting filtered messages')
       return this.messages.filter(message => JSON.parse(message).chat_id == this.chatid);
     },
     onlineUsers() {
@@ -99,7 +101,7 @@ export default {
     },
     offlineUsers() {
       return this.userlist.filter(user => !user.chat_online);
-    }
+    },
   },
   mounted () {
     // watch for changes in isLoggedIn from store/index.js
@@ -116,24 +118,20 @@ export default {
       const parsedMessage = JSON.parse(message)
       return parsedMessage.sender_id === this.own_id ? 'message-item-sent' : 'message-item-received'
     },
-    checkScroll (event) {
-      const container = event.target
-      if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
-        this.showScrollButton = false
-        this.unseen = 0
-      }
-    },
     scrollDown () {
       this.$nextTick(() => {
         const container = this.$el.querySelector('.chat-messages')
         container.scrollTop = container.scrollHeight
       })
-      this.unseen = 0
-      this.showScrollButton = false
     },
     selectUser (user) {
       this.chatid = user.id
       this.scrollDown()
+      if (this.unreadMessageCountMap.has(String(user.id))) {
+        this.unreadMessageCountMap.set(String(user.id), 0);
+      }
+      // send read message info to server
+      this.socket.send(JSON.stringify({ type: "read_info", chat_id: user.id }))
     },
     createWebSocket () {
       const currentDomain = window.location.hostname;
@@ -141,16 +139,16 @@ export default {
       this.socket = new WebSocket(sockurl)
 
       this.socket.onopen = () => {
-        console.log('opened chat websocket')
-        this.$emit('connected')
+        this.$emit('loading')
       }
 
       this.socket.onclose = () => {
-        console.log('closed chat websocket')
+        this.$emit('disconnected')
       }
 
       this.socket.onerror = (error) => {
         console.error(`WebSocket-Error: ${error}`)
+        this.$emit('disconnected')
       }
 
       this.socket.onmessage = (event) => {
@@ -158,19 +156,23 @@ export default {
         if (data.type === 'user_list') {
           this.own_id = data.own_id
           this.userlist = data.users.filter(user => user.id != this.own_id)
+          this.$emit('connected')
         } else if (data.type === 'chat_message') {
-          const container = this.$el.querySelector('.chat-messages')
-          const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 1
+          // add message to messages array
           this.messages.push(event.data)
-          if (isScrolledToBottom) {
+          //
+          const chatId = data.chat_id;
+          const unread = data.unread;
+          // scroll down if message is from current chat window
+          if (this.chatid == chatId) {
             this.scrollDown()
-          } else {
-            this.showScrollButton = true
-            this.unseen += 1
-            if (!this.scrollEventListenerAdded) {
-              this.$el.querySelector('.chat-messages').addEventListener('scroll', this.checkScroll)
-              this.scrollEventListenerAdded = true
-              console.log('added scroll event listener')
+          }
+          // increase unread messages count if message is from other chat window
+          else if (unread && chatId) {
+            if (this.unreadMessageCountMap.has(chatId)) {
+              this.unreadMessageCountMap.set(chatId, this.unreadMessageCountMap.get(chatId) + 1);
+            } else {
+              this.unreadMessageCountMap.set(chatId, 1);
             }
           }
         } else {
@@ -183,13 +185,13 @@ export default {
         this.socket.close()
       }
       this.messages = []
-      if (this.$el.querySelector('.chat-messages')) {
-        this.$el.querySelector('.chat-messages').removeEventListener('scroll', this.checkScroll)
-      }
+      this.userlist = []
+      this.chatid = null
+      this.own_id = null
     },
     sendMessage () {
       if (this.newMessage.trim() !== '') {
-        this.socket.send(JSON.stringify({ message: this.newMessage, receiver_id: this.chatid }))
+        this.socket.send(JSON.stringify({ type: "message", message: this.newMessage, receiver_id: this.chatid }))
         this.newMessage = ''
       }
     }
@@ -293,14 +295,6 @@ export default {
   word-wrap: break-word;
   max-width: 80%;
   align-self: flex-end;
-}
-
-/* The scroll down button that appears if you have unseen messages */
-.scroll-button {
-  position: absolute;
-  left: 3%;
-  top: 80%;
-  z-index: 1;
 }
 
 .chat-input-container {

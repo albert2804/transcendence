@@ -6,10 +6,10 @@
         <p class="m-0">
         Contacts
         </p>
-        <button type="button" class="btn-close" @click="this.$emit('closeChat')" aria-label="Close"></button>
+        <button type="button" class="btn-close" @click="this.$emit('closeChat'); chatid = null;" aria-label="Close"></button>
       </div>
       <ul class="contacts-list">
-        <div class="accordion" id="contactListAccordion" v-if="userlist && userlist.length > 0">
+        <div class="accordion" id="contactListAccordion">
           <div class="accordion-item">
             <h2 class="accordion-header">
               <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
@@ -17,14 +17,14 @@
               </button>
             </h2>
             <div id="collapseOnline" class="accordion-collapse collapse show">
-                  <ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
-                    <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
-                      <span class="badge rounded-pill bg-danger" v-if="unreadMessageCountMap.get(String(user.id)) != 0">
-                        {{ unreadMessageCountMap.get(String(user.id)) }}
-                      </span>
-                      {{ user.username }}
-                    </li>
-                </ul>
+              <ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
+                <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
+                  <span class="badge rounded-pill bg-danger" v-if="unreadMessageCountMap.get(String(user.id)) != 0">
+                    {{ unreadMessageCountMap.get(String(user.id)) }}
+                  </span>
+                  {{ user.username }}
+                </li>
+              </ul>
             </div>
           </div>
           <div class="accordion-item">
@@ -34,16 +34,16 @@
               </button>
             </h2>
             <div id="collapseOffline" class="accordion-collapse collapse show">
-                <ul class="contacts-list">
-                  <ul v-for="(user, index) in offlineUsers" :key="index" class="list-group">
-                    <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
-                      <span class="badge rounded-pill bg-danger" v-if="unreadMessageCountMap.get(String(user.id)) != 0">
-                        {{ unreadMessageCountMap.get(String(user.id)) }}
-                      </span>
-                      {{ user.username }}
-                    </li>
-                  </ul>
+              <ul class="contacts-list">
+                <ul v-for="(user, index) in offlineUsers" :key="index" class="list-group">
+                  <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
+                    <span class="badge rounded-pill bg-danger" v-if="unreadMessageCountMap.get(String(user.id)) != 0">
+                      {{ unreadMessageCountMap.get(String(user.id)) }}
+                    </span>
+                    {{ user.username }}
+                  </li>
                 </ul>
+              </ul>
             </div>
           </div>
         </div>
@@ -93,7 +93,6 @@ export default {
   },
   computed: {
     filteredMessages() {
-      // console.log('getting filtered messages')
       return this.messages.filter(message => JSON.parse(message).chat_id == this.chatid);
     },
     onlineUsers() {
@@ -112,6 +111,14 @@ export default {
         this.closeWebSocket();
       }
     });
+    // watch for unread messages (in unreadMessageCountMap)
+    watchEffect(() => {
+      let totalUnreadMessages = 0;
+      for (const count of this.unreadMessageCountMap.values()) {
+        totalUnreadMessages += count;
+      }
+      this.$emit('unreadMessages', totalUnreadMessages);
+    });
   },
   methods: {
     getMessageType (message) {
@@ -127,8 +134,9 @@ export default {
     selectUser (user) {
       this.chatid = user.id
       this.scrollDown()
+      // remove unread message count for selected chat
       if (this.unreadMessageCountMap.has(String(user.id))) {
-        this.unreadMessageCountMap.set(String(user.id), 0);
+        this.unreadMessageCountMap.delete(String(user.id));
       }
       // send read message info to server
       this.socket.send(JSON.stringify({ type: "read_info", chat_id: user.id }))

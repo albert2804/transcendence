@@ -59,8 +59,12 @@
           <ul class="chat-messages">
             <li v-for="(message, index) in filteredMessages" :key="index" :class="getMessageType(message)">
                 <span class="message">
-                    {{ JSON.parse(message).message }}
+                  {{ JSON.parse(message).message }}
+                  <span class="date" style="font-size: 0.8em; text-align: right; display: block;">
+                    {{ JSON.parse(message).date }}
+                  </span>
                 </span>
+
             </li>
           </ul>
           <div class="chat-input-container">
@@ -303,6 +307,10 @@ export default {
   word-wrap: break-word;
   max-width: 80%;
   align-self: flex-end;
+}
+
+.date {
+  color: #808080;
 }
 
 .chat-input-container {

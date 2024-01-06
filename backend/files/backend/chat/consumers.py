@@ -2,6 +2,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.db import models
 from django.contrib.auth import get_user_model
+from datetime import datetime
+from pytz import timezone
 import json
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -17,11 +19,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return list(User.objects.all())
 
     @database_sync_to_async
-    def save_message(self, sender, receiver_id, message):
+    def save_message(self, sender, receiver_id, message, date):
         from .models import ChatMessage
         User = get_user_model()
         receiver = User.objects.get(id=int(receiver_id))
-        ChatMessage.objects.create(sender=sender, receiver=receiver, message=message)
+        ChatMessage.objects.create(sender=sender, receiver=receiver, message=message, created_at=date)
 
     # get all saved messages for the user (sent and received) from the database
     @database_sync_to_async
@@ -43,17 +45,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # get messages from database and send them to the user
     async def send_saved_messages(self, user):
         messages = await self.get_saved_messages(user)
+        current_date = datetime.now().astimezone(timezone('Europe/Berlin')).date()
         for message in messages:
             sender_id = str(await database_sync_to_async(lambda: message.sender.id)())
             chat_id = str(await database_sync_to_async(lambda: message.receiver.id if sender_id == self.scope["user"].id.__str__() else sender_id)())
             unread = not (sender_id == self.scope["user"].id.__str__()) and message.unread
+            # check if message is from today (only send time if it is from today)
+            local_created_at = message.created_at.astimezone(timezone('Europe/Berlin'))
+            if local_created_at.date() == current_date:
+                date_format = "%H:%M"
+            else:
+                date_format = "%d.%m.%Y %H:%M"
+            # send message to the user
             await self.send(text_data=json.dumps({
                 'type': 'chat_message',
                 'message': message.message,
                 'sender_id': sender_id,
                 'receiver_id': self.scope["user"].id.__str__(),
                 'chat_id': chat_id,
-                'unread': unread
+                'unread': unread,
+                'date': local_created_at.strftime(date_format),
             }))
 
     async def connect(self):
@@ -91,8 +102,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if (text_data_json.get('type') == 'message'):
                 message = text_data_json.get('message')
                 receiver = text_data_json.get('receiver_id')
+                # date = models.DateTimeField(auto_now_add=True)
+                date = datetime.now()
                 if message and receiver:
-                    await self.save_message(self.scope["user"], receiver, message)
+                    await self.save_message(self.scope["user"], receiver, message, date)
                     # send message to the sender itself
                     await self.channel_layer.group_send(
                         f"chat_{self.scope['user'].id}",
@@ -102,6 +115,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             'sender_id': self.scope["user"].id.__str__(),
                             'chat_id': receiver,
                             'unread' : False,
+                            'date': date.strftime("%H:%M"),
                         }
                     )
                     # send message to the receivers group
@@ -113,6 +127,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             'sender_id': self.scope["user"].id.__str__(),
                             'chat_id': self.scope["user"].id.__str__(),
                             'unread' : True,
+                            'date': date.strftime("%H:%M"),
                         }
                     )
             elif (text_data_json.get('type') == 'read_info'):
@@ -120,7 +135,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 if chat_id:
                     # set all messages from the sender to read
                     await self.update_unread_messages(self.scope["user"], chat_id)
-                    print(f"set all messages from {chat_id} to read")
         except json.JSONDecodeError:
             print(f"Ungültiges JSON erhalten: {text_data}")
     
@@ -135,6 +149,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'receiver_id': self.scope["user"].id.__str__(),
             'chat_id': event['chat_id'],
             'unread': event['unread'],
+            'date': event['date'],
         }))
     
     async def user_list(self, event):

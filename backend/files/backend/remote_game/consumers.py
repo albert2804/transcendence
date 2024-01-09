@@ -39,16 +39,19 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
         while True:
             # Update game state periodically (replace with your game logic)
             updated_state = {
-                'ball_x': 123.45,
-                'ball_y': 67.89,
-                'paddle_left_y': 12.34,
-                'paddle_right_y': 56.78,
+                'ball': {
+                    'x' : 400,
+                    'y' : 200,
+                    'radius': 6,
+                    'dx': 0,
+                    'dy': 0,
+                }
             }
 
             # Call send_game_state to send the updated state to clients
             await self.send_game_state({'state': updated_state})
-            print(f"periodic update submitted")
-            print(f"state:", updated_state['ball_x'])
+            # print(f"periodic update submitted")
+            # print(f"state:", updated_state['ball_x'])
 
             # Adjust the sleep duration based on your desired update frequency
             await asyncio.sleep(1)  # Send updates every 1 second (adjust as needed)

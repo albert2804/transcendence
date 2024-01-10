@@ -4,8 +4,13 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 import random
 import asyncio
+from .utils import PongGame
 
 class RemoteGameConsumer(AsyncWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.game = PongGame()
+
     async def connect(self):
         await self.accept()
         print(f"upgrade to websocket accepted")
@@ -23,48 +28,59 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
         # Perform actions based on the pressed key
         if key_pressed == 'ArrowUp':
             print(f"key pressed: {key_pressed}")
-            # Your action here
+            self.game.rightPaddle['dy'] = -10
+            print(f"paddle", self.game.rightPaddle['y'])
+        elif key_pressed == 'ArrowUp':
+            print(f"key pressed: {key_pressed}")
+            self.game.rightPaddle['dy'] = 10
+            print(f"paddle", self.game.rightPaddle['y'])
+        elif key_pressed == 'ArrowUp':
+            self.game.isGameExited==True
 
         # Add more conditions for other keys as needed
         # send_game_state()
 
-    async def send_game_state(self, event):
-        # Send updated game state to the client
+    # async def send_game_state(self, event):
+    #     # Send updated game state to the client
+    #     await self.send(text_data=json.dumps({
+    #         'type': 'game_state',
+    #         'state': event['state'],
+    #     }))
+    async def send_game_state(self):
+        state = {
+            'ball': {
+                'x': self.game.ball['x'],
+                'y': self.game.ball['y'],
+                'radius': self.game.ball['radius'],
+            },
+            'leftPaddle': {
+                'x': self.game.leftPaddle['x'],
+                'y': self.game.leftPaddle['y'],
+                'width': self.game.leftPaddle['width'],
+                'height': self.game.leftPaddle['height'],
+            },
+            'rightPaddle': {
+                'x': self.game.rightPaddle['x'],
+                'y': self.game.rightPaddle['y'],
+                'width': self.game.rightPaddle['width'],
+                'height': self.game.rightPaddle['height'],
+            },
+        }
+        high_score = {
+            'numberOfWinsP1': self.game.numberOfWinsP1,
+            'numberOfWinsP2': self.game.numberOfWinsP2,
+        }
         await self.send(text_data=json.dumps({
             'type': 'game_state',
-            'state': event['state'],
+            'state': state,
+            'high_score': high_score,
         }))
 
     async def send_periodic_updates(self):
-        while True:
+        while not self.game.isGameExited:
             # Update game state periodically
-            updated_state = {
-                'ball': {
-                    'x' : 400,
-                    'y' : 200,
-                    'radius': 6,
-                },
-                'Paddle' : {
-		            'width': 10,
-		            'height': 80,
-                },
-                'leftPaddle': {
-		            'x': 0,
-            		'y': 160,
-		        },
-                'rightPaddle': {
-		            'x': 790,
-            		'y': 160,
-                },
-            },
-            high_score = {
-                'numberOfWinsP1' : 0,
-                'numberOfWinsP2' : 0
-            }
-            # Call send_game_state to send the updated state to clients
-            await self.send_game_state({'state': updated_state, 'score' : high_score})
-            # print(f"periodic update submitted")
-            # print(f"state:", updated_state['ball_x'])
+            self.game.game_loop()
+            await self.send_game_state()
 
             # Adjust the sleep duration based on your desired update frequency
-            await asyncio.sleep(1)  # Send updates every 1 second (adjust as needed)
+            await asyncio.sleep(0.005)  # Send updates every 0.005 second for a smooth UX

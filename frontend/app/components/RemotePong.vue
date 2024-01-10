@@ -70,14 +70,14 @@
 
         if (data.type === 'game_state') {
           if (data.state) {
-            const gameState = data.state[0];
+            const gameState = data.state;
             const highScore = data.state[1];
-            console.log('numberodWinsP1:', gameState);
-            console.log('numberodWinsP1:', highScore);
+            console.log('game state:', gameState);
+            // console.log('numberodWinsP1:', highScore);
 
-            this.numberOfWinsP1 = gameState.numberOfWinsP1;
+            // this.numberOfWinsP1 = gameState.numberOfWinsP1;
             // this.$set(this, 'numberOfWinsP1', gameState.numberOfWinsP1);
-            this.numberOfWinsP2 = gameState.numberOfWinsP2;
+            // this.numberOfWinsP2 = gameState.numberOfWinsP2;
             this.updateGameUI(gameState);
           } else {
             console.error('Received game_state message with undefined data:', data);
@@ -98,15 +98,15 @@
     /* ------------- Event handler ---------------------------------------*/
     handleKeyDown(event) {
       const pressedKey = event.key;
-      const data = { 'key_pressed': key };
+      const data = { 'key_pressed': pressedKey };
       this.socket.send(JSON.stringify(data));
-      console.log('key pressed:', key);
+      console.log('key pressed:', pressedKey);
     },
     /* ------------- Update UI -------------------------------------------*/
     updateGameUI(gameState) {
       this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-      this.drawPaddle(gameState.leftPaddle.x, gameState.leftPaddle.y, gameState.Paddle.width, gameState.Paddle.height);
-      this.drawPaddle(gameState.rightPaddle.x, gameState.rightPaddle.y, gameState.Paddle.width, gameState.Paddle.height);
+      this.drawPaddle(gameState.leftPaddle.x, gameState.leftPaddle.y, gameState.leftPaddle.width, gameState.leftPaddle.height);
+      this.drawPaddle(gameState.rightPaddle.x, gameState.rightPaddle.y, gameState.rightPaddle.width, gameState.rightPaddle.height);
       this.drawBall(gameState.ball.x, gameState.ball.y, gameState.ball.radius);
       this.drawLine();
     },

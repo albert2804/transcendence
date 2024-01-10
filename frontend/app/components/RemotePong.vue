@@ -1,9 +1,10 @@
+    <!-- need to think about when to create the websocket; probably when pressing the "start game" button -->
+
 <template>
 	<div>
-	  <button @click="sendMessage" class="start-button">Start Game</button>
-	  <!-- <button @click="startGame" class="start-button">Start Game</button> -->
+	  <button @click="createWebSocket" class="start-button">Start Game</button>
 	  <canvas ref="pongCanvas" width="800" height="400"></canvas>
-	  <!-- <div class="score-container">{{ numberOfWinsP1 }} : {{ numberOfWinsP2 }}</div> -->
+	  <div class="score-container">{{ numberOfWinsP1 }} : {{ numberOfWinsP2 }}</div>
     <!-- <div @keydown="handleKeyDown" tabindex="0"></div> -->
 	</div>
   </template>
@@ -14,26 +15,25 @@
   name: 'RemotePong',
 
   data () {
+      const canvasHeight = 400;
+      const canvasWidth = 800;
+      const canvas = null;
+      const context = null;
     return {
       socket: null,
-      ball: {
-        x: 400,
-        y: 200,
-        radius: 6,
-        dx: 0,
-        dy: 0,
-		},
-      // messages: [],
-      // unseen: 0,
-      // showScrollButton: false,
-      // scrollEventListenerAdded: false,
-      // newMessage: '',
-    //   chatid: null,
+      canvasHeight : canvasHeight,
+      canvasWidth : canvasWidth,
+      numberOfWinsP1 : 0,
+      numberOfWinsP2 : 0
     }
   },
   mounted () {
-    this.createWebSocket();
     document.addEventListener('keydown', this.handleKeyDown);
+    // Use $nextTick to ensure the canvas is rendered before accessing it
+    this.$nextTick(() => {
+      this.canvas = this.$refs.pongCanvas;
+      this.context = this.canvas.getContext('2d');
+    });
     // watch for changes in isLoggedIn from store/index.js
     // watchEffect(() => {
     //   if (isLoggedIn.value === 1) {
@@ -44,13 +44,7 @@
     // });
   },
   methods: {
-    updateGameUI(gameState) {
-      this.ball.x = gameState.ball_x;
-      this.ball.y = gameState.ball_y;
-      console.log('updated ball_y', this.ball.y);
-
-    },
-
+    /* ------------- Web sockets -----------------------------------------*/
 	  createWebSocket () {
       const currentDomain = window.location.hostname;
       const sockurl = 'wss://' + currentDomain + '/endpoint/remoteGame/';
@@ -76,13 +70,15 @@
 
         if (data.type === 'game_state') {
           if (data.state) {
-            const gameState = data.state;
-            const ballXValue = gameState.ball_x;
-            this.updateGameUI(gameState);
-            console.log('ball_x value is:', ballXValue);
+            const gameState = data.state[0];
+            const highScore = data.state[1];
+            console.log('numberodWinsP1:', gameState);
+            console.log('numberodWinsP1:', highScore);
 
-            // Now you can work with the ball_x value
-            // For example, you can use it in other parts of your Vue component
+            this.numberOfWinsP1 = gameState.numberOfWinsP1;
+            // this.$set(this, 'numberOfWinsP1', gameState.numberOfWinsP1);
+            this.numberOfWinsP2 = gameState.numberOfWinsP2;
+            this.updateGameUI(gameState);
           } else {
             console.error('Received game_state message with undefined data:', data);
           }
@@ -94,55 +90,52 @@
         }
       }
     },
-
     closeWebSocket () {
       if (this.socket) {
         this.socket.close()
       }
-    //   this.messages = []
-    //   if (this.$el.querySelector('.chat-messages')) {
-    //     this.$el.querySelector('.chat-messages').removeEventListener('scroll', this.checkScroll)
-    //   }
     },
-
-    // Method to handle keydown event and send the pressed key to the backend
+    /* ------------- Event handler ---------------------------------------*/
     handleKeyDown(event) {
       const pressedKey = event.key;
-      // Send the pressed key to the backend using your WebSocket connection
-      this.sendKeyPressed(pressedKey);
-    },
-
-    // Method to send the pressed key to the backend
-    sendKeyPressed(key) {
-      // Use your WebSocket connection to send the key to the backend
-      const data = { 'key_pressed': key};
+      const data = { 'key_pressed': key };
       this.socket.send(JSON.stringify(data));
       console.log('key pressed:', key);
     },
-
-
-
-    draw() {
+    /* ------------- Update UI -------------------------------------------*/
+    updateGameUI(gameState) {
       this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-    
-      this.drawPaddle(this.leftPaddle.x, this.leftPaddle.y, this.leftPaddle.width, this.leftPaddle.height);
-      this.drawPaddle(this.rightPaddle.x, this.rightPaddle.y, this.rightPaddle.width, this.rightPaddle.height);
-    
-      this.drawBall(this.ball.x, this.ball.y, this.ball.radius);
-    
+      this.drawPaddle(gameState.leftPaddle.x, gameState.leftPaddle.y, gameState.Paddle.width, gameState.Paddle.height);
+      this.drawPaddle(gameState.rightPaddle.x, gameState.rightPaddle.y, gameState.Paddle.width, gameState.Paddle.height);
+      this.drawBall(gameState.ball.x, gameState.ball.y, gameState.ball.radius);
+      this.drawLine();
+    },
+    drawPaddle(x, y, width, height) {
+      this.context.fillStyle = 'white';
+      this.context.fillRect(x, y, width, height);
+    },
+    drawBall(x, y, radius) {
+      this.context.beginPath();
+      this.context.arc(x, y, radius, 0, Math.PI * 2, false);
+      this.context.fillStyle = 'pink';
+      this.context.fill();
+      this.context.closePath();
+    },
+    drawLine() {
       this.context.beginPath();
       this.context.setLineDash([5, 5]);
-      this.context.moveTo(this.canvasWidth/2, 0);
-      this.context.lineTo(this.canvasWidth/2, this.canvasHeight);
+      this.context.moveTo(this.canvasWidth / 2, 0);
+      this.context.lineTo(this.canvasWidth / 2, this.canvasHeight);
       this.context.strokeStyle = 'white';
       this.context.stroke();
       this.context.closePath();
       this.context.setLineDash([]);
-      }
-    }
+    },
+  }
 };
   </script>
-  
+
+  <!-- Styles -->
   <style scoped>
   .start-button {
 	display: block;

@@ -21,7 +21,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
         key_pressed = data.get('key_pressed')
 
         # Perform actions based on the pressed key
-        if key_pressed == 'w':
+        if key_pressed == 'ArrowUp':
             print(f"key pressed: {key_pressed}")
             # Your action here
 
@@ -37,19 +37,32 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 
     async def send_periodic_updates(self):
         while True:
-            # Update game state periodically (replace with your game logic)
+            # Update game state periodically
             updated_state = {
                 'ball': {
                     'x' : 400,
                     'y' : 200,
                     'radius': 6,
-                    'dx': 0,
-                    'dy': 0,
-                }
+                },
+                'Paddle' : {
+		            'width': 10,
+		            'height': 80,
+                },
+                'leftPaddle': {
+		            'x': 0,
+            		'y': 160,
+		        },
+                'rightPaddle': {
+		            'x': 790,
+            		'y': 160,
+                },
+            },
+            high_score = {
+                'numberOfWinsP1' : 0,
+                'numberOfWinsP2' : 0
             }
-
             # Call send_game_state to send the updated state to clients
-            await self.send_game_state({'state': updated_state})
+            await self.send_game_state({'state': updated_state, 'score' : high_score})
             # print(f"periodic update submitted")
             # print(f"state:", updated_state['ball_x'])
 

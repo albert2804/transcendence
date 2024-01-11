@@ -8,7 +8,6 @@
 		<div class="score-container">{{ numberOfWinsP1 }} : {{ numberOfWinsP2 }}</div>
 		<div style="display: flex;">	
 			<button @click="startGame" class="start-button">Start Game</button>
-			<localTournament/>
 			<!-- <button @click="startTournament" class="start-tournament">Start Tournament</button> -->
 		</div>
 	  <canvas ref="pongCanvas" width="800" height="400"></canvas>
@@ -266,12 +265,6 @@
     padding: 10px;
     font-size: 16px;
   }
-
-	.start-tournament{
-    margin: 10px auto; /* Center the button horizontally */
-    padding: 10px;
-    font-size: 16px;
-	}
 
   canvas {
 	display: block;

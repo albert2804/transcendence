@@ -15,7 +15,7 @@
           </div>
           <div v-for="index in nbr_players" :key="index" class="mb-3">
             <label :for="'name' + index" class="form-label">Name for Player {{ index }}</label>
-            <input :id="'name' + index" type="text" class="form-control" v-model="passwords[index - 1]">
+            <input :id="'name' + index" type="text" class="form-control" v-model="all_players[index - 1]">
           </div>
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>
@@ -38,14 +38,16 @@ export default {
       formVisible: false,
     };
   },
+  mounted() {
+    
+  }
   methods: {
     toggleForm() {
       this.formVisible = !this.formVisible;
+      console.log(this.formVisible);
     },
     startTournament() {
       // Implement logic to start the tournament
-      console.log('Starting tournament with ' + this.nbr_players + ' players.');
-      console.log('Player name: ' + this.all_players[0].name);
       // You can add more logic here as needed
       // For now, just toggle the form visibility
       this.formVisible = false;

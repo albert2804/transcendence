@@ -1,54 +1,63 @@
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-  Launch demo modal
-</button>
+<template>
+  <div>
+    <!-- Toggle button -->
+    <button @click="toggleForm" class="start-tournament">
+      {{ formVisible ? 'No Tournament' : 'Local Tournament' }}
+    </button>
 
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        ...
-        </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
+    <!-- Form (shown/hidden based on formVisible) -->
+    <div v-if="formVisible">
+      <form>
+        <label for="nbrPlayerRange" class="form-label">Number of total Players</label>
+          <div class="mb-3 d-flex align-items-center">
+            <input type="range" class="form-range" min="3" max="42" id="nbrPlayerRange" v-model="nbr_players">
+            <input type="number" class="form-control" v-model.number="nbr_players" min="3" max="42">
+          </div>
+          <div v-for="index in nbr_players" :key="index" class="mb-3">
+            <label :for="'name' + index" class="form-label">Name for Player {{ index }}</label>
+            <input :id="'name' + index" type="text" class="form-control" v-model="passwords[index - 1]">
+          </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+      <button @click="startTournament" class="start-tournament">Start Tournament</button>
     </div>
   </div>
-</div>
-
+</template>
 
 <script>
-  export default {
-    name: 'localTournament',
-      data() {
-        return {
-          all_players: [
-            {
-              name: '',
-              games_won: '[]',
-            }
-          ],
-          nbr_players: '',
-        }
-      },
-    mounted() {},
-    methods: {
-
+export default {
+  data() {
+    return {
+      all_players: [
+        {
+          name: '',
+          games_won: '[]',
+        },
+      ],
+      nbr_players: '3',
+      formVisible: false,
+    };
+  },
+  methods: {
+    toggleForm() {
+      this.formVisible = !this.formVisible;
     },
-  };
+    startTournament() {
+      // Implement logic to start the tournament
+      console.log('Starting tournament with ' + this.nbr_players + ' players.');
+      console.log('Player name: ' + this.all_players[0].name);
+      // You can add more logic here as needed
+      // For now, just toggle the form visibility
+      this.formVisible = false;
+    },
+  },
+};
 </script>
 
 <style scoped>
-.start-tournament{
-  margin: 10px auto; /* Center the button horizontally */
-  padding: 10px;
-  font-size: 16px;
-}
-
+	.start-tournament{
+    margin: 10px auto; /* Center the button horizontally */
+    padding: 10px;
+    font-size: 16px;
+	}
 </style>

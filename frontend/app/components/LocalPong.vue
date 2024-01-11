@@ -8,7 +8,8 @@
 		<div class="score-container">{{ numberOfWinsP1 }} : {{ numberOfWinsP2 }}</div>
 		<div style="display: flex;">	
 			<button @click="startGame" class="start-button">Start Game</button>
-			<button @click="startTournament" class="start-tournament">Start Tournament</button>
+			<localTournament/>
+			<!-- <button @click="startTournament" class="start-tournament">Start Tournament</button> -->
 		</div>
 	  <canvas ref="pongCanvas" width="800" height="400"></canvas>
 	</div>
@@ -16,6 +17,7 @@
   
   <script>
   export default {
+		name: 'LocalPong',
 	data() {
 		const canvasHeight = 400;
 		const canvasWidth = 800;

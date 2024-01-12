@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'custom_auth',
     'api',
     'chat',
+	'remote_game'
 ]
 
 CHANNEL_LAYERS = {

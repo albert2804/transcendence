@@ -24,8 +24,8 @@ from channels.auth import AuthMiddlewareStack
 #All main URLs for the backend also needs to be set in the nginx.conf file from the NGINX Container
 urlpatterns = [
     path('endpoint/api/', include('api.urls')),
-    path('endpoint/test_db/', include('test_db.urls')),
     path('endpoint/auth/', include("custom_auth.urls")),
+    path('endpoint/user/', include("users.urls")),
 ]
 
 # Enable admin panel if ADMIN_PANEL_ENABLED (in .env-file) is set to True

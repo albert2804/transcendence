@@ -99,6 +99,7 @@ export default {
           isLoggedIn.value = 1
           this.password = ''
           this.message = data.message
+          sessionStorage.setItem('userid',data.userid)
         } else if (response.status === 403 || response.status === 400) {
           isLoggedIn.value = 0 
           this.password = ''
@@ -126,6 +127,7 @@ export default {
           this.username = ''
           this.password = ''
           this.message = data.message
+          sessionStorage.removeItem('userid');
         }
       } catch (error) {
         console.error('Error:', error)
@@ -151,6 +153,7 @@ export default {
           this.password2 = ''
           const data = await response.json()
           this.message = data.message
+          sessionStorage.setItem('userid',data.userid);
         } else if (response.status === 403 || response.status === 400) {
           isLoggedIn.value = 0
           this.password = ''

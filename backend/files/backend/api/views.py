@@ -2,6 +2,7 @@ from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
 from .models import CustomUser
+from users.models import Statistics
 from .forms import CustomUserCreationForm
 from django.middleware.csrf import get_token
 from django.db import IntegrityError
@@ -69,15 +70,15 @@ def userlogin(request):
         if request.user.is_authenticated:
             return JsonResponse({
                 'message': 'You are already logged in',
-                # 'username': request.user.username,
                 }, status=200)
         # try to authenticate and login user
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+            user_id = user.id
             return JsonResponse({
                 'message': 'Successfully logged in as ' + request.user.username,
-                # 'username': request.user.username,
+                'userid': user_id,
                 }, status=200)
     return JsonResponse({'error': 'Invalid credentials'}, status=403)
 
@@ -101,16 +102,17 @@ def userregister(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             # save user to database and login
-            form.save()
+            user_stats = form.save()
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                # print(user.username + ' registered and logged in')
+                user_id = user.id
+                Statistics.objects.create(user=user_stats)
                 return JsonResponse({
                     'message': 'Successfully registered as ' + request.user.username,
-                    # 'username': request.user.username,
+                    'userid': user_id,
                     }, status=200)
             else:
                 return JsonResponse({'error': 'Something went wrong'}, status=400)

@@ -43,8 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'social_django',
-	'test_db.apps.TestDbConfig',
     'custom_auth',
+    'users',
     'api',
     'chat',
 ]

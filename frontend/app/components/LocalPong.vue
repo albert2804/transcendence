@@ -23,14 +23,14 @@
 	  return {
 		canvas: null,
 		context: null,
-		initialSpeed: 3,
-		currentSpeed: 3,
-		numberOfWinsP1: 0,
-		numberOfWinsP2: 0,
+		currentSpeed: null,
 		canvasWidth: canvasWidth,
 		canvasHeight: canvasHeight,
 		isGamePaused: false,
 		isGameExited: false,
+		numberOfWinsP1: 0,
+		numberOfWinsP2: 0,
+		initialSpeed: 3,
 		leftPaddle: {
 		  x: 0,
 		  y: 160,
@@ -63,6 +63,22 @@
 	  window.addEventListener('keydown', this.handleKeyDown);
 	  window.addEventListener('keyup', this.handleKeyUp);
 	},
+	beforeRouteLeave(to, from, next) {
+    // Stop executing JavaScript code specific to this page/component
+	//   this.resetGame();
+      this.exitGame();  
+	  console.log('Leaving the current page. Stop executing JavaScript code here.');
+    
+    // Optionally, stop intervals, cancel API requests, etc.
+
+    // Call next() to proceed with the navigation
+    next();
+  	},
+	beforeDestroy(){
+	//   this.resetGame();
+	  this.exitGame();
+	  console.log("Page left. Game loop stopped.");
+	},
 	methods: {
 	
 	  setupGame() {
@@ -74,17 +90,33 @@
 		this.gameLoop();
       },
 
-	  drawPaddle(x, y, width, height) {
-		this.context.fillStyle = 'white';
-		this.context.fillRect(x, y, width, height);
+	  exitGame() {
+		console.log('Exiting the game');
+		this.isGameExited = true;
 	  },
 
-	  drawBall(x, y, radius) {
-		this.context.beginPath();
-		this.context.arc(x, y, radius, 0, Math.PI * 2, false);
-		this.context.fillStyle = 'pink';
-		this.context.fill();
-		this.context.closePath();
+	  resetGame() {
+		// reset parameters
+		this.numberOfWinsP1 = 0;
+		this.numberOfWinsP2 = 0;
+		this.isGameExited = false;
+		this.isGamePaused = false;
+
+		// reset paddles
+		this.leftPaddle.x = 0;
+    	this.leftPaddle.y = this.canvasHeight/2 - this.leftPaddle.height/2;
+    	this.rightPaddle.x = this.canvasWidth - this.rightPaddle.width;
+    	this.rightPaddle.y = this.canvasHeight/2 - this.rightPaddle.height/2;
+
+		// reset ball
+		this.ball.x = this.canvasWidth/2;
+		this.ball.y = this.canvasHeight/2;
+		this.ball.dx = this.initialSpeed;
+		this.ball.dy = this.initialSpeed;
+
+		// reset speed values
+		this.initialSpeed = 3;
+		this.currentSpeed = this.initialSpeed;
 	  },
 
 	  updateGame() {
@@ -92,7 +124,7 @@
 		if (this.isGamePaused) {
 			return;
 		}
-		//update paddle position
+		// update paddle position
 		this.leftPaddle.y += this.leftPaddle.dy;
 		this.rightPaddle.y += this.rightPaddle.dy;
 		
@@ -114,17 +146,20 @@
 		  this.ball.x - this.ball.radius < this.leftPaddle.x + this.leftPaddle.width &&
 		  this.ball.y > this.leftPaddle.y && this.ball.y < this.leftPaddle.y + this.leftPaddle.height
 		) {
-			this.currentSpeed += 1;
+			if (this.currentSpeed < 12)
+				this.currentSpeed += 1;
 			this.ball.dy = -this.currentSpeed;
 			this.ball.dx = this.currentSpeed;
 		  	console.log('current speed:', this.currentSpeed);
+		  	console.log('this loop is running');
 		}
   
 		if (
 		  this.ball.x + this.ball.radius > this.rightPaddle.x &&
 		  this.ball.y > this.rightPaddle.y && this.ball.y < this.rightPaddle.y + this.rightPaddle.height
 		) {
-			this.currentSpeed += 1;
+			if (this.currentSpeed < 12)
+				this.currentSpeed += 1;
 			this.ball.dy = this.currentSpeed;
 			this.ball.dx = -this.currentSpeed;
 		  	console.log('current speed:', this.currentSpeed);
@@ -152,15 +187,26 @@
 		  this.ball.y = this.canvasHeight/2;
 		}
 	  },
+	  /* ------------- Draw functions ----------------------------------------*/
+	  drawPaddle(x, y, width, height) {
+		this.context.fillStyle = 'white';
+		this.context.fillRect(x, y, width, height);
+	  },
+
+	  drawBall(x, y, radius) {
+		this.context.beginPath();
+		this.context.arc(x, y, radius, 0, Math.PI * 2, false);
+		this.context.fillStyle = 'pink';
+		this.context.fill();
+		this.context.closePath();
+	  },
 
 	  draw() {
 		this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-  
 		this.drawPaddle(this.leftPaddle.x, this.leftPaddle.y, this.leftPaddle.width, this.leftPaddle.height);
 		this.drawPaddle(this.rightPaddle.x, this.rightPaddle.y, this.rightPaddle.width, this.rightPaddle.height);
-  
 		this.drawBall(this.ball.x, this.ball.y, this.ball.radius);
-  
+
 		this.context.beginPath();
 		this.context.setLineDash([5, 5]);
 		this.context.moveTo(this.canvasWidth/2, 0);
@@ -171,40 +217,14 @@
 		this.context.setLineDash([]);
 	  },
 
-	  exitGame() {
-		console.log('Exiting the game');
-		this.isGameExited = true;
-	  },
 
-	  resetGame() {
-		// Reset parameters
-		this.numberOfWinsP1 = 0;
-		this.numberOfWinsP2 = 0;
-		this.isGameExited = false;
-		this.isGamePaused = false;
 
-		// Reset paddles
-		this.leftPaddle.x = 0;
-    	this.leftPaddle.y = this.canvasHeight/2 - this.leftPaddle.height/2;
-    	this.rightPaddle.x = this.canvasWidth - this.rightPaddle.width;
-    	this.rightPaddle.y = this.canvasHeight/2 - this.rightPaddle.height/2;
-
-		// Reset ball
-		this.ball.x = this.canvasWidth/2;
-		this.ball.y = this.canvasHeight/2;
-		this.ball.dx = this.initialSpeed;
-		this.ball.dy = this.initialSpeed;
-
-		// Reset speed values
-		this.initialSpeed = 3;
-		this.currentSpeed = 3;
-		this.draw();
-	  },
 	  //main game loop
 	  gameLoop() {
 		// Check if escape button has been hit
 		if (this.isGameExited == true) {
 			this.resetGame();
+			this.draw();
 		}
   		// Check if the maximum number of games has been reached
   		else if (this.numberOfWinsP1 < 10 && this.numberOfWinsP2 < 10) {
@@ -214,8 +234,6 @@
   	  	}
 	  	else {
     	  console.log("Maximum number of games reached. Game loop stopped.");
-		//   this.numberOfWinsP1 = 0;
-		//   this.numberOfWinsP2 = 0;
   		}
 	  },
 	  handleKeyDown(e) {

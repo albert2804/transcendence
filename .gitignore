@@ -12,3 +12,4 @@ frontend/app/node-modules/
 
 temp/
 *.DS_Store
+backend/files/backend/.DS_Store

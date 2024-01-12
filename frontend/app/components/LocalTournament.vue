@@ -1,25 +1,26 @@
 <template>
-  <div>
+  <div class="formTournament">
     <!-- Toggle button -->
     <button @click="toggleForm" class="start-tournament">
       {{ formVisible ? 'No Tournament' : 'Local Tournament' }}
     </button>
 
     <!-- Form (shown/hidden based on formVisible) -->
-    <div v-if="formVisible">
-      <form>
+    <div v-if="formVisible" class="formTournament">
+      <form> 
         <label for="nbrPlayerRange" class="form-label">Number of total Players</label>
           <div class="mb-3 d-flex align-items-center">
             <input type="range" class="form-range" min="3" max="42" id="nbrPlayerRange" v-model="nbr_players">
             <input type="number" class="form-control" v-model.number="nbr_players" min="3" max="42">
           </div>
-          <div v-for="index in nbr_players" :key="index" class="mb-3">
-            <label :for="'name' + index" class="form-label">Name for Player {{ index }}</label>
-            <input :id="'name' + index" type="text" class="form-control" v-model="all_players[index - 1]">
+          <div class="name-box">
+            <div v-for="index in nbr_players" :key="index" class="name-input">
+              <label :for="'name' + index" class="form-label">Player {{ index }}:</label>
+              <input :id="'name' + index" type="text" class="form-input" v-model="all_players[index - 1]">
+            </div>
           </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="submit" @click="startTournament" class="start-tournament">Start Tournament</button>
       </form>
-      <button @click="startTournament" class="start-tournament">Start Tournament</button>
     </div>
   </div>
 </template>
@@ -40,7 +41,7 @@ export default {
   },
   mounted() {
     
-  }
+  },
   methods: {
     toggleForm() {
       this.formVisible = !this.formVisible;
@@ -58,8 +59,36 @@ export default {
 
 <style scoped>
 	.start-tournament{
+    display: flex;
     margin: 10px auto; /* Center the button horizontally */
     padding: 10px;
     font-size: 16px;
+    height: 50px;
 	}
+
+  .formTournament {
+    width: 800px;
+    margin: auto;
+  }
+
+  .form-range {
+    width: 650px;
+  }
+
+  .form-control {
+    width: 100px;
+    margin-left: 50px;
+  }
+
+  .name-box {
+    display: flex;
+    max-width: 800px;
+    flex-wrap: wrap;
+  } 
+
+  .name-input {
+    max-width: 400px;
+    margin: 5px;
+  }
+
 </style>

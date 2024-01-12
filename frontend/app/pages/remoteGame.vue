@@ -1,9 +1,8 @@
 <template>
     <div>
       <div style="display: flex; justify-content: center; margin-top: 20vh;">
-        <LocalPong />
+          <RemotePong/>
       </div>
-      <LocalTournament/>
     </div>
   </template>
 

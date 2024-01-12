@@ -156,11 +156,13 @@ export default {
 
       this.socket.onclose = () => {
         this.$emit('disconnected')
+        this.unreadMessageCountMap.clear()
       }
 
       this.socket.onerror = (error) => {
         console.error(`WebSocket-Error: ${error}`)
         this.$emit('disconnected')
+        this.unreadMessageCountMap.clear()
       }
 
       this.socket.onmessage = (event) => {

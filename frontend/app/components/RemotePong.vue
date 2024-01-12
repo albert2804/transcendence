@@ -29,6 +29,7 @@
   },
   mounted () {
     document.addEventListener('keydown', this.handleKeyDown);
+    document.addEventListener('keyup', this.handleKeyUp);
     // Use $nextTick to ensure the canvas is rendered before accessing it
     this.$nextTick(() => {
       this.canvas = this.$refs.pongCanvas;
@@ -58,6 +59,7 @@
       this.socket.onclose = () => {
         console.log('closed remoteGame websocket')
         document.removeEventListener('keydown', this.handleKeyDown);
+        document.removeEventListener('keyup', this.handleKeyUp);
       }
 
       this.socket.onerror = (error) => {
@@ -101,6 +103,12 @@
       const data = { 'key_pressed': pressedKey };
       this.socket.send(JSON.stringify(data));
       console.log('key pressed:', pressedKey);
+    },
+    handleKeyUp(event) {
+      const releasedKey = event.key;
+      const data = { 'key_released': releasedKey };
+      this.socket.send(JSON.stringify(data));
+      console.log('key released:', releasedKey);
     },
     /* ------------- Update UI -------------------------------------------*/
     updateGameUI(gameState) {

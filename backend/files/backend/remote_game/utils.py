@@ -113,3 +113,4 @@ class PongGame:
             # Use asyncio.sleep instead of requestAnimationFrame
         else:
             print("Maximum number of games reached. Game loop stopped.")
+            self.isGameExited = True

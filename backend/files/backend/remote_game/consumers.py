@@ -19,23 +19,32 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
         print(f"periodic updates started")
 
     async def disconnect(self, close_code):
+        print(f"websocket connection closed")
         pass
 
     async def receive(self, text_data):
         data = json.loads(text_data)
         key_pressed = data.get('key_pressed')
+        key_released = data.get('key_released')
 
         # Perform actions based on the pressed key
         if key_pressed == 'ArrowUp':
             print(f"key pressed: {key_pressed}")
-            self.game.rightPaddle['dy'] = -10
+            self.game.rightPaddle['dy'] = -5
             print(f"paddle", self.game.rightPaddle['y'])
-        elif key_pressed == 'ArrowUp':
+        elif key_pressed == 'ArrowDown':
             print(f"key pressed: {key_pressed}")
-            self.game.rightPaddle['dy'] = 10
+            self.game.rightPaddle['dy'] = 5
             print(f"paddle", self.game.rightPaddle['y'])
-        elif key_pressed == 'ArrowUp':
-            self.game.isGameExited==True
+        elif key_released in ['ArrowDown', 'ArrowUp']:
+            print(f"key released: {key_released}")
+            self.game.rightPaddle['dy'] = 0
+            print(f"paddle", self.game.rightPaddle['y'])
+        elif key_pressed == 'Escape':
+            self.game.isGameExited=True
+
+        if self.game.isGameExited :
+            self.close()
 
         # Add more conditions for other keys as needed
         # send_game_state()

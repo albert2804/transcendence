@@ -4,6 +4,10 @@ all:
 	@docker-compose up
 	@echo "\033[32mContainers are up and running\033[0m"
 
+detached:
+	@docker-compose up -d
+	@echo "\033[32mContainers are up and running\033[0m"
+
 build:
 	@docker-compose build
 	@echo "\033[32mContainers built\033[0m"

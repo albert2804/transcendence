@@ -9,15 +9,12 @@
 <template>
   <div class="user-stats">
     <h2>User Statistics</h2>
-    <div v-if="userStats">
+    <div v-if="userStats.username != ''">
       <p>Username: {{ userStats.username }}</p>
       <p>Date Joined: {{ userStats.date_joined }}</p>
       <p>Games Played: {{ userStats.games_played }}</p>
       <p>Matchmade Ranking: {{ userStats.mmr }}</p>
       <p>Overall Ranking: {{ userStats.ranking }}</p>
-    </div>
-    <div v-else>
-      <p>No user statistics available.</p>
     </div>
   </div>
 </template>
@@ -27,7 +24,13 @@ export default {
   name: 'InfoComponent',
     data() {
     return {
-      userStats: null,
+      userStats: {
+        username: '',
+        date_joined: '',
+        games_played: '0',
+        mmr: '0',
+        ranking: '0',
+      },
       error: '',
     };
   },

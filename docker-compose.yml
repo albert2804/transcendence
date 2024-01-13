@@ -4,20 +4,16 @@ version: '3'
 services:
   nginx:
     container_name: nginx
-    build:
-      context: .
-      dockerfile: nginx/Dockerfile
-      args:
-        - DOMAIN
-        - CERT_PATH
-        - CERT_KEY_PATH
-    env_file:
-      - .env
+    image: nginx
     restart: always
+    command: ["nginx", "-g", "daemon off;"]
     volumes:
-      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf.d/nginx.conf
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
+      - ${CERT_PATH}:/etc/nginx/ssl/inception.crt
+      - ${CERT_KEY_PATH}:/etc/nginx/ssl/inception.key
       - static_django_files:/static
     ports:
+      - "80:80"
       - "443:443"
 
   frontend:
@@ -49,8 +45,8 @@ services:
     volumes:
       - ./backend/files:/code
       - static_django_files:/static
-    ports:
-      - 8000:8000
+    # ports:
+    #   - 8000:8000
 
   db:
     container_name: db

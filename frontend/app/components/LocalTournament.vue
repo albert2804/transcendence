@@ -6,12 +6,12 @@
     </button>
 
     <!-- Form (shown/hidden based on formVisible) -->
-    <div v-if="formVisible" class="formTournament">
+    <div v-if="formVisible" class="formViTournament">
       <form>
         <label for="nbrPlayerRange" class="form-label">Number of total Players</label>
         <div class="mb-3 d-flex align-items-center">
-          <input type="range" class="form-range" min="3" max="42" id="nbrPlayerRange" v-model.number="nbr_players">
-          <input type="number" class="form-control" v-model.number="nbr_players" min="3" max="42">
+          <input type="range" class="form-range" min="3" max="42" id="nbrPlayerRange" v-model.number="nbr_players" @input="updatePlayerCount">
+          <input type="number" class="form-control" v-model.number="nbr_players" min="3" max="42" @input="updatePlayerCount">
         </div>
         <div class="name-box">
           <div v-for="index in nbr_players" :key="index" class="name-input">
@@ -37,8 +37,7 @@
               />
               <label class="btn btn-outline-primary" :for="'btnradio2' + index">Bot</label>
             </div>
-            <input :id="'name' + index" type="text" class="form-input" :value="getPlayerValue(index)">
-      
+            <input :id="'name' + index" type="text" class="form-input" :value="getPlayerValue(index)" @input="updatePlayerName(index, $event)">
           </div>
         </div>
         <button type="submit" @click="startTournament" class="start-tournament">Start Tournament</button>
@@ -51,13 +50,10 @@
 export default {
   data() {
     return {
-      all_players: Array.from({ length: 42 }, () => ({
-        name: '',
-        games_won: '[]',
-      })),
+      all_players: [],
       nbr_players: '3',
       formVisible: false,
-      activeRadio: 'Player',
+      updatingNames: false,
     };
   },
   computed: {
@@ -69,19 +65,50 @@ export default {
   methods: {
     toggleForm() {
       this.formVisible = !this.formVisible;
-      console.log(this.formVisible);
+      console.log(this.formVisible)
+      if (this.formVisible)
+        this.updatePlayerCount();
+      else
+        this.all_players = [];
+    },
+    updatePlayerCount() {
+      const currentCount = this.all_players.length;
+
+      if (this.nbr_players > currentCount) {
+        // Add new players to the array
+        for (let i = currentCount + 1; i <= this.nbr_players; i++) {
+          this.all_players.push({
+            name: `Player-${i}`,
+            games_won: '[]',
+            player_or_bot: 'Player',
+          });
+        }
+      } else if (this.nbr_players < currentCount) {
+        // Remove players from the end of the array
+        this.all_players.splice(this.nbr_players);
+      }
     },
     startTournament() {
-      // Implement logic to start the tournament
-      // You can add more logic here as needed
-      // For now, just toggle the form visibility
+      console.log(this.all_players)
+      this.updatePlayerName()
       this.formVisible = false;
+      //logic
     },
     setActiveRadio(value, index) {
-      this.all_players[index - 1].name = value + index;
+      this.all_players[index - 1].name = value + "-" + index;
+      if (value == 'Bot') {
+        console.log("hello")
+        this.all_players[index - 1].player_or_bot = 'Bot';
+      }
+      else
+        this.all_players[index - 1].player_or_bot = 'Player';
+    },
+    updatePlayerName(index, event) {
+      if (index >= 0 && index < this.all_players.length)
+        this.all_players[index - 1].name = event.target.value;
     },
     getPlayerValue(index) {
-      return this.all_players[index - 1].name
+      return this.all_players[index - 1].name;
     }
   },
 };
@@ -96,10 +123,11 @@ export default {
     height: 50px;
 	}
 
-  .formTournament {
+  .formViTournament {
     width: 800px;
     margin: auto;
   }
+
 
   .form-range {
     width: 650px;

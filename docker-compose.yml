@@ -17,6 +17,7 @@ services:
     volumes:
       - ${PWD}/nginx/conf/nginx.conf:/etc/nginx/nginx.conf.d/nginx.conf
       - static_django_files:/static
+      - ${PWD}/media:/media
     ports:
       - "443:443"
 

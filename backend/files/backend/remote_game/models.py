@@ -11,4 +11,4 @@ class RemoteGame(models.Model) :
 	numberofHitsP1 = models.IntegerField(default=0)
 	numberofHitsP2 = models.IntegerField(default=0)
 	gameDuration = models.DurationField(default=timedelta(minutes=0, seconds=0))
-	winner = models.TextField()
+	winner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='winner')

@@ -17,6 +17,7 @@ class CustomUser(AbstractUser):
     # date_joined
 
     # Custom fields
+    chat_online = models.BooleanField(default=False)
     # profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     profile_pic = models.FileField(upload_to='profilepic/', default='profilepic/default.jpeg', blank=True, null=True)
     # mobile = models.CharField(max_length=20, blank=True, null=True)

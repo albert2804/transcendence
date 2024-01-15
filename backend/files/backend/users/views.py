@@ -1,5 +1,6 @@
 from django.http import JsonResponse, HttpResponse
 from .models import Statistics
+from api.models import CustomUser
 
 
 # sends the statistics of the user as response to the frontend 
@@ -23,6 +24,20 @@ def send_userinfo(request):
 	else:
 		return JsonResponse({'error': 'User not authenticated'},
 			status=401)
+
+def send_profilepic(request):
+	if request.user.is_authenticated:
+		try:
+			profilepic_url = CustomUser.objects.get(username=request.user).profile_pic.url
+			return JsonResponse({'url': profilepic_url},
+				status=200)
+		except:
+			return JsonResponse({'error': 'No Profile Picture found for the user'},
+					status=404)
+	else:
+		return JsonResponse({'error': 'User not authenticated'},
+			status=401)
+
 
 # sends the results of the games which the user played as response to the frontend
 # def send_usergames(request):

@@ -28,6 +28,7 @@
 		canvasHeight: canvasHeight,
 		isGamePaused: false,
 		isGameExited: false,
+		isGameWon: false,
 		numberOfWinsP1: 0,
 		numberOfWinsP2: 0,
 		initialSpeed: 3,
@@ -85,10 +86,10 @@
 		this.draw();
 		},
 		
-	  startGame() {
-        this.resetGame();
-		this.gameLoop();
-      },
+	  async startGame() {
+      this.resetGame();
+			this.gameLoop();
+		},
 
 	  exitGame() {
 		console.log('Exiting the game');
@@ -227,12 +228,14 @@
 			this.draw();
 		}
   		// Check if the maximum number of games has been reached
-  		else if (this.numberOfWinsP1 < 10 && this.numberOfWinsP2 < 10) {
+  		else if (this.numberOfWinsP1 < 1 && this.numberOfWinsP2 < 1) {
     	  this.updateGame();
     	  this.draw();
     	  requestAnimationFrame(() => this.gameLoop());
   	  	}
 	  	else {
+				this.isGameWon = true;
+				this.$emit('updateIsGameWon', this.isGameWon);
     	  console.log("Maximum number of games reached. Game loop stopped.");
   		}
 	  },

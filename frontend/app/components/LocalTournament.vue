@@ -1,12 +1,23 @@
 <template>
   <div class="formTournament">
-    <!-- Toggle button -->
-    <button @click="toggleForm" class="start-tournament">
-      {{ formVisible ? 'No Tournament' : 'Local Tournament' }}
-    </button>
+    <div class="player-bar">
+
+      <!-- Toggle button -->
+      <div v-if="ongoingTournament" class="name-container">
+        <img src="https://picsum.photos/100" class="float-start picture" />
+        <p v-if="ongoingTournament" class="player-name float-start"><strong>{{this.all_players[this.player_one].name}}</strong></p>
+      </div>
+      <button @click="toggleForm" class="start-tournament">
+        {{ formVisible ? 'No Tournament' : 'Local Tournament' }}
+      </button>
+      <div v-if="ongoingTournament" class="name-container">
+        <img src="https://picsum.photos/100" class="float-end picture" />
+        <p v-if="ongoingTournament" class="player-name float-end"><strong>{{this.all_players[this.player_two].name}}</strong></p>
+      </div>
+    </div>
 
     <!-- Form (shown/hidden based on formVisible) -->
-    <div v-if="formVisible" class="formViTournament">
+    <div v-if="formVisible" class="tournament-settings">
       <form>
         <label for="nbrPlayerRange" class="form-label">Number of total Players</label>
         <div class="mb-3 d-flex align-items-center">
@@ -47,15 +58,20 @@
 </template>
 
 <script>
+import LocalPong from './LocalPong.vue';
+
 export default {
   data() {
     return {
       all_players: [],
       nbr_players: '3',
       formVisible: false,
-      updatingNames: false,
+      ongoingTournament: false,
+      player_one: 0,
+      player_two: 1,
     };
   },
+  props: ['isGameWon'],
   computed: {
     // Computed property to generate unique radio button group names
     radioGroupName() {
@@ -88,16 +104,32 @@ export default {
         this.all_players.splice(this.nbr_players);
       }
     },
-    startTournament() {
+    async startTournament() {
       console.log(this.all_players)
       this.updatePlayerName()
       this.formVisible = false;
+      this.ongoingTournament = true;
+      const total_games = 3;
+      for (let games_played = 0; games_played < total_games; games_played++) {
+        this.$emit('startGame')
+        while (this.isGameWon != true) {
+          // console.log("hello is this " + this.isGameWon)
+        }
+        if (games_played === 0) {
+          this.player_one = 0;
+          this.player_two = 1;
+        }
+        else if (games_played === 1) {
+          this.player_one = 2;
+          this.player_two = 3;
+        }
+      }
+
       //logic
     },
     setActiveRadio(value, index) {
       this.all_players[index - 1].name = value + "-" + index;
       if (value == 'Bot') {
-        console.log("hello")
         this.all_players[index - 1].player_or_bot = 'Bot';
       }
       else
@@ -108,7 +140,8 @@ export default {
         this.all_players[index - 1].name = event.target.value;
     },
     getPlayerValue(index) {
-      return this.all_players[index - 1].name;
+      if (this.all_players[index - 1] !== undefined)
+        return this.all_players[index - 1].name;
     }
   },
 };
@@ -123,7 +156,18 @@ export default {
     height: 50px;
 	}
 
-  .formViTournament {
+  .player-bar {
+    width: 800px;
+    height: 110px;
+    margin: auto;
+    flex-direction: row;
+    display: flex;
+  }
+  .name-container {
+    width: 40%;
+    overflow: hidden;
+  }
+  .tournament-settings {
     width: 800px;
     margin: auto;
   }
@@ -148,5 +192,14 @@ export default {
   .name-input {
     max-width: 400px;
     margin: 5px;
+  }
+  .picture {
+    width: 100px;
+    height: 100px;
+  }
+
+  .player-name {
+    margin: 10px;
+    margin-top: 5px;
   }
 </style>

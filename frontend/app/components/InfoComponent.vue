@@ -1,11 +1,3 @@
-<script setup>
-  // Listen to changes of the isLoggedIn from store/index.js
-  import { isLoggedIn } from '~/store';
-  watchEffect(() => {
-  isLoggedIn.value = isLoggedIn.value
-})
-</script>
-
 <template>
   <div class="user-stats">
     <h2>User Statistics</h2>

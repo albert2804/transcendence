@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+from custom_auth.models import Intra42OAuth2
 from pathlib import Path
 import os
 
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     'users',
     'api',
     'chat',
+	'remote_game'
 ]
 
 CHANNEL_LAYERS = {
@@ -169,7 +171,7 @@ AUTHENTICATION_BACKENDS = [
     #'social_core.backends.google.GoogleOAuth',
     'social_core.backends.twitter.TwitterOAuth',
     'social_core.backends.oauth.BaseOAuth2',
-    #'auth.Intra42OAuth2'
+    'custom_auth.models.Intra42OAuth2'
 ]
 
 SOCIAL_AUTH_GITHUB_KEY='e989ab105c9b8c40d3f6'
@@ -179,3 +181,4 @@ SOCIAL_AUTH_URL_NAMESPACE = 'social'
 
 LOGIN_URL = 'auth/login/'
 LOGIN_REDIRECT_URL='/endpoint/auth'
+

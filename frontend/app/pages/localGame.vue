@@ -1,13 +1,18 @@
 <template>
     <div>
-      <div style="display: flex; justify-content: center; margin-top: 20vh;">
-        <LocalPong />
+      <div style="justify-content: center; margin-top: 20vh;">
+        <LocalPong ref="pongComponentRef" @updateIsGameWon="isGameWon = $event"/>
+        <LocalTournament @startGame="callStartGame" :isGameWon="isGameWon" />
       </div>
-      <LocalTournament/>
     </div>
   </template>
 
   <script>
   export default {
+    methods: {
+      callStartGame() {
+        this.$refs.pongComponentRef.startGame();
+      },
+    },
   };
 </script>

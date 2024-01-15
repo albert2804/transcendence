@@ -4,6 +4,10 @@ all:
 	@docker-compose up
 	@echo "\033[32mContainers are up and running\033[0m"
 
+detached:
+	@docker-compose up -d
+	@echo "\033[32mContainers are up and running\033[0m"
+
 build:
 	@docker-compose build
 	@echo "\033[32mContainers built\033[0m"
@@ -27,8 +31,7 @@ vclean:
 	@echo "\033[32mRemoved all volumes\033[0m"
 
 fclean: iclean vclean
-	-@rm -rf ./frontend/node_modules
-	-@rm -rf ./frontend/package-lock.json
+	-@rm -rf ./frontend/app/node_modules ./frontend/app/package-lock.json ./frontend/app/.nuxt ./frontend/app/dist
 	@echo "\033[32mRemoved all containers, images and volumes\033[0m"
 
 prune:

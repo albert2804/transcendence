@@ -16,7 +16,8 @@
             <NuxtLink class="nav-link active" to="/localGame">Local Game</NuxtLink>
           </li>
           <li class="nav-item">
-            <NuxtLink class="nav-link active" to="/remoteGame">Remote Game</NuxtLink>
+            <!-- <NuxtLink class="nav-link active" to="/remoteGame">Remote Game</NuxtLink> -->
+            <a class="nav-link active" @click="showGameModal">Remote Game</a>
           </li>
           <li class="nav-item">
             <NuxtLink class="nav-link active" to="/login">Login</NuxtLink>
@@ -38,6 +39,7 @@
           <li class="nav-item">
             <a class="nav-link disabled" aria-disabled="true">Disabled</a>
           </li>
+          <GameModal :modalTitle="'Game'" modalId="pongmodal" ariaLabel="A modal to play our remote Pong Game" />
         </ul>
         <!-- <form class="d-flex" role="search">
           <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
@@ -57,5 +59,12 @@
 <script>
 export default {
   name: 'NavBar',
+  methods: {
+    showGameModal() {
+      this.$nextTick(() => {
+        new bootstrap.Modal(document.getElementById('pongmodal')).show();
+      });
+    },
+  },
 }
 </script>

@@ -9,6 +9,7 @@ import random
 import asyncio
 from .utils import PongGame
 
+
 class RemoteGameConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -30,34 +31,26 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
         pass
 
     async def receive(self, text_data):
-
-        try:    
+        try:
             game_data = json.loads(text_data)
-            key_pressed = game_data.get('key_pressed')
-            key_released = game_data.get('key_released')
-
-            # Perform actions based on the pressed key
-            if key_pressed == 'ArrowUp':
-                # print(f"key pressed: {key_pressed}")
-                self.game.rightPaddle['dy'] = -2
-                # print(f"paddle", self.game.rightPaddle['y'])
-            elif key_pressed == 'ArrowDown':
-                # print(f"key pressed: {key_pressed}")
-                self.game.rightPaddle['dy'] = 2
-                # print(f"paddle", self.game.rightPaddle['y'])
-            elif key_released in ['ArrowDown', 'ArrowUp']:
-                # print(f"key released: {key_released}")
-                self.game.rightPaddle['dy'] = 0
-                # print(f"paddle", self.game.rightPaddle['y'])
-            elif key_pressed == 'Escape':
-                self.game.isGameExited=True
-
-            if self.game.isGameExited :
+            print(f"game_data: {game_data}")
+            type = game_data.get('type')
+            key = game_data.get('key')
+            print(f"Type: {type}, Key: {key}")
+            if type == 'key_pressed':
+                if key == 'ArrowUp':
+                    self.game.rightPaddle['dy'] = -2
+                elif key == 'ArrowDown':
+                    self.game.rightPaddle['dy'] = 2
+            elif type == 'key_released':
+                if key in ['ArrowDown', 'ArrowUp']:
+                    self.game.rightPaddle['dy'] = 0
+                elif key == 'Escape':
+                    self.game.isGameExited=True
                     self.close()
-
         except json.JSONDecodeError:
             print(f"Received invalid JSON file: {game_data}")
-
+                
                 
     async def send_game_state(self):
         state = {

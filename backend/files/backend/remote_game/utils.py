@@ -70,7 +70,7 @@ class PongGame:
                 self.currentSpeed += 0.5
             self.ball['dy'] = -self.currentSpeed
             self.ball['dx'] = self.currentSpeed
-            print('Current speed:', self.currentSpeed)
+            # print('Current speed:', self.currentSpeed)
 
         if (
             self.ball['x'] + self.ball['radius'] > self.rightPaddle['x'] and
@@ -80,7 +80,7 @@ class PongGame:
                 self.currentSpeed += 0.5
             self.ball['dy'] = self.currentSpeed
             self.ball['dx'] = -self.currentSpeed
-            print('Current speed:', self.currentSpeed)
+            # print('Current speed:', self.currentSpeed)
 
         # Check for scoring
         if self.ball['x'] - self.ball['radius'] < 0 or self.ball['x'] + self.ball['radius'] > self.canvasWidth:

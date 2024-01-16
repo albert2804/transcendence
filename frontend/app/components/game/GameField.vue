@@ -1,17 +1,4 @@
-    <!-- need to think about when to create the websocket; probably when pressing the "start game" button -->
-
-<!-- <template>
-	<div>
-	  <canvas ref="pongCanvas" width="800" height="400"></canvas>
-	  <div class="score-container">{{ numberOfHitsP1 }} : {{ numberOfHitsP2 }}</div>
-	</div>
-  </template> -->
-
 <template>
-  	<div>
-	  <canvas ref="pongCanvas" width="800" height="400"></canvas>
-	  <div class="score-container">{{ numberOfHitsP1 }} : {{ numberOfHitsP2 }}</div>
-	</div>
   <div
       class="game-canvas" tabindex="0" @keyup="handleKeyUp" @keydown="handleKeyDown">
       <div class="score-container">{{ numberOfHitsP1 }} : {{ numberOfHitsP2 }}</div>
@@ -19,7 +6,6 @@
       <div class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
       <div class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%' }"></div>
       <div class="midline"></div>
-      
       <!-- centered text -->
       <!-- <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.6em; font-weight: bold; color: #000; text-align: center;">
           <div v-if="message">{{ message }}</div>
@@ -32,17 +18,10 @@
   export default {
   name: 'RemotePong',
   data () {
-      const canvasHeight = 400;
-      const canvasWidth = 800;
-      const canvas = null;
-      const context = null;
     return {
       socket: null,
-      canvasHeight : canvasHeight,
-      canvasWidth : canvasWidth,
       numberOfHitsP1 : 0,
       numberOfHitsP2 : 0,
-      own_id : null,
       //
       pressedKeys: [],
       paddleSize: 20,
@@ -62,11 +41,6 @@
     }
   },
   mounted () {
-    this.$nextTick(() => {
-      this.canvas = this.$refs.pongCanvas;
-      this.context = this.canvas.getContext('2d');
-    });
-
     watchEffect(() => {
       if (isLoggedIn.value === 1) {
         this.createWebSocket();
@@ -107,14 +81,6 @@
               this.numberOfHitsP2 = highScore.numberOfHitsP2;
 
               this.updateGameUI(gameState);
-              // update paddle positions
-              // convert height px(400) to %(100)
-              // in future calculate this in backend and send only % values
-              this.p1pos.y = gameState.leftPaddle.y / this.canvasHeight * 100;
-              this.p2pos.y = gameState.rightPaddle.y / this.canvasHeight * 100;
-              // update ball position
-              this.ballPos.x = (gameState.ball.x / this.canvasWidth * 100) - (1.5/2);
-              this.ballPos.y = (gameState.ball.y / this.canvasHeight * 100) - (3/2);
             } else {
               console.error('Received game_state message with undefined data:', data);
             }
@@ -151,32 +117,15 @@
 
     /* ------------- Update UI -------------------------------------------*/
     updateGameUI(gameState) {
-      this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-      this.drawPaddle(gameState.leftPaddle.x, gameState.leftPaddle.y, gameState.leftPaddle.width, gameState.leftPaddle.height);
-      this.drawPaddle(gameState.rightPaddle.x, gameState.rightPaddle.y, gameState.rightPaddle.width, gameState.rightPaddle.height);
-      this.drawBall(gameState.ball.x, gameState.ball.y, gameState.ball.radius);
-      this.drawLine();
-    },
-    drawPaddle(x, y, width, height) {
-      this.context.fillStyle = 'white';
-      this.context.fillRect(x, y, width, height);
-    },
-    drawBall(x, y, radius) {
-      this.context.beginPath();
-      this.context.arc(x, y, radius, 0, Math.PI * 2, false);
-      this.context.fillStyle = 'pink';
-      this.context.fill();
-      this.context.closePath();
-    },
-    drawLine() {
-      this.context.beginPath();
-      this.context.setLineDash([5, 5]);
-      this.context.moveTo(this.canvasWidth / 2, 0);
-      this.context.lineTo(this.canvasWidth / 2, this.canvasHeight);
-      this.context.strokeStyle = 'white';
-      this.context.stroke();
-      this.context.closePath();
-      this.context.setLineDash([]);
+      // NEW RESPONSIIVE GAME UI:
+      // update paddle positions
+      // convert height px(400) to %(100)
+      // in future calculate this in backend and send only % values
+      this.p1pos.y = gameState.leftPaddle.y / 400 * 100;
+      this.p2pos.y = gameState.rightPaddle.y / 400 * 100;
+      // update ball position
+      this.ballPos.x = (gameState.ball.x / 800 * 100) - (1.5/2);
+      this.ballPos.y = (gameState.ball.y / 400 * 100) - (3/2);
     },
   }
 };
@@ -184,32 +133,19 @@
 
   <!-- Styles -->
   <style scoped>
-  .start-button {
-	display: block;
-    margin: 10px auto; /* Center the button horizontally */
-    padding: 10px;
-    font-size: 16px;
-  }
-  canvas {
-	display: block;
-	margin: auto;
-	background-color: black;
-  }
-
   .score-container {
 	display: flex;
-    justify-content: center; /* Center the content horizontally */
-    align-items: flex-start; /* Align the content to the top */
+    justify-content: center;
+    align-items: flex-start;
     color: blue;
     font-size: 80px;
-    margin-top: 50px; /* Adjust the margin-top value */
+    margin-top: 50px;
     position: absolute;
-    top: 0; /* Position at the top */
+    top: 0;
     left: 0;
     right: 0;
     z-index: 1;
-  }
-
+  } 
   
   .game-canvas {
   width: 100%;
@@ -240,7 +176,6 @@
     left: 50%;
     transform: translateX(-50%);
     background-color: #fff;
-    /* background-image: repeating-linear-gradient(0deg, #fff, #fff 2px, transparent 2px, transparent 4px); */
 }
 
 .ball {

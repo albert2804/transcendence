@@ -1,19 +1,36 @@
     <!-- need to think about when to create the websocket; probably when pressing the "start game" button -->
 
-<template>
+<!-- <template>
 	<div>
-	  <button @click="createWebSocket" class="start-button">Start Game</button>
 	  <canvas ref="pongCanvas" width="800" height="400"></canvas>
 	  <div class="score-container">{{ numberOfHitsP1 }} : {{ numberOfHitsP2 }}</div>
-    <!-- <div @keydown="handleKeyDown" tabindex="0"></div> -->
 	</div>
+  </template> -->
+
+<template>
+  	<div>
+	  <canvas ref="pongCanvas" width="800" height="400"></canvas>
+	  <div class="score-container">{{ numberOfHitsP1 }} : {{ numberOfHitsP2 }}</div>
+	</div>
+  <div
+      class="game-canvas"
+      tabindex="0"
+      @keyup="handleKeyUp"
+      @keydown="handleKeyDown"
+  >
+      <div class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
+      <div class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%' }"></div>
+      <!-- centered text -->
+      <!-- <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.6em; font-weight: bold; color: #000; text-align: center;">
+          <div v-if="message">{{ message }}</div>
+      </div> -->
+  </div>
   </template>
   
   <script>
   import { isLoggedIn } from '~/store';
   export default {
   name: 'RemotePong',
-
   data () {
       const canvasHeight = 400;
       const canvasWidth = 800;
@@ -25,12 +42,23 @@
       canvasWidth : canvasWidth,
       numberOfHitsP1 : 0,
       numberOfHitsP2 : 0,
-      own_id : null
+      own_id : null,
+      //
+      pressedKeys: [],
+      paddleSize: 20,
+      p1pos: {
+        x: 0,
+        y: (100 - this.paddleSize) / 2,
+      },
+      p2pos: {
+        x: 98,
+        y: (100 - this.paddleSize) / 2,
+      },
     }
   },
   mounted () {
-    document.addEventListener('keydown', this.handleKeyDown);
-    document.addEventListener('keyup', this.handleKeyUp);
+    // document.addEventListener('keydown', this.handleKeyDown);
+    // document.addEventListener('keyup', this.handleKeyUp);
     // Use $nextTick to ensure the canvas is rendered before accessing it
     this.$nextTick(() => {
       this.canvas = this.$refs.pongCanvas;
@@ -44,6 +72,14 @@
     //     this.closeWebSocket();
     //   }
     // });
+
+    watchEffect(() => {
+      if (isLoggedIn.value === 1) {
+        this.createWebSocket();
+      } else if (isLoggedIn.value === 0) {
+        this.closeWebSocket();
+      }
+    });
   },
   methods: {
     /* ------------- Web sockets -----------------------------------------*/
@@ -59,8 +95,8 @@
 
       this.socket.onclose = () => {
         console.log('closed remoteGame websocket')
-        document.removeEventListener('keydown', this.handleKeyDown);
-        document.removeEventListener('keyup', this.handleKeyUp);
+        // document.removeEventListener('keydown', this.handleKeyDown);
+        // document.removeEventListener('keyup', this.handleKeyUp);
       }
 
       this.socket.onerror = (error) => {
@@ -69,45 +105,50 @@
 
       this.socket.onmessage = (event) => {
         try {
+          // console.log('Message received:', event.data);
           const data = JSON.parse(event.data);
+          if (data.type === 'game_update') {
+            if (data.state) {
+              const gameState = data.state;
+              const highScore = data.high_score;
+              this.numberOfHitsP1 = highScore.numberOfHitsP1;
+              this.numberOfHitsP2 = highScore.numberOfHitsP2;
 
-        if (data.type === 'game_update') {
-          if (data.state) {
-            const gameState = data.state;
-            const highScore = data.high_score;
-            this.numberOfHitsP1 = highScore.numberOfHitsP1;
-            this.numberOfHitsP2 = highScore.numberOfHitsP2;
-
-            this.updateGameUI(gameState);
+              this.updateGameUI(gameState);
+            } else {
+              console.error('Received game_state message with undefined data:', data);
+            }
           } else {
-            console.error('Received game_state message with undefined data:', data);
+            console.error('Received message of unknown type:', data);
           }
-        } else {
-          console.error('Received message of unknown type:', data);
-        }
         } catch (error) {
           console.error('Error parsing JSON:', error);
         }
       }
     },
     closeWebSocket () {
-      if (this.socket) {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         this.socket.close()
+        console.log('WebSocket connection closed')
       }
     },
     /* ------------- Event handler ---------------------------------------*/
-    handleKeyDown(event) {
-      const pressedKey = event.key;
-      const data = { 'key_pressed': pressedKey };
-      this.socket.send(JSON.stringify(data));
-      console.log('key pressed:', pressedKey);
+    handleKeyDown(event){
+      if (this.pressedKeys.includes(event.key)) {
+        return;
+      }
+      this.pressedKeys.push(event.key);
+      console.log("key_pressed: " + event.key);
+      const data = JSON.stringify({ type: 'key_pressed', key: event.key });
+      this.socket.send(data);
     },
-    handleKeyUp(event) {
-      const releasedKey = event.key;
-      const data = { 'key_released': releasedKey };
-      this.socket.send(JSON.stringify(data));
-      console.log('key released:', releasedKey);
+    handleKeyUp(event){
+      this.pressedKeys = this.pressedKeys.filter(key => key !== event.key);
+      console.log("key_released: " + event.key);
+      const data = JSON.stringify({ type: 'key_released', key: event.key });
+      this.socket.send(data);
     },
+
     /* ------------- Update UI -------------------------------------------*/
     updateGameUI(gameState) {
       this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
@@ -168,6 +209,28 @@
     right: 0;
     z-index: 1;
   }
+
+  
+  .game-canvas {
+  width: 100%;
+  padding-bottom: 50%;
+  border: 3px solid #0b51b4;
+  background-color: #000;
+  position: relative;
+  overflow: hidden;
+}
+
+.paddle_1 {
+  width: 2%;
+  background-color: rgb(255, 255, 255);
+  position: absolute;
+}
+
+.paddle_2 {
+  width: 2%;
+  background-color: rgb(255, 255, 255);
+  position: absolute;
+}
 
   </style>
   

@@ -13,11 +13,8 @@
 	  <div class="score-container">{{ numberOfHitsP1 }} : {{ numberOfHitsP2 }}</div>
 	</div>
   <div
-      class="game-canvas"
-      tabindex="0"
-      @keyup="handleKeyUp"
-      @keydown="handleKeyDown"
-  >
+      class="game-canvas" tabindex="0" @keyup="handleKeyUp" @keydown="handleKeyDown">
+      <div class="score-container">{{ numberOfHitsP1 }} : {{ numberOfHitsP2 }}</div>
       <div class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
       <div class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%' }"></div>
       <!-- centered text -->
@@ -115,6 +112,12 @@
               this.numberOfHitsP2 = highScore.numberOfHitsP2;
 
               this.updateGameUI(gameState);
+              // update paddle positions
+              // convert height px(400) to %(100)
+              // in future calculate this in backend and send only % values
+              this.p1pos.y = gameState.leftPaddle.y / this.canvasHeight * 100;
+              this.p2pos.y = gameState.rightPaddle.y / this.canvasHeight * 100;
+
             } else {
               console.error('Received game_state message with undefined data:', data);
             }

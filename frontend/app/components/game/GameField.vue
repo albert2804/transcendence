@@ -15,8 +15,11 @@
   <div
       class="game-canvas" tabindex="0" @keyup="handleKeyUp" @keydown="handleKeyDown">
       <div class="score-container">{{ numberOfHitsP1 }} : {{ numberOfHitsP2 }}</div>
+      <div class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
       <div class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
       <div class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%' }"></div>
+      <div class="midline"></div>
+      
       <!-- centered text -->
       <!-- <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.6em; font-weight: bold; color: #000; text-align: center;">
           <div v-if="message">{{ message }}</div>
@@ -48,27 +51,21 @@
         y: (100 - this.paddleSize) / 2,
       },
       p2pos: {
-        x: 98,
+        x: 98.5,
         y: (100 - this.paddleSize) / 2,
+      },
+      ballPos: {
+        // middle position minus half the ball size
+        x: 50 - (1.5/2),
+        y: 50 - (3/2),
       },
     }
   },
   mounted () {
-    // document.addEventListener('keydown', this.handleKeyDown);
-    // document.addEventListener('keyup', this.handleKeyUp);
-    // Use $nextTick to ensure the canvas is rendered before accessing it
     this.$nextTick(() => {
       this.canvas = this.$refs.pongCanvas;
       this.context = this.canvas.getContext('2d');
     });
-    // watch for changes in isLoggedIn from store/index.js
-    // watchEffect(() => {
-    //   if (isLoggedIn.value === 1) {
-    //     this.createWebSocket();
-    //   } else if (isLoggedIn.value === 0) {
-    //     this.closeWebSocket();
-    //   }
-    // });
 
     watchEffect(() => {
       if (isLoggedIn.value === 1) {
@@ -92,8 +89,6 @@
 
       this.socket.onclose = () => {
         console.log('closed remoteGame websocket')
-        // document.removeEventListener('keydown', this.handleKeyDown);
-        // document.removeEventListener('keyup', this.handleKeyUp);
       }
 
       this.socket.onerror = (error) => {
@@ -117,7 +112,9 @@
               // in future calculate this in backend and send only % values
               this.p1pos.y = gameState.leftPaddle.y / this.canvasHeight * 100;
               this.p2pos.y = gameState.rightPaddle.y / this.canvasHeight * 100;
-
+              // update ball position
+              this.ballPos.x = (gameState.ball.x / this.canvasWidth * 100) - (1.5/2);
+              this.ballPos.y = (gameState.ball.y / this.canvasHeight * 100) - (3/2);
             } else {
               console.error('Received game_state message with undefined data:', data);
             }
@@ -224,15 +221,34 @@
 }
 
 .paddle_1 {
-  width: 2%;
+  width: 1.5%;
   background-color: rgb(255, 255, 255);
   position: absolute;
 }
 
 .paddle_2 {
-  width: 2%;
+  width: 1.5%;
   background-color: rgb(255, 255, 255);
   position: absolute;
+}
+
+.midline {
+    position: absolute;
+    width: 1px;
+    height: 100%;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #fff;
+    /* background-image: repeating-linear-gradient(0deg, #fff, #fff 2px, transparent 2px, transparent 4px); */
+}
+
+.ball {
+  position: absolute;
+  width: 1.5%;
+  height: 3%;
+  background-color: pink;
+  border-radius: 50%;
 }
 
   </style>

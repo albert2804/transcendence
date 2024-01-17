@@ -7,16 +7,15 @@
     data-bs-keyboard="false"
     @keydown.esc="closeModal"
     @keydown="handleKeyDown"
-    @keyup="handleKeyUp"
-    ><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 10px; right: 10px;"></button>
+    @keyup="handleKeyUp">
     <div class="modal-dialog fullscreen-modal align-items-center">
       <div class="modal-content">
         <div class="modal-body">
           <GameField ref="ponggamefieldRef"/>
-          
         </div>
       </div>
     </div>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 10px; right: 10px;"></button>
   </div>
 </template>
 

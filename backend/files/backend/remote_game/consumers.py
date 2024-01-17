@@ -28,7 +28,8 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         print(f"websocket connection closed")
-        pass
+        # pass
+        self.game.isGameExited = True
 
     async def receive(self, text_data):
         try:

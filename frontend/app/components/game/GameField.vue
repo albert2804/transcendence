@@ -1,6 +1,6 @@
 <template>
   <div
-      class="game-canvas" tabindex="0" @mousedown="handleMousePress" @mouseup="handleMouseRelease" @mousemove="handleMouseMove">
+      class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease">
       <div class="score-container">{{ numberOfHitsP1 }} : {{ numberOfHitsP2 }}</div>
       <div class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
       <div class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
@@ -102,103 +102,55 @@
       }
     },
     /* ------------- Event handler ---------------------------------------*/
-    handleKeyDown(event){
-      if (this.pressedKeys.includes(event.key)) {
+    pressKey(keyToPress) {
+      if (this.pressedKeys.includes(keyToPress)) {
         return;
       }
-      this.pressedKeys.push(event.key);
-      console.log("key_pressed: " + event.key);
-      const data = JSON.stringify({ type: 'key_pressed', key: event.key });
+      this.pressedKeys.push(keyToPress);
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        const data = JSON.stringify({ type: 'key_pressed', key: keyToPress });
         this.socket.send(data);
       }
+    },
+    removeKey(keyToRemove) {
+      if (!this.pressedKeys.includes(keyToRemove)) {
+        return;
+      }
+      this.pressedKeys = this.pressedKeys.filter(key => key !== keyToRemove);
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        const data = JSON.stringify({ type: 'key_released', key: keyToRemove });
+        this.socket.send(data);
+      }
+    },
+    // handle keyboard events
+    handleKeyDown(event){
+      this.pressKey(event.key);
     },
     handleKeyUp(event){
-      this.pressedKeys = this.pressedKeys.filter(key => key !== event.key);
-      console.log("key_released: " + event.key);
-      const data = JSON.stringify({ type: 'key_released', key: event.key });
-      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        this.socket.send(data);
-      }
+      this.removeKey(event.key);
     },
-    handleMousePress(event) {
-      const screenHeight = window.innerHeight;
+    // handle touch events (mobile)
+    handleTouchPress(event) {
+      const rect = this.$refs.gameFieldRef.getBoundingClientRect();
+      const fieldHeight = rect.height;
+      const touch = event.touches[0];
+      const mouseY = touch.clientY - rect.top;
 
-      if (event.clientY < screenHeight / 2) {
-        if (this.pressedKeys.includes('ArrowUp')) {
-          return;
-        }
-        this.pressedKeys.push('ArrowUp');
-        // console.log("top half clicked");
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-          const data = JSON.stringify({ type: 'key_pressed', key: 'ArrowUp' });
-          this.socket.send(data);
+      if (mouseY < fieldHeight / 2) {
+        if (!this.pressedKeys.includes('ArrowUp')) {
+          this.removeKey('ArrowDown');
+          this.pressKey('ArrowUp');
         }
       } else {
-        if (this.pressedKeys.includes('ArrowDown')) {
-          return;
-        }
-        this.pressedKeys.push('ArrowDown');
-        // console.log("bottom half clicked");
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-          const data = JSON.stringify({ type: 'key_pressed', key: 'ArrowDown' });
-          this.socket.send(data);
+        if (!this.pressedKeys.includes('ArrowDown')) {
+          this.removeKey('ArrowUp');
+          this.pressKey('ArrowDown');
         }
       }
     },
-    handleMouseRelease(event) {
-      if (this.pressedKeys.includes('ArrowUp')) {
-        this.pressedKeys = this.pressedKeys.filter(key => key !== 'ArrowUp');
-        // console.log("top half released");
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-          const data = JSON.stringify({ type: 'key_released', key: 'ArrowUp' });
-          this.socket.send(data);
-        }
-      }
-      if (this.pressedKeys.includes('ArrowDown')) {
-        this.pressedKeys = this.pressedKeys.filter(key => key !== 'ArrowDown');
-        // console.log("bottom half released");
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-          const data = JSON.stringify({ type: 'key_released', key: 'ArrowDown' });
-          this.socket.send(data);
-        }
-      }
-    },
-    handleMouseMove(event) {
-      const screenHeight = window.innerHeight;
-      let data;
-      // check if mouse button is pressed
-      if (event.buttons !== 1) {
-        return;
-      }
-      // check if mouse moved to top or bottom half
-      if (event.clientY < screenHeight / 2) {
-        if (this.pressedKeys.includes('ArrowUp')) {
-          return;
-        }
-        // console.log("moved to top half");
-        this.pressedKeys.push('ArrowUp');
-        this.pressedKeys = this.pressedKeys.filter(key => key !== 'ArrowDown');
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-          data = JSON.stringify({ type: 'key_released', key: 'ArrowDown' });
-          this.socket.send(data);
-          data = JSON.stringify({ type: 'key_pressed', key: 'ArrowUp' });
-          this.socket.send(data);
-        }
-      } else {
-        if (this.pressedKeys.includes('ArrowDown')) {
-          return;
-        }
-        // console.log("moved to bottom half");
-        this.pressedKeys = this.pressedKeys.filter(key => key !== 'ArrowUp');
-        this.pressedKeys.push('ArrowDown');
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-          data = JSON.stringify({ type: 'key_released', key: 'ArrowUp' });
-          this.socket.send(data);
-          data = JSON.stringify({ type: 'key_pressed', key: 'ArrowDown' });
-          this.socket.send(data);
-        }
-      }
+    handleTouchRelease(event) {
+      this.removeKey('ArrowUp');
+      this.removeKey('ArrowDown');
     },
 
     /* ------------- Update UI -------------------------------------------*/

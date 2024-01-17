@@ -45,9 +45,9 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
             elif type == 'key_released':
                 if key in ['ArrowDown', 'ArrowUp']:
                     self.game.rightPaddle['dy'] = 0
-                elif key == 'Escape':
-                    self.game.isGameExited=True
-                    self.close()
+                # elif key == 'Escape':
+                #     self.game.isGameExited=True
+                #     self.close()
         except json.JSONDecodeError:
             print(f"Received invalid JSON file: {game_data}")
                 

@@ -1,15 +1,19 @@
 <template>
-  <div class="modal fade" :id="modalId" tabindex="-1" :aria-labelledby="ariaLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-xl">
+  <div class="modal fade"
+    :id="modalId" tabindex="-1"
+    :aria-labelledby="ariaLabel"
+    aria-hidden="true"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false"
+    @keydown.esc="closeModal"
+    @keydown="handleKeyDown"
+    @keyup="handleKeyUp"
+    ><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 10px; right: 10px;"></button>
+    <div class="modal-dialog fullscreen-modal align-items-center">
       <div class="modal-content">
-        <div class="modal-header">
-          <!-- <h5 class="modal-title">{{ modalTitle }}</h5> -->
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          <!-- <button type="button" class="btn-close" aria-label="Close" @click="closeModal"></button> -->
-        </div>
         <div class="modal-body">
-          <!-- <GameField :paddleSize="20" @game-end="closeModal" /> -->
-          <GameField />
+          <GameField ref="ponggamefieldRef"/>
+          
         </div>
       </div>
     </div>
@@ -24,30 +28,39 @@ export default {
     modalId: String,
     ariaLabel: String,
   },
-  // listener useful to trigger the closeModal method when the modal is closed by clicking on the close button
-  // also possible to use the @click event on the close button and remove this listener
-  // but for now I leave it here because maybe it will be useful in the future
-  mounted() {
-    console.log('set listener for game modal');
-    document.getElementById(this.modalId).addEventListener('hidden.bs.modal', this.closeModal);
-  },
-  beforeDestroy() {
-    console.log('remove listener for game modal');
-    document.getElementById(this.modalId).removeEventListener('hidden.bs.modal', this.closeModal);
-  },
   methods: {
-
-    // this method is here to get emitted from GameField.vue when the game ends ?!?
-    // or maybe it is not needed at all
-    // we will see
     closeModal() {
-      console.log('close modal');
+      // console.log('close modal');
       setTimeout(() => {
         var mood = document.getElementById(this.modalId);
         var bsModal = bootstrap.Modal.getInstance(mood);
         bsModal.hide();
-      }, 1000);
+      // }, 1000);
+      }, 0);
     },
+    handleKeyDown(event) {
+      if (this.$refs.ponggamefieldRef) {
+        this.$refs.ponggamefieldRef.handleKeyDown(event);
+      }
+    },
+    handleKeyUp(event) {
+      if (this.$refs.ponggamefieldRef) {
+        this.$refs.ponggamefieldRef.handleKeyUp(event);
+      }
+    }
   },
 };
 </script>
+
+<style>
+  .modal-dialog.fullscreen-modal {
+    max-width: 100%;
+    margin: 0;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    display: flex;
+  }
+</style>

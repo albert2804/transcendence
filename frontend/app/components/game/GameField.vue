@@ -1,6 +1,6 @@
 <template>
   <div
-      class="game-canvas" tabindex="0" @keyup="handleKeyUp" @keydown="handleKeyDown">
+      class="game-canvas" tabindex="0">
       <div class="score-container">{{ numberOfHitsP1 }} : {{ numberOfHitsP2 }}</div>
       <div class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
       <div class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
@@ -48,6 +48,9 @@
         this.closeWebSocket();
       }
     });
+  },
+  beforeDestroy () {
+    this.closeWebSocket();
   },
   methods: {
     /* ------------- Web sockets -----------------------------------------*/
@@ -106,13 +109,17 @@
       this.pressedKeys.push(event.key);
       console.log("key_pressed: " + event.key);
       const data = JSON.stringify({ type: 'key_pressed', key: event.key });
-      this.socket.send(data);
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        this.socket.send(data);
+      }
     },
     handleKeyUp(event){
       this.pressedKeys = this.pressedKeys.filter(key => key !== event.key);
       console.log("key_released: " + event.key);
       const data = JSON.stringify({ type: 'key_released', key: event.key });
-      this.socket.send(data);
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        this.socket.send(data);
+      }
     },
 
     /* ------------- Update UI -------------------------------------------*/

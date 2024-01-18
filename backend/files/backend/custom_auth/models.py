@@ -19,19 +19,26 @@ class Intra42OAuth2(BaseOAuth2):
     # old secret
     #SECRET='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'
 
+
+    UID = 'u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da'
     # next secret, valid after 29/12/2023
     SECRET='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'
 
     # SCOPE_SEPARATOR = ','
     # ID_KEY = 'id'
     # EXTRA_DATA = [
-    #     ('id', 'id'),
-    #     ('expires', 'expires')
+    #     ('grant_type', 'authorization_code'),
+    #     ('client_id', UID),
+    #     ('client_secret', SECRET),
+    #     ('code', )
     # ]
 
     def auth_params(self, *args, **kwargs):
         params = super().auth_params(*args, **kwargs)
         params = {"client_id": self.KEY, "redirect_uri": self.LOGIN_REDIRECT_URL}
+        #params["client_secret"] = self.SECRET
+        #params["grant_type"] = "authorization_code"
+        #params["code"] = "123456789"
         params['response_type'] = 'code'
         return params
 
@@ -48,3 +55,7 @@ class Intra42OAuth2(BaseOAuth2):
             'access_token': access_token
         })
         return self.get_json(url)
+
+    def foo():
+        print ("FOOOOOOOOOOOOOOOO")
+        logger.error("foooooooo")

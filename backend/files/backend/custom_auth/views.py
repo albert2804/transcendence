@@ -13,6 +13,7 @@ def home(request):
     context = {
         'tabs':tabs
     }
+    print("HHHHORCEODRECCHSCUCHRSEHOSU")
     return render(request, 'auth_view.html', context)
 
 # def social_login(request):

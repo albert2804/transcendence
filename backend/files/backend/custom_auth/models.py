@@ -5,9 +5,10 @@ logger = logging.getLogger(__name__)
 
 #from social_django.models import UserSocialAuth
 from social_core.backends.oauth import BaseOAuth2
+from urllib.parse import urlencode
 
 SOCIAL_AUTH_PIPELINE = (
-    # 'custom_auth.models.Intra42OAuth2.foo'
+    'custom_auth.models.foo'
     'social_core.pipeline.social_auth.social_details',
     'social_core.pipeline.social_auth.social_uid',
     'social_core.pipeline.social_auth.auth_allowed',
@@ -51,6 +52,7 @@ class Intra42OAuth2(BaseOAuth2):
     # ]
 
     def auth_params(self, *args, **kwargs):
+        print ("AUTH_PARAMS!!!")
         params = super().auth_params(*args, **kwargs)
         params = {"client_id": self.KEY, "redirect_uri": self.LOGIN_REDIRECT_URL}
         #params["client_secret"] = self.SECRET
@@ -68,11 +70,12 @@ class Intra42OAuth2(BaseOAuth2):
 
     def user_data(self, access_token, *args, **kwargs):
         """Loads user data from service"""
+        print("USER_DATA!!!")
         url = 'https://api.intra.42.fr/v2/users' + urlencode({
             'access_token': access_token
         })
         return self.get_json(url)
 
-    def foo():
-        print ("FOOOOOOOOOOOOOOOO")
-        logger.error("foooooooo")
+def foo(strategy, details, response, is_new=False, user=None, *args, **kwargs):
+    print ("FOOOOOOOOOOOOOOOO")
+    logger.error("foooooooo")

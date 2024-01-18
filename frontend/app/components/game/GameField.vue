@@ -7,9 +7,9 @@
       <div class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%' }"></div>
       <div class="midline"></div>
       <!-- centered text -->
-      <!-- <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.6em; font-weight: bold; color: #000; text-align: center;">
+      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.6em; font-weight: bold; color: #ffffff; text-align: center;">
           <div v-if="message">{{ message }}</div>
-      </div> -->
+      </div>
   </div>
   </template>
   
@@ -19,6 +19,7 @@
   name: 'RemotePong',
   data () {
     return {
+      message: '',
       socket: null,
       numberOfHitsP1 : 0,
       numberOfHitsP2 : 0,
@@ -87,7 +88,14 @@
             } else {
               console.error('Received game_state message with undefined data:', data);
             }
-          } else {
+          } else if (data.type === 'message') {
+            // await self.send(text_data=json.dumps({
+            //     'type': 'message',
+            //     'message': 'Welcome!',
+            // }))
+            this.message = data.message;
+          } 
+          else {
             console.error('Received message of unknown type:', data);
           }
         } catch (error) {

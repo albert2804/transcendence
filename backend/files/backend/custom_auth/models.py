@@ -54,9 +54,9 @@ class Intra42OAuth2(BaseOAuth2):
     def auth_params(self, *args, **kwargs):
         print ("AUTH_PARAMS!!!")
         params = super().auth_params(*args, **kwargs)
-        params = {"client_id": self.KEY, "redirect_uri": self.LOGIN_REDIRECT_URL}
-        #params["client_secret"] = self.SECRET
-        #params["grant_type"] = "authorization_code"
+        params = {"client_id": self.UID, "redirect_uri": self.LOGIN_REDIRECT_URL}
+        params["client_secret"] = self.SECRET
+        params["grant_type"] = "authorization_code"
         #params["code"] = "123456789"
         params['response_type'] = 'code'
         return params

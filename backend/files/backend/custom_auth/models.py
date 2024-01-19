@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 import logging
+import json
+
 logger = logging.getLogger(__name__)
 
 #from social_django.models import UserSocialAuth
@@ -24,41 +26,49 @@ SOCIAL_AUTH_PIPELINE = (
 
 class Intra42OAuth2(BaseOAuth2):
     """GitHub OAuth authentication backend"""
-    name = '42_intra_oauth'
+    name = 'intra42_oauth2'
                         #'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da&response_type=code?client_id=None&redirect_uri=http%3A%2F%2Flocalhost%2Fendpoint%2Fauth%2Fcomplete%2F42_intra_oauth%2F%3Fredirect_state%3DMZGSGWtCvB0SdIKDoYiOzStEc5vizkJh&state=MZGSGWtCvB0SdIKDoYiOzStEc5vizkJh&response_type=code&grant_type=client_credentials'
-    #AUTHORIZATION_URL = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da&response_type=code'
+    AUTHORIZATION_URL = 'https://api.intra.42.fr/oauth/authorize'
     
     #https://api.intra.42.fr/oauth/authorize?client_id=None&redirect_uri=http%3A%2F%2Flocalhost%2Fendpoint%2Fauth%2Fcomplete%2F42_intra_oauth%2F%3Fredirect_state%3DMZGSGWtCvB0SdIKDoYiOzStEc5vizkJh&state=MZGSGWtCvB0SdIKDoYiOzStEc5vizkJh&response_type=code&grant_type=client_credentials
-    AUTHORIZATION_URL='https://api.intra.42.fr/oauth/authorize'
     ACCESS_TOKEN_URL = 'https://api.intra.42.fr/oauth/token/'
     ACCESS_TOKEN_METHOD = 'POST'
-    LOGIN_REDIRECT_URL='https://localhost/endpoint/auth/'
+    LOGIN_REDIRECT_URL='https://localhost/endpoint/auth/complete/intra42_oauth2'
+    STATE_PARAMETER = True
     KEY='u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da'
-    # old secret
-    #SECRET='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'
-
 
     UID = 'u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da'
-    # next secret, valid after 29/12/2023
     SECRET='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'
+    CLIENT = UID
+    SOCIAL_AUTH_INTRA42_OAUTH2_KEY = 'u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da'
+    SOCIAL_AUTH_INTRA42_OAUTH2_SECRET = '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'
+    # next secret, valid after 29/12/2023
+
 
     # SCOPE_SEPARATOR = ','
     # ID_KEY = 'id'
-    # EXTRA_DATA = [
-    #     ('grant_type', 'authorization_code'),
+    # SOCIAL_AUTH_Intra42OAUTH2_EXTRA_DATA = [
+    #     ('grant_type', 'client_credentials'),
     #     ('client_id', UID),
     #     ('client_secret', SECRET),
-    #     ('code', )
+    #     ('response_type', 'code'),
+    #     ('state', 'MZGSGWtffooCvB011SdIKD47oYiOzStEc23x5vizkJh')
     # ]
 
     def auth_params(self, *args, **kwargs):
         print ("AUTH_PARAMS!!!")
         params = super().auth_params(*args, **kwargs)
-        params = {"client_id": self.UID, "redirect_uri": self.LOGIN_REDIRECT_URL}
-        params["client_secret"] = self.SECRET
-        params["grant_type"] = "authorization_code"
-        #params["code"] = "123456789"
-        params['response_type'] = 'code'
+        print ("Params:" + json.dumps(params))
+        #params["client_id"] = self.UID
+        #params["client_secret"] = self.SECRET
+        #params["grant_type"] = "authorization_code"
+        
+        # state = self.state_token()
+        # print(state)
+        # self.strategy.session_set('social_auth_{backend_name}_state'.format(backend_name=self.name), state)
+        # print(state)
+        #params['response_type'] = 'code'
+        #print ("Params:" + json.dumps(params))
         return params
 
     def get_user_details(self, response):
@@ -75,6 +85,16 @@ class Intra42OAuth2(BaseOAuth2):
             'access_token': access_token
         })
         return self.get_json(url)
+
+    def get_redirect_uri(self, state=None):
+        print ("GET_REDIRECT_URI!!!")
+        print(self.LOGIN_REDIRECT_URL)
+        return self.LOGIN_REDIRECT_URL
+    
+    def authorization_url(self):
+        print ("AUTHORIZATION_URL!!!")
+        print(self.AUTHORIZATION_URL)
+        return self.AUTHORIZATION_URL
 
 def foo(strategy, details, response, is_new=False, user=None, *args, **kwargs):
     print ("FOOOOOOOOOOOOOOOO")

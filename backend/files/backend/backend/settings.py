@@ -49,8 +49,12 @@ INSTALLED_APPS = [
     'users',
     'api',
     'chat',
-	'remote_game'
+	'remote_game',
+	'debug_toolbar',
 ]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 CHANNEL_LAYERS = {
     'default': {
@@ -67,6 +71,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -130,6 +135,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://python-social-auth.readthedocs.io/en/latest/configuration/django.html
 
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
+SOCIAL_AUTH_STRATEGY = "social_django.strategy.DjangoStrategy"
+SOCIAL_AUTH_STORAGE = "social_django.models.DjangoStorage"
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -180,6 +187,10 @@ SOCIAL_AUTH_GITHUB_SECRET='9a6ca7f1e6106dccf4564dc626fa43c4167e1aeb'
 
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 
+SOCIAL_AUTH_INTRA42_OAUTH2_KEY = 'u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da'
+SOCIAL_AUTH_INTRA42_OAUTH2_SECRET = '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'
+SOCIAL_AUTH_INTRA42_OAUTH2_AUTHORIZATION_URL='https://api.intra.42.fr/oauth/authorize'
+
 LOGIN_URL = 'auth/login/'
 LOGIN_REDIRECT_URL='/endpoint/auth'
 
@@ -196,6 +207,26 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
 )
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+	'localhost',
+]
+
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.versions.VersionsPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'debug_toolbar.panels.cache.CachePanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.logging.LoggingPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+]
 
 #  LOGGING = {
 #     'version': 1,

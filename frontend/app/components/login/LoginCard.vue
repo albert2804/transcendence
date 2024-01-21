@@ -1,10 +1,12 @@
 <script setup>
   // Listen to changes of the isLoggedIn from store/index.js
   import { isLoggedIn } from '~/store';
+  const client_id = import.meta.env.VITE_42INTRA_CLIENT_ID;
   watchEffect(() => {
-  isLoggedIn.value = isLoggedIn.value
+  isLoggedIn.value = isLoggedIn.value;
 })
 </script>
+
 
 <template>
   <div class="card card-size">
@@ -27,6 +29,12 @@
           <button type="button" @keyup.enter="$refs.loginnamefield.focus()" ref="loginbutton" class="btn btn-primary" @click="login">Login</button>
           <a class="btn btn-link btn-sm" @click="reg_form = true; error = ''; message = ''">create account</a>
         </div>
+        {{ client_id }}
+<!--        <a :href="`https://api.intra.42.fr/oauth/authorize
+          &client_id={$config.clientId}
+          &redirect_uri=${encodeURIComponent(window.location)/endpoint/auth}
+          &state=${generateRandomString()}
+          &response_type=code`">Login with 42 intra</a> -->
       </form>
       <!-- REGISTRATION FORM -->
       <form v-if="isLoggedIn == 0 && reg_form">

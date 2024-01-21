@@ -1,10 +1,22 @@
 <script setup>
   // Listen to changes of the isLoggedIn from store/index.js
   import { isLoggedIn } from '~/store';
-  const client_id = import.meta.env.VITE_42INTRA_CLIENT_ID;
   watchEffect(() => {
-  isLoggedIn.value = isLoggedIn.value;
+  isLoggedIn.value = isLoggedIn.value
 })
+
+  import { ref, onMounted } from 'vue';
+
+  const client_id = import.meta.env.VITE_42INTRA_CLIENT_ID;
+  const redirect_uri = ref('');
+
+  onMounted(() => {
+    redirect_uri.value = encodeURIComponent(window.location.origin) + encodeURIComponent("/endpoint/auth/callback");
+  });
+
+  const generateRandomString = () => {
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  };
 </script>
 
 
@@ -30,11 +42,11 @@
           <a class="btn btn-link btn-sm" @click="reg_form = true; error = ''; message = ''">create account</a>
         </div>
         {{ client_id }}
-<!--        <a :href="`https://api.intra.42.fr/oauth/authorize
-          &client_id={$config.clientId}
-          &redirect_uri=${encodeURIComponent(window.location)/endpoint/auth}
-          &state=${generateRandomString()}
-          &response_type=code`">Login with 42 intra</a> -->
+        <br>
+        {{ redirect_uri }}
+        <a :href="`https://api.intra.42.fr/oauth/authorize?client_id=${ client_id }&redirect_uri=${redirect_uri}&state=${generateRandomString()}&response_type=code`">Login with 42 intra</a>
+        <!-- <a :href="`https://api.intra.42.fr/oauth/authorize?client_id=${ client_id }&redirect_uri=${redirect_uri}&response_type=code&scope=public`">Login with 42 intra 2</a> -->
+                <!-- <a :href="`https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da&redirect_uri=https%3A%2F%2Flocalhost%2Fendpoint%2Fauth%2Fcallback&response_type=code`"> Login with 42 intra</a>  -->
       </form>
       <!-- REGISTRATION FORM -->
       <form v-if="isLoggedIn == 0 && reg_form">

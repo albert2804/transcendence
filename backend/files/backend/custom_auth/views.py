@@ -4,6 +4,9 @@ from custom_auth.models import Intra42OAuth2
 from django.contrib.auth import login
 from social_django.utils import psa
 import json
+import requests
+import os
+from urllib.parse import quote
 
 import logging
 logger = logging.getLogger(__name__)
@@ -13,7 +16,34 @@ logger = logging.getLogger(__name__)
 
 tabs = [
     {'name':'home', 'dir':"/endpoint/auth/"},
+    {'name':'callback', 'dir':"/endpoint/auth/callback/"},
 ]
+
+def success(request):
+    return HttpResponse("This is the success view.")
+
+def callback(request):
+    code = request.GET.get('code')
+    print("CODE: " + code)
+    print("URL: " + request.get_full_path())
+    state = request.GET.get('state')
+    print("STATE: " + state)
+    client_id = os.environ.get('42INTRA_CLIENT_ID')
+    client_secret = os.environ.get('42INTRA_CLIENT_SECRET')
+    url = "https://api.intra.42.fr/oauth/token"
+    url += "?grant_type=authorization_code"
+    url += "&client_id=" + client_id
+    url += "&client_secret=" + client_secret
+    url += "&code=" + code
+    url += "&state=" + state
+    url += "&redirect_uri=" + quote("https://localhost/endpoint/auth/callback", safe='')
+
+    print("URL: " + url)
+    response = requests.post(url)
+    print(response.json())
+    print (response.text)
+
+    return HttpResponse("This is the callback view.\n" + "CODE: " + code + "\nURL called: " + url)
 
 # @psa("social:complete")
 # def ajax_auth(request, backend):

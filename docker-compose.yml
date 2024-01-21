@@ -26,6 +26,8 @@ services:
         - DOMAIN
         - CERT_PATH
         - CERT_KEY_PATH
+    env_file:
+      - .env_frontend
     restart: always
     volumes:
       - ./frontend/app:/code

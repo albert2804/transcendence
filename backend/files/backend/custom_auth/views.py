@@ -5,6 +5,9 @@ from django.contrib.auth import login
 from social_django.utils import psa
 import json
 
+import logging
+logger = logging.getLogger(__name__)
+
 # def index(request):
 #     return HttpResponse("Hello, world. You're at the auth index.")
 
@@ -31,16 +34,20 @@ tabs = [
 
 
 @psa('social:complete')
-def register_by_access_token(request, backend):
+def register_by_access_token(request):
     # This view expects an access_token GET parameter, if it's needed,
     # request.backend and request.strategy will be loaded with the current
     # backend and strategy.
-    print("REGISTER BY ACCESS TOKEN")
+    logger.warning("REGISTER BY ACCESS TOKEN")
     token = request.REQUEST.get('access_token')
+    print("TOKEN: " + token)
     user = request.backend.do_auth(token)
-
-    data = {"id": user.id, "username": user.username}
+    logger.warning("USER: " + user)
+    login(request, user)
+    print ("USER: " + user)
+    data = {"id": user.id, "username": user.username, "provider" : ""}
     return HttpResponse(json.dumps(data), mimetype="application/json")
+    #return render(request, 'auth_view.html', context)
     
 def home(request):
     context = {

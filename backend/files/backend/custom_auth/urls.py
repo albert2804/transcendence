@@ -6,6 +6,7 @@ urlpatterns = [
 #    path('', views.index, name="index"),
     path('', views.home, name="home"),
     path('', include('social_django.urls', namespace='social')),
+	path('complete/intra42_oauth2/', include('social_django.urls', namespace='social')),
 
 ]
 

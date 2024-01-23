@@ -11,6 +11,7 @@
 			<!-- <button @click="startTournament" class="start-tournament">Start Tournament</button> -->
 		</div>
 	  <canvas ref="pongCanvas" width="800" height="400"></canvas>
+		<LocalTournament @startGame="callStartGame" :isGameWon="isGameWon" />
 	</div>
 </template>
   

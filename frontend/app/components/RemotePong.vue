@@ -4,7 +4,7 @@
 	<div>
 	  <button @click="createWebSocket" class="start-button">Start Game</button>
 	  <canvas ref="pongCanvas" width="800" height="400"></canvas>
-	  <div class="score-container">{{ numberOfWinsP1 }} : {{ numberOfWinsP2 }}</div>
+	  <div class="score-container">{{ numberOfHitsP1 }} : {{ numberOfHitsP2 }}</div>
     <!-- <div @keydown="handleKeyDown" tabindex="0"></div> -->
 	</div>
   </template>
@@ -23,8 +23,9 @@
       socket: null,
       canvasHeight : canvasHeight,
       canvasWidth : canvasWidth,
-      numberOfWinsP1 : 0,
-      numberOfWinsP2 : 0
+      numberOfHitsP1 : 0,
+      numberOfHitsP2 : 0,
+      own_id : null
     }
   },
   mounted () {
@@ -70,16 +71,13 @@
         try {
           const data = JSON.parse(event.data);
 
-        if (data.type === 'game_state') {
+        if (data.type === 'game_update') {
           if (data.state) {
             const gameState = data.state;
-            const highScore = data.state[1];
-            console.log('game state:', gameState);
-            // console.log('numberodWinsP1:', highScore);
+            const highScore = data.high_score;
+            this.numberOfHitsP1 = highScore.numberOfHitsP1;
+            this.numberOfHitsP2 = highScore.numberOfHitsP2;
 
-            // this.numberOfWinsP1 = gameState.numberOfWinsP1;
-            // this.$set(this, 'numberOfWinsP1', gameState.numberOfWinsP1);
-            // this.numberOfWinsP2 = gameState.numberOfWinsP2;
             this.updateGameUI(gameState);
           } else {
             console.error('Received game_state message with undefined data:', data);

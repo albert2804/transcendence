@@ -21,8 +21,8 @@
       <form>
         <label for="nbrPlayerRange" class="form-label">Number of total Players</label>
         <div class="mb-3 d-flex align-items-center">
-          <input type="range" class="form-range" min="3" max="16" id="nbrPlayerRange" v-model.number="nbr_players" @input="updatePlayerCount">
-          <input type="number" class="form-control" v-model.number="nbr_players" min="3" max="16" @input="updatePlayerCount">
+          <input type="range" class="form-range" min="4" max="32" step="4" id="nbrPlayerRange" v-model.number="nbr_players" @input="updatePlayerCount">
+          <input type="number" class="form-control" v-model.number="nbr_players" min="4" max="32" step="4" @input="updatePlayerCount">
         </div>
         <div class="name-box">
           <div v-for="index in nbr_players" :key="index" class="name-input">
@@ -60,12 +60,12 @@
 <script>
 
 export default {
-  props: ['startGameTour', 'gameFinish'],
+  props: ['startGameTour', 'gameFinish', 'gameExited'],
   name: 'LocalTournament',
   data() {
     return {
       all_players: [],
-      nbr_players: '3',
+      nbr_players: '8',
       formVisible: false,
       ongoingTournament: false,
       player_one: 0,
@@ -107,24 +107,41 @@ export default {
     },
     async startTournament() {
       console.log(this.all_players)
+      if (this.nbr_players % 2 != 0) {
+        console.log("nbr of players needs to be even")
+        return;
+      }
       this.updatePlayerName()
       this.formVisible = false;
       this.ongoingTournament = true;
-      
-      const total_games = 3; //needs a calc
-      
+  
+      const total_games = this.nbr_players - 1; 
+      let total_rounds = 0;
+      for (let calc = this.nbr_players; calc > 0; calc >>= 1) {
+        total_rounds++;
+      }
+
+      console.log(total_rounds);
+      let   round = 0;
       console.log("start game")
       const playGame = async () => {
         for (let games_played = 0; games_played < total_games; games_played++) {
+
           console.log("Before startGameTour");
           await this.startGameTour();
           console.log("After startGameTour, before waitForVariableChange");
+          if (this.gameExited) {
+            this.ongoingTournament = false;
+            console.log("tournament exited")
+            break;
+          }
           await this.waitForVariableChange(() => this.gameFinish);
           console.log("After waitForVariableChange");
         }
       };
       playGame().then(() => {
-
+        
+        this.ongoingTournament = false;
         console.log("Tournament finished")
       });
     },

@@ -104,24 +104,14 @@ export default {
         this.all_players.splice(this.nbr_players);
       }
     },
-    async startTournament() {
+    startTournament() {
       console.log(this.all_players)
       this.updatePlayerName()
       this.formVisible = false;
       this.ongoingTournament = true;
       const total_games = 3;
       for (let games_played = 0; games_played < total_games; games_played++) {
-        this.$emit('startGame')
-        while (this.isGameWon != true) {
-          // console.log("hello is this " + this.isGameWon)
-        }
-        if (games_played === 0) {
-          this.player_one = 0;
-          this.player_two = 1;
-        }
-        else if (games_played === 1) {
-          this.player_one = 2;
-          this.player_two = 3;
+          ;
         }
       }
 

@@ -11,7 +11,7 @@
 			<!-- <button @click="startTournament" class="start-tournament">Start Tournament</button> -->
 		</div>
 	  <canvas ref="pongCanvas" width="800" height="400"></canvas>
-		<LocalTournament :startGameTour="startGame" :gameFinish="isGameWon" />
+		<LocalTournament :startGameTour="startGame" :gameFinish="isGameWon" :gameExited="isGameExited" />
 	</div>
 </template>
   
@@ -100,7 +100,6 @@
 	  exitGame() {
 			console.log('Exiting the game');
 			this.isGameExited = true;
-			this.isGameWon = true
 	  },
 
 	  resetGame() {

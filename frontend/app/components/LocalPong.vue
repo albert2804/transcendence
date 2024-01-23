@@ -11,11 +11,13 @@
 			<!-- <button @click="startTournament" class="start-tournament">Start Tournament</button> -->
 		</div>
 	  <canvas ref="pongCanvas" width="800" height="400"></canvas>
-		<LocalTournament @startGame="callStartGame" :isGameWon="isGameWon" />
+		<LocalTournament :startGameTour="startGame" :gameFinish="isGameWon" />
 	</div>
 </template>
   
   <script>
+	import LocalTournament from './LocalTournament.vue';
+
   export default {
 		name: 'LocalPong',
 	data() {
@@ -81,6 +83,9 @@
 	  this.exitGame();
 	  console.log("Page left. Game loop stopped.");
 	},
+	components: {
+		LocalTournament
+	},
 	methods: {
 	
 	  setupGame() {
@@ -93,8 +98,9 @@
 		},
 
 	  exitGame() {
-		console.log('Exiting the game');
-		this.isGameExited = true;
+			console.log('Exiting the game');
+			this.isGameExited = true;
+			this.isGameWon = true
 	  },
 
 	  resetGame() {
@@ -103,6 +109,7 @@
 		this.numberOfWinsP2 = 0;
 		this.isGameExited = false;
 		this.isGamePaused = false;
+		this.isGameWon = false;
 
 		// reset paddles
 		this.leftPaddle.x = 0;

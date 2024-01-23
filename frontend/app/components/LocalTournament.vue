@@ -21,8 +21,8 @@
       <form>
         <label for="nbrPlayerRange" class="form-label">Number of total Players</label>
         <div class="mb-3 d-flex align-items-center">
-          <input type="range" class="form-range" min="3" max="42" id="nbrPlayerRange" v-model.number="nbr_players" @input="updatePlayerCount">
-          <input type="number" class="form-control" v-model.number="nbr_players" min="3" max="42" @input="updatePlayerCount">
+          <input type="range" class="form-range" min="3" max="16" id="nbrPlayerRange" v-model.number="nbr_players" @input="updatePlayerCount">
+          <input type="number" class="form-control" v-model.number="nbr_players" min="3" max="16" @input="updatePlayerCount">
         </div>
         <div class="name-box">
           <div v-for="index in nbr_players" :key="index" class="name-input">
@@ -58,9 +58,10 @@
 </template>
 
 <script>
-import LocalPong from './LocalPong.vue';
 
 export default {
+  props: ['startGameTour', 'gameFinish'],
+  name: 'LocalTournament',
   data() {
     return {
       all_players: [],
@@ -69,9 +70,9 @@ export default {
       ongoingTournament: false,
       player_one: 0,
       player_two: 1,
+      isGameFinished: false,
     };
   },
-  props: ['isGameWon'],
   computed: {
     // Computed property to generate unique radio button group names
     radioGroupName() {
@@ -104,19 +105,45 @@ export default {
         this.all_players.splice(this.nbr_players);
       }
     },
-    startTournament() {
+    async startTournament() {
       console.log(this.all_players)
       this.updatePlayerName()
       this.formVisible = false;
       this.ongoingTournament = true;
-      const total_games = 3;
-      for (let games_played = 0; games_played < total_games; games_played++) {
-          ;
+      
+      const total_games = 3; //needs a calc
+      
+      console.log("start game")
+      const playGame = async () => {
+        for (let games_played = 0; games_played < total_games; games_played++) {
+          console.log("Before startGameTour");
+          await this.startGameTour();
+          console.log("After startGameTour, before waitForVariableChange");
+          await this.waitForVariableChange(() => this.gameFinish);
+          console.log("After waitForVariableChange");
         }
-      }
+      };
+      playGame().then(() => {
+
+        console.log("Tournament finished")
+      });
+    },
+
+    async waitForVariableChange(conditionalCallback) {
+      return new Promise((resolve) => {
+        const checkCondition = () => {
+          if (conditionalCallback()) {
+            resolve();
+          } else {
+            setTimeout(checkCondition, 1);
+          }
+        };
+
+        checkCondition();
+      });
+    },
 
       //logic
-    },
     setActiveRadio(value, index) {
       this.all_players[index - 1].name = value + "-" + index;
       if (value == 'Bot') {
@@ -132,7 +159,7 @@ export default {
     getPlayerValue(index) {
       if (this.all_players[index - 1] !== undefined)
         return this.all_players[index - 1].name;
-    }
+    },
   },
 };
 </script>

@@ -8,6 +8,7 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <GameModal :modalTitle="'Game'" modalId="pongmodal" ariaLabel="A modal to play our remote Pong Game" />
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
             <NuxtLink class="nav-link active" to="/">Home</NuxtLink>
@@ -39,7 +40,6 @@
           <li class="nav-item">
             <a class="nav-link disabled" aria-disabled="true">Disabled</a>
           </li>
-          <GameModal :modalTitle="'Game'" modalId="pongmodal" ariaLabel="A modal to play our remote Pong Game" />
         </ul>
         <!-- <form class="d-flex" role="search">
           <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">

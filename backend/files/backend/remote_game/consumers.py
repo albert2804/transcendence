@@ -8,35 +8,77 @@ import asyncio
 from .utils import PongGame
 
 class GameGroup:
-    def __init__(self, channel_p1, channel_p2, channel_game_group, channel_layer):
-        self.player1 = channel_p1
-        self.player2 = channel_p2
-        self.game_group = channel_game_group
+    def __init__(self, p1_channel, p2_channel, game_group, channel_layer):
+        self.p1_channel = p1_channel
+        self.p2_channel = p2_channel
+        self.game_group = game_group
         self.game = PongGame()
         self.channel_layer = channel_layer
 
     async def start_game(self):
         print(f"Starting game ({self.game_group}).")
+        # send info, that game is starting
+        await self.channel_layer.group_send(
+            self.game_group,
+            {
+                'type': 'state',
+                'state': "playing",
+                'p1_name': await database_sync_to_async(lambda: get_user_model().objects.get(id=int(RemoteGameConsumer.channel_to_user[self.p1_channel])).username)(),
+                'p2_name': await database_sync_to_async(lambda: get_user_model().objects.get(id=int(RemoteGameConsumer.channel_to_user[self.p2_channel])).username)(),
+            }
+        )
+        # run game loop
         while not self.game.isGameExited:
             self.game.game_loop()
             await self.send_game_state()
             await asyncio.sleep(0.003)
+        # send info, that game is finished
+        await self.channel_layer.group_send(
+            self.game_group,
+            {
+                'type': 'state',
+                'state': "finished",
+                'p1_name': await database_sync_to_async(lambda: get_user_model().objects.get(id=int(RemoteGameConsumer.channel_to_user[self.p1_channel])).username)(),
+                'p2_name': await database_sync_to_async(lambda: get_user_model().objects.get(id=int(RemoteGameConsumer.channel_to_user[self.p2_channel])).username)(),
+            }
+        )
+        # UNU@NERPRU@FTES ZEUGS:
+        # wait 5 seconds
+        await asyncio.sleep(5)
+        # remove game group from maps
+        del RemoteGameConsumer.game_groups[self.game_group]
+        del RemoteGameConsumer.channel_to_game_group[self.p1_channel]
+        del RemoteGameConsumer.channel_to_game_group[self.p2_channel]
+        print(f"Game ({self.game_group}) finished.")
+        # send info, that game is finished and players are back in the menu
+        await self.channel_layer.group_send(
+            self.game_group,
+            {
+                'type': 'state',
+                'state': "menu",
+                'p1_name': "",
+                'p2_name': "",
+            }
+        )
+        # remove channels from game group
+        await self.channel_layer.group_discard(self.game_group, self.p1_channel)
+        await self.channel_layer.group_discard(self.game_group, self.p2_channel)
+
+
+
+
+        # move players to waiting group
+        # RemoteGameConsumer.add_to_waiting_group(self.p1_channel)
+        # RemoteGameConsumer.add_to_waiting_group(self.p2_channel)
+        # ENDE UNU@NERPRU@FTES ZEUGS
+
     
     def stop_game(self):
         print(f"Stopping game ({self.game_group}).")
         self.game.isGameExited = True
     
     def update_paddle(self, channel_name, key, type):
-        if channel_name == self.player1:
-            if type == 'key_pressed':
-                if key == 'ArrowUp':
-                    self.game.rightPaddle['dy'] = -2
-                elif key == 'ArrowDown':
-                    self.game.rightPaddle['dy'] = 2
-            elif type == 'key_released':
-                if key in ['ArrowDown', 'ArrowUp']:
-                    self.game.rightPaddle['dy'] = 0
-        elif channel_name == self.player2:
+        if channel_name == self.p1_channel:
             if type == 'key_pressed':
                 if key == 'ArrowUp':
                     self.game.leftPaddle['dy'] = -2
@@ -45,6 +87,15 @@ class GameGroup:
             elif type == 'key_released':
                 if key in ['ArrowDown', 'ArrowUp']:
                     self.game.leftPaddle['dy'] = 0
+        elif channel_name == self.p2_channel:
+            if type == 'key_pressed':
+                if key == 'ArrowUp':
+                    self.game.rightPaddle['dy'] = -2
+                elif key == 'ArrowDown':
+                    self.game.rightPaddle['dy'] = 2
+            elif type == 'key_released':
+                if key in ['ArrowDown', 'ArrowUp']:
+                    self.game.rightPaddle['dy'] = 0
         else:
             print(f"Unknown channel name: {channel_name}")
     
@@ -53,19 +104,19 @@ class GameGroup:
             'ball': {
                 'x': self.game.ball['x'],
                 'y': self.game.ball['y'],
-                'radius': self.game.ball['radius'],
+                'radius': self.game.ball['radius'], #needed?? BETTER PADDLESIZE IN PERCENT !!!
             },
             'leftPaddle': {
-                'x': self.game.leftPaddle['x'],
+                # 'x': self.game.leftPaddle['x'],
                 'y': self.game.leftPaddle['y'],
-                'width': self.game.leftPaddle['width'],
-                'height': self.game.leftPaddle['height'],
+                # 'width': self.game.leftPaddle['width'],
+                # 'height': self.game.leftPaddle['height'],
             },
             'rightPaddle': {
-                'x': self.game.rightPaddle['x'],
+                # 'x': self.game.rightPaddle['x'],
                 'y': self.game.rightPaddle['y'],
-                'width': self.game.rightPaddle['width'],
-                'height': self.game.rightPaddle['height'],
+                # 'width': self.game.rightPaddle['width'],
+                # 'height': self.game.rightPaddle['height'],
             },
         }
         high_score = {
@@ -92,37 +143,36 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 
     # channel_name to game_group_name (one entry for each player who is in a game group)
     channel_to_game_group = {}
+    # INFO: der game_group_name ist gleichzeitig der channel_name der game group
 
     # map of game groups (game_group_name: GameGroup)
     game_groups = {}
-
     
     async def add_to_waiting_group(self, channel_name):
-        # following 2 lines are only for debugging
+        # send "waiting" state to the player
         username = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(RemoteGameConsumer.channel_to_user[channel_name])).username)()
-        print(f"User {username} added to waiting group.")
+        await self.channel_layer.group_send(
+            f"game_user_{self.channel_to_user[channel_name]}",
+            {
+                'type': 'state',
+                'state': "waiting",
+                'p1_name': username,
+                'p2_name': "...",
+            }
+        )
         # add consumer to the group of waiting players
         await self.channel_layer.group_add("waiting", channel_name)
         # check if there is another player waiting
         if len(self.channel_layer.groups["waiting"]) >= 2:
-            new_group_name = f"game_group_{random.randint(0, 1000000)}"
+            new_group_name = f"game_group_{random.randint(0, 1000000)}" # enough randomness to avoid collisions ??
             waiting_channel_ids = list(self.channel_layer.groups["waiting"])
+            # check again if there are still enough players waiting (because of asyncronous code)
             if len(waiting_channel_ids) >= 2:
+                # move players from waiting group to new game group
                 await self.channel_layer.group_add(new_group_name, waiting_channel_ids[0])
                 await self.channel_layer.group_discard("waiting", waiting_channel_ids[0])
                 await self.channel_layer.group_add(new_group_name, waiting_channel_ids[1])
                 await self.channel_layer.group_discard("waiting", waiting_channel_ids[1])
-                # get usernames of the players
-                first_player_username = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(RemoteGameConsumer.channel_to_user[waiting_channel_ids[0]])).username)()
-                second_player_username = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(RemoteGameConsumer.channel_to_user[waiting_channel_ids[1]])).username)()
-                # send message to the players
-                await self.channel_layer.group_send(
-                    new_group_name,
-                    {
-                        'type': 'message',
-                        'message': f'The game is starting! Players: {first_player_username} vs. {second_player_username}',
-                    }
-                )
                 # create new game group
                 RemoteGameConsumer.game_groups[new_group_name] = GameGroup(waiting_channel_ids[0], waiting_channel_ids[1], new_group_name, self.channel_layer)
                 # add players to the game group
@@ -131,24 +181,8 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
                 # start the game in the game group in a new thread
                 asyncio.ensure_future(RemoteGameConsumer.game_groups[new_group_name].start_game())
             else:
-                # TODO:
                 # remove the new created group
                 del self.channel_layer.groups[new_group_name]
-                await self.channel_layer.group_send(
-                    f"user_{self.channel_to_user[channel_name]}",
-                    {
-                        'type': 'message',
-                        'message': 'Something went wrong. Please try again.',
-                    }
-                )
-        else:
-            await self.channel_layer.group_send(
-                f"user_{self.channel_to_user[channel_name]}",
-                {
-                    'type': 'message',
-                    'message': 'Waiting for another player to join...',
-                }
-            )
     
     async def connect(self):
         await self.accept()
@@ -165,7 +199,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
             print(f"User {self.scope['user']} connected.")
             #  add user to his own group / create group for the user
             await self.channel_layer.group_add(
-                f"user_{self.scope['user'].id}",
+                f"game_user_{self.scope['user'].id}",
                 self.channel_name
             )
             # add user to the maps
@@ -175,21 +209,40 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
                 'type': 'message',
                 'message': 'Welcome!',
             }))
-            await self.add_to_waiting_group(self.channel_name)
+            # await self.add_to_waiting_group(self.channel_name)
+            await self.channel_layer.group_send(
+                f"game_user_{self.scope['user'].id}",
+                {
+                    'type': 'state',
+                    'state': "menu",
+                    'p1_name': "",
+                    'p2_name': "",
+                }
+            )
     
+
+    # DIESE RECEIVE FUNKTION MUSS DEFINITIV NOCH ÜBERARBEITET WERDEN !
+    # ERST DATENTYP CHECKEN UND DANN GUCKEN OB IM GAME UND SO... SONDT SCHNELL ERROR!
+    # WENN MENU_DATA KOMMT UND SPIELER IN GAME SOLLTE NICHTS PASSIEREN....
     async def receive(self, text_data):
         try:
             # check if user is in a game group
             if self.channel_name in RemoteGameConsumer.channel_to_game_group:
+                # get the game data
+                game_data = json.loads(text_data)
                 # get the game group
                 game_group_name = RemoteGameConsumer.channel_to_game_group[self.channel_name]
                 game_group = RemoteGameConsumer.game_groups[game_group_name]
-                # get the game data
-                game_data = json.loads(text_data)
-                type = game_data.get('type')
-                key = game_data.get('key')
                 # update the paddle
-                game_group.update_paddle(self.channel_name, key, type)
+                game_group.update_paddle(self.channel_name, game_data.get('key'), game_data.get('type'))
+            else:
+                # get the menu data
+                menu_data = json.loads(text_data)
+                # check if the user wants to start a game
+                if menu_data.get('type') == 'start_game':
+                    await self.add_to_waiting_group(self.channel_name)
+                else:
+                    print(f"Received invalid JSON file: {menu_data}")
         except json.JSONDecodeError:
             print(f"Received invalid JSON file")
         
@@ -223,16 +276,36 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
                             group_name,
                             {
                                 'type': 'message',
-                                'message': 'The other player left the game. In 10 seconds you will be added to the waiting group.',
+                                'message': 'The other player left the game. In 5 seconds you will be back in the menu.',
                             }
                         )
-                        # wait 10 seconds
-                        await asyncio.sleep(10)
+                        # wait 5 seconds
+                        await asyncio.sleep(5)
+                        # remove the game group
+                        del RemoteGameConsumer.game_groups[group_name]
+                        # remove the game group from the maps
+                        del RemoteGameConsumer.channel_to_game_group[self.p1_channel]
+                        del RemoteGameConsumer.channel_to_game_group[self.p2_channel]
+                        # remove the remaining player from the game group
+                        remaining_player_channel_id = list(self.channel_layer.groups[group_name])[0]
+                        await self.channel_layer.group_discard(group_name, remaining_player_channel_id)
+                        # send info, that game is finished and players are back in the menu
+                        await self.channel_layer.group_send(
+                            group_name,
+                            {
+                                'type': 'state',
+                                'state': "menu",
+                                'p1_name': "",
+                                'p2_name': "",
+                            }
+                        )
+                        # TODO: Check if group is deleted! Test it with print statements or something like that!
+
                         # move the remaining player to the waiting group
-                        if group_name in self.channel_layer.groups and len(self.channel_layer.groups[group_name]) == 1:
-                            remaining_player_channel_id = list(self.channel_layer.groups[group_name])[0]
-                            await self.add_to_waiting_group(remaining_player_channel_id)
-                            del self.channel_layer.groups[group_name]
+                        # if group_name in self.channel_layer.groups and len(self.channel_layer.groups[group_name]) == 1:
+                        #     remaining_player_channel_id = list(self.channel_layer.groups[group_name])[0]
+                        #     await self.add_to_waiting_group(remaining_player_channel_id)
+                        #     del self.channel_layer.groups[group_name]
 
     #########################
     # group message handler #
@@ -249,6 +322,15 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
             'type': 'game_update',
             'state': event['state'],
             'high_score': event['high_score'],
+        }))
+    
+    async def state(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'state',
+            'state': event['state'], # "playing", "waiting", "finished" ...
+            # 'playing': event['playing'], # True or False
+            'p1_name': event['p1_name'],
+            'p2_name': event['p2_name'],
         }))
 
 

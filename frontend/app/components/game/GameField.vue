@@ -1,19 +1,35 @@
 <template>
   <div
       class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease">
-      <div class="score-container">{{ numberOfHitsP1 }} : {{ numberOfHitsP2 }}</div>
-      <div class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
-      <div class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
-      <div class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%' }"></div>
-      <div class="midline"></div>
+      <!-- <div class="score-container">{{ numberOfHitsP1 }} : {{ numberOfHitsP2 }}</div> -->
+      <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
+      <div v-show="playing" class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
+      <div v-show="playing" class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%' }"></div>
+      <div v-show="playing" class="midline"></div>
+      <div v-show="playing" style="position: absolute; top: 0; left: 2%; font-size: 1.2em; color: #ffffff;">
+        {{ p1_name }}
+      </div>
+      <div v-show="playing" style="position: absolute; top: 0; right: 2%; font-size: 1.2em; color: #ffffff;">
+        {{ p2_name }}
+      </div>
+      <div v-show="playing" style="position: absolute; bottom: 0; left: 2%; font-size: 2.0em; color: #ffffff;">
+        {{ numberOfHitsP1 }}
+      </div>
+      <div v-show="playing" style="position: absolute; bottom: 0; right: 2%; font-size: 2.0em; color: #ffffff;">
+        {{ numberOfHitsP2 }}
+      </div>
       <!-- centered text -->
       <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.6em; font-weight: bold; color: #ffffff; text-align: center;">
           <div v-if="message">{{ message }}</div>
       </div>
+      <!-- centered Bootstrap button -->
+      <div v-if="showMenu" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+        <button type="button" class="btn btn-primary" @click="startGame">Start Game</button>
+      </div>
   </div>
-  </template>
+</template>
   
-  <script>
+<script>
   import { isLoggedIn } from '~/store';
   export default {
   name: 'RemotePong',
@@ -21,8 +37,14 @@
     return {
       message: '',
       socket: null,
-      numberOfHitsP1 : 0,
-      numberOfHitsP2 : 0,
+      //
+      numberOfHitsP1: 0,
+      numberOfHitsP2: 0,
+      //
+      playing: false,
+      showMenu: false,
+      p1_name: 'player 1', // left players name
+      p2_name: 'player 2', // right players name
       //
       pressedKeys: [],
       paddleSize: 20,
@@ -94,7 +116,31 @@
             //     'message': 'Welcome!',
             // }))
             this.message = data.message;
-          } 
+          } else if (data.type === "state")
+          {
+            // this.playing = data.playing;
+            this.p1_name = data.p1_name;
+            this.p2_name = data.p2_name;
+            if (data.state === "playing") {
+              this.message = '';
+              this.playing = true;
+              this.showMenu = false;
+            } else if (data.state === "waiting") {
+              this.message = 'Waiting for opponent...';
+              this.playing = true;
+              this.showMenu = false;
+            } else if (data.state === "finished") {
+              this.message = 'Game finished!';
+              this.playing = false;
+              this.showMenu = false;
+            } else if (data.state === "menu") {
+              this.message = '';
+              this.playing = false;
+              this.showMenu = true;
+            } else {
+              console.error('Received message of unknown type:', data);
+            }
+          }
           else {
             console.error('Received message of unknown type:', data);
           }
@@ -107,6 +153,13 @@
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         this.socket.close()
         console.log('WebSocket connection closed')
+      }
+    },
+    // function to send info to backend to start game (join waiting room)
+    startGame () {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        const data = JSON.stringify({ type: 'start_game' });
+        this.socket.send(data);
       }
     },
     /* ------------- Event handler ---------------------------------------*/
@@ -175,23 +228,10 @@
     },
   }
 };
-  </script>
+</script>
 
-  <!-- Styles -->
-  <style scoped>
-  .score-container {
-	display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    color: blue;
-    font-size: 80px;
-    margin-top: 50px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1;
-  } 
+<!-- Styles -->
+<style scoped>
   
   .game-canvas {
   width: 100%;
@@ -232,5 +272,5 @@
   border-radius: 50%;
 }
 
-  </style>
+</style>
   

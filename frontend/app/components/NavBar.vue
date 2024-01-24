@@ -1,6 +1,7 @@
 <!-- https://getbootstrap.com/docs/5.3/components/navbar/ -->
 
 <template>
+  <GameModal :modalTitle="'Game'" modalId="pongmodal" ariaLabel="A modal to play our remote Pong Game" />
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">ft_transcendence</a>
@@ -8,7 +9,6 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <GameModal :modalTitle="'Game'" modalId="pongmodal" ariaLabel="A modal to play our remote Pong Game" />
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
             <NuxtLink class="nav-link active" to="/">Home</NuxtLink>

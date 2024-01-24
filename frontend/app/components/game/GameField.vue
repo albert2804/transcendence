@@ -111,14 +111,9 @@
               console.error('Received game_state message with undefined data:', data);
             }
           } else if (data.type === 'message') {
-            // await self.send(text_data=json.dumps({
-            //     'type': 'message',
-            //     'message': 'Welcome!',
-            // }))
             this.message = data.message;
-          } else if (data.type === "state")
-          {
-            // this.playing = data.playing;
+            // this.menu = false; // hide menu if you get already connected message and menu is still visible because you were connected as another user before
+          } else if (data.type === "state") {
             this.p1_name = data.p1_name;
             this.p2_name = data.p2_name;
             if (data.state === "playing") {
@@ -127,7 +122,7 @@
               this.showMenu = false;
             } else if (data.state === "waiting") {
               this.message = 'Waiting for opponent...';
-              this.playing = true;
+              this.playing = false;
               this.showMenu = false;
             } else if (data.state === "finished") {
               this.message = 'Game finished!';
@@ -140,8 +135,15 @@
             } else {
               console.error('Received message of unknown type:', data);
             }
-          }
-          else {
+          } else if (data.type === "winner") {
+            this.message = "You won the game!";
+            this.playing = false;
+            this.showMenu = false;
+          } else if (data.type === "loser") {
+            this.message = "You lost the game!";
+            this.playing = false;
+            this.showMenu = false;
+          } else {
             console.error('Received message of unknown type:', data);
           }
         } catch (error) {

@@ -18,27 +18,27 @@ class PongGame:
         # Ball initialization
         self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.initialSpeed, 'dy': self.initialSpeed, 'radius': 6}
 
-    def reset_game(self):
-        # Reset parameters
-        self.numberOfHitsP1 = 0
-        self.numberOfHitsP2 = 0
-        self.isGameExited = False
-        self.isGamePaused = False
+    # def reset_game(self):
+    #     # Reset parameters
+    #     self.numberOfHitsP1 = 0
+    #     self.numberOfHitsP2 = 0
+    #     self.isGameExited = False
+    #     self.isGamePaused = False
 
-        # Reset paddles
-        self.leftPaddle['x'] = 0
-        self.leftPaddle['y'] = self.canvasHeight/2 - self.leftPaddle['height']/2
-        self.rightPaddle['x'] = self.canvasWidth - self.rightPaddle['width']
-        self.rightPaddle['y'] = self.canvasHeight/2 - self.rightPaddle['height']/2
+    #     # Reset paddles
+    #     self.leftPaddle['x'] = 0
+    #     self.leftPaddle['y'] = self.canvasHeight/2 - self.leftPaddle['height']/2
+    #     self.rightPaddle['x'] = self.canvasWidth - self.rightPaddle['width']
+    #     self.rightPaddle['y'] = self.canvasHeight/2 - self.rightPaddle['height']/2
 
-        # Reset ball
-        self.ball['x'] = self.canvasWidth/2
-        self.ball['y'] = self.canvasHeight/2
-        self.ball['dx'] = self.initialSpeed
-        self.ball['dy'] = self.initialSpeed
+    #     # Reset ball
+    #     self.ball['x'] = self.canvasWidth/2
+    #     self.ball['y'] = self.canvasHeight/2
+    #     self.ball['dx'] = self.initialSpeed
+    #     self.ball['dy'] = self.initialSpeed
 
-        # Reset speed values
-        self.currentSpeed = self.initialSpeed
+    #     # Reset speed values
+    #     self.currentSpeed = self.initialSpeed
 
     def update_game(self):
         # If the game is paused, the game will not be updated
@@ -99,10 +99,10 @@ class PongGame:
 
     def game_loop(self):
         # Check if the game is exited
-        if self.isGameExited:
-            self.reset_game()
+        # if self.isGameExited:
+        #     self.reset_game()
         # Check if the maximum number of games has been reached
-        elif self.numberOfHitsP1 < 10 and self.numberOfHitsP2 < 10:
+        if self.numberOfHitsP1 < 10 and self.numberOfHitsP2 < 10:
             self.update_game()
             # Use asyncio.sleep instead of requestAnimationFrame
         else:

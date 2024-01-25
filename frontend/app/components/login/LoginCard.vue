@@ -17,6 +17,11 @@
   const generateRandomString = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   };
+
+  const redirectToIntraLogin = () => {
+    const url =`https://api.intra.42.fr/oauth/authorize?client_id=${client_id}&redirect_uri=${redirect_uri.value}&state=${generateRandomString()}&response_type=code`;
+    window.location.href = url;
+  };
 </script>
 
 
@@ -41,13 +46,11 @@
           <button type="button" @keyup.enter="$refs.loginnamefield.focus()" ref="loginbutton" class="btn btn-primary" @click="login">Login</button>
           <a class="btn btn-link btn-sm" @click="reg_form = true; error = ''; message = ''">create account</a>
         </div>
-        {{ client_id }}
-        <br>
-        {{ redirect_uri }}
-        <a :href="`https://api.intra.42.fr/oauth/authorize?client_id=${ client_id }&redirect_uri=${redirect_uri}&state=${generateRandomString()}&response_type=code`">Login with 42 intra</a>
-        <!-- <a :href="`https://api.intra.42.fr/oauth/authorize?client_id=${ client_id }&redirect_uri=${redirect_uri}&response_type=code&scope=public`">Login with 42 intra 2</a> -->
-                <!-- <a :href="`https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da&redirect_uri=https%3A%2F%2Flocalhost%2Fendpoint%2Fauth%2Fcallback&response_type=code`"> Login with 42 intra</a>  -->
       </form>
+      <div class="button-list">
+        <button type="button" class="btn" @click="redirectToIntraLogin">Login with your 42 intra account instead</button>
+        <a :href="`https://api.intra.42.fr/oauth/authorize?client_id=${ client_id }&redirect_uri=${ redirect_uri }&state=${generateRandomString()}&response_type=code`">Login with 42 intra</a>
+      </div>
       <!-- REGISTRATION FORM -->
       <form v-if="isLoggedIn == 0 && reg_form">
         <div class="mb-3">

@@ -43,8 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crispy_forms',
-    'social_django',
-    'custom_auth',
+    # 'social_django',
+    # 'custom_auth',
     'users',
     'api',
     'chat',
@@ -69,7 +69,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'social_django.middleware.SocialAuthExceptionMiddleware',
+    # 'social_django.middleware.SocialAuthExceptionMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
@@ -130,12 +130,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Social Auth config for OAuth
-# https://python-social-auth.readthedocs.io/en/latest/configuration/django.html
+# # Social Auth config for OAuth
+# # https://python-social-auth.readthedocs.io/en/latest/configuration/django.html
 
-SOCIAL_AUTH_JSONFIELD_ENABLED = True
-SOCIAL_AUTH_STRATEGY = "social_django.strategy.DjangoStrategy"
-SOCIAL_AUTH_STORAGE = "social_django.models.DjangoStorage"
+# SOCIAL_AUTH_JSONFIELD_ENABLED = True
+# SOCIAL_AUTH_STRATEGY = "social_django.strategy.DjangoStrategy"
+# SOCIAL_AUTH_STORAGE = "social_django.models.DjangoStorage"
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -173,12 +173,12 @@ AUTHENTICATION_BACKENDS = [
     #
     #'social_core.backends.open_id.OpenIdAuth',
     #'social_core.backends.google.GoogleOpenId',     #deprecated, remove after testing
-    'social_core.backends.github.GithubOAuth2',
-    'social_core.backends.google.GoogleOAuth2',
-    #'social_core.backends.google.GoogleOAuth',
-    'social_core.backends.twitter.TwitterOAuth',
-    'social_core.backends.oauth.BaseOAuth2',
-    'custom_auth.models.Intra42OAuth2'
+    # 'social_core.backends.github.GithubOAuth2',
+    # 'social_core.backends.google.GoogleOAuth2',
+    # #'social_core.backends.google.GoogleOAuth',
+    # 'social_core.backends.twitter.TwitterOAuth',
+    # 'social_core.backends.oauth.BaseOAuth2',
+    # 'custom_auth.models.Intra42OAuth2'
 ]
 
 SOCIAL_AUTH_GITHUB_KEY='e989ab105c9b8c40d3f6'
@@ -186,46 +186,31 @@ SOCIAL_AUTH_GITHUB_SECRET='9a6ca7f1e6106dccf4564dc626fa43c4167e1aeb'
 
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 
-SOCIAL_AUTH_INTRA42_OAUTH2_KEY = 'u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da'
-SOCIAL_AUTH_INTRA42_OAUTH2_SECRET = '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'
-SOCIAL_AUTH_INTRA42_OAUTH2_AUTHORIZATION_URL='https://api.intra.42.fr/oauth/authorize'
+# SOCIAL_AUTH_INTRA42_OAUTH2_KEY = 'u-s4t2ud-3c7e6b5f041d92a81665a41cf1fe7244fce02d09e64f7d39e5c5ee13da9018da'
+# SOCIAL_AUTH_INTRA42_OAUTH2_SECRET = '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'
+# SOCIAL_AUTH_INTRA42_OAUTH2_AUTHORIZATION_URL='https://api.intra.42.fr/oauth/authorize'
 
 LOGIN_URL = 'auth/login/'
 LOGIN_REDIRECT_URL='/endpoint/auth'
 
-SOCIAL_AUTH_PIPELINE = (
-    'custom_auth.models.foo',
-    'social_core.pipeline.social_auth.social_details',
-    'social_core.pipeline.social_auth.social_uid',
-    'social_core.pipeline.social_auth.auth_allowed',
-    'social_core.pipeline.social_auth.social_user',
-    'social_core.pipeline.user.get_username',
-    'social_core.pipeline.user.create_user',
-# #    'custom_auth.pipeline',  # <--- set the path to the function
-#     'social_core.pipeline.social_auth.associate_user',
-#     'social_core.pipeline.social_auth.load_extra_data',
-    'social_core.pipeline.user.user_details',
-    'custom_auth.models.foo',
-)
+# SOCIAL_AUTH_PIPELINE = (
+#     'custom_auth.models.foo',
+#     'social_core.pipeline.social_auth.social_details',
+#     'social_core.pipeline.social_auth.social_uid',
+#     'social_core.pipeline.social_auth.auth_allowed',
+#     'social_core.pipeline.social_auth.social_user',
+#     'social_core.pipeline.user.get_username',
+#     'social_core.pipeline.user.create_user',
+# # #    'custom_auth.pipeline',  # <--- set the path to the function
+# #     'social_core.pipeline.social_auth.associate_user',
+# #     'social_core.pipeline.social_auth.load_extra_data',
+#     'social_core.pipeline.user.user_details',
+#     'custom_auth.models.foo',
+# )
 
 INTERNAL_IPS = [
     '127.0.0.1',
 	'localhost',
-]
-
-DEBUG_TOOLBAR_PANELS = [
-    'debug_toolbar.panels.versions.VersionsPanel',
-    'debug_toolbar.panels.timer.TimerPanel',
-    'debug_toolbar.panels.settings.SettingsPanel',
-    'debug_toolbar.panels.headers.HeadersPanel',
-    'debug_toolbar.panels.request.RequestPanel',
-    'debug_toolbar.panels.sql.SQLPanel',
-    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
-    'debug_toolbar.panels.templates.TemplatesPanel',
-    'debug_toolbar.panels.cache.CachePanel',
-    'debug_toolbar.panels.signals.SignalsPanel',
-    'debug_toolbar.panels.logging.LoggingPanel',
-    'debug_toolbar.panels.redirects.RedirectsPanel',
 ]
 
 #  LOGGING = {
@@ -253,4 +238,3 @@ DEBUG_TOOLBAR_PANELS = [
 #     },
 # }
 
-SOCIAL_AUTH_FIELDS_STORED_IN_SESSION = ['user', 'username', 'social_user', 'provider', 'email', 'first_name', 'last_name', 'id', 'access_token', 'refresh_token', 'expires', 'token_type', 'extra_data', 'client_id']

@@ -11,7 +11,7 @@
   const redirect_uri = ref('');
 
   onMounted(() => {
-    redirect_uri.value = encodeURIComponent(window.location.origin) + encodeURIComponent("/endpoint/auth/callback");
+    redirect_uri.value = encodeURIComponent(window.location.origin + "/endpoint/auth/callback");
   });
 
   const generateRandomString = () => {
@@ -47,10 +47,12 @@
           <a class="btn btn-link btn-sm" @click="reg_form = true; error = ''; message = ''">create account</a>
         </div>
       </form>
+      <form v-if="isLoggedIn != 1 && !reg_form">
       <div class="button-list">
-        <button type="button" class="btn" @click="redirectToIntraLogin">Login with your 42 intra account instead</button>
-        <a :href="`https://api.intra.42.fr/oauth/authorize?client_id=${ client_id }&redirect_uri=${ redirect_uri }&state=${generateRandomString()}&response_type=code`">Login with 42 intra</a>
+        Alternatively, 42 students can just log in with their intra accounts at 42. Just click on the magic button below
+        <button type="button" ref="loginbutton_42intra" class="btn btn-primary" @click="redirectToIntraLogin">CLICK ME TO 42!</button>
       </div>
+      </form>
       <!-- REGISTRATION FORM -->
       <form v-if="isLoggedIn == 0 && reg_form">
         <div class="mb-3">

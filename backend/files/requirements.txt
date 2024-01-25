@@ -16,10 +16,7 @@ daphne==4.0.0
 # twisted[tls,http2]==23.10.0
 # Timezone support
 pytz==2023.3.post1
-
-# Authentication/OAuth
-social-auth-app-django
-django-crispy-forms
+requests==2.27.1
 
 #debug toolbar
 django-debug-toolbar

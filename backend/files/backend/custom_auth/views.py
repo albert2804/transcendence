@@ -1,7 +1,5 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from custom_auth.models import Intra42OAuth2
-from social_django.utils import psa
 import json
 import requests
 import os
@@ -101,28 +99,28 @@ def callback(request):
 #     return HttpResponse(json.dumps(data), mimetype="application/json")
 
 
-@psa('social:complete')
-def register_by_access_token(request):
-    # This view expects an access_token GET parameter, if it's needed,
-    # request.backend and request.strategy will be loaded with the current
-    # backend and strategy.
-    logger.warning("REGISTER BY ACCESS TOKEN")
-    token = request.REQUEST.get('access_token')
-    print("TOKEN: " + token)
-    user = request.backend.do_auth(token)
-    logger.warning("USER: " + user)
-    login(request, user)
-    print ("USER: " + user)
-    data = {"id": user.id, "username": user.username, "provider" : ""}
-    return HttpResponse(json.dumps(data), mimetype="application/json")
-    #return render(request, 'auth_view.html', context)
+# @psa('social:complete')
+# def register_by_access_token(request):
+#     # This view expects an access_token GET parameter, if it's needed,
+#     # request.backend and request.strategy will be loaded with the current
+#     # backend and strategy.
+#     logger.warning("REGISTER BY ACCESS TOKEN")
+#     token = request.REQUEST.get('access_token')
+#     print("TOKEN: " + token)
+#     user = request.backend.do_auth(token)
+#     logger.warning("USER: " + user)
+#     login(request, user)
+#     print ("USER: " + user)
+#     data = {"id": user.id, "username": user.username, "provider" : ""}
+#     return HttpResponse(json.dumps(data), mimetype="application/json")
+#     #return render(request, 'auth_view.html', context)
     
-def home(request):
-    context = {
-        'tabs':tabs
-    }
-    print("HHHHORCEODRECCHSCUCHRSEHOSU")
-    return render(request, 'auth_view.html', context)
+# def home(request):
+#     context = {
+#         'tabs':tabs
+#     }
+#     print("HHHHORCEODRECCHSCUCHRSEHOSU")
+#     return render(request, 'auth_view.html', context)
 
 # def social_login(request):
 #     return render(request,'auth_view.html')

@@ -1,12 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from custom_auth.models import Intra42OAuth2
-from django.contrib.auth import login
 from social_django.utils import psa
 import json
 import requests
 import os
 from urllib.parse import quote
+from api.models import CustomUser
+from django.contrib.auth import login
+from django.contrib.auth.backends import ModelBackend
 
 import logging
 logger = logging.getLogger(__name__)
@@ -43,7 +45,43 @@ def callback(request):
     print(response.json())
     print (response.text)
 
-    return HttpResponse("This is the callback view.\n" + "CODE: " + code + "\nURL called: " + url)
+    token = response.json()['access_token'] 
+    print("TOKEN: " + token)
+
+    headers = {'Authorization': f'Bearer {token}'}
+    endpoint = "https://api.intra.42.fr/v2/"
+    print(endpoint + "me/")
+    response = requests.get(endpoint + "me/", headers=headers)
+
+    user_details = ""
+    if response.status_code == 200:
+        user_details = response.json()
+        print(user_details)
+    else:
+        print(f'Error: {response.status_code}')
+
+    user, created = CustomUser.objects.get_or_create(
+        username=user_details['login'] + "_42intra",
+        defaults={'email': user_details['email']})
+    if created:
+        print(f'User {user.username} created')
+    else:
+        print(f'User {user.username} already exists')
+
+    if user is not None:
+        backend = ModelBackend()
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, user)
+        print(f'User {user.username} logged in')
+# ...
+
+
+
+
+
+    # print(f"username: {user_details['login']}")
+
+    return HttpResponse("This is the callback view.\n" + "USERDATA:\n" + "\nURL called: " + json.dumps(user_details))
 
 # @psa("social:complete")
 # def ajax_auth(request, backend):

@@ -20,9 +20,10 @@
     <div v-if="formVisible" class="tournament-settings">
       <form>
         <label for="nbrPlayerRange" class="form-label">Number of total Players</label>
-        <div class="mb-3 d-flex align-items-center">
-          <input type="range" class="form-range" min="4" max="32" step="4" id="nbrPlayerRange" v-model.number="nbr_players" @input="updatePlayerCount">
-          <input type="number" class="form-control" v-model.number="nbr_players" min="4" max="32" step="4" @input="updatePlayerCount">
+        <div class="mb-3 align-items-center position-relative">
+          <input type="range" class="form-range" min="0" max="3" step="1" id="nbrPlayerRange" v-model.number="selectPos" @input="updatePlayerCount">
+          <!-- <input type="number" class="form-control" v-model.number="nbr_players" min="0" max="3" step="1" @input="updatePlayerCount"> -->
+          <h6 class="float-end" >{{ selectedData }}</h6>
         </div>
         <div class="name-box">
           <div v-for="index in nbr_players" :key="index" class="name-input">
@@ -54,10 +55,14 @@
         <button type="submit" @click="startTournament" class="start-tournament">Start Tournament</button>
       </form>
     </div>
+    <div v-if="ongoingTournament">
+      <LocalTournamentBracket :numberOfPlayers="nbr_players" :matches="all_matches" />
+    </div>
   </div>
 </template>
 
 <script>
+import LocalTournamentBracket from './LocalTournamentBracket.vue';
 
 export default {
   props: ['startGameTour', 'gameFinish', 'gameExited'],
@@ -65,15 +70,22 @@ export default {
   data() {
     return {
       all_players: [],
+      all_matches: [],
       nbr_players: '8',
       formVisible: false,
       ongoingTournament: false,
       player_one: 0,
       player_two: 1,
       isGameFinished: false,
+      tournamentSize: [4, 8, 16, 32],
+      selectPos: 1,
     };
   },
   computed: {
+    selectedData() {
+      this.nbr_players = this.tournamentSize[this.selectPos]
+      return this.tournamentSize[this.selectPos]
+    },
     // Computed property to generate unique radio button group names
     radioGroupName() {
       return (index) => `btnradio${index}`;
@@ -105,25 +117,42 @@ export default {
         this.all_players.splice(this.nbr_players);
       }
     },
+
+    calculateRoundNumber(currentMatch, totalGames) {
+      let round = 1;
+      
+      while(currentMatch <=totalGames / 2) {
+        totalGames -= totalGames / 2;
+        round++;
+      }
+      // while (totalGames > 0) {
+      //   round++;
+      //   totalGames = totalGames / 2;
+      // }
+      return round;
+    },
+
     async startTournament() {
       console.log(this.all_players)
-      if (this.nbr_players % 2 != 0) {
-        console.log("nbr of players needs to be even")
-        return;
-      }
       this.updatePlayerName()
       this.formVisible = false;
       this.ongoingTournament = true;
   
       const total_games = this.nbr_players - 1; 
-      let total_rounds = 0;
-      for (let calc = this.nbr_players; calc > 0; calc >>= 1) {
-        total_rounds++;
-      }
+      let total_rounds = Math.log2(this.numberOfPlayers);
 
       console.log(total_rounds);
-      let   round = 0;
       console.log("start game")
+      for (let match = 0; match < this.nbr_players - 1; match++) {
+        this.all_matches.push({
+          is_round: this.calculateRoundNumber(match + 1, total_games), 
+          game_nbr: match + 1, 
+          l_player: this.all_players[this.player_one],
+          r_player: this.all_players[this.player_two],
+          l_score: 10,
+          r_score: 10,
+        });
+      }
       const playGame = async () => {
         for (let games_played = 0; games_played < total_games; games_played++) {
 
@@ -208,7 +237,7 @@ export default {
 
 
   .form-range {
-    width: 650px;
+    width: 700px;
   }
 
   .form-control {

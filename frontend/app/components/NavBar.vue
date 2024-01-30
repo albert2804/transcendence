@@ -1,6 +1,7 @@
 <!-- https://getbootstrap.com/docs/5.3/components/navbar/ -->
 
 <template>
+  <GameModal :modalTitle="'Game'" modalId="pongmodal" ariaLabel="A modal to play our remote Pong Game" />
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">ft_transcendence</a>
@@ -16,7 +17,8 @@
             <NuxtLink class="nav-link active" to="/localGame">Local Game</NuxtLink>
           </li>
           <li class="nav-item">
-            <NuxtLink class="nav-link active" to="/remoteGame">Remote Game</NuxtLink>
+            <!-- <NuxtLink class="nav-link active" to="/remoteGame">Remote Game</NuxtLink> -->
+            <a class="nav-link active" @click="showGameModal">Remote Game</a>
           </li>
           <li class="nav-item">
             <NuxtLink class="nav-link active" to="/login">Login</NuxtLink>
@@ -57,5 +59,12 @@
 <script>
 export default {
   name: 'NavBar',
+  methods: {
+    showGameModal() {
+      this.$nextTick(() => {
+        new bootstrap.Modal(document.getElementById('pongmodal')).show();
+      });
+    },
+  },
 }
 </script>

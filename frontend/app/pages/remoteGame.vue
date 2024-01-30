@@ -1,7 +1,7 @@
 <template>
     <div>
       <div style="display: flex; justify-content: center; margin-top: 20vh;">
-          <RemotePong/>
+          <!-- <RemotePong/> -->
       </div>
     </div>
   </template>

@@ -114,6 +114,7 @@
             this.message = data.message;
             // this.menu = false; // hide menu if you get already connected message and menu is still visible because you were connected as another user before
           } else if (data.type === "state") {
+            // console.log('Received state message:', data);
             this.p1_name = data.p1_name;
             this.p2_name = data.p2_name;
             if (data.state === "playing") {
@@ -132,6 +133,11 @@
               this.message = '';
               this.playing = false;
               this.showMenu = true;
+            } else if (data.state === "other_device") {
+              // console.log('Received state message:', data);
+              this.message = 'You are connected with another device!';
+              this.playing = false;
+              this.showMenu = false;
             } else {
               console.error('Received message of unknown type:', data);
             }

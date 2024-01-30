@@ -26,7 +26,6 @@ urlpatterns = [
     path('endpoint/api/', include('api.urls')),
     path('endpoint/auth/', include("custom_auth.urls")),
     path('endpoint/user/', include("users.urls")),
-    path('endpoint/remoteGame/', include("remote_game.urls")),
 ]
 
 # Enable admin panel if ADMIN_PANEL_ENABLED (in .env-file) is set to True

@@ -1,5 +1,3 @@
-# remote_game/utils.py
-
 class PongGame:
     def __init__(self):
         self.numberOfHitsP1 = 0

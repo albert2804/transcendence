@@ -7,6 +7,16 @@ import random
 import asyncio
 from .utils import PongGame
 
+# TODO: send user object or id instead of p1_channel and p2_channel to GameGroup.
+#       this way the game can be continued if the user disconnects and reconnects
+#       (the user object is still the same, but the channel name changes)
+#       -> we can still send messages to the user with his private channel name (f"game_user_{user.id}")
+#       -> also we don't need to use the "channel_to_user" from RemoteGameConsumer here in GameGroup !
+
+# TODO: In Frontend: if websocket connection is closed -> show message "Connection lost. Please reload the page."
+#       hmm maybe send a disconnection code to the frontend and show a message there (for example if the user is already connected with another device)
+#       google about close_code for the disconnect function ;)
+
 class GameGroup:
     def __init__(self, p1_channel, p2_channel, game_group, channel_layer):
         self.p1_channel = p1_channel
@@ -23,8 +33,8 @@ class GameGroup:
             {
                 'type': 'state',
                 'state': "playing",
-                'p1_name': await database_sync_to_async(lambda: get_user_model().objects.get(id=int(RemoteGameConsumer.channel_to_user[self.p1_channel])).username)(),
-                'p2_name': await database_sync_to_async(lambda: get_user_model().objects.get(id=int(RemoteGameConsumer.channel_to_user[self.p2_channel])).username)(),
+                'p1_name': await database_sync_to_async(lambda: get_user_model().objects.get(id=int(RemoteGameConsumer.channel_to_user[self.p1_channel].id)).username)(),
+                'p2_name': await database_sync_to_async(lambda: get_user_model().objects.get(id=int(RemoteGameConsumer.channel_to_user[self.p2_channel].id)).username)(),
             }
         )
         # run game loop
@@ -46,27 +56,26 @@ class GameGroup:
         elif (self.game.winner == 1):
             # player 1 won
             await self.channel_layer.group_send(
-                f"game_user_{RemoteGameConsumer.channel_to_user[self.p1_channel]}",
+                f"game_user_{RemoteGameConsumer.channel_to_user[self.p1_channel].id}",
                 {
                     'type': 'winner',
                 }
             )
             await self.channel_layer.group_send(
-                f"game_user_{RemoteGameConsumer.channel_to_user[self.p2_channel]}",
+                f"game_user_{RemoteGameConsumer.channel_to_user[self.p2_channel].id}",
                 {
                     'type': 'loser',
                 }
             )
         elif (self.game.winner == 2):
-            # player 2 won
             await self.channel_layer.group_send(
-                f"game_user_{RemoteGameConsumer.channel_to_user[self.p1_channel]}",
+                f"game_user_{RemoteGameConsumer.channel_to_user[self.p1_channel].id}",
                 {
                     'type': 'loser',
                 }
             )
             await self.channel_layer.group_send(
-                f"game_user_{RemoteGameConsumer.channel_to_user[self.p2_channel]}",
+                f"game_user_{RemoteGameConsumer.channel_to_user[self.p2_channel].id}",
                 {
                     'type': 'winner',
                 }
@@ -153,10 +162,9 @@ class GameGroup:
 
 class RemoteGameConsumer(AsyncWebsocketConsumer):
 
-    # maps of connected players
-    # you should ensure that the maps are always in sync ! (always add/remove players from both maps) --- maybe create a class or function for that?!?
-    user_to_channel = {}    # key: user_id,         value: channel_name
-    channel_to_user = {}    # key: channel_name,    value: user_id
+    # maps of connected channels
+    # this map is needed later to know which user is connected to which channel
+    channel_to_user = {}    # key: channel_name,    value: user object
 
     # channel_name to game_group_name (one entry for each player who is in a game group)
     channel_to_game_group = {}
@@ -167,9 +175,11 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
     
     async def add_to_waiting_group(self, channel_name):
         # send "waiting" state to the player
-        username = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(RemoteGameConsumer.channel_to_user[channel_name])).username)()
+        # username = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(RemoteGameConsumer.channel_to_user[channel_name])).username)()
+        username = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(self.scope["user"].id)).username)()
         await self.channel_layer.group_send(
-            f"game_user_{self.channel_to_user[channel_name]}",
+            # f"game_user_{self.channel_to_user[channel_name]}",
+            f"game_user_{self.scope['user'].id}",
             {
                 'type': 'state',
                 'state': "waiting",
@@ -201,11 +211,16 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
                 # remove the new created group
                 del self.channel_layer.groups[new_group_name]
     
+    async def group_exists(self, group_name):
+        return bool(self.channel_layer.groups.get(group_name, False))
+    
     async def connect(self):
         await self.accept()
         if self.scope["user"].is_authenticated:
+            # add user to the channel_to_user map
+            RemoteGameConsumer.channel_to_user[self.channel_name] = self.scope["user"]
             # check if user is already connected
-            if self.scope["user"].id in RemoteGameConsumer.user_to_channel:
+            if await self.group_exists(f"game_user_{self.scope['user'].id}"):
                 print(f"User {self.scope['user'].id} is already connected.")
                 await self.send(text_data=json.dumps({
                     'type': 'message',
@@ -213,20 +228,15 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
                 }))
                 await self.close()
                 return
-            print(f"User {self.scope['user']} connected.")
             #  add user to his own group / create group for the user
             await self.channel_layer.group_add(
                 f"game_user_{self.scope['user'].id}",
                 self.channel_name
             )
-            # add user to the maps
-            RemoteGameConsumer.user_to_channel[self.scope["user"].id] = self.channel_name
-            RemoteGameConsumer.channel_to_user[self.channel_name] = self.scope["user"].id
             await self.send(text_data=json.dumps({
                 'type': 'message',
                 'message': 'Welcome!',
             }))
-            # await self.add_to_waiting_group(self.channel_name)
             await self.channel_layer.group_send(
                 f"game_user_{self.scope['user'].id}",
                 {
@@ -236,6 +246,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
                     'p2_name': "",
                 }
             )
+            print(f"User {self.scope['user']} connected.")
     
 
     # DIESE RECEIVE FUNKTION MUSS DEFINITIV NOCH ÜBERARBEITET WERDEN !
@@ -264,72 +275,23 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
             print(f"Received invalid JSON file")
         
     async def disconnect(self, close_code):
-        # first check if this connection is a second connection of the same user
-        # if so, do nothing because the first connection is still active
-        if self.scope["user"].id in RemoteGameConsumer.user_to_channel and RemoteGameConsumer.user_to_channel[self.scope["user"].id] != self.channel_name:
-            print(f"User {self.scope['user'].id} is still connected with another device.")
-            return
-        print(f"User {self.scope['user']} disconnected.")
         if self.scope["user"].is_authenticated:
-            # remove user from the maps
-            if self.scope["user"].id in RemoteGameConsumer.user_to_channel:
-                del RemoteGameConsumer.user_to_channel[self.scope["user"].id]
+            # remove user from the channel_to_user map
             if self.channel_name in RemoteGameConsumer.channel_to_user:
                 del RemoteGameConsumer.channel_to_user[self.channel_name]
+            # remove user from his own group
+            await self.channel_layer.group_discard(
+                f"game_user_{self.scope['user'].id}",
+                self.channel_name
+            )
+            # check if user group still exists (if not, the user disconnected with all his devices)
+            if not await self.group_exists(f"game_user_{self.scope['user'].id}"):
+                print(f"User {self.scope['user'].id} disconnected.")
             # remove user from the waiting group
             await self.channel_layer.group_discard("waiting", self.channel_name)
             # check if user is in a game group
             if self.channel_name in RemoteGameConsumer.channel_to_game_group:
                 RemoteGameConsumer.game_groups[RemoteGameConsumer.channel_to_game_group[self.channel_name]].stop_game()
-
-            # remove user from the game group
-            # groups_copy = list(self.channel_layer.groups.keys())
-            # for group_name in groups_copy:
-            #     if group_name.startswith("game_group_"):
-            #         # remove user from the game group and "channel_to_game_group" map
-            #         await self.channel_layer.group_discard(group_name, self.channel_name)
-            #         del RemoteGameConsumer.channel_to_game_group[self.channel_name]
-            #         # kill the game if there is only one player left
-            #         if group_name in self.channel_layer.groups and len(self.channel_layer.groups[group_name]) == 1:
-            #             # stop the game
-            #             RemoteGameConsumer.game_groups[group_name].stop_game()
-            #             # HIER SOLLTE NOCH MEHR AUFGERÄUMT WERDEN!!
-            #             # ALSO MÖGLICHERWEISE DIE GRUPPE LÖSCHEN ODER BESSER NOCH DIE GRUPPE
-            #             # BEIBEHALTEN UND DAS GAME NUR PAUSIEREN BIS DER ANDERE SPIELER WIEDER DA IST ?!?
-            #             # WENN DANN ABER MIT EINER ZEITLICHEN BEGRENZUNG, DAMIT DAS SPIEL NICHT EWIG PAUSIERT...
-            #             # DER GANZE QUATSCH KÖNNTE ABER AUCH IN DER STOP_GAME METHODE PASSIEREN
-            #             print(f"Killing game {group_name} because there is only one player left.")
-            #             # send message to the remaining player
-            #             await self.channel_layer.group_send(
-            #                 group_name,
-            #                 {
-            #                     'type': 'message',
-            #                     'message': 'The other player left the game. In 5 seconds you will be back in the menu.',
-            #                 }
-            #             )
-            #             # wait 5 seconds
-            #             await asyncio.sleep(5)
-            #             # send info, that game is finished and players are back in the menu
-            #             await self.channel_layer.group_send(
-            #                 group_name,
-            #                 {
-            #                     'type': 'state',
-            #                     'state': "menu",
-            #                     'p1_name': "",
-            #                     'p2_name': "",
-            #                 }
-            #             )
-            #             # remove the remaining player from the game group and the "channel_to_game_group" map
-            #             remaining_player_channel_id = list(self.channel_layer.groups[group_name])[0]
-            #             await self.channel_layer.group_discard(group_name, remaining_player_channel_id)
-            #             del RemoteGameConsumer.channel_to_game_group[remaining_player_channel_id]
-            #             # remove the game group from the map
-            #             del RemoteGameConsumer.game_groups[group_name]
-            #             # 
-            #             # print(f"removed game group {group_name}")
-            #             print("remaining game groups:")
-            #             for group in RemoteGameConsumer.game_groups:
-            #                 print(group)
 
 
 

@@ -145,7 +145,7 @@ export default {
       }
       console.log(this.all_matches)
       const playGame = async () => {
-        for (let games_played = 0; games_played < total_games; games_played++) {
+        for (let match = 0; match < total_games; match++) {
 
           console.log("Before startGameTour");
           await this.startGameTour();

@@ -4,6 +4,8 @@ import asyncio
 from .player import Player
 from .gameHandler import GameHandler
 
+from asgiref.sync import sync_to_async
+
 # TODO: send user object or id instead of p1_channel and p2_channel to GameGroup.
 #       this way the game can be continued if the user disconnects and reconnects
 #       (the user object is still the same, but the channel name changes)
@@ -27,6 +29,28 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 
 	# list of players in the waiting group
 	waiting_room = []
+
+	async def create_guest_player(self, alias):
+		for p in Player.all_players:
+			if p.get_user().username == alias:
+				# player with this alias already exists
+				await self.send(text_data=json.dumps({
+					'type': 'alias_exists',
+				}))
+				return
+		from api.models import CustomUser
+		exists = await sync_to_async(CustomUser.objects.filter(username=alias).exists)()
+		if exists:
+			# CustomUser with this username already exists
+			await self.send(text_data=json.dumps({
+				'type': 'alias_exists',
+			}))
+			return
+		# create new player object
+		player = Player(self.scope["user"], self.channel_name)
+		player.get_user().username = alias
+		await player.send_state()
+		print(f"Anonymous user upgraded to guest player with alias {alias}.")
 
 	async def add_to_waiting_room(self, player):
 		if len(RemoteGameConsumer.waiting_room) >= 1:
@@ -56,11 +80,18 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 			player = Player(self.scope["user"], self.channel_name)
 			await player.send_state()
 			print(f"{self.scope['user'].username} connected to game-websocket.")
+		else:
+			print(f"Anonymous user connected to game-websocket.")
+			# send state to bring guest to an alias screen !
+			await self.send(text_data=json.dumps({
+				'type': 'alias_screen',
+			}))
 	
 	async def receive(self, text_data):
 		try:
 			player = Player.get_player_by_channel(self.channel_name)
 			if player == None:
+				print(f"Received message from unknown player: {text_data}")
 				if self.scope["user"].is_authenticated:
 					# authenticated but no player object -> already connected with another device
 					data = json.loads(text_data)
@@ -70,6 +101,13 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 							oldchannel = Player.get_channel_by_user(self.scope["user"])
 							player = Player.get_player_by_channel(oldchannel)
 							await player.change_channel(self.channel_name)
+				# return
+				else:
+					print(f"Received message from unauthorized user: {text_data}")
+					# not authenticated -> create guest player
+					data = json.loads(text_data)
+					if data.get('type') == 'create_guest_player':
+						await self.create_guest_player(data.get('alias'))
 				return
 			# check if player is in a game group
 			if player.get_game_handler() != None:
@@ -89,19 +127,19 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 			print(f"Received invalid JSON file")
 		
 	async def disconnect(self, close_code):
-		if self.scope["user"].is_authenticated:
-			player = Player.get_player_by_channel(self.channel_name)
-			if player != None:
-				# Stop the game if the user is in a game group (LATER CHANGE THIS TO WAIT A FEW SECONDS AND CHECK IF THE USER RECONNECTS)
-				if player.get_game_handler() != None:
-					print(f"Stopping game group: {player.get_game_handler()}")
-					player.get_game_handler().stop_game()
-				# remove player from waiting room list if in there
-				if player in RemoteGameConsumer.waiting_room:
-					RemoteGameConsumer.waiting_room.remove(player)
-				# remove player from list of all players
-				Player.all_players.remove(Player.get_player_by_channel(self.channel_name))
-				print(f"{self.scope['user'].username} disconnected from game-websocket.")
+		# if self.scope["user"].is_authenticated:
+		player = Player.get_player_by_channel(self.channel_name)
+		if player != None:
+			# Stop the game if the user is in a game group (LATER CHANGE THIS TO WAIT A FEW SECONDS AND CHECK IF THE USER RECONNECTS)
+			if player.get_game_handler() != None:
+				print(f"Stopping game group: {player.get_game_handler()}")
+				player.get_game_handler().stop_game()
+			# remove player from waiting room list if in there
+			if player in RemoteGameConsumer.waiting_room:
+				RemoteGameConsumer.waiting_room.remove(player)
+			# remove player from list of all players
+			Player.all_players.remove(Player.get_player_by_channel(self.channel_name))
+			print(f"{self.scope['user'].username} disconnected from game-websocket.")
 
 
 	#########################
@@ -143,3 +181,13 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 			'type': 'tied',
 		}))
 
+	# Only for guest players
+	async def alias_screen(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'alias_screen',
+		}))
+
+	async def alias_exists(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'alias_exists',
+		}))

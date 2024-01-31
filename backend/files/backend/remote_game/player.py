@@ -34,6 +34,12 @@ class Player:
 	def get_user(self):
 		return self.user
 	
+	def get_username(self):
+		if self.user.is_authenticated:
+			return self.user.username
+		else:
+			return self.user.username + " (Guest)"
+	
 	def get_channel(self):
 		return self.channel
 	
@@ -46,8 +52,8 @@ class Player:
 			await self.send({
 				'type': 'state',
 				'state': "playing",
-				'p1_name': group.player1.get_user().username,
-				'p2_name': group.player2.get_user().username,
+				'p1_name': group.player1.get_username(),
+				'p2_name': group.player2.get_username(),
 			})
 		# check if in waiting room
 		elif self in RemoteGameConsumer.waiting_room:
@@ -62,7 +68,7 @@ class Player:
 			await self.send({
 				'type': 'state',
 				'state': "menu",
-				'p1_name': "",
+				'p1_name': self.get_user().username,
 				'p2_name': "",
 			})
 		

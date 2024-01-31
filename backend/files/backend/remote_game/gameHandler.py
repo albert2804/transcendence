@@ -51,8 +51,8 @@ class GameHandler:
 			{
 				'type': 'state',
 				'state': "playing",
-				'p1_name': self.player1.get_user().username,
-				'p2_name': self.player2.get_user().username,
+				'p1_name': self.player1.get_username(),
+				'p2_name': self.player2.get_username(),
 			}
 		)
 		# run game loop

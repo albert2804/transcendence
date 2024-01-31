@@ -18,14 +18,20 @@
       <div v-show="playing" style="position: absolute; bottom: 0; right: 2%; font-size: 2.0em; color: #ffffff;">
         {{ numberOfHitsP2 }}
       </div>
-      <!-- centered text -->
-      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.6em; font-weight: bold; color: #ffffff; text-align: center;">
-          <div v-if="message">{{ message }}</div>
-      </div>
-      <!-- centered Bootstrap button -->
-      <div v-if="showMenu" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-        <button type="button" class="btn btn-primary" @click="startGame">Start Game</button>
-      </div>
+	  <li style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; position: absolute;">
+		<!-- centered text -->
+		<div style="font-size: 1.6em; font-weight: bold; color: #ffffff; text-align: center;">
+			<div v-if="message">{{ message }}</div>
+		</div>
+		<!-- centered Bootstrap button -->
+		<div v-if="showMenu">
+			<button type="button" class="btn btn-primary" @click="startGame">Start Game</button>
+		</div>
+		<!-- play on this device - button --->
+		<div v-if="!playOnThisDevice">
+			<button type="button" class="btn btn-primary" @click="changeDevice">Play on this device</button>
+		</div>
+	</li>
   </div>
 </template>
   
@@ -61,6 +67,8 @@
         x: 50 - (1.5/2),
         y: 50 - (3/2),
       },
+	  //
+	  playOnThisDevice: true,
     }
   },
   mounted () {
@@ -105,14 +113,10 @@
               const highScore = data.high_score;
               this.numberOfHitsP1 = highScore.numberOfHitsP1;
               this.numberOfHitsP2 = highScore.numberOfHitsP2;
-
               this.updateGameUI(gameState);
             } else {
               console.error('Received game_state message with undefined data:', data);
             }
-          } else if (data.type === 'message') {
-            this.message = data.message;
-            // this.menu = false; // hide menu if you get already connected message and menu is still visible because you were connected as another user before
           } else if (data.type === "state") {
             // console.log('Received state message:', data);
             this.p1_name = data.p1_name;
@@ -125,10 +129,6 @@
               this.message = 'Waiting for opponent...';
               this.playing = false;
               this.showMenu = false;
-            } else if (data.state === "finished") {
-              this.message = 'Game finished!';
-              this.playing = false;
-              this.showMenu = false;
             } else if (data.state === "menu") {
               this.message = '';
               this.playing = false;
@@ -138,6 +138,7 @@
               this.message = 'You are connected with another device!';
               this.playing = false;
               this.showMenu = false;
+			  this.playOnThisDevice = false;
             } else {
               console.error('Received message of unknown type:', data);
             }
@@ -149,7 +150,11 @@
             this.message = "You lost the game!";
             this.playing = false;
             this.showMenu = false;
-          } else {
+          } else if (data.type === "tied") {
+			this.message = "Game finished without result!";
+			this.playing = false;
+			this.showMenu = false;
+		  } else {
             console.error('Received message of unknown type:', data);
           }
         } catch (error) {
@@ -234,6 +239,16 @@
       this.ballPos.x = (gameState.ball.x / 800 * 100) - (1.5/2);
       this.ballPos.y = (gameState.ball.y / 400 * 100) - (3/2);
     },
+
+	//#######################################################################
+	/* ------------- Change device ---------------------------------------*/
+	changeDevice() {
+	  if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+		const data = JSON.stringify({ type: 'change_device' });
+		this.socket.send(data);
+	  }
+	  this.playOnThisDevice = true;
+	},
   }
 };
 </script>

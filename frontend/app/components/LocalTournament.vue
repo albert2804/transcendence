@@ -118,41 +118,32 @@ export default {
       }
     },
 
-    calculateRoundNumber(currentMatch, totalGames) {
-      let round = 1;
-      
-      while(currentMatch <=totalGames / 2) {
-        totalGames -= totalGames / 2;
-        round++;
-      }
-      // while (totalGames > 0) {
-      //   round++;
-      //   totalGames = totalGames / 2;
-      // }
-      return round;
-    },
-
     async startTournament() {
       console.log(this.all_players)
       this.updatePlayerName()
       this.formVisible = false;
       this.ongoingTournament = true;
-  
-      const total_games = this.nbr_players - 1; 
-      let total_rounds = Math.log2(this.numberOfPlayers);
 
-      console.log(total_rounds);
+      console.log("nbr of players" + this.nbr_players);
+      const total_games = this.nbr_players - 1; 
+      console.log(total_games);
       console.log("start game")
-      for (let match = 0; match < this.nbr_players - 1; match++) {
+      for (let match = 0; match < total_games; match++) {
+        console.log(Math.log2(total_games) - Math.floor(Math.log2(match + 1)))
         this.all_matches.push({
-          is_round: this.calculateRoundNumber(match + 1, total_games), 
+          is_round: Math.floor(Math.log2(total_games + 1)) - Math.floor(Math.log2(total_games - match)),
           game_nbr: match + 1, 
-          l_player: this.all_players[this.player_one],
-          r_player: this.all_players[this.player_two],
-          l_score: 10,
-          r_score: 10,
+          l_player: -1,
+          r_player: -1,
+          l_score: 0,
+          r_score: 0,
         });
+        if (this.all_matches[match].is_round == 1) {
+          this.all_matches[match].l_player = this.all_players[match * 2];
+          this.all_matches[match].r_player = this.all_players[match * 2 + 1];
+        }
       }
+      console.log(this.all_matches)
       const playGame = async () => {
         for (let games_played = 0; games_played < total_games; games_played++) {
 

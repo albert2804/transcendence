@@ -31,6 +31,13 @@
 		<div v-if="!playOnThisDevice">
 			<button type="button" class="btn btn-primary" @click="changeDevice">Play on this device</button>
 		</div>
+    <!-- alias screen -->
+    <div v-if="showAliasScreen">
+      <input type="text" class="form-control" v-model="alias" placeholder="Enter alias">
+    </div>
+    <div v-if="showAliasScreen">
+      <button type="button" class="btn btn-primary" @click="create_guest_player">Start Game</button>
+    </div>
 	</li>
   </div>
 </template>
@@ -69,14 +76,20 @@
       },
 	  //
 	  playOnThisDevice: true,
+    // Only for guest users
+    // aliasAlreadyTaken: false,
+    showAliasScreen: false,
+    alias: '',
     }
   },
   mounted () {
     watchEffect(() => {
       if (isLoggedIn.value === 1) {
         this.createWebSocket();
+        this.closeWebSocket();
       } else if (isLoggedIn.value === 0) {
         this.closeWebSocket();
+        this.createWebSocket();
       }
     });
   },
@@ -121,6 +134,7 @@
             // console.log('Received state message:', data);
             this.p1_name = data.p1_name;
             this.p2_name = data.p2_name;
+            this.showAliasScreen = false;
             if (data.state === "playing") {
               this.message = '';
               this.playing = true;
@@ -130,7 +144,12 @@
               this.playing = false;
               this.showMenu = false;
             } else if (data.state === "menu") {
-              this.message = '';
+              if (data.p1_name !== '') {
+                this.message = 'hello ' + data.p1_name + '!';
+              } else {
+                this.message = '';
+              }
+              // this.message = '';
               this.playing = false;
               this.showMenu = true;
             } else if (data.state === "other_device") {
@@ -151,10 +170,25 @@
             this.playing = false;
             this.showMenu = false;
           } else if (data.type === "tied") {
-			this.message = "Game finished without result!";
-			this.playing = false;
-			this.showMenu = false;
-		  } else {
+          this.message = "Game finished without result!";
+          this.playing = false;
+          this.showMenu = false;
+          }
+          // GUEST STUFF
+          else if (data.type === "alias_screen") {
+            //only for guest users
+            this.message = 'hello guest, please enter your alias!';
+            this.playing = false;
+            this.showMenu = false;
+            this.alias = '';
+            this.showAliasScreen = true;
+          }
+          else if (data.type === "alias_exists") {
+            //only for guest users
+            // this.aliasAlreadyTaken = true;
+            this.message = "Alias already taken!";
+          }
+          else {
             console.error('Received message of unknown type:', data);
           }
         } catch (error) {
@@ -171,7 +205,19 @@
     // function to send info to backend to start game (join waiting room)
     startGame () {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        const data = JSON.stringify({ type: 'start_game' });
+        const data = JSON.stringify({
+          type: 'start_game',
+          alias: this.alias,
+        });
+        this.socket.send(data);
+      }
+    },
+    create_guest_player () {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        const data = JSON.stringify({
+          type: 'create_guest_player',
+          alias: this.alias,
+        });
         this.socket.send(data);
       }
     },

@@ -1,7 +1,6 @@
 <template>
   <div
       class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease">
-      <!-- <div class="score-container">{{ numberOfHitsP1 }} : {{ numberOfHitsP2 }}</div> -->
       <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
       <div v-show="playing" class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
       <div v-show="playing" class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%' }"></div>
@@ -19,11 +18,11 @@
         {{ numberOfHitsP2 }}
       </div>
 	  <li style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; position: absolute;">
-		<!-- centered text -->
+		<!-- Message --->
 		<div style="font-size: 1.6em; font-weight: bold; color: #ffffff; text-align: center;">
 			<div v-if="message">{{ message }}</div>
 		</div>
-		<!-- centered Bootstrap button -->
+		<!-- Start game - button --->
 		<div v-if="showMenu">
 			<button type="button" class="btn btn-primary" @click="startGame">Start Game</button>
 		</div>
@@ -33,10 +32,11 @@
 		</div>
     <!-- alias screen -->
     <div v-if="showAliasScreen">
-      <input type="text" class="form-control" v-model="alias" placeholder="Enter alias">
+      <input type="text" class="form-control" v-model="alias" placeholder="Enter alias" maxlength="20"> 
     </div>
+    <div v-if="showAliasScreen" style="height: 5px;"></div>
     <div v-if="showAliasScreen">
-      <button type="button" class="btn btn-primary" @click="create_guest_player">Start Game</button>
+      <button type="button" class="btn btn-primary" @click="create_guest_player">Enter</button>
     </div>
 	</li>
   </div>
@@ -48,17 +48,14 @@
   name: 'RemotePong',
   data () {
     return {
-      message: '',
       socket: null,
-      //
+      message: '',
       numberOfHitsP1: 0,
       numberOfHitsP2: 0,
-      //
       playing: false,
       showMenu: false,
-      p1_name: 'player 1', // left players name
-      p2_name: 'player 2', // right players name
-      //
+      p1_name: '',
+      p2_name: '',
       pressedKeys: [],
       paddleSize: 20,
       p1pos: {
@@ -70,23 +67,21 @@
         y: (100 - this.paddleSize) / 2,
       },
       ballPos: {
-        // middle position minus half the ball size
-        x: 50 - (1.5/2),
-        y: 50 - (3/2),
+        x: 0,
+        y: 0,
       },
-	  //
-	  playOnThisDevice: true,
-    // Only for guest users
-    // aliasAlreadyTaken: false,
-    showAliasScreen: false,
-    alias: '',
+	    playOnThisDevice: true,
+      // Following only for guest users:
+      showAliasScreen: false,
+      alias: '',
     }
   },
   mounted () {
+    // watch for changes in the login status (need to close and reopen the websocket when the user logs in or out)
     watchEffect(() => {
       if (isLoggedIn.value === 1) {
-        this.createWebSocket();
         this.closeWebSocket();
+        this.createWebSocket();
       } else if (isLoggedIn.value === 0) {
         this.closeWebSocket();
         this.createWebSocket();
@@ -97,7 +92,7 @@
     this.closeWebSocket();
   },
   methods: {
-    /* ------------- Web sockets -----------------------------------------*/
+    // function to create and handle the websocket
 	  createWebSocket () {
       const currentDomain = window.location.hostname;
       const sockurl = 'wss://' + currentDomain + '/endpoint/remoteGame/';
@@ -118,20 +113,18 @@
 
       this.socket.onmessage = (event) => {
         try {
-          // console.log('Message received:', event.data);
           const data = JSON.parse(event.data);
           if (data.type === 'game_update') {
-            if (data.state) {
+            // if (data.state) {
               const gameState = data.state;
               const highScore = data.high_score;
               this.numberOfHitsP1 = highScore.numberOfHitsP1;
               this.numberOfHitsP2 = highScore.numberOfHitsP2;
               this.updateGameUI(gameState);
-            } else {
-              console.error('Received game_state message with undefined data:', data);
-            }
+            // } else {
+              // console.error('Received game_state message with undefined data:', data);
+            // }
           } else if (data.type === "state") {
-            // console.log('Received state message:', data);
             this.p1_name = data.p1_name;
             this.p2_name = data.p2_name;
             this.showAliasScreen = false;
@@ -149,18 +142,17 @@
               } else {
                 this.message = '';
               }
-              // this.message = '';
               this.playing = false;
               this.showMenu = true;
             } else if (data.state === "other_device") {
-              // console.log('Received state message:', data);
               this.message = 'You are connected with another device!';
               this.playing = false;
               this.showMenu = false;
-			  this.playOnThisDevice = false;
-            } else {
-              console.error('Received message of unknown type:', data);
-            }
+			        this.playOnThisDevice = false;
+            } 
+            // else {
+            //   console.error('Received message of unknown type:', data);
+            // }
           } else if (data.type === "winner") {
             this.message = "You won the game!";
             this.playing = false;
@@ -170,13 +162,12 @@
             this.playing = false;
             this.showMenu = false;
           } else if (data.type === "tied") {
-          this.message = "Game finished without result!";
-          this.playing = false;
-          this.showMenu = false;
+            this.message = "Game finished without result!";
+            this.playing = false;
+            this.showMenu = false;
           }
-          // GUEST STUFF
+          // GUEST PLAYERS STUFF
           else if (data.type === "alias_screen") {
-            //only for guest users
             this.message = 'hello guest, please enter your alias!';
             this.playing = false;
             this.showMenu = false;
@@ -184,8 +175,6 @@
             this.showAliasScreen = true;
           }
           else if (data.type === "alias_exists") {
-            //only for guest users
-            // this.aliasAlreadyTaken = true;
             this.message = "Alias already taken!";
           }
           else {
@@ -196,13 +185,14 @@
         }
       }
     },
+    // function to close the websocket
     closeWebSocket () {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         this.socket.close()
         console.log('WebSocket connection closed')
       }
     },
-    // function to send info to backend to start game (join waiting room)
+    // function to start the game
     startGame () {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
@@ -212,6 +202,7 @@
         this.socket.send(data);
       }
     },
+    // function to create a guest player (send alias to server)
     create_guest_player () {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
@@ -221,35 +212,29 @@
         this.socket.send(data);
       }
     },
-    /* ------------- Event handler ---------------------------------------*/
-    pressKey(keyToPress) {
-      if (this.pressedKeys.includes(keyToPress)) {
+    // handler for key press
+    handleKeyPress(event){
+      if (this.pressedKeys.includes(event.key)) {
         return;
       }
-      this.pressedKeys.push(keyToPress);
+      this.pressedKeys.push(event.key);
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        const data = JSON.stringify({ type: 'key_pressed', key: keyToPress });
+        const data = JSON.stringify({ type: 'key_pressed', key: event.key });
         this.socket.send(data);
       }
     },
-    removeKey(keyToRemove) {
-      if (!this.pressedKeys.includes(keyToRemove)) {
+    // handler for key release
+    handleKeyRelease(event){
+      if (!this.pressedKeys.includes(event.key)) {
         return;
       }
-      this.pressedKeys = this.pressedKeys.filter(key => key !== keyToRemove);
+      this.pressedKeys = this.pressedKeys.filter(key => key !== event.key);
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        const data = JSON.stringify({ type: 'key_released', key: keyToRemove });
+        const data = JSON.stringify({ type: 'key_released', key: event.key });
         this.socket.send(data);
       }
     },
-    // handle keyboard events
-    handleKeyDown(event){
-      this.pressKey(event.key);
-    },
-    handleKeyUp(event){
-      this.removeKey(event.key);
-    },
-    // handle touch events (mobile)
+    // handler for touch press (mobile)
     handleTouchPress(event) {
       const rect = this.$refs.gameFieldRef.getBoundingClientRect();
       const fieldHeight = rect.height;
@@ -268,33 +253,26 @@
         }
       }
     },
+    // handler for touch release (mobile)
     handleTouchRelease(event) {
       this.removeKey('ArrowUp');
       this.removeKey('ArrowDown');
     },
-
-    /* ------------- Update UI -------------------------------------------*/
+    // function to update the game UI (called when receiving game state from server)
     updateGameUI(gameState) {
-      // NEW RESPONSIIVE GAME UI:
-      // update paddle positions
-      // convert height px(400) to %(100)
-      // in future calculate this in backend and send only % values
-      this.p1pos.y = gameState.leftPaddle.y / 400 * 100;
-      this.p2pos.y = gameState.rightPaddle.y / 400 * 100;
-      // update ball position
-      this.ballPos.x = (gameState.ball.x / 800 * 100) - (1.5/2);
-      this.ballPos.y = (gameState.ball.y / 400 * 100) - (3/2);
+      this.p1pos.y = gameState.leftPaddle.y;
+      this.p2pos.y = gameState.rightPaddle.y;
+      this.ballPos.x = gameState.ball.x - (1.5/2); // 1.5% is the width of the ball
+      this.ballPos.y = gameState.ball.y - (3/2);   // 3% is the height of the ball
     },
-
-	//#######################################################################
-	/* ------------- Change device ---------------------------------------*/
-	changeDevice() {
-	  if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-		const data = JSON.stringify({ type: 'change_device' });
-		this.socket.send(data);
-	  }
-	  this.playOnThisDevice = true;
-	},
+    // function to send information to server that the user wants to play on this device
+    changeDevice() {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      const data = JSON.stringify({ type: 'change_device' });
+      this.socket.send(data);
+      }
+      this.playOnThisDevice = true;
+    },
   }
 };
 </script>

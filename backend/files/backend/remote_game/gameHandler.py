@@ -59,7 +59,7 @@ class GameHandler:
 		while not self.game.isGameExited:
 			self.game.game_loop()
 			await self.send_game_state()
-			await asyncio.sleep(0.003)
+			await asyncio.sleep(0.004)
 		# send info, that game is finished
 		if (self.game.winner == 0):
 			await self.player1.send({
@@ -136,19 +136,19 @@ class GameHandler:
 					self.game.rightPaddle['dy'] = 0
 		else:
 			print(f"Unknown player: {player}")
-	
+
+	# send game state to game group (converted to percent)
 	async def send_game_state(self):
 		state = {
 			'ball': {
-				'x': self.game.ball['x'],
-				'y': self.game.ball['y'],
-				'radius': self.game.ball['radius'], #needed?? BETTER PADDLESIZE IN PERCENT !!!
+				'x': (self.game.ball['x'] / self.game.canvasWidth) * 100,
+				'y': (self.game.ball['y'] / self.game.canvasHeight) * 100,
 			},
 			'leftPaddle': {
-				'y': self.game.leftPaddle['y'],
+				'y': (self.game.leftPaddle['y'] / self.game.canvasHeight) * 100,
 			},
 			'rightPaddle': {
-				'y': self.game.rightPaddle['y'],
+				'y': (self.game.rightPaddle['y'] / self.game.canvasHeight) * 100,
 			},
 		}
 		high_score = {

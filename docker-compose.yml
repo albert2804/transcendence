@@ -48,6 +48,7 @@ services:
     volumes:
       - ./backend/files:/code
       - static_django_files:/static
+      - ./media:/media
     # ports:
     #   - 8000:8000
 

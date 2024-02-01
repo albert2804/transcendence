@@ -91,7 +91,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 		try:
 			player = Player.get_player_by_channel(self.channel_name)
 			if player == None:
-				print(f"Received message from unknown player: {text_data}")
+				# print(f"Received message from unknown player: {text_data}")
 				if self.scope["user"].is_authenticated:
 					# authenticated but no player object -> already connected with another device
 					data = json.loads(text_data)
@@ -103,14 +103,13 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 							await player.change_channel(self.channel_name)
 				# return
 				else:
-					print(f"Received message from unauthorized user: {text_data}")
+					# print(f"Received message from unauthorized user: {text_data}")
 					# not authenticated -> create guest player
 					data = json.loads(text_data)
 					if data.get('type') == 'create_guest_player':
 						await self.create_guest_player(data.get('alias'))
-				return
 			# check if player is in a game group
-			if player.get_game_handler() != None:
+			elif player.get_game_handler() != None:
 				# get the game data
 				game_data = json.loads(text_data)
 				# update the paddle
@@ -124,7 +123,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 				else:
 					print(f"Received invalid JSON file: {menu_data}")
 		except json.JSONDecodeError:
-			print(f"Received invalid JSON file")
+			print(f"Error handling received message from a game-websocket: {text_data}")
 		
 	async def disconnect(self, close_code):
 		# if self.scope["user"].is_authenticated:

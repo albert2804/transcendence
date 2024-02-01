@@ -17,7 +17,6 @@
             <NuxtLink class="nav-link active" to="/localGame">Local Game</NuxtLink>
           </li>
           <li class="nav-item">
-            <!-- <NuxtLink class="nav-link active" to="/remoteGame">Remote Game</NuxtLink> -->
             <a class="nav-link active" @click="showGameModal">Remote Game</a>
           </li>
           <li class="nav-item">
@@ -41,19 +40,9 @@
             <a class="nav-link disabled" aria-disabled="true">Disabled</a>
           </li>
         </ul>
-        <!-- <form class="d-flex" role="search">
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-success" type="submit">Search</button>
-        </form> -->
       </div>
     </div>
-    <!-- <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">User</button> -->
     </nav>
-    <!-- <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
-      <div class="offcanvas-body">
-        <Login />
-      </div>
-    </div> -->
 </template>
 
 <script>

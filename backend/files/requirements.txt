@@ -18,5 +18,8 @@ daphne==4.0.0
 pytz==2023.3.post1
 requests==2.27.1
 
+# Django image handling
+Pillow==8.4.0
+
 #debug toolbar
 django-debug-toolbar

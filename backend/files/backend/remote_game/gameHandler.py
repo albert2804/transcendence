@@ -45,16 +45,21 @@ class GameHandler:
 
 	async def start_game(self):
 		print(f"Started {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username}.")
-		# send info, that game is starting
+		# send player names to game group
 		await self.channel_layer.group_send(
 			self.game_group,
 			{
-				'type': 'state',
-				'state': "playing",
+				'type': 'player_names',
 				'p1_name': self.player1.get_username(),
 				'p2_name': self.player2.get_username(),
-			}
-		)
+			})
+		# send redirect to playing page
+		await self.channel_layer.group_send(
+			self.game_group,
+			{
+				'type': 'redirect',
+				'page': "playing",
+			})
 		# run game loop
 		while not self.game.isGameExited:
 			self.game.game_loop()
@@ -63,37 +68,41 @@ class GameHandler:
 		# send info, that game is finished
 		if (self.game.winner == 0):
 			await self.player1.send({
-				'type': 'tied',
+				'type': 'game_result',
+				'result': 'tied',
 			})
 			await self.player2.send({
-				'type': 'tied',
+				'type': 'game_result',
+				'result': 'tied',
 			})
 		elif (self.game.winner == 1):
 			# player 1 won
 			await self.player1.send({
-				'type': 'winner',
+				'type': 'game_result',
+				'result': 'winner',
 			})
 			await self.player2.send({
-				'type': 'loser',
+				'type': 'game_result',
+				'result': 'loser',
 			})
 		elif (self.game.winner == 2):
 			await self.player1.send({
-				'type': 'loser',
+				'type': 'game_result',
+				'result': 'loser',
 			})
 			await self.player2.send({
-				'type': 'winner',
+				'type': 'game_result',
+				'result': 'winner',
 			})
 		print(f"{self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username} finished.")
 		# wait 5 seconds
 		await asyncio.sleep(5)
-		# send info, that game is finished and players are back in the menu
+		# send redirect to menu
 		await self.channel_layer.group_send(
 			self.game_group,
 			{
-				'type': 'state',
-				'state': "menu",
-				'p1_name': "",
-				'p2_name': "",
+				'type': 'redirect',
+				'page': "menu",
 			}
 		)
 		# remove players from game group (channel layer for sending messages to both players)

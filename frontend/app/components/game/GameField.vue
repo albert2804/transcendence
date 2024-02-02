@@ -20,7 +20,7 @@
 	  <li style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; position: absolute;">
 		<!-- Message --->
 		<div style="font-size: 1.6em; font-weight: bold; color: #ffffff; text-align: center;">
-			<div v-if="message">{{ message }}</div>
+			<div>{{ message }}</div>
 		</div>
 		<!-- Start game - button --->
 		<div v-if="showMenu">
@@ -114,70 +114,54 @@
       this.socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.type === 'game_update') {
-            // if (data.state) {
-              const gameState = data.state;
-              const highScore = data.high_score;
-              this.numberOfHitsP1 = highScore.numberOfHitsP1;
-              this.numberOfHitsP2 = highScore.numberOfHitsP2;
-              this.updateGameUI(gameState);
-            // } else {
-              // console.error('Received game_state message with undefined data:', data);
-            // }
-          } else if (data.type === "state") {
-            this.p1_name = data.p1_name;
-            this.p2_name = data.p2_name;
+          if (data.type === "redirect") {
             this.showAliasScreen = false;
-            if (data.state === "playing") {
+            if (data.page === "playing") {
               this.message = '';
               this.playing = true;
               this.showMenu = false;
-            } else if (data.state === "waiting") {
+            } else if (data.page === "waiting") {
               this.message = 'Waiting for opponent...';
               this.playing = false;
               this.showMenu = false;
-            } else if (data.state === "menu") {
-              if (data.p1_name !== '') {
-                this.message = 'hello ' + data.p1_name + '!';
-              } else {
-                this.message = '';
-              }
+            } else if (data.page === "menu") {
+              this.message = '';
               this.playing = false;
               this.showMenu = true;
-            } else if (data.state === "other_device") {
+            } else if (data.page === "other_device") {
               this.message = 'You are connected with another device!';
               this.playing = false;
               this.showMenu = false;
 			        this.playOnThisDevice = false;
-            } 
-            // else {
-            //   console.error('Received message of unknown type:', data);
-            // }
-          } else if (data.type === "winner") {
-            this.message = "You won the game!";
+            } else if (data.page === "alias_screen") {
+              this.message = 'hello guest, please enter your alias!';
+              this.playing = false;
+              this.showMenu = false;
+              this.alias = '';
+              this.showAliasScreen = true;
+            }
+          } else if (data.type === "game_result") {
             this.playing = false;
             this.showMenu = false;
-          } else if (data.type === "loser") {
-            this.message = "You lost the game!";
-            this.playing = false;
-            this.showMenu = false;
-          } else if (data.type === "tied") {
-            this.message = "Game finished without result!";
-            this.playing = false;
-            this.showMenu = false;
-          }
-          // GUEST PLAYERS STUFF
-          else if (data.type === "alias_screen") {
-            this.message = 'hello guest, please enter your alias!';
-            this.playing = false;
-            this.showMenu = false;
-            this.alias = '';
-            this.showAliasScreen = true;
-          }
-          else if (data.type === "alias_exists") {
+            if (data.result === "winner") {
+              this.message = "You won the game!";
+            } else if (data.result === "loser") {
+              this.message = "You lost the game!";
+            } else if (data.result === "tied") {
+              this.message = "Game finished without result!";
+            }
+          } else if (data.type === "player_names") {
+            this.p1_name = data.p1_name;
+            this.p2_name = data.p2_name;
+          } else if (data.type === 'game_update') {
+            const gameState = data.state;
+            const highScore = data.high_score;
+            this.numberOfHitsP1 = highScore.numberOfHitsP1;
+            this.numberOfHitsP2 = highScore.numberOfHitsP2;
+            this.updateGameUI(gameState);
+          } else if (data.type === "alias_exists") {
             this.message = "Alias already taken!";
-          }
-          else {
+          } else {
             console.error('Received message of unknown type:', data);
           }
         } catch (error) {

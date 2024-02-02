@@ -67,12 +67,8 @@ class PongGame:
 		# Check for scoring
 		if self.ball['x'] - self.ball['radius'] < 0 or self.ball['x'] + self.ball['radius'] > self.canvasWidth:
 			self.currentSpeed = self.initialSpeed
-		
-			# Generate a random angle between 30 and 150 degrees
-			angle = random.uniform(math.radians(30), math.radians(150))
-
-			self.ball['dx'] = self.currentSpeed * math.cos(angle)
-			self.ball['dy'] = self.currentSpeed * math.sin(angle)
+			self.ball['dx'] = -self.currentSpeed
+			self.ball['dy'] = self.currentSpeed
 
 			if self.ball['x'] + self.ball['radius'] > self.canvasWidth:
 				self.numberOfHitsP1 += 1

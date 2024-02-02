@@ -226,21 +226,29 @@
       const mouseY = touch.clientY - rect.top;
 
       if (mouseY < fieldHeight / 2) {
-        if (!this.pressedKeys.includes('ArrowUp')) {
-          this.removeKey('ArrowDown');
-          this.pressKey('ArrowUp');
-        }
+		event.key = 'ArrowUp';
+		this.handleKeyPress(event);
+        // if (!this.pressedKeys.includes('ArrowUp')) {
+        //   this.removeKey('ArrowDown');
+        //   this.pressKey('ArrowUp');
+        // }
       } else {
-        if (!this.pressedKeys.includes('ArrowDown')) {
-          this.removeKey('ArrowUp');
-          this.pressKey('ArrowDown');
-        }
+		event.key = 'ArrowDown';
+		this.handleKeyPress(event);
+        // if (!this.pressedKeys.includes('ArrowDown')) {
+        //   this.removeKey('ArrowUp');
+        //   this.pressKey('ArrowDown');
+        // }
       }
     },
     // handler for touch release (mobile)
     handleTouchRelease(event) {
-      this.removeKey('ArrowUp');
-      this.removeKey('ArrowDown');
+		event.key = 'ArrowUp';
+		this.handleKeyRelease(event);
+		event.key = 'ArrowDown';
+		this.handleKeyRelease(event);
+    //   this.removeKey('ArrowUp');
+    //   this.removeKey('ArrowDown');
     },
     // function to update the game UI (called when receiving game state from server)
     updateGameUI(gameState) {

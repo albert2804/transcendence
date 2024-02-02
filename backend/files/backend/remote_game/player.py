@@ -10,6 +10,7 @@ from channels.layers import get_channel_layer
 class Player:
 	all_players = []
 
+	# Returns the player object of the given channel
 	@classmethod
 	def get_player_by_channel(cls, channel):
 		for player in Player.all_players:
@@ -17,6 +18,7 @@ class Player:
 				return player
 		return None
 
+	# Returns the channel of the given user
 	@classmethod
 	def get_channel_by_user(cls, user):
 		for player in Player.all_players:
@@ -24,6 +26,7 @@ class Player:
 				return player.get_channel()
 		return None
 
+	# Constructor for the Player object
 	def __init__(self, user, channel):
 		self.user = user
 		self.channel = channel
@@ -31,15 +34,19 @@ class Player:
 		self.game_handler = None
 		Player.all_players.append(self)
 	
+	# Getter for the user object (CustomUser) of the player
 	def get_user(self):
 		return self.user
 	
+	# Getter for the username of the player
+	# If the player is a guest, a (Guest) is added to the username
 	def get_username(self):
 		if self.user.is_authenticated:
 			return self.user.username
 		else:
 			return self.user.username + " (Guest)"
 	
+	# Getter for the channel of the player
 	def get_channel(self):
 		return self.channel
 	
@@ -90,5 +97,6 @@ class Player:
 	def get_game_handler(self):
 		return GameHandler.get_game_handler_by_name(self.game_handler)
 	
+	# Function to send a message to the player
 	async def send(self, message):
 		await self.channel_layer.send(self.channel, message)

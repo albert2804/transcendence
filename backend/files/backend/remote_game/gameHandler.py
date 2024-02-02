@@ -23,10 +23,10 @@ class GameHandler:
 		self.channel_layer = get_channel_layer()
 		GameHandler.all_game_groups[self.game_group] = self
 
+	# Use this function to create a new instance of this class
 	@classmethod
 	async def create(cls, player1, player2):
 		instance = cls(player1, player2)
-		# add players to game group (channel layer for sending messages to both players)
 		player1.game_handler = instance.game_group
 		await instance.channel_layer.group_add(
             instance.game_group,
@@ -39,10 +39,12 @@ class GameHandler:
 		)
 		return instance
 	
+	# Returns the game handler instance from the given game group name
 	@classmethod
 	def get_game_handler_by_name(cls, game_group_name):
 		return cls.all_game_groups.get(game_group_name, None)
 
+	# Starts the game and runs the game loop until the game is finished or stopped
 	async def start_game(self):
 		print(f"Started {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username}.")
 		# send player names to game group
@@ -121,9 +123,10 @@ class GameHandler:
 		del self
 	
 	def stop_game(self):
-		# print(f"Stopped game ({self.game_group}) between {self.player1.get_user().username} and {self.player2.get_user().username}.")
 		self.game.isGameExited = True
 	
+	# This function is called when a player wants to update the paddle position
+	# (gets called from consumers.py receive(), when a player sends a message)
 	def update_paddle(self, player, key, type):
 		if player == self.player1:
 			if type == 'key_pressed':

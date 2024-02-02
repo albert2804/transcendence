@@ -13,3 +13,6 @@ frontend/app/node-modules/
 temp/
 *.DS_Store
 backend/files/backend/.DS_Store
+elasticsearch/data/_state
+elasticsearch/data/snapshot_cache
+*.lock

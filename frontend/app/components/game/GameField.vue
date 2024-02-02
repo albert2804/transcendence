@@ -228,17 +228,9 @@
       if (mouseY < fieldHeight / 2) {
 		event.key = 'ArrowUp';
 		this.handleKeyPress(event);
-        // if (!this.pressedKeys.includes('ArrowUp')) {
-        //   this.removeKey('ArrowDown');
-        //   this.pressKey('ArrowUp');
-        // }
       } else {
 		event.key = 'ArrowDown';
 		this.handleKeyPress(event);
-        // if (!this.pressedKeys.includes('ArrowDown')) {
-        //   this.removeKey('ArrowUp');
-        //   this.pressKey('ArrowDown');
-        // }
       }
     },
     // handler for touch release (mobile)
@@ -247,8 +239,6 @@
 		this.handleKeyRelease(event);
 		event.key = 'ArrowDown';
 		this.handleKeyRelease(event);
-    //   this.removeKey('ArrowUp');
-    //   this.removeKey('ArrowDown');
     },
     // function to update the game UI (called when receiving game state from server)
     updateGameUI(gameState) {

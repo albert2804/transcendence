@@ -23,8 +23,13 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	waiting_room = []
 
 	# Tries to create a guest player with the given alias
-	# If the alias is already taken, the player gets an "alias_exists" message
+	# If the alias is already taken or empty, the player gets an "alias_exists" message
 	async def create_guest_player(self, alias):
+		if alias == "":
+			await self.send(text_data=json.dumps({
+				'type': 'alias_exists',
+			}))
+			return
 		for p in Player.all_players:
 			if p.get_user().username == alias:
 				await self.send(text_data=json.dumps({

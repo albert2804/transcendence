@@ -1,7 +1,7 @@
 <template>
     <div>
-      <div style="display: flex; justify-content: center; margin-top: 20vh;">
-          <LocalPong />
+      <div style="justify-content: center; margin-top: 20vh;">
+        <LocalPong/>
       </div>
     </div>
   </template>

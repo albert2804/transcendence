@@ -1,13 +1,16 @@
+<!-- 
+  @keydown.esc="closeModal"
+  @keydown="handleKeyPress"
+  @keyup="handleKeyRelease" 
+-->
+
 <template>
   <div class="modal fade"
     :id="modalId" tabindex="-1"
     :aria-labelledby="ariaLabel"
     aria-hidden="true"
     data-bs-backdrop="static"
-    data-bs-keyboard="false"
-    @keydown.esc="closeModal"
-    @keydown="handleKeyPress"
-    @keyup="handleKeyRelease">
+    data-bs-keyboard="false">
     <div class="modal-dialog fullscreen-modal align-items-center">
       <div class="modal-content">
         <div class="modal-body">
@@ -28,25 +31,25 @@ export default {
     ariaLabel: String,
   },
   methods: {
-    closeModal() {
-      // console.log('close modal');
-      setTimeout(() => {
-        var mood = document.getElementById(this.modalId);
-        var bsModal = bootstrap.Modal.getInstance(mood);
-        bsModal.hide();
-      // }, 1000);
-      }, 0);
-    },
-    handleKeyPress(event) {
-      if (this.$refs.ponggamefieldRef) {
-        this.$refs.ponggamefieldRef.handleKeyPress(event);
-      }
-    },
-    handleKeyRelease(event) {
-      if (this.$refs.ponggamefieldRef) {
-        this.$refs.ponggamefieldRef.handleKeyRelease(event);
-      }
-    }
+    // closeModal() {
+    //   // console.log('close modal');
+    //   setTimeout(() => {
+    //     var mood = document.getElementById(this.modalId);
+    //     var bsModal = bootstrap.Modal.getInstance(mood);
+    //     bsModal.hide();
+    //   // }, 1000);
+    //   }, 0);
+    // },
+    // handleKeyPress(event) {
+    //   if (this.$refs.ponggamefieldRef) {
+    //     this.$refs.ponggamefieldRef.handleKeyPress(event);
+    //   }
+    // },
+    // handleKeyRelease(event) {
+    //   if (this.$refs.ponggamefieldRef) {
+    //     this.$refs.ponggamefieldRef.handleKeyRelease(event);
+    //   }
+    // }
   },
 };
 </script>

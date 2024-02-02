@@ -1,5 +1,15 @@
+<script setup>
+  // Listen to changes of the isLoggedIn from store/index.js
+  import { isLoggedIn } from '~/store';
+  watchEffect(() => {
+  isLoggedIn.value = isLoggedIn.value
+})
+</script>
+
 <template>
   <div
+      @keydown="handleKeyPress"
+      @keyup="handleKeyRelease"
       class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease">
       <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
       <div v-show="playing" class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
@@ -26,6 +36,10 @@
 		<div v-if="showMenu">
 			<button type="button" class="btn btn-primary" @click="startGame">Start Game</button>
 		</div>
+    <div v-if="showMenu && isLoggedIn == 1" style="height: 5px;"></div>
+    <div v-if="showMenu && isLoggedIn == 1">
+      <button type="button" class="btn btn-primary" @click="startRatedGame">Start Rated Game</button>
+    </div>
 		<!-- play on this device - button --->
 		<div v-if="!playOnThisDevice">
 			<button type="button" class="btn btn-primary" @click="changeDevice">Play on this device</button>
@@ -182,6 +196,14 @@
         const data = JSON.stringify({
           type: 'start_game',
           alias: this.alias,
+        });
+        this.socket.send(data);
+      }
+    },
+    startRatedGame () {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        const data = JSON.stringify({
+          type: 'start_rated_game'
         });
         this.socket.send(data);
       }

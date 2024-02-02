@@ -4,7 +4,26 @@
   watchEffect(() => {
   isLoggedIn.value = isLoggedIn.value
 })
+
+  import { ref, onMounted } from 'vue';
+
+  const client_id = import.meta.env.VITE_42INTRA_CLIENT_ID;
+  const redirect_uri = ref('');
+
+  onMounted(() => {
+    redirect_uri.value = encodeURIComponent(window.location.origin + "/endpoint/auth/callback");
+  });
+
+  const generateRandomString = () => {
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  };
+
+  const redirectToIntraLogin = () => {
+    const url =`https://api.intra.42.fr/oauth/authorize?client_id=${client_id}&redirect_uri=${redirect_uri.value}&state=${generateRandomString()}&response_type=code`;
+    window.location.href = url;
+  };
 </script>
+
 
 <template>
   <div class="card card-size">
@@ -27,6 +46,12 @@
           <button type="button" @keyup.enter="$refs.loginnamefield.focus()" ref="loginbutton" class="btn btn-primary" @click="login">Login</button>
           <a class="btn btn-link btn-sm" @click="reg_form = true; error = ''; message = ''">create account</a>
         </div>
+      </form>
+      <form v-if="isLoggedIn != 1 && !reg_form">
+      <div class="button-list">
+        Alternatively, 42 students can just log in with their intra accounts at 42. Just click on the magic button below
+        <button type="button" ref="loginbutton_42intra" class="btn btn-primary" @click="redirectToIntraLogin">CLICK ME TO 42!</button>
+      </div>
       </form>
       <!-- REGISTRATION FORM -->
       <form v-if="isLoggedIn == 0 && reg_form">

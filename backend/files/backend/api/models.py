@@ -19,6 +19,7 @@ class CustomUser(AbstractUser):
     # Custom fields
     chat_online = models.BooleanField(default=False)
     profile_pic = models.FileField(upload_to='profilepic', default='profilepic/default.jpeg', blank=True, null=True)
+
     # mobile = models.CharField(max_length=20, blank=True, null=True)
     def __str__(self):
         return self.username

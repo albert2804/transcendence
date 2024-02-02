@@ -5,14 +5,21 @@
 
 <template>
 	<div>
-	  <button @click="startGame" class="start-button">Start Game</button>
+		<div class="score-container">{{ numberOfWinsP1 }} : {{ numberOfWinsP2 }}</div>
+		<div style="display: flex;">	
+			<button @click="startGame" class="start-button">Start Game</button>
+			<!-- <button @click="startTournament" class="start-tournament">Start Tournament</button> -->
+		</div>
 	  <canvas ref="pongCanvas" width="800" height="400"></canvas>
-	  <div class="score-container">{{ numberOfWinsP1 }} : {{ numberOfWinsP2 }}</div>
+		<LocalTournament :startGameTour="startGame" :gameFinish="isGameWon" :gameExited="isGameExited" />
 	</div>
-  </template>
+</template>
   
   <script>
+	import LocalTournament from './LocalTournament.vue';
+
   export default {
+		name: 'LocalPong',
 	data() {
 		const canvasHeight = 400;
 		const canvasWidth = 800;
@@ -24,6 +31,7 @@
 		canvasHeight: canvasHeight,
 		isGamePaused: false,
 		isGameExited: false,
+		isGameWon: false,
 		numberOfWinsP1: 0,
 		numberOfWinsP2: 0,
 		initialSpeed: 3,
@@ -75,20 +83,23 @@
 	  this.exitGame();
 	  console.log("Page left. Game loop stopped.");
 	},
+	components: {
+		LocalTournament
+	},
 	methods: {
 	
 	  setupGame() {
 		this.draw();
 		},
 		
-	  startGame() {
-        this.resetGame();
-		this.gameLoop();
-      },
+	  async startGame() {
+      this.resetGame();
+			this.gameLoop();
+		},
 
 	  exitGame() {
-		console.log('Exiting the game');
-		this.isGameExited = true;
+			console.log('Exiting the game');
+			this.isGameExited = true;
 	  },
 
 	  resetGame() {
@@ -97,6 +108,7 @@
 		this.numberOfWinsP2 = 0;
 		this.isGameExited = false;
 		this.isGamePaused = false;
+		this.isGameWon = false;
 
 		// reset paddles
 		this.leftPaddle.x = 0;
@@ -223,12 +235,14 @@
 			this.draw();
 		}
   		// Check if the maximum number of games has been reached
-  		else if (this.numberOfWinsP1 < 10 && this.numberOfWinsP2 < 10) {
+  		else if (this.numberOfWinsP1 < 1 && this.numberOfWinsP2 < 1) {
     	  this.updateGame();
     	  this.draw();
     	  requestAnimationFrame(() => this.gameLoop());
   	  	}
 	  	else {
+				this.isGameWon = true;
+				this.$emit('updateIsGameWon', this.isGameWon);
     	  console.log("Maximum number of games reached. Game loop stopped.");
   		}
 	  },
@@ -279,6 +293,7 @@
     padding: 10px;
     font-size: 16px;
   }
+
   canvas {
 	display: block;
 	margin: auto;

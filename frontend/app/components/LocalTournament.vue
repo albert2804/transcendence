@@ -217,7 +217,7 @@ export default {
         this.all_players[index - 1].player_or_bot = 'Player';
     },
     updatePlayerName(index, event) {
-      if (index >= 0 && index < this.all_players.length)
+      if (index >= 0 && index <= this.all_players.length)
         this.all_players[index - 1].name = event.target.value;
     },
     getPlayerValue(index) {

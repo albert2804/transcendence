@@ -35,7 +35,7 @@ ALLOWED_HOSTS = ['*']
 # Set trusted origins for CSRF from environment variable
 # CSRF_TRUSTED_ORIGINS = ['https://' + host for host in os.environ['DOMAIN'].split()]
 # Allow all hosts for schools network
-CSRF_TRUSTED_ORIGINS = ['*']
+CSRF_TRUSTED_ORIGINS = ['https://localhost', 'https://10.*']
 
 # Application definition
 

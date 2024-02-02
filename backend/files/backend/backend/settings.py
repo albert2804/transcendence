@@ -150,7 +150,10 @@ STATIC_ROOT = BASE_DIR / '../../static'
 
 # directory where media for example (.jpg)is stored
 MEDIA_URL = '/endpoint/media/'
-MEDIA_ROOT = BASE_DIR / '../../media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, '../../..', 'media')
+
+########## change this directory to variable ############
+MEDIA_ROOT = BASE_DIR / '..'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

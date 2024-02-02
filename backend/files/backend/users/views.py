@@ -29,6 +29,7 @@ def send_profilepic(request):
 	if request.user.is_authenticated:
 		try:
 			profilepic_url = CustomUser.objects.get(username=request.user).profile_pic.url
+			print(f"{profilepic_url}")
 			return JsonResponse({'url': profilepic_url},
 				status=200)
 		except:
@@ -37,6 +38,25 @@ def send_profilepic(request):
 	else:
 		return JsonResponse({'error': 'User not authenticated'},
 			status=401)
+
+def uploadpicture(request):
+    try:
+        if request.method == 'POST':
+            user = CustomUser.objects.get(username=request.user)
+            if 'newPic' in request.FILES:
+                user.profile_pic = request.FILES['newPic']
+                user.save()
+                print(f"user.profile_pic.url: {user.profile_pic.url}")
+                print(f"user.profile_pic: {user.profile_pic}")
+                return JsonResponse({'url': user.profile_pic.url}, status=200)
+            else:
+                return JsonResponse({'error': 'No Profile Picture found for the user'}, status=404)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': 'Changing profilePic failed'}, status=400)
+
+
 
 
 # sends the results of the games which the user played as response to the frontend

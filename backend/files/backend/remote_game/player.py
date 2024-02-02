@@ -50,36 +50,32 @@ class Player:
 		if self.game_handler != None:
 			group = GameHandler.get_game_handler_by_name(self.game_handler)
 			await self.send({
-				'type': 'state',
-				'state': "playing",
+				'type': 'player_names',
 				'p1_name': group.player1.get_username(),
 				'p2_name': group.player2.get_username(),
+			})
+			await self.send({
+				'type': 'redirect',
+				'page': "playing",
 			})
 		# check if in waiting room
 		elif self in RemoteGameConsumer.waiting_room:
 			await self.send({
-				'type': 'state',
-				'state': "waiting",
-				'p1_name': self.get_user().username,
-				'p2_name': "...",
+				'type': 'redirect',
+				'page': "waiting",
 			})
 		# else send menu state
 		else:
 			await self.send({
-				'type': 'state',
-				'state': "menu",
-				'p1_name': self.get_user().username,
-				'p2_name': "",
+				'type': 'redirect',
+				'page': "menu",
 			})
-		
+
 	# This function changes the channel of the player to the new_channel (device)
 	async def change_channel(self, new_channel):
-		# send "other_device" state to the old channel
 		await self.send({
-			'type': 'state',
-			'state': "other_device",
-			'p1_name': "",
-			'p2_name': "",
+			'type': 'redirect',
+			'page': "other_device",
 		})
 		print(f"Player {self.user.username} changed his device/channel")
 		if self.game_handler != None:

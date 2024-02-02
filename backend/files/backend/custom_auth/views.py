@@ -20,6 +20,7 @@ tabs = [
 
 def callback(request):
     code = request.GET.get('code')
+    print("HOST: " + request.get_host())
     print("CODE: " + code)
     print("URL: " + request.get_full_path())
     state = request.GET.get('state')
@@ -32,13 +33,15 @@ def callback(request):
     url += "&client_secret=" + client_secret
     url += "&code=" + code
     url += "&state=" + state
-    url += "&redirect_uri=" + quote("https://localhost/endpoint/auth/callback", safe='')
+    url += "&redirect_uri=" + quote("https://" + request.get_host() + "/endpoint/auth/callback", safe='')
 
     print("URL: " + url)
     response = requests.post(url)
     print(response.json())
     print (response.text)
 
+
+    #TODO: handle error if there is no access_token
     token = response.json()['access_token'] 
     print("TOKEN: " + token)
 

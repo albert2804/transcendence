@@ -28,14 +28,14 @@ SECRET_KEY = 'django-insecure-0q20k#atx@vql74=j^5=hijw2@=+s0e4gv4wnltw--94#-*yi=
 DEBUG = True
 
 # Set allowed hosts from environment variable
-# ALLOWED_HOSTS = os.environ['DOMAIN'].split()
+ALLOWED_HOSTS = os.environ['DOMAIN'].split()
 # Allow all hosts for schools network
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
 
 # Set trusted origins for CSRF from environment variable
-# CSRF_TRUSTED_ORIGINS = ['https://' + host for host in os.environ['DOMAIN'].split()]
+CSRF_TRUSTED_ORIGINS = ['https://' + host for host in os.environ['DOMAIN'].split()]
 # Allow all hosts for schools network
-CSRF_TRUSTED_ORIGINS = ['https://localhost', 'https://10.*']
+# CSRF_TRUSTED_ORIGINS = ['https://localhost', 'https://10.*']
 
 # Application definition
 
@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'social_django',
     'users',
     'api',
     'chat',

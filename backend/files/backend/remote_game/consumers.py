@@ -21,6 +21,8 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 
 	# list of players in the waiting group (mixed room for guests and registered users -> unranked games)
 	waiting_room = []
+	#
+	rated_waiting_room = []
 
 	# Tries to create a guest player with the given alias
 	# If the alias is already taken or empty, the player gets an "alias_exists" message
@@ -58,6 +60,17 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 		else:
 			RemoteGameConsumer.waiting_room.append(player)
 		await player.send_state()
+	
+	async def add_to_rated_waiting_room(self, player):
+		if player.get_user().is_authenticated:
+			if len(RemoteGameConsumer.rated_waiting_room) >= 1:
+				player1 = RemoteGameConsumer.rated_waiting_room[0]
+				RemoteGameConsumer.rated_waiting_room.pop(0)
+				game_group = await GameHandler.create(player1, player, rated=True)
+				asyncio.ensure_future(game_group.start_game())
+			else:
+				RemoteGameConsumer.rated_waiting_room.append(player)
+			await player.send_state()
 	
 	# This function is called when a new connection is established
 	# Checks if user is authenticated or not
@@ -106,6 +119,9 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 				menu_data = json.loads(text_data)
 				if menu_data.get('type') == 'start_game':
 					await self.add_to_waiting_room(player)
+				elif menu_data.get('type') == 'start_rated_game':
+					print("start_rated_game")
+					await self.add_to_rated_waiting_room(player)
 				# else:
 					# print(f"Received invalid JSON file: {menu_data}")      # uncommented because this also happens when the message is valid but not at the right time
 		except json.JSONDecodeError:
@@ -122,6 +138,8 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 				player.get_game_handler().stop_game()
 			if player in RemoteGameConsumer.waiting_room:
 				RemoteGameConsumer.waiting_room.remove(player)
+			if player in RemoteGameConsumer.rated_waiting_room:
+				RemoteGameConsumer.rated_waiting_room.remove(player)
 			Player.all_players.remove(Player.get_player_by_channel(self.channel_name))
 			print(f"{self.scope['user'].username} disconnected from game-websocket.")
 

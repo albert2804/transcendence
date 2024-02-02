@@ -1,7 +1,10 @@
+# from channels.db import database_sync_to_async
 import random
 import asyncio
 from .pong import PongGame
 from channels.layers import get_channel_layer
+from asgiref.sync import sync_to_async
+# from .models import RemoteGame
 
 # This class is used to handle the PongGame between the two Player objects (player1 and player2)
 # Create a new instance of this class with GAME_XXX = GameHandler.create(player1, player2)
@@ -15,9 +18,15 @@ class GameHandler:
 	all_game_groups = {}
 
 	# Use create() instead of __init__() to create a new instance of this class 
-	def __init__(self, player1, player2):
+	# @database_sync_to_async
+	def __init__(self, player1, player2, rated=False):
 		self.player1 = player1
 		self.player2 = player2
+		self.rated = rated
+		# if rated game, create a new RemoteGame model (DB entry)
+		# self.remote_game = None
+		#
+		self.db_entry = None
 		self.game_group = f"game_{random.randint(0, 1000000)}"
 		self.game = PongGame()
 		self.channel_layer = get_channel_layer()
@@ -25,8 +34,16 @@ class GameHandler:
 
 	# Use this function to create a new instance of this class
 	@classmethod
-	async def create(cls, player1, player2):
-		instance = cls(player1, player2)
+	async def create(cls, player1, player2, rated=False):
+		# from .models import RemoteGame
+		instance = cls(player1, player2, rated)
+
+		# if instance.rated:
+		# 	instance.remote_game = await sync_to_async(RemoteGame.objects.create(
+		# 		player1=player1.get_user(),
+		# 		player2=player2.get_user(),
+		# 	))()
+
 		player1.game_handler = instance.game_group
 		await instance.channel_layer.group_add(
             instance.game_group,
@@ -46,7 +63,19 @@ class GameHandler:
 
 	# Starts the game and runs the game loop until the game is finished or stopped
 	async def start_game(self):
-		print(f"Started {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username}.")
+		if self.rated:
+			print(f"Started rated {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username}.")
+			# await sync_to_async(RemoteGame.objects.create(
+			# 	player1=player1.get_user(),
+			# 	player2=player2.get_user(),
+			# ))()
+			from .models import RemoteGame
+			db_entry = await sync_to_async(RemoteGame.objects.create)(
+				player1=self.player1.get_user(),
+				player2=self.player2.get_user(),
+			)
+		else:
+			print(f"Started {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username}.")
 		# send player names to game group
 		await self.channel_layer.group_send(
 			self.game_group,

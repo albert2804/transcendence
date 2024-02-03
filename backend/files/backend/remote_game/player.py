@@ -65,8 +65,8 @@ class Player:
 				'type': 'redirect',
 				'page': "playing",
 			})
-		# check if in waiting room or rated waiting room
-		elif self in RemoteGameConsumer.waiting_room or self in RemoteGameConsumer.rated_waiting_room:
+		# check if in waiting room or ranked waiting room
+		elif self in RemoteGameConsumer.training_waiting_room or self in RemoteGameConsumer.ranked_waiting_room:
 			await self.send({
 				'type': 'redirect',
 				'page': "waiting",

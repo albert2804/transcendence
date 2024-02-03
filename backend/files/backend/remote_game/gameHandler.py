@@ -1,10 +1,9 @@
-# from channels.db import database_sync_to_async
 import random
 import asyncio
 from .pong import PongGame
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async
-# from .models import RemoteGame
+from django.utils import timezone
 
 # This class is used to handle the PongGame between the two Player objects (player1 and player2)
 # Create a new instance of this class with GAME_XXX = GameHandler.create(player1, player2)
@@ -19,13 +18,10 @@ class GameHandler:
 
 	# Use create() instead of __init__() to create a new instance of this class 
 	# @database_sync_to_async
-	def __init__(self, player1, player2, rated=False):
+	def __init__(self, player1, player2, ranked=False):
 		self.player1 = player1
 		self.player2 = player2
-		self.rated = rated
-		# if rated game, create a new RemoteGame model (DB entry)
-		# self.remote_game = None
-		#
+		self.ranked = ranked
 		self.db_entry = None
 		self.game_group = f"game_{random.randint(0, 1000000)}"
 		self.game = PongGame()
@@ -34,16 +30,8 @@ class GameHandler:
 
 	# Use this function to create a new instance of this class
 	@classmethod
-	async def create(cls, player1, player2, rated=False):
-		# from .models import RemoteGame
-		instance = cls(player1, player2, rated)
-
-		# if instance.rated:
-		# 	instance.remote_game = await sync_to_async(RemoteGame.objects.create(
-		# 		player1=player1.get_user(),
-		# 		player2=player2.get_user(),
-		# 	))()
-
+	async def create(cls, player1, player2, ranked=False):
+		instance = cls(player1, player2, ranked)
 		player1.game_handler = instance.game_group
 		await instance.channel_layer.group_add(
             instance.game_group,
@@ -54,6 +42,12 @@ class GameHandler:
 			instance.game_group,
 			player2.channel
 		)
+		if ranked:
+			from .models import RemoteGame
+			instance.db_entry = await sync_to_async(RemoteGame.objects.create)(
+				player1=player1.get_user(),
+				player2=player2.get_user(),
+			)
 		return instance
 	
 	# Returns the game handler instance from the given game group name
@@ -63,17 +57,13 @@ class GameHandler:
 
 	# Starts the game and runs the game loop until the game is finished or stopped
 	async def start_game(self):
-		if self.rated:
-			print(f"Started rated {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username}.")
-			# await sync_to_async(RemoteGame.objects.create(
-			# 	player1=player1.get_user(),
-			# 	player2=player2.get_user(),
-			# ))()
+		if self.ranked:
+			print(f"Started ranked {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username}.")
+			# fill in the started_at field of the RemoteGame model
 			from .models import RemoteGame
-			db_entry = await sync_to_async(RemoteGame.objects.create)(
-				player1=self.player1.get_user(),
-				player2=self.player2.get_user(),
-			)
+			self.db_entry.started_at = timezone.now()
+			await sync_to_async(self.db_entry.save)()
+			
 		else:
 			print(f"Started {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username}.")
 		# send player names to game group
@@ -125,6 +115,22 @@ class GameHandler:
 				'type': 'game_result',
 				'result': 'winner',
 			})
+		# if ranked game, fill the db entry
+		if self.ranked:
+			from .models import RemoteGame
+			self.db_entry.finished_at = timezone.now()
+			self.db_entry.pointsP1 = int(self.game.pointsP1)
+			self.db_entry.pointsP2 = int(self.game.pointsP2)
+			if self.game.winner == 1:
+				self.db_entry.winner = self.player1.get_user()
+				self.db_entry.loser = self.player2.get_user()
+			elif self.game.winner == 2:
+				self.db_entry.winner = self.player2.get_user()
+				self.db_entry.loser = self.player1.get_user()
+			self.db_entry.finished = True
+			print("Hits Player 1:", self.game.pointsP1)
+			print("Hits Player 2:", self.game.pointsP2)
+			await sync_to_async(self.db_entry.save)()
 		print(f"{self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username} finished.")
 		# wait 5 seconds
 		await asyncio.sleep(5)
@@ -193,8 +199,8 @@ class GameHandler:
 			},
 		}
 		high_score = {
-			'numberOfHitsP1': self.game.numberOfHitsP1,
-			'numberOfHitsP2': self.game.numberOfHitsP2,
+			'pointsP1': self.game.pointsP1,
+			'pointsP2': self.game.pointsP2,
 		}
 		# send game state to game group
 		await self.channel_layer.group_send(

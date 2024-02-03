@@ -22,10 +22,10 @@
         {{ p2_name }}
       </div>
       <div v-show="playing" style="position: absolute; bottom: 0; left: 2%; font-size: 2.0em; color: #ffffff;">
-        {{ numberOfHitsP1 }}
+        {{ pointsP1 }}
       </div>
       <div v-show="playing" style="position: absolute; bottom: 0; right: 2%; font-size: 2.0em; color: #ffffff;">
-        {{ numberOfHitsP2 }}
+        {{ pointsP2 }}
       </div>
 	  <li style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; position: absolute;">
 		<!-- Message --->
@@ -34,11 +34,11 @@
 		</div>
 		<!-- Start game - button --->
 		<div v-if="showMenu">
-			<button type="button" class="btn btn-primary" @click="startGame">Start Game</button>
+			<button type="button" class="btn btn-primary" @click="startTrainingGame">Start Training Game</button>
 		</div>
     <div v-if="showMenu && isLoggedIn == 1" style="height: 5px;"></div>
     <div v-if="showMenu && isLoggedIn == 1">
-      <button type="button" class="btn btn-primary" @click="startRatedGame">Start Rated Game</button>
+      <button type="button" class="btn btn-primary" @click="startRankedGame">Start Ranked Game</button>
     </div>
 		<!-- play on this device - button --->
 		<div v-if="!playOnThisDevice">
@@ -64,8 +64,8 @@
     return {
       socket: null,
       message: '',
-      numberOfHitsP1: 0,
-      numberOfHitsP2: 0,
+      pointsP1: 0,
+      pointsP2: 0,
       playing: false,
       showMenu: false,
       p1_name: '',
@@ -170,8 +170,8 @@
           } else if (data.type === 'game_update') {
             const gameState = data.state;
             const highScore = data.high_score;
-            this.numberOfHitsP1 = highScore.numberOfHitsP1;
-            this.numberOfHitsP2 = highScore.numberOfHitsP2;
+            this.pointsP1 = highScore.pointsP1;
+            this.pointsP2 = highScore.pointsP2;
             this.updateGameUI(gameState);
           } else if (data.type === "alias_exists") {
             this.message = "Alias already taken!";
@@ -191,19 +191,19 @@
       }
     },
     // function to start the game
-    startGame () {
+    startTrainingGame () {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
-          type: 'start_game',
+          type: 'start_training_game',
           alias: this.alias,
         });
         this.socket.send(data);
       }
     },
-    startRatedGame () {
+    startRankedGame () {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
-          type: 'start_rated_game'
+          type: 'start_ranked_game'
         });
         this.socket.send(data);
       }

@@ -3,8 +3,8 @@ import math
 
 class PongGame:
 	def __init__(self):
-		self.numberOfHitsP1 = 0
-		self.numberOfHitsP2 = 0
+		self.pointsP1 = 0
+		self.pointsP2 = 0
 		self.isGameExited = False
 		self.isGamePaused = False
 		self.initialSpeed = 2
@@ -71,20 +71,20 @@ class PongGame:
 			self.ball['dy'] = self.currentSpeed
 
 			if self.ball['x'] + self.ball['radius'] > self.canvasWidth:
-				self.numberOfHitsP1 += 1
+				self.pointsP1 += 1
 				# Set new speed and direction
 			elif self.ball['x'] - self.ball['radius'] < 0:
-				self.numberOfHitsP2 += 1
+				self.pointsP2 += 1
 
 			# Reset ball position to center
 			self.ball['x'] = self.canvasWidth/2
 
 	def game_loop(self):
-		if self.numberOfHitsP1 < 10 and self.numberOfHitsP2 < 10:
+		if self.pointsP1 < 10 and self.pointsP2 < 10:
 			self.update_game()
 		else:
-			if self.numberOfHitsP1 == 10:
+			if self.pointsP1 == 10:
 				self.winner = 1
-			elif self.numberOfHitsP2 == 10:
+			elif self.pointsP2 == 10:
 				self.winner = 2
 			self.isGameExited = True

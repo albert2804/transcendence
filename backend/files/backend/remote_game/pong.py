@@ -7,7 +7,7 @@ class PongGame:
 		self.pointsP2 = 0
 		self.isGameExited = False
 		self.isGamePaused = False
-		self.initialSpeed = 2
+		self.initialSpeed = 4
 		self.currentSpeed = self.initialSpeed
 		self.canvasWidth = 800
 		self.canvasHeight = 400

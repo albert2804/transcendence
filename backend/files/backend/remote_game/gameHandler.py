@@ -23,12 +23,18 @@ class GameHandler:
 		self.player2 = player2
 		if (player1 == player2):
 			self.local_game = True
+		else:
+			self.local_game = False
 		self.ranked = ranked
 		self.db_entry = None
 		self.game_group = f"game_{random.randint(0, 1000000)}"
 		self.game = PongGame()
 		self.channel_layer = get_channel_layer()
 		GameHandler.all_game_groups[self.game_group] = self
+		# This variable is used to store the latest game state
+		# So we can store and send the latest game state to players instead of sending the whole game state
+		# This is useful during network lag
+		self.latest_game_state = None
 
 	# Use this function to create a new instance of this class
 	@classmethod
@@ -36,9 +42,9 @@ class GameHandler:
 		instance = cls(player1, player2, ranked)
 		player1.game_handler = instance.game_group
 		await instance.channel_layer.group_add(
-            instance.game_group,
-            player1.channel
-        )
+			instance.game_group,
+			player1.channel
+		)
 		player2.game_handler = instance.game_group
 		await instance.channel_layer.group_add(
 			instance.game_group,
@@ -142,11 +148,15 @@ class GameHandler:
 				'type': 'redirect',
 				'page': "playing",
 			})
+		# start send_from_queue in background
+		# asyncio.ensure_future(self.send_from_queue())
+		asyncio.ensure_future(self.send_game_state_to_player_1())
+		asyncio.ensure_future(self.send_game_state_to_player_2())
 		# run game loop
 		while not self.game.isGameExited:
 			self.game.game_loop()
-			await self.send_game_state()
-			await asyncio.sleep(0.004)
+			await self.save_game_state()
+			await asyncio.sleep(0.01) # 100 times per second still too much?
 		# send game result to game group
 		await self.send_game_result()
 		# if ranked game, fill the db entry
@@ -205,13 +215,13 @@ class GameHandler:
 		if self.local_game:
 			if type == 'key_pressed':
 				if key == 'ArrowUp':
-					self.game.rightPaddle['dy'] = -2
+					self.game.rightPaddle['dy'] = -4
 				elif key == 'ArrowDown':
-					self.game.rightPaddle['dy'] = 2
+					self.game.rightPaddle['dy'] = 4
 				elif key == 'w':
-					self.game.leftPaddle['dy'] = -2
+					self.game.leftPaddle['dy'] = -4
 				elif key == 's':
-					self.game.leftPaddle['dy'] = 2
+					self.game.leftPaddle['dy'] = 4
 			elif type == 'key_released':
 				if key in ['ArrowDown', 'ArrowUp']:
 					self.game.rightPaddle['dy'] = 0
@@ -220,26 +230,26 @@ class GameHandler:
 		elif player == self.player1:
 			if type == 'key_pressed':
 				if key == 'ArrowUp':
-					self.game.leftPaddle['dy'] = -2
+					self.game.leftPaddle['dy'] = -4
 				elif key == 'ArrowDown':
-					self.game.leftPaddle['dy'] = 2
+					self.game.leftPaddle['dy'] = 4
 			elif type == 'key_released':
 				if key in ['ArrowDown', 'ArrowUp']:
 					self.game.leftPaddle['dy'] = 0
 		elif player == self.player2:
 			if type == 'key_pressed':
 				if key == 'ArrowUp':
-					self.game.rightPaddle['dy'] = -2
+					self.game.rightPaddle['dy'] = -4
 				elif key == 'ArrowDown':
-					self.game.rightPaddle['dy'] = 2
+					self.game.rightPaddle['dy'] = 4
 			elif type == 'key_released':
 				if key in ['ArrowDown', 'ArrowUp']:
 					self.game.rightPaddle['dy'] = 0
 		else:
 			print(f"Unknown player: {player}")
 
-	# send game state to game group (converted to percent)
-	async def send_game_state(self):
+	# saves the actual game state to latest_game_state
+	async def save_game_state(self):
 		state = {
 			'ball': {
 				'x': (self.game.ball['x'] / self.game.canvasWidth) * 100,
@@ -256,12 +266,46 @@ class GameHandler:
 			'pointsP1': self.game.pointsP1,
 			'pointsP2': self.game.pointsP2,
 		}
-		# send game state to game group
-		await self.channel_layer.group_send(
-			self.game_group,
-			{
-				'type': 'game_update',
-				'state': state,
-				'high_score': high_score,
-			}
-		)
+		# store latest game state
+		self.latest_game_state = {
+			'type': 'game_update',
+			'state': state,
+			'high_score': high_score,
+		}
+
+	# sends the latest game state to the game group
+	async def send_from_queue(self):
+		while not self.game.isGameExited:
+			if self.latest_game_state is not None:
+				await self.channel_layer.group_send(
+					self.game_group,
+					self.latest_game_state
+				)
+				self.latest_game_state = None
+			# await asyncio.sleep(0.1)
+			# await asyncio.sleep(0.05)
+			await asyncio.sleep(0.025)
+			# await asyncio.sleep(0.01)
+			# await asyncio.sleep(0)
+	
+	async def send_game_state_to_player_1(self): 
+		while not self.game.isGameExited: # ALSO CHECK FOR PLAYER != NONE ??
+			if self.latest_game_state is not None:
+				await self.player1.send(self.latest_game_state)
+				self.latest_game_state = None
+			# await asyncio.sleep(0.1)
+			# await asyncio.sleep(0.05)
+			await asyncio.sleep(0.025)
+			# await asyncio.sleep(0.01)
+			# await asyncio.sleep(0)
+	
+	async def send_game_state_to_player_2(self):
+		while not self.game.isGameExited:
+			if self.latest_game_state is not None:
+				await self.player2.send(self.latest_game_state)
+				self.latest_game_state = None
+			await asyncio.sleep(0.1)
+			# await asyncio.sleep(0.05)
+			# await asyncio.sleep(0.025)
+			# await asyncio.sleep(0.01)
+			# await asyncio.sleep(0)

@@ -124,6 +124,8 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 				elif menu_data.get('type') == 'start_local_game':
 					game_group = await GameHandler.create(player, player)
 					asyncio.ensure_future(game_group.start_game())
+				elif menu_data.get('type') == 'slow_device':
+					player.fps = 12 # slow device (worked with 12fps on esp8266)
 				# else:
 					# print(f"Received invalid JSON file: {menu_data}")      # uncommented because this also happens when the message is valid but not at the right time
 		except json.JSONDecodeError:

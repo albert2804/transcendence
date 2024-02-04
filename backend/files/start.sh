@@ -29,8 +29,8 @@ python manage.py migrate
 # Collect static files (needed for serving static files with daphne)
 python manage.py collectstatic --noinput
 # Start the ASGI server (Daphne in this case)
-# daphne -b 0.0.0.0 -p 8000 backend.asgi:application
-tail -f /dev/null
+daphne -b 0.0.0.0 -p 8000 backend.asgi:application
+# tail -f /dev/null
 
 
 

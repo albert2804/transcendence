@@ -31,9 +31,7 @@ class GameHandler:
 		self.game = PongGame()
 		self.channel_layer = get_channel_layer()
 		GameHandler.all_game_groups[self.game_group] = self
-		# This variable is used to store the latest game state
-		# So we can store and send the latest game state to players instead of sending the whole game state
-		# This is useful during network lag
+		self.game_state_lock = asyncio.Lock() # lock for the game state (got problems with async send_game_state_to_player_1() and send_game_state_to_player_2())
 		self.latest_game_state = None
 
 	# Use this function to create a new instance of this class
@@ -150,6 +148,7 @@ class GameHandler:
 			})
 		# start send_from_queue in background
 		# asyncio.ensure_future(self.send_from_queue())
+		# asyncio.ensure_future(self.send_game_state_to_player_2())
 		asyncio.ensure_future(self.send_game_state_to_player_1())
 		asyncio.ensure_future(self.send_game_state_to_player_2())
 		# run game loop
@@ -248,7 +247,7 @@ class GameHandler:
 		else:
 			print(f"Unknown player: {player}")
 
-	# saves the actual game state to latest_game_state
+	# stores the actual game state to self.latest_game_state
 	async def save_game_state(self):
 		state = {
 			'ball': {
@@ -266,46 +265,28 @@ class GameHandler:
 			'pointsP1': self.game.pointsP1,
 			'pointsP2': self.game.pointsP2,
 		}
-		# store latest game state
 		self.latest_game_state = {
 			'type': 'game_update',
 			'state': state,
 			'high_score': high_score,
 		}
-
-	# sends the latest game state to the game group
-	async def send_from_queue(self):
-		while not self.game.isGameExited:
-			if self.latest_game_state is not None:
-				await self.channel_layer.group_send(
-					self.game_group,
-					self.latest_game_state
-				)
-				self.latest_game_state = None
-			# await asyncio.sleep(0.1)
-			# await asyncio.sleep(0.05)
-			await asyncio.sleep(0.025)
-			# await asyncio.sleep(0.01)
-			# await asyncio.sleep(0)
 	
+	# sends the latest game state to player 1
+	# gets called in a separate thread
 	async def send_game_state_to_player_1(self): 
 		while not self.game.isGameExited: # ALSO CHECK FOR PLAYER != NONE ??
-			if self.latest_game_state is not None:
-				await self.player1.send(self.latest_game_state)
-				self.latest_game_state = None
-			# await asyncio.sleep(0.1)
-			# await asyncio.sleep(0.05)
-			await asyncio.sleep(0.025)
-			# await asyncio.sleep(0.01)
-			# await asyncio.sleep(0)
+			async with self.game_state_lock:
+				if self.latest_game_state is not None:
+					await self.player1.send(self.latest_game_state)
+					self.latest_game_state = None
+				await asyncio.sleep(1 / self.player1.fps)
 	
+	# sends the latest game state to player 2
+	# gets called in a separate thread
 	async def send_game_state_to_player_2(self):
 		while not self.game.isGameExited:
-			if self.latest_game_state is not None:
-				await self.player2.send(self.latest_game_state)
-				self.latest_game_state = None
-			await asyncio.sleep(0.1)
-			# await asyncio.sleep(0.05)
-			# await asyncio.sleep(0.025)
-			# await asyncio.sleep(0.01)
-			# await asyncio.sleep(0)
+			async with self.game_state_lock:
+				if self.latest_game_state is not None:
+					await self.player2.send(self.latest_game_state)
+					self.latest_game_state = None
+				await asyncio.sleep(1 / self.player2.fps)

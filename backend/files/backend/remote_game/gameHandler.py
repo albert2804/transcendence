@@ -279,7 +279,8 @@ class GameHandler:
 				if self.latest_game_state is not None:
 					await self.player1.send(self.latest_game_state)
 					self.latest_game_state = None
-				await asyncio.sleep(1 / self.player1.fps)
+					await asyncio.sleep(0.01) # needed that the lock gets released before sleeping
+			await asyncio.sleep(1 / self.player1.fps)
 	
 	# sends the latest game state to player 2
 	# gets called in a separate thread
@@ -289,4 +290,5 @@ class GameHandler:
 				if self.latest_game_state is not None:
 					await self.player2.send(self.latest_game_state)
 					self.latest_game_state = None
-				await asyncio.sleep(1 / self.player2.fps)
+					await asyncio.sleep(0.01)
+			await asyncio.sleep(1 / self.player2.fps)

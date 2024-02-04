@@ -36,6 +36,10 @@
 		<div v-if="showMenu">
 			<button type="button" class="btn btn-primary" @click="startTrainingGame">Start Training Game</button>
 		</div>
+    <div v-if="showMenu" style="height: 5px;"></div>
+    <div v-if="showMenu">
+      <button type="button" class="btn btn-primary" @click="startLocalGame">Start Local Game</button>
+    </div>
     <div v-if="showMenu && isLoggedIn == 1" style="height: 5px;"></div>
     <div v-if="showMenu && isLoggedIn == 1">
       <button type="button" class="btn btn-primary" @click="startRankedGame">Start Ranked Game</button>
@@ -163,6 +167,10 @@
               this.message = "You lost the game!";
             } else if (data.result === "tied") {
               this.message = "Game finished without result!";
+            } else if (data.result === "right") {
+              this.message = "The right player won the game!";
+            } else if (data.result === "left") {
+              this.message = "The left player won the game!";
             }
           } else if (data.type === "player_names") {
             this.p1_name = data.p1_name;
@@ -196,6 +204,15 @@
         const data = JSON.stringify({
           type: 'start_training_game',
           alias: this.alias,
+        });
+        this.socket.send(data);
+      }
+    },
+    // function to start a local game
+    startLocalGame () {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        const data = JSON.stringify({
+          type: 'start_local_game'
         });
         this.socket.send(data);
       }

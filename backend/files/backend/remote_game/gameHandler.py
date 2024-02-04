@@ -21,6 +21,8 @@ class GameHandler:
 	def __init__(self, player1, player2, ranked=False):
 		self.player1 = player1
 		self.player2 = player2
+		if (player1 == player2):
+			self.local_game = True
 		self.ranked = ranked
 		self.db_entry = None
 		self.game_group = f"game_{random.randint(0, 1000000)}"
@@ -54,40 +56,43 @@ class GameHandler:
 	@classmethod
 	def get_game_handler_by_name(cls, game_group_name):
 		return cls.all_game_groups.get(game_group_name, None)
-
-	# Starts the game and runs the game loop until the game is finished or stopped
-	async def start_game(self):
-		if self.ranked:
-			print(f"Started ranked {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username}.")
-			# fill in the started_at field of the RemoteGame model
-			from .models import RemoteGame
-			self.db_entry.started_at = timezone.now()
-			await sync_to_async(self.db_entry.save)()
-			
+	
+	# gets called at start of the game
+	async def send_player_names(self):
+		if self.local_game:
+			player1_name = ""
+			player2_name = ""
 		else:
-			print(f"Started {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username}.")
-		# send player names to game group
+			player1_name = self.player1.get_username()
+			player2_name = self.player2.get_username()
 		await self.channel_layer.group_send(
 			self.game_group,
 			{
 				'type': 'player_names',
-				'p1_name': self.player1.get_username(),
-				'p2_name': self.player2.get_username(),
+				'p1_name': player1_name,
+				'p2_name': player2_name
 			})
-		# send redirect to playing page
-		await self.channel_layer.group_send(
-			self.game_group,
-			{
-				'type': 'redirect',
-				'page': "playing",
-			})
-		# run game loop
-		while not self.game.isGameExited:
-			self.game.game_loop()
-			await self.send_game_state()
-			await asyncio.sleep(0.004)
-		# send info, that game is finished
-		if (self.game.winner == 0):
+	
+	# sends the game result to the players
+	# gets called after the game is finished
+	async def send_game_result(self):
+		if self.local_game:
+			if (self.game.winner == 0):
+				await self.player1.send({
+					'type': 'game_result',
+					'result': 'tied',
+				})
+			elif (self.game.winner == 1):
+				await self.player1.send({
+					'type': 'game_result',
+					'result': 'left',
+				})
+			else:
+				await self.player1.send({
+					'type': 'game_result',
+					'result': 'right',
+				})
+		elif (self.game.winner == 0):
 			await self.player1.send({
 				'type': 'game_result',
 				'result': 'tied',
@@ -97,7 +102,6 @@ class GameHandler:
 				'result': 'tied',
 			})
 		elif (self.game.winner == 1):
-			# player 1 won
 			await self.player1.send({
 				'type': 'game_result',
 				'result': 'winner',
@@ -115,6 +119,36 @@ class GameHandler:
 				'type': 'game_result',
 				'result': 'winner',
 			})
+
+	# Starts the game and runs the game loop until the game is finished or stopped
+	async def start_game(self):
+		if self.local_game:
+			print(f"Started local game {self.game_group} --- {self.player1.get_user().username}.")
+		elif self.ranked:
+			print(f"Started ranked {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username}.")
+			# fill in the started_at field of the db entry
+			from .models import RemoteGame
+			self.db_entry.started_at = timezone.now()
+			await sync_to_async(self.db_entry.save)()
+			
+		else:
+			print(f"Started {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username}.")
+		# send player names to game group
+		await self.send_player_names()
+		# send redirect to playing page
+		await self.channel_layer.group_send(
+			self.game_group,
+			{
+				'type': 'redirect',
+				'page': "playing",
+			})
+		# run game loop
+		while not self.game.isGameExited:
+			self.game.game_loop()
+			await self.send_game_state()
+			await asyncio.sleep(0.004)
+		# send game result to game group
+		await self.send_game_result()
 		# if ranked game, fill the db entry
 		if self.ranked:
 			from .models import RemoteGame
@@ -131,7 +165,12 @@ class GameHandler:
 			print("Hits Player 1:", self.game.pointsP1)
 			print("Hits Player 2:", self.game.pointsP2)
 			await sync_to_async(self.db_entry.save)()
-		print(f"{self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username} finished.")
+		if self.local_game:
+			print(f"Local game {self.game_group} finished.")
+		elif self.ranked:
+			print(f"Ranked {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username} finished.")
+		else:
+			print(f"{self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username} finished.")
 		# wait 5 seconds
 		await asyncio.sleep(5)
 		# send redirect to menu
@@ -163,7 +202,22 @@ class GameHandler:
 	# This function is called when a player wants to update the paddle position
 	# (gets called from consumers.py receive(), when a player sends a message)
 	def update_paddle(self, player, key, type):
-		if player == self.player1:
+		if self.local_game:
+			if type == 'key_pressed':
+				if key == 'ArrowUp':
+					self.game.rightPaddle['dy'] = -2
+				elif key == 'ArrowDown':
+					self.game.rightPaddle['dy'] = 2
+				elif key == 'w':
+					self.game.leftPaddle['dy'] = -2
+				elif key == 's':
+					self.game.leftPaddle['dy'] = 2
+			elif type == 'key_released':
+				if key in ['ArrowDown', 'ArrowUp']:
+					self.game.rightPaddle['dy'] = 0
+				elif key in ['w', 's']:
+					self.game.leftPaddle['dy'] = 0
+		elif player == self.player1:
 			if type == 'key_pressed':
 				if key == 'ArrowUp':
 					self.game.leftPaddle['dy'] = -2

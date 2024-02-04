@@ -113,14 +113,17 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 						await self.create_guest_player(data.get('alias'))
 			elif player.get_game_handler() != None:
 				game_data = json.loads(text_data)
+				# print(f"Received game data: {game_data}")
 				player.get_game_handler().update_paddle(player, game_data.get('key'), game_data.get('type'))
 			else:
 				menu_data = json.loads(text_data)
 				if menu_data.get('type') == 'start_training_game':
 					await self.add_to_training_waiting_room(player)
 				elif menu_data.get('type') == 'start_ranked_game':
-					print("start_ranked_game")
 					await self.add_to_ranked_waiting_room(player)
+				elif menu_data.get('type') == 'start_local_game':
+					game_group = await GameHandler.create(player, player)
+					asyncio.ensure_future(game_group.start_game())
 				# else:
 					# print(f"Received invalid JSON file: {menu_data}")      # uncommented because this also happens when the message is valid but not at the right time
 		except json.JSONDecodeError:
@@ -175,6 +178,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 
 	# This message is used to inform the players about the result of the game
 	# The result can be "winner", "loser" or "tied"
+	# For local games, the result can be "tied", "left" or "right"
 	async def game_result(self, event):
 		await self.send(text_data=json.dumps({
 			'type': 'game_result',

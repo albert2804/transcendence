@@ -39,7 +39,7 @@
        		 })
 			this.userProfilePic = await response.json();
 			} catch (error) {
-				console.error('Error fetching user data:', error);
+				console.error('Error fetching user profile pic:', error);
 			}
 		},
 		async uploadProfilePic(event) {

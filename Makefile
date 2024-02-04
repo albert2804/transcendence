@@ -32,6 +32,7 @@ vclean:
 
 fclean: iclean vclean
 	-@rm -rf ./frontend/app/node_modules ./frontend/app/package-lock.json ./frontend/app/.nuxt ./frontend/app/dist
+	-@rm -rf ./elasticsearch/data
 	@echo "\033[32mRemoved all containers, images and volumes\033[0m"
 
 prune:

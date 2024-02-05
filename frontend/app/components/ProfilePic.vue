@@ -65,7 +65,7 @@
 					console.log(entry[0], entry[1]);
 				}
 				const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-				const response = await fetch('/endpoint/user/uploadpicture/', {
+				const response = await fetch('/endpoint/user/profilepic/', {
         			method: 'POST',
           			headers: {
             		'X-CSRFToken': csrfToken,

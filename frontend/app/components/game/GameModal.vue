@@ -6,8 +6,8 @@
     data-bs-backdrop="static"
     data-bs-keyboard="false"
     @keydown.esc="closeModal"
-    @keydown="handleKeyDown"
-    @keyup="handleKeyUp">
+    @keydown="handleKeyPress"
+    @keyup="handleKeyRelease">
     <div class="modal-dialog fullscreen-modal align-items-center">
       <div class="modal-content">
         <div class="modal-body">
@@ -37,14 +37,14 @@ export default {
       // }, 1000);
       }, 0);
     },
-    handleKeyDown(event) {
+    handleKeyPress(event) {
       if (this.$refs.ponggamefieldRef) {
-        this.$refs.ponggamefieldRef.handleKeyDown(event);
+        this.$refs.ponggamefieldRef.handleKeyPress(event);
       }
     },
-    handleKeyUp(event) {
+    handleKeyRelease(event) {
       if (this.$refs.ponggamefieldRef) {
-        this.$refs.ponggamefieldRef.handleKeyUp(event);
+        this.$refs.ponggamefieldRef.handleKeyRelease(event);
       }
     }
   },

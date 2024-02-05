@@ -17,6 +17,9 @@ Including another URLconf
 import os
 from django.contrib import admin
 from django.urls import path, re_path, include
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
@@ -26,8 +29,11 @@ urlpatterns = [
     path('endpoint/api/', include('api.urls')),
     path('endpoint/auth/', include("custom_auth.urls")),
     path('endpoint/user/', include("users.urls")),
-    path('endpoint/remoteGame/', include("remote_game.urls")),
 ]
+
+#Let us access the media files when DEBUG is set to True
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Enable admin panel if ADMIN_PANEL_ENABLED (in .env-file) is set to True
 admin_panel = os.environ.get('ADMIN_PANEL_ENABLED', 'False').lower() == 'true'

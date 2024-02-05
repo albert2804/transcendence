@@ -63,7 +63,7 @@
 <script>
   import { isLoggedIn } from '~/store';
   export default {
-  name: 'RemotePong',
+  name: 'GameField',
   data () {
     return {
       socket: null,
@@ -109,7 +109,23 @@
   beforeDestroy () {
     this.closeWebSocket();
   },
+  expose: ['giveUpGame'], // expose function to parent component
   methods: {
+    //
+    //
+    //
+    //   closeModal() {
+    //   // console.log('close modal');
+    //   setTimeout(() => {
+    //     var mood = document.getElementById("");
+    //     var bsModal = bootstrap.Modal.getInstance(mood);
+    //     bsModal.hide();
+    //   // }, 1000);
+    //   }, 0);
+    // },
+    //
+    //
+    //
     // function to create and handle the websocket
 	  createWebSocket () {
       const currentDomain = window.location.hostname;
@@ -294,6 +310,15 @@
       }
       this.playOnThisDevice = true;
     },
+    // give up the game
+    giveUpGame() {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        const data = JSON.stringify({ type: 'give_up' });
+        this.socket.send(data);
+        console.log('gave up game');
+      }
+    }
+    //
   }
 };
 </script>

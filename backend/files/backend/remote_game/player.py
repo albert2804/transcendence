@@ -46,7 +46,7 @@ class Player:
 			return self.user.username
 		else:
 			return self.user.username + " (Guest)"
-	
+
 	# Getter for the channel of the player
 	def get_channel(self):
 		return self.channel

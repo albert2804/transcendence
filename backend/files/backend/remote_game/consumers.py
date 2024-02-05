@@ -5,14 +5,10 @@ from .player import Player
 from .gameHandler import GameHandler
 from asgiref.sync import sync_to_async
 
-# TODO: Implement a logic to wait (30sec?) for the user to reconnect if he disconnects before stopping the game
-#	   	This is only possible with registered users (not guests) because we need to know the user id (or we have to implement a session management for guests... but this is way too much for now)
 
 # TODO: In Frontend: if websocket connection is closed -> show message "Connection lost. Please reload the page."
 #       hmm maybe send a disconnection code to the frontend and show a message there (for example if the user is already connected with another device)
 #       google about close_code for the disconnect function ;)
-
-# TODO: implement send() function in GameGroup to send to both players. maybe other name for this function?
 
 
 class RemoteGameConsumer(AsyncWebsocketConsumer):
@@ -98,48 +94,48 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	# Message handler for incoming messages
 	async def receive(self, text_data):
 		try:
+			data = json.loads(text_data)
 			player = Player.get_player_by_channel(self.channel_name)
 			if player == None:
 				if self.scope["user"].is_authenticated:
-					data = json.loads(text_data)
 					if data.get('type') == 'change_device':
 						if Player.get_channel_by_user(self.scope["user"]) != None:
 							oldchannel = Player.get_channel_by_user(self.scope["user"])
 							player = Player.get_player_by_channel(oldchannel)
 							await player.change_channel(self.channel_name)
 				else:
-					data = json.loads(text_data)
 					if data.get('type') == 'create_guest_player':
 						await self.create_guest_player(data.get('alias'))
-			elif player.get_game_handler() != None:
-				game_data = json.loads(text_data)
-				# print(f"Received game data: {game_data}")
-				player.get_game_handler().update_paddle(player, game_data.get('key'), game_data.get('type'))
 			else:
-				menu_data = json.loads(text_data)
-				if menu_data.get('type') == 'start_training_game':
-					await self.add_to_training_waiting_room(player)
-				elif menu_data.get('type') == 'start_ranked_game':
-					await self.add_to_ranked_waiting_room(player)
-				elif menu_data.get('type') == 'start_local_game':
-					game_group = await GameHandler.create(player, player)
-					asyncio.ensure_future(game_group.start_game())
-				elif menu_data.get('type') == 'slow_device':
-					player.fps = 12 # slow device (worked with 12fps on esp8266)
-				# else:
-					# print(f"Received invalid JSON file: {menu_data}")      # uncommented because this also happens when the message is valid but not at the right time
+				# general message handling for connected players
+				if data.get('type') == 'slow_device':
+					player.fps = 12 # (worked with 12fps on esp8266)
+				# message handling for players in a game
+				if player.get_game_handler() != None:
+					if (data.get('type') == 'give_up'):
+						player.get_game_handler().give_up(player)
+					elif (data.get('type') == 'key_pressed' or data.get('type') == 'key_released'):
+						player.get_game_handler().update_paddle(player, data.get('key'), data.get('type'))
+				# message handling for players in the menu
+				else:
+					if data.get('type') == 'start_training_game':
+						await self.add_to_training_waiting_room(player)
+					elif data.get('type') == 'start_ranked_game':
+						await self.add_to_ranked_waiting_room(player)
+					elif data.get('type') == 'start_local_game':
+						game_group = await GameHandler.create(player, player)
+						asyncio.ensure_future(game_group.start_game())
 		except json.JSONDecodeError:
 			print(f"Error handling received message from a game-websocket: {text_data}")
 	
 	# This function is called when the connection is closed
-	# Removes the player from game groups and waiting room and deletes the player object (LATER CHANGE THIS TO WAIT A FEW SECONDS AND CHECK IF THE USER RECONNECTS)
+	# Removes the player from game and waiting room and deletes the player object
 	async def disconnect(self, close_code):
 		player = Player.get_player_by_channel(self.channel_name)
 		if player != None:
-			# Stop the game if the user is in a game group (LATER CHANGE THIS TO WAIT A FEW SECONDS AND CHECK IF THE USER RECONNECTS)
+			# give up if the user is in a game
 			if player.get_game_handler() != None:
-				print(f"Stopping game group: {player.get_game_handler()}")
-				player.get_game_handler().stop_game()
+				player.get_game_handler().give_up(player)
 			if player in RemoteGameConsumer.training_waiting_room:
 				RemoteGameConsumer.training_waiting_room.remove(player)
 			if player in RemoteGameConsumer.ranked_waiting_room:

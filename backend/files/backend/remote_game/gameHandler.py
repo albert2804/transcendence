@@ -9,7 +9,6 @@ from django.utils import timezone
 # Create a new instance of this class with GAME_XXX = GameHandler.create(player1, player2)
 # Start this created instance with asyncio.ensure_future(GAME_XXX.start_game())
 # After the game is finished, the instance gets deleted automatically
-# To stop the game manually, use GAME_XXX.stop_game() (this will also delete the instance)
 
 # TODO: implement a bool to decide if the game is a training game or a ranked game
 
@@ -204,8 +203,15 @@ class GameHandler:
 		# delete instance
 		del GameHandler.all_game_groups[self.game_group]
 		del self
-	
-	def stop_game(self):
+
+	# This function is called when a player gives up or disconnects
+	# The other player wins the game
+	def give_up(self, player):
+		if not self.local_game:
+			if player == self.player1:
+				self.game.winner = 2
+			else:
+				self.game.winner = 1
 		self.game.isGameExited = True
 	
 	# This function is called when a player wants to update the paddle position

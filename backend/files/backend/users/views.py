@@ -8,7 +8,10 @@ RESET = "\033[0m"
 def send_userinfo(request):
 	if request.user.is_authenticated:
 		try:
-			statistics_data = Statistics.objects.get(user=request.user)
+			statistics_data, created = Statistics.objects.get_or_create(user=request.user)
+		except Exception as e: 
+			return JsonResponse({'error': f'Could not get statistics data for user. Error: {str(e)}'}, status=500)
+		try:
 			response_data = {
 				'userid:':statistics_data.user.id,
 				'username':statistics_data.user.username,

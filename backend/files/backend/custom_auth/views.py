@@ -8,6 +8,7 @@ from api.models import CustomUser
 from django.contrib.auth import login
 from django.contrib.auth.backends import ModelBackend
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 
 import logging
 logger = logging.getLogger(__name__)
@@ -73,7 +74,7 @@ def callback(request):
 # ...
 
     print ("IMAGE LINK: ")
-    print(user_details['image']['link'])
+    print(user_details['image']['versions']['small'])
     print(user_details['first_name'])
     print(user_details['last_name'])
     user.first_name = user_details['first_name']
@@ -81,13 +82,14 @@ def callback(request):
     user.save()
 
 
-    image_get = requests.get(user_details['image']['link'])
+    image_get = requests.get(user_details['image']['versions']['small'])
 
     if image_get.status_code == 200:
         print("IMAGE GET OK")
         image_content = ContentFile(image_get.content)
-        user.profile_pic.save(f'{user.username}_avatar.jpg', image_content)
-        user.save()
+        if not default_storage.exists(user.username + "_avatar.jpg"):
+            user.profile_pic.save(f'{user.username}_avatar.jpg', image_content)
+            user.save()
     print(user.profile_pic.url)
     # print(f"username: {user_details['login']}")
 

@@ -80,11 +80,11 @@ class PongGame:
 			self.ball['x'] = self.canvasWidth/2
 
 	def game_loop(self):
-		if self.numberOfHitsP1 < 10 and self.numberOfHitsP2 < 10:
+		if self.numberOfHitsP1 < 1 and self.numberOfHitsP2 < 1:
 			self.update_game()
 		else:
-			if self.numberOfHitsP1 == 10:
+			if self.numberOfHitsP1 == 1:
 				self.winner = 1
-			elif self.numberOfHitsP2 == 10:
+			elif self.numberOfHitsP2 == 1:
 				self.winner = 2
 			self.isGameExited = True

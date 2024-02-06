@@ -118,6 +118,9 @@ export default {
         this.all_players.splice(this.nbr_players);
       }
     },
+    async sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    },
 
     async startTournament() {
       if (!this.ongoingTournament) {
@@ -157,14 +160,12 @@ export default {
             await this.waitForVariableChange(() => this.gameFinish);
             this.all_matches[match].l_score = this.leftScore;
             this.all_matches[match].r_score = this.rightScore;
-            console.log("ASHDAJKSDJKSAGHFKADHSFJKASF")
             let winner = -1;
             if (this.leftScore > this.rightScore)
               winner = this.all_matches[match].l_player.index;
             else
               winner = this.all_matches[match].r_player.index;
             for (let next_match = match; next_match < total_games; next_match++) {
-              console.log("next match is " + next_match);
               if (this.all_matches[next_match].l_player == -1) {
                 this.all_matches[next_match].l_player = this.all_players[winner];
                 break;
@@ -178,8 +179,7 @@ export default {
               this.player_one = this.all_matches[match + 1].l_player.index;
               this.player_two = this.all_matches[match + 1].r_player.index;
             }
-            console.log("PLAYER ONE IS NOW"  + this.player_one);
-            console.log("PLAYER TWO IS NOW"  + this.player_two);
+            await this.sleep(3000);
           }
         };
         playGame().then(() => {

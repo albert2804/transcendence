@@ -17,7 +17,6 @@ daphne==4.0.0
 # Timezone support
 pytz==2023.3.post1
 requests==2.27.1
-social-auth-app-django==5.4.0
 
 # Django image handling
 Pillow==8.4.0

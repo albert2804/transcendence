@@ -149,7 +149,11 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	#####################
 	
 	# This message is used to redirect the players to the different pages of the pong game
-	# "playing", "waiting", "menu", "other_device", "alias_screen",
+	# "playing"				--> screen for playing the game
+	# "waiting" 			--> show a waiting message
+	# "menu" 				--> show the menu
+	# "other_device" 		--> show a message that the user is already connected with another device (ask for change device)
+	# "alias_screen" 		--> let the user choose an alias (for guest players)
 	async def redirect(self, event):
 		await self.send(text_data=json.dumps({
 			'type': 'redirect',

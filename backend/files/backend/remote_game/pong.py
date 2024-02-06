@@ -16,8 +16,7 @@ class PongGame:
 
 		# Game state saved as json (ready to be sent to the client)
 		self.latest_game_state = None
-		# lock for the game state (got problems with async send_game_state_to_player_1() and send_game_state_to_player_2() from gameHandler.py without this lock)
-		self.game_state_lock = asyncio.Lock()
+		self.game_state_lock = asyncio.Lock() # Lock to prevent race conditions
 
 		# Paddle initialization
 		self.leftPaddle = {'x': 0, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
@@ -95,7 +94,7 @@ class PongGame:
 				self.winner = 2
 			self.isGameExited = True
 
-	def save_game_state(self):
+	async def save_game_state(self):
 		state = {
 			'ball': {
 				'x': (self.ball['x'] / self.canvasWidth) * 100,
@@ -112,14 +111,15 @@ class PongGame:
 			'pointsP1': self.pointsP1,
 			'pointsP2': self.pointsP2,
 		}
-		self.latest_game_state = {
-			'type': 'game_update',
-			'state': state,
-			'high_score': high_score,
-		}
+		async with self.game_state_lock:
+			self.latest_game_state = {
+				'type': 'game_update',
+				'state': state,
+				'high_score': high_score,
+			}
 	
 	async def run_game(self):
 		while not self.isGameExited:
 			self.game_loop()
-			self.save_game_state()
+			await self.save_game_state()
 			await asyncio.sleep(0.01)

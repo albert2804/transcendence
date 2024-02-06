@@ -249,40 +249,15 @@ class GameHandler:
 					self.game.rightPaddle['dy'] = 0
 		else:
 			print(f"Unknown player: {player}")
-
-	# stores the actual game state to self.latest_game_state
-	# async def save_game_state(self):
-	# 	state = {
-	# 		'ball': {
-	# 			'x': (self.game.ball['x'] / self.game.canvasWidth) * 100,
-	# 			'y': (self.game.ball['y'] / self.game.canvasHeight) * 100,
-	# 		},
-	# 		'leftPaddle': {
-	# 			'y': (self.game.leftPaddle['y'] / self.game.canvasHeight) * 100,
-	# 		},
-	# 		'rightPaddle': {
-	# 			'y': (self.game.rightPaddle['y'] / self.game.canvasHeight) * 100,
-	# 		},
-	# 	}
-	# 	high_score = {
-	# 		'pointsP1': self.game.pointsP1,
-	# 		'pointsP2': self.game.pointsP2,
-	# 	}
-	# 	self.latest_game_state = {
-	# 		'type': 'game_update',
-	# 		'state': state,
-	# 		'high_score': high_score,
-	# 	}
 	
 	# sends the latest game state to player 1
 	# gets called in a separate thread
 	async def send_game_state_to_player_1(self): 
 		while not self.game.isGameExited:
 			async with self.game.game_state_lock:
-				if self.game.latest_game_state is not None:
-					await self.player1.send(self.game.latest_game_state)
-					self.game.latest_game_state = None
-					await asyncio.sleep(0.01) # needed that the lock gets released before sleeping
+				game_state = self.game.latest_game_state
+			if game_state is not None:
+				await self.player1.send(game_state)
 			await asyncio.sleep(1 / self.player1.fps)
 	
 	# sends the latest game state to player 2
@@ -290,8 +265,7 @@ class GameHandler:
 	async def send_game_state_to_player_2(self):
 		while not self.game.isGameExited:
 			async with self.game.game_state_lock:
-				if self.game.latest_game_state is not None:
-					await self.player2.send(self.game.latest_game_state)
-					self.game.latest_game_state = None
-					await asyncio.sleep(0.01)
+				game_state = self.game.latest_game_state
+			if game_state is not None:
+				await self.player2.send(game_state)
 			await asyncio.sleep(1 / self.player2.fps)

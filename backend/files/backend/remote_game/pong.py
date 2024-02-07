@@ -83,6 +83,24 @@ class PongGame:
 
 			# Reset ball position to center
 			self.ball['x'] = self.canvasWidth/2
+	
+	def paddle_up(self, player):
+		if player == 1:
+			self.leftPaddle['dy'] = -4
+		elif player == 2:
+			self.rightPaddle['dy'] = -4
+	
+	def paddle_down(self, player):
+		if player == 1:
+			self.leftPaddle['dy'] = 4
+		elif player == 2:
+			self.rightPaddle['dy'] = 4
+	
+	def paddle_stop(self, player):
+		if player == 1:
+			self.leftPaddle['dy'] = 0
+		elif player == 2:
+			self.rightPaddle['dy'] = 0
 
 	def game_loop(self):
 		if self.pointsP1 < 10 and self.pointsP2 < 10:

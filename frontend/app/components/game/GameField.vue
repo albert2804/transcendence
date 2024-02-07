@@ -74,7 +74,7 @@
       showMenu: false,
       p1_name: '',
       p2_name: '',
-      // pressedKeys: [],
+      pressedKeys: [],
       paddleSize: 20,
       p1pos: {
         x: 0,
@@ -239,6 +239,10 @@
     // handler for key press
     handleKeyPress(event){
       if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'w' || event.key === 's') {
+        if (this.pressedKeys.includes(event.key)) {
+          return;
+        }
+        this.pressedKeys.push(event.key);
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
           const data = JSON.stringify({ type: 'key_pressed', key: event.key });
           this.socket.send(data);
@@ -248,6 +252,7 @@
     // handler for key release
     handleKeyRelease(event){
       if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'w' || event.key === 's') {
+        this.pressedKeys = this.pressedKeys.filter(key => key !== event.key);
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
           const data = JSON.stringify({ type: 'key_released', key: event.key });
           this.socket.send(data);

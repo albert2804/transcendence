@@ -1,7 +1,7 @@
 <!-- https://getbootstrap.com/docs/5.3/components/navbar/ -->
 
 <template>
-  <GameModal :modalTitle="'Game'" modalId="pongmodal" ariaLabel="A modal to play our remote Pong Game" />
+  <GameModal modalId="pongmodal" ariaLabel="A modal to play our remote Pong Game" />
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">ft_transcendence</a>

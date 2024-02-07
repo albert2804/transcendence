@@ -33,6 +33,12 @@ vclean:
 fclean: iclean vclean
 	-@rm -rf ./frontend/app/node_modules ./frontend/app/package-lock.json ./frontend/app/.nuxt ./frontend/app/dist
 	@echo "\033[32mRemoved all containers, images and volumes\033[0m"
+	@find backend/files/backend/api/migrations -type f ! -name '__init__.py' -delete
+	@find backend/files/backend/chat/migrations -type f ! -name '__init__.py' -delete
+	@find backend/files/backend/custom_auth/migrations -type f ! -name '__init__.py' -delete
+	@find backend/files/backend/remote_game/migrations -type f ! -name '__init__.py' -delete
+	@find backend/files/backend/users/migrations -type f ! -name '__init__.py' -delete
+
 
 prune:
 	@docker system prune -a -f

@@ -74,7 +74,7 @@
       showMenu: false,
       p1_name: '',
       p2_name: '',
-      pressedKeys: [],
+      // pressedKeys: [],
       paddleSize: 20,
       p1pos: {
         x: 0,
@@ -111,21 +111,6 @@
   },
   expose: ['giveUpGame'], // expose function to parent component
   methods: {
-    //
-    //
-    //
-    //   closeModal() {
-    //   // console.log('close modal');
-    //   setTimeout(() => {
-    //     var mood = document.getElementById("");
-    //     var bsModal = bootstrap.Modal.getInstance(mood);
-    //     bsModal.hide();
-    //   // }, 1000);
-    //   }, 0);
-    // },
-    //
-    //
-    //
     // function to create and handle the websocket
 	  createWebSocket () {
       const currentDomain = window.location.hostname;
@@ -253,47 +238,69 @@
     },
     // handler for key press
     handleKeyPress(event){
-      if (this.pressedKeys.includes(event.key)) {
-        return;
-      }
-      this.pressedKeys.push(event.key);
-      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        const data = JSON.stringify({ type: 'key_pressed', key: event.key });
-        this.socket.send(data);
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'w' || event.key === 's') {
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+          const data = JSON.stringify({ type: 'key_pressed', key: event.key });
+          this.socket.send(data);
+        }
       }
     },
     // handler for key release
     handleKeyRelease(event){
-      if (!this.pressedKeys.includes(event.key)) {
-        return;
-      }
-      this.pressedKeys = this.pressedKeys.filter(key => key !== event.key);
-      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        const data = JSON.stringify({ type: 'key_released', key: event.key });
-        this.socket.send(data);
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'w' || event.key === 's') {
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+          const data = JSON.stringify({ type: 'key_released', key: event.key });
+          this.socket.send(data);
+        }
       }
     },
     // handler for touch press (mobile)
     handleTouchPress(event) {
       const rect = this.$refs.gameFieldRef.getBoundingClientRect();
       const fieldHeight = rect.height;
-      const touch = event.touches[0];
-      const mouseY = touch.clientY - rect.top;
-
-      if (mouseY < fieldHeight / 2) {
-		event.key = 'ArrowUp';
-		this.handleKeyPress(event);
-      } else {
-		event.key = 'ArrowDown';
-		this.handleKeyPress(event);
+      const fieldWidth = rect.width;
+      let key;
+      // iterate over all touches
+      // (multi-touch possibility because of the local multiplayer mode)
+      for (let i = 0; i < event.touches.length; i++) {
+        const touch = event.touches[i];
+        // get X and Y coordinates of the touch (relative to the game field)
+        const touchY = touch.clientY - rect.top;
+        const touchX = touch.clientX - rect.left;
+        if (touchX < fieldWidth / 2) {
+          if (touchY < fieldHeight / 2) {
+            key = 'w';
+          } else {
+            key = 's';
+          }
+        } else {
+          if (touchY < fieldHeight / 2) {
+            key = 'ArrowUp';
+          } else {
+            key = 'ArrowDown';
+          }
+        }
+        this.handleKeyPress({ key: key });
       }
     },
     // handler for touch release (mobile)
     handleTouchRelease(event) {
-		event.key = 'ArrowUp';
-		this.handleKeyRelease(event);
-		event.key = 'ArrowDown';
-		this.handleKeyRelease(event);
+      // event.changedTouches is a list of all touches that changed in this event
+      // it's nearly impossible to release two keys at the same time, so we only need [0] ;)
+      const rect = this.$refs.gameFieldRef.getBoundingClientRect();
+      const fieldWidth = rect.width;
+      const touch = event.changedTouches[0];
+      const mouseX = touch.clientX - rect.left;
+      let keyUp, keyDown;
+      if (mouseX < fieldWidth / 2) {
+        keyUp = 'w';
+        keyDown = 's';
+      } else {
+        keyUp = 'ArrowUp';
+        keyDown = 'ArrowDown';
+      }
+      this.handleKeyRelease({ key: keyUp });
+      this.handleKeyRelease({ key: keyDown });
     },
     // function to update the game UI (called when receiving game state from server)
     updateGameUI(gameState) {

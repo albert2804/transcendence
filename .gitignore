@@ -13,3 +13,10 @@ frontend/app/node-modules/
 temp/
 *.DS_Store
 backend/files/backend/.DS_Store
+
+media/profilepic/
+
+backend/files/backend/api/migrations
+backend/files/backend/chat/migrations
+backend/files/backend/custom_auth/migrations
+backend/files/backend/remote_game/migrations

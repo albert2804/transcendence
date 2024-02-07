@@ -1,5 +1,15 @@
+<script setup>
+  // Listen to changes of the isLoggedIn from store/index.js
+  import { isLoggedIn } from '~/store';
+  watchEffect(() => {
+  isLoggedIn.value = isLoggedIn.value
+})
+</script>
+
 <template>
   <div
+      @keydown="handleKeyPress"
+      @keyup="handleKeyRelease"
       class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease">
       <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
       <div v-show="playing" class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
@@ -12,10 +22,10 @@
         {{ p2_name }}
       </div>
       <div v-show="playing" style="position: absolute; bottom: 0; left: 2%; font-size: 2.0em; color: #ffffff;">
-        {{ numberOfHitsP1 }}
+        {{ pointsP1 }}
       </div>
       <div v-show="playing" style="position: absolute; bottom: 0; right: 2%; font-size: 2.0em; color: #ffffff;">
-        {{ numberOfHitsP2 }}
+        {{ pointsP2 }}
       </div>
 	  <li style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; position: absolute;">
 		<!-- Message --->
@@ -24,8 +34,16 @@
 		</div>
 		<!-- Start game - button --->
 		<div v-if="showMenu">
-			<button type="button" class="btn btn-primary" @click="startGame">Start Game</button>
+			<button type="button" class="btn btn-primary" @click="startTrainingGame">Start Training Game</button>
 		</div>
+    <div v-if="showMenu" style="height: 5px;"></div>
+    <div v-if="showMenu">
+      <button type="button" class="btn btn-primary" @click="startLocalGame">Start Local Game</button>
+    </div>
+    <div v-if="showMenu && isLoggedIn == 1" style="height: 5px;"></div>
+    <div v-if="showMenu && isLoggedIn == 1">
+      <button type="button" class="btn btn-primary" @click="startRankedGame">Start Ranked Game</button>
+    </div>
 		<!-- play on this device - button --->
 		<div v-if="!playOnThisDevice">
 			<button type="button" class="btn btn-primary" @click="changeDevice">Play on this device</button>
@@ -45,13 +63,13 @@
 <script>
   import { isLoggedIn } from '~/store';
   export default {
-  name: 'RemotePong',
+  name: 'GameField',
   data () {
     return {
       socket: null,
       message: '',
-      numberOfHitsP1: 0,
-      numberOfHitsP2: 0,
+      pointsP1: 0,
+      pointsP2: 0,
       playing: false,
       showMenu: false,
       p1_name: '',
@@ -91,6 +109,7 @@
   beforeDestroy () {
     this.closeWebSocket();
   },
+  expose: ['giveUpGame'], // expose function to parent component
   methods: {
     // function to create and handle the websocket
 	  createWebSocket () {
@@ -149,6 +168,10 @@
               this.message = "You lost the game!";
             } else if (data.result === "tied") {
               this.message = "Game finished without result!";
+            } else if (data.result === "right") {
+              this.message = "The right player won the game!";
+            } else if (data.result === "left") {
+              this.message = "The left player won the game!";
             }
           } else if (data.type === "player_names") {
             this.p1_name = data.p1_name;
@@ -156,8 +179,8 @@
           } else if (data.type === 'game_update') {
             const gameState = data.state;
             const highScore = data.high_score;
-            this.numberOfHitsP1 = highScore.numberOfHitsP1;
-            this.numberOfHitsP2 = highScore.numberOfHitsP2;
+            this.pointsP1 = highScore.pointsP1;
+            this.pointsP2 = highScore.pointsP2;
             this.updateGameUI(gameState);
           } else if (data.type === "alias_exists") {
             this.message = "Alias already taken!";
@@ -177,11 +200,28 @@
       }
     },
     // function to start the game
-    startGame () {
+    startTrainingGame () {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
-          type: 'start_game',
+          type: 'start_training_game',
           alias: this.alias,
+        });
+        this.socket.send(data);
+      }
+    },
+    // function to start a local game
+    startLocalGame () {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        const data = JSON.stringify({
+          type: 'start_local_game'
+        });
+        this.socket.send(data);
+      }
+    },
+    startRankedGame () {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        const data = JSON.stringify({
+          type: 'start_ranked_game'
         });
         this.socket.send(data);
       }
@@ -198,47 +238,74 @@
     },
     // handler for key press
     handleKeyPress(event){
-      if (this.pressedKeys.includes(event.key)) {
-        return;
-      }
-      this.pressedKeys.push(event.key);
-      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        const data = JSON.stringify({ type: 'key_pressed', key: event.key });
-        this.socket.send(data);
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'w' || event.key === 's') {
+        if (this.pressedKeys.includes(event.key)) {
+          return;
+        }
+        this.pressedKeys.push(event.key);
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+          const data = JSON.stringify({ type: 'key_pressed', key: event.key });
+          this.socket.send(data);
+        }
       }
     },
     // handler for key release
     handleKeyRelease(event){
-      if (!this.pressedKeys.includes(event.key)) {
-        return;
-      }
-      this.pressedKeys = this.pressedKeys.filter(key => key !== event.key);
-      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        const data = JSON.stringify({ type: 'key_released', key: event.key });
-        this.socket.send(data);
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'w' || event.key === 's') {
+        this.pressedKeys = this.pressedKeys.filter(key => key !== event.key);
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+          const data = JSON.stringify({ type: 'key_released', key: event.key });
+          this.socket.send(data);
+        }
       }
     },
     // handler for touch press (mobile)
     handleTouchPress(event) {
       const rect = this.$refs.gameFieldRef.getBoundingClientRect();
       const fieldHeight = rect.height;
-      const touch = event.touches[0];
-      const mouseY = touch.clientY - rect.top;
-
-      if (mouseY < fieldHeight / 2) {
-		event.key = 'ArrowUp';
-		this.handleKeyPress(event);
-      } else {
-		event.key = 'ArrowDown';
-		this.handleKeyPress(event);
+      const fieldWidth = rect.width;
+      let key;
+      // iterate over all touches
+      // (multi-touch possibility because of the local multiplayer mode)
+      for (let i = 0; i < event.touches.length; i++) {
+        const touch = event.touches[i];
+        // get X and Y coordinates of the touch (relative to the game field)
+        const touchY = touch.clientY - rect.top;
+        const touchX = touch.clientX - rect.left;
+        if (touchX < fieldWidth / 2) {
+          if (touchY < fieldHeight / 2) {
+            key = 'w';
+          } else {
+            key = 's';
+          }
+        } else {
+          if (touchY < fieldHeight / 2) {
+            key = 'ArrowUp';
+          } else {
+            key = 'ArrowDown';
+          }
+        }
+        this.handleKeyPress({ key: key });
       }
     },
     // handler for touch release (mobile)
     handleTouchRelease(event) {
-		event.key = 'ArrowUp';
-		this.handleKeyRelease(event);
-		event.key = 'ArrowDown';
-		this.handleKeyRelease(event);
+      // event.changedTouches is a list of all touches that changed in this event
+      // it's nearly impossible to release two keys at the same time, so we only need [0] ;)
+      const rect = this.$refs.gameFieldRef.getBoundingClientRect();
+      const fieldWidth = rect.width;
+      const touch = event.changedTouches[0];
+      const mouseX = touch.clientX - rect.left;
+      let keyUp, keyDown;
+      if (mouseX < fieldWidth / 2) {
+        keyUp = 'w';
+        keyDown = 's';
+      } else {
+        keyUp = 'ArrowUp';
+        keyDown = 'ArrowDown';
+      }
+      this.handleKeyRelease({ key: keyUp });
+      this.handleKeyRelease({ key: keyDown });
     },
     // function to update the game UI (called when receiving game state from server)
     updateGameUI(gameState) {
@@ -255,6 +322,15 @@
       }
       this.playOnThisDevice = true;
     },
+    // give up the game
+    giveUpGame() {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        const data = JSON.stringify({ type: 'give_up' });
+        this.socket.send(data);
+        console.log('gave up game');
+      }
+    }
+    //
   }
 };
 </script>

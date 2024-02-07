@@ -32,6 +32,7 @@ class Player:
 		self.channel = channel
 		self.channel_layer = get_channel_layer()
 		self.game_handler = None
+		self.fps = 40 # default fps
 		Player.all_players.append(self)
 	
 	# Getter for the user object (CustomUser) of the player
@@ -45,7 +46,7 @@ class Player:
 			return self.user.username
 		else:
 			return self.user.username + " (Guest)"
-	
+
 	# Getter for the channel of the player
 	def get_channel(self):
 		return self.channel
@@ -65,8 +66,8 @@ class Player:
 				'type': 'redirect',
 				'page': "playing",
 			})
-		# check if in waiting room
-		elif self in RemoteGameConsumer.waiting_room:
+		# check if in waiting room or ranked waiting room
+		elif self in RemoteGameConsumer.training_waiting_room or self in RemoteGameConsumer.ranked_waiting_room:
 			await self.send({
 				'type': 'redirect',
 				'page': "waiting",

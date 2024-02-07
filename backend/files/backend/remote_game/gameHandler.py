@@ -28,6 +28,8 @@ class GameHandler:
 		self.game = PongGame()
 		self.channel_layer = get_channel_layer()
 		GameHandler.all_game_groups[self.game_group] = self
+		self.pressed_keys_p1 = []
+		self.pressed_keys_p2 = []
 		# only used for ranked games:
 		self.ranked = ranked
 		self.db_entry = None
@@ -214,41 +216,40 @@ class GameHandler:
 	# This function is called when a player wants to update the paddle position
 	# (gets called from consumers.py receive(), when a player sends a message)
 	def update_paddle(self, player, key, type):
+		if not key in ['ArrowUp', 'ArrowDown', 'w', 's']:
+			return
+    	# if local game, check which paddle to update because of the key
 		if self.local_game:
-			if type == 'key_pressed':
-				if key == 'ArrowUp':
-					self.game.rightPaddle['dy'] = -4
-				elif key == 'ArrowDown':
-					self.game.rightPaddle['dy'] = 4
-				elif key == 'w':
-					self.game.leftPaddle['dy'] = -4
-				elif key == 's':
-					self.game.leftPaddle['dy'] = 4
-			elif type == 'key_released':
-				if key in ['ArrowDown', 'ArrowUp']:
-					self.game.rightPaddle['dy'] = 0
-				elif key in ['w', 's']:
-					self.game.leftPaddle['dy'] = 0
-		elif player == self.player1:
-			if type == 'key_pressed':
-				if key == 'ArrowUp':
-					self.game.leftPaddle['dy'] = -4
-				elif key == 'ArrowDown':
-					self.game.leftPaddle['dy'] = 4
-			elif type == 'key_released':
-				if key in ['ArrowDown', 'ArrowUp']:
-					self.game.leftPaddle['dy'] = 0
-		elif player == self.player2:
-			if type == 'key_pressed':
-				if key == 'ArrowUp':
-					self.game.rightPaddle['dy'] = -4
-				elif key == 'ArrowDown':
-					self.game.rightPaddle['dy'] = 4
-			elif type == 'key_released':
-				if key in ['ArrowDown', 'ArrowUp']:
-					self.game.rightPaddle['dy'] = 0
+			if key in ['w', 's']:
+				pressed_keys = self.pressed_keys_p1
+				paddle_num = 1
+			elif key in ['ArrowUp', 'ArrowDown']:
+				pressed_keys = self.pressed_keys_p2
+				paddle_num = 2
+		# if remote game, check which paddle to update because of the player object
 		else:
-			print(f"Unknown player: {player}")
+			if player == self.player1:
+				pressed_keys = self.pressed_keys_p1
+				paddle_num = 1
+			elif player == self.player2:
+				pressed_keys = self.pressed_keys_p2
+				paddle_num = 2
+		# update the paddle position
+		if type == 'key_pressed':
+			if key in pressed_keys:
+				pressed_keys.remove(key)
+			pressed_keys.append(key)
+		elif type == 'key_released':
+			if key in pressed_keys:
+				pressed_keys.remove(key)
+		if pressed_keys:
+			last_key = pressed_keys[-1]
+			if last_key in ['ArrowUp', 'w']:
+				self.game.paddle_up(paddle_num)
+			elif last_key in ['ArrowDown', 's']:
+				self.game.paddle_down(paddle_num)
+		else:
+			self.game.paddle_stop(paddle_num)
 	
 	# sends the latest game state to player 1
 	# gets called in a separate thread

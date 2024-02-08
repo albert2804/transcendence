@@ -10,11 +10,14 @@
 
 <template>
   <div>
-    <button type="button" class="btn btn-primary" @click="fetchData">
-      <slot>Click me!</slot>
-    </button>
+    
+    <div>
+      <button type="button" class="btn btn-primary" @click="fetchData">
+        <slot>Click me!</slot>
+      </button>
+    </div>
+    <SimpleModal v-show="errormsg" :content="errormsg" :modalTitle="'Fetch-Error:'" modalId="fetchErrModal" ariaLabel="fetchErrModalLabel" />
   </div>
-  <SimpleModal v-show="errormsg" :content="errormsg" :modalTitle="'Fetch-Error:'" modalId="fetchErrModal" ariaLabel="fetchErrModalLabel" />
 </template>
 
 <script>

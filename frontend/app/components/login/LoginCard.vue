@@ -6,7 +6,7 @@
 })
 
   import { ref, onMounted } from 'vue';
-
+  
   const client_id = import.meta.env.VITE_42INTRA_CLIENT_ID.split('"').join('');
   const redirect_uri = ref('');
 

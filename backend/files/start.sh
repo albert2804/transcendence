@@ -23,25 +23,25 @@ python manage.py shell -c "from django.contrib.auth import get_user_model; User 
 # Create the superuser from .env file
 python manage.py createsuperuser --noinput
 
-#create test user
-python manage.py createsuperuser --noinput --username=johndoe
-python manage.py createsuperuser --noinput --username=johndoe2
-python manage.py createsuperuser --noinput --username=johndoe3
-python manage.py createsuperuser --noinput --username=pnolte
-python manage.py createsuperuser --noinput --username=albert
-python manage.py createsuperuser --noinput --username=kathrin
-python manage.py createsuperuser --noinput --username=kekse
-python manage.py createsuperuser --noinput --username=kek
-python manage.py createsuperuser --noinput --username=nikkka
-python manage.py createsuperuser --noinput --username=stephanie
+# #create test user
+# python manage.py createsuperuser --noinput --username=johndoe
+# python manage.py createsuperuser --noinput --username=johndoe2
+# python manage.py createsuperuser --noinput --username=johndoe3
+# python manage.py createsuperuser --noinput --username=pnolte
+# python manage.py createsuperuser --noinput --username=albert
+# python manage.py createsuperuser --noinput --username=kathrin
+# python manage.py createsuperuser --noinput --username=kekse
+# python manage.py createsuperuser --noinput --username=kek
+# python manage.py createsuperuser --noinput --username=nikkka
+# python manage.py createsuperuser --noinput --username=stephanie
 
 # Collect static files (needed for serving static files with daphne)
 python manage.py collectstatic --noinput
 
 # Start the ASGI server (Daphne in this case)
-# daphne -b 0.0.0.0 -p 8000 backend.asgi:application
+daphne -b 0.0.0.0 -p 8000 backend.asgi:application
 
-tail -f /dev/null
+# tail -f /dev/null
 
 
 

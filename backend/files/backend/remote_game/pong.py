@@ -53,20 +53,24 @@ class PongGame:
 			self.ball['x'] - self.ball['radius'] < self.leftPaddle['x'] + self.leftPaddle['width'] and
 			self.leftPaddle['y'] < self.ball['y'] < self.leftPaddle['y'] + self.leftPaddle['height']
 		):
-			if self.currentSpeed < 6:
-				self.currentSpeed += 0.5
-			self.ball['dy'] = -self.currentSpeed
-			self.ball['dx'] = self.currentSpeed
-			# print('Current speed:', self.currentSpeed)
+			
+			self.adjust_ball_angle(self.leftPaddle)
+			# if self.currentSpeed < 6:
+			# 	self.currentSpeed += 0.5
+			# self.ball['dy'] = -self.currentSpeed
+			# self.ball['dx'] = self.currentSpeed
+			# # print('Current speed:', self.currentSpeed)
 
 		if (
 			self.ball['x'] + self.ball['radius'] > self.rightPaddle['x'] and
 			self.rightPaddle['y'] < self.ball['y'] < self.rightPaddle['y'] + self.rightPaddle['height']
 		):
-			if self.currentSpeed < 6:
-				self.currentSpeed += 0.5
-			self.ball['dy'] = self.currentSpeed
-			self.ball['dx'] = -self.currentSpeed
+			
+			self.adjust_ball_angle(self.rightPaddle)
+			# if self.currentSpeed < 6:
+			# 	self.currentSpeed += 0.5
+			# self.ball['dy'] = self.currentSpeed
+			# self.ball['dx'] = -self.currentSpeed
 			# print('Current speed:', self.currentSpeed)
 
 		# Check for scoring
@@ -141,3 +145,12 @@ class PongGame:
 			self.game_loop()
 			await self.save_game_state()
 			await asyncio.sleep(0.01)
+
+	def adjust_ball_angle(self, paddle):
+		angle_factor = (self.ball['y'] - paddle['y'] - paddle['height'] / 2) / (paddle['height'] / 2)
+		max_angle = math.pi / 3  # Maximum angle change (adjust as needed)
+
+		# Change the ball's angle based on the position on the paddle
+		self.ball['dy'] = self.current_speed * angle_factor
+		self.ball['dy'] = min(max(self.ball['dy'], -max_angle), max_angle)
+		self.ball['dx'] = -self.ball['dx']  # Reverse the horizontal direction

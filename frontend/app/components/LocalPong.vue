@@ -94,7 +94,12 @@
 		
 	  async startGame() {
       this.resetGame();
-			this.gameLoop();
+  	  // Set a random initial angle between 45 and 135 degrees
+  	  const randomAngle = Math.random() * Math.PI / 2 + Math.PI / 4; // Random angle in radians between 45 and 135 degrees
+  	  const direction = Math.random() < 0.5 ? 1 : -1; // Randomly choose left or right direction
+  	  this.ball.dx = direction * this.initialSpeed * Math.cos(randomAngle);
+  	  this.ball.dy = this.initialSpeed * Math.sin(randomAngle);
+		this.gameLoop();
 		},
 
 	  exitGame() {

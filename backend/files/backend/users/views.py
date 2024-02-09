@@ -35,8 +35,9 @@ def handle_profilepic(request):
 	if request.user.is_authenticated:
 		if request.method == 'GET':
 			try:
-				profilepic_url = CustomUser.objects.get(username=request.user).profile_pic.url
-				print(f"{profilepic_url}")
+				user = CustomUser.objects.get(username=request.user)
+				profilepic_url = user.profile_pic.url
+				print(f"{RED}GET: profilepic_url {profilepic_url}{RESET}")
 				return JsonResponse({'url': profilepic_url},
 					status=200)
 			except:
@@ -48,8 +49,8 @@ def handle_profilepic(request):
 				if 'newPic' in request.FILES:
 					user.profile_pic = request.FILES['newPic']
 					user.save()
-					print(f"{RED}user.profile_pic.url: {user.profile_pic.url}{RESET}")
-					print(f"{RED}user.profile_pic: {user.profile_pic}{RESET}")
+					print(f"{RED}POST: user.profile_pic.url: {user.profile_pic.url}{RESET}")
+					print(f"{RED}POST: user.profile_pic: {user.profile_pic}{RESET}")
 					return JsonResponse({'url': user.profile_pic.url}, status=200)
 				else:
 					return JsonResponse({'error': 'No Profile Picture found for the user'}, status=404)

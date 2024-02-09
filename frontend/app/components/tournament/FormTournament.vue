@@ -1,26 +1,35 @@
 <template>
-  <form>
-    <label for="nbrPlayerRange" class="form-label">Number of total Players</label>
-    <div class="mb-3 align-items-center position-relative">
-      <input type="range" class="form-range" min="0" max="3" step="1" id="nbrPlayerRange" 
+  <form style="min-width: 400px; max-width: 800px; margin: auto;">
+    <div class="mb-3">
+      <label for="nbrPlayerRange" class="form-label">Number of Total Players</label>
+      <div class="d-flex align-items-center">
+        <input style="width: 80%; " type="range" class="form-range" min="0" max="3" step="1" id="nbrPlayerRange" 
           v-model.number="selectPos" @input="updatePlayerCount">
-      <h6 class="float-end" >{{ selectedData }}</h6>
-    </div>
-    <div class="name-box">
-      <div v-for="index in nbr_players" :key="index" class="name-input">
-        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-          <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio1' + index"
-                    autocomplete="off" checked @change="setActiveRadio('Player', index)"/>
-          <label class="btn btn-outline-primary" :for="'btnradio1' + index">Player</label>
-          <input type="radio" class="btn-check" :name="radioGroupName(index)"
-                 :id="'btnradio2' + index" autocomplete="off" @change="setActiveRadio('Bot', index)"/>
-          <label class="btn btn-outline-primary" :for="'btnradio2' + index">Bot</label>
-        </div>
-        <input :id="'name' + index" type="text" class="form-input" :value="getPlayerValue(index)" 
-                @input="updatePlayerName(index, $event)">
+        <h6 style="rotate:90deg;" class="ms-3">{{ selectedData }}</h6>
       </div>
     </div>
-    <button type="submit" @click="startTournament" class="start-tournament">Start Tournament</button>
+
+    <div style="margin-bottom: 3%;" class="name-box row">
+      <div v-for="index in nbr_players" style="min-width: 50%; margin-bottom: 1%" :key="index" class="name-input d-flex col">
+        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+          <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio1' + index"
+            autocomplete="off" checked @change="setActiveRadio('Player', index)"/>
+          <label class="btn btn-outline-primary" :for="'btnradio1' + index">Player</label>
+          <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio2' + index"
+            autocomplete="off" @change="setActiveRadio('Bot', index)"/>
+          <label class="btn btn-outline-primary" :for="'btnradio2' + index">Bot</label>
+        </div>
+        <div v-if="local">
+          <input :id="'name' + index" type="text" class="form-control" :value="getPlayerValue(index)" 
+          @input="updatePlayerName(index, $event)">
+        </div>
+        <div v-else>
+          <UserSearchDropdown />
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" @click="startTournament($event)" class="btn btn-primary">Start Tournament</button>
   </form>
 </template>
 
@@ -29,6 +38,13 @@
 
 export default {
   name: 'FormTournament',
+  props: {
+    local: Boolean,
+  },
+  mounted() {
+    this.all_players = [];
+    this.updatePlayerCount();
+  },
   data() {
     return {
       all_players: [],
@@ -39,7 +55,6 @@ export default {
     };
   },
   computed: {
-
     selectedData() {
       this.nbr_players = this.tournamentSize[this.selectPos];
       return this.tournamentSize[this.selectPos];
@@ -90,8 +105,10 @@ export default {
       }
     },
 
-    startTournament() {
-      //TODO: needs to call backend for tournament handling which is not yet implementet
+    startTournament(event) {
+      event.preventDefault();
+      // TODO: needs to call backend for tournament handling which is not yet implementet
+      console.log(this.all_players);
       console.log("Tournament handling not yet implemented in backend");
     }
   },  

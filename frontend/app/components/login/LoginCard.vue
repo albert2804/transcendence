@@ -170,7 +170,7 @@ export default {
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-CSRFToken': csrfToken
           },
-          body: `username=${encodeURIComponent(this.username)}&password1=${encodeURIComponent(this.password)}&password2=${encodeURIComponent(this.password2)}`,
+          body: `username=${encodeURIComponent(this.username)}&password1=${encodeURIComponent(this.password)}&password2=${encodeURIComponent(this.password2)}&alias=${encodeURIComponent(this.username)}`,
         });
         if (response.status === 200) {
           isLoggedIn.value = 1

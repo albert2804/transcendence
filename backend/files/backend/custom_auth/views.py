@@ -64,13 +64,14 @@ def callback(request):
     user.alias = user.username
     user.save()
 
-
-    image_get = requests.get(user_details['image']['versions']['small'])
-
-    if image_get.status_code == 200:
-        print("IMAGE GET OK")
-        image_content = ContentFile(image_get.content)
-        if not default_storage.exists(user.username + "_avatar.jpg"):
+    if created:
+        image_get = requests.get(user_details['image']['versions']['small'])
+        if image_get.status_code == 200:
+            print("IMAGE GET OK")
+            image_content = ContentFile(image_get.content)
+            # image_path = ("profilepic/" + user.username + "_avatar.jpg")
+            # image_path = os.path.join(settings.MEDIA_ROOT, image_path)
+            # print("IMAGE PATH: " + image_path)
             user.profile_pic.save(f'{user.username}_avatar.jpg', image_content)
             user.save()
     print(user.profile_pic.url)

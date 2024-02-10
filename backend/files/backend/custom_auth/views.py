@@ -59,9 +59,9 @@ def callback(request):
         print(f'Error: {response.status_code}')
 
     user, created = CustomUser.objects.get_or_create(
-        username=user_details['login'] + "_42intra",
-        defaults={'email': user_details['email']})
-    if created:
+        username=user_details['login'],
+        defaults={'email': user_details['email'],
+                  'is_42_login': True })
         print(f'User {user.username} created')
     else:
         print(f'User {user.username} already exists')

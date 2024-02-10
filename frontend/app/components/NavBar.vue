@@ -1,4 +1,10 @@
 <!-- https://getbootstrap.com/docs/5.3/components/navbar/ -->
+<script setup>
+  import { isLoggedIn } from '~/store';
+  watchEffect(() => {
+    isLoggedIn.value = isLoggedIn.value
+  })
+</script>
 
 <template>
   <div>
@@ -21,8 +27,11 @@
             <li class="nav-item">
               <a class="nav-link active" @click="showGameModal">Remote Game</a>
             </li>
-            <li class="nav-item">
-              <NuxtLink class="nav-link active" to="/login">Login</NuxtLink>
+            <li class="nav-item" v-if="isLoggedIn != 1">
+            <NuxtLink class="nav-link active" to="/login">Login</NuxtLink>
+            </li>
+            <li class="nav-item" v-if="isLoggedIn === 1">
+              <NuxtLink class="nav-link active" to="/login">Logout</NuxtLink>
             </li>
             <li class="nav-item">
               <NuxtLink class="nav-link active" to="/infopage">Info</NuxtLink>

@@ -32,6 +32,11 @@
 		<div style="font-size: 1.6em; font-weight: bold; color: #ffffff; text-align: center;">
 			<div>{{ message }}</div>
 		</div>
+    <!-- Back to menu - button --->
+    <div v-if="waiting" style="height: 5px;"></div>
+    <div v-if="waiting">
+      <button type="button" class="btn btn-primary" @click="backToMenu">Back to Menu</button>
+    </div>
 		<!-- Start game - button --->
 		<div v-if="showMenu">
 			<button type="button" class="btn btn-primary" @click="startTrainingGame">Start Training Game</button>
@@ -70,6 +75,7 @@
       message: '',
       pointsP1: 0,
       pointsP2: 0,
+      waiting: false,
       playing: false,
       showMenu: false,
       p1_name: '',
@@ -137,23 +143,28 @@
             this.showAliasScreen = false;
             if (data.page === "playing") {
               this.message = '';
+              this.waiting = false;
               this.playing = true;
               this.showMenu = false;
             } else if (data.page === "waiting") {
               this.message = 'Waiting for opponent...';
+              this.waiting = true;
               this.playing = false;
               this.showMenu = false;
             } else if (data.page === "menu") {
               this.message = '';
+              this.waiting = false;
               this.playing = false;
               this.showMenu = true;
             } else if (data.page === "other_device") {
               this.message = 'You are connected with another device!';
+              this.waiting = false;
               this.playing = false;
               this.showMenu = false;
 			        this.playOnThisDevice = false;
             } else if (data.page === "alias_screen") {
               this.message = 'hello guest, please enter your alias!';
+              this.waiting = false;
               this.playing = false;
               this.showMenu = false;
               this.alias = '';
@@ -233,6 +244,13 @@
           type: 'create_guest_player',
           alias: this.alias,
         });
+        this.socket.send(data);
+      }
+    },
+    // go back to the menu
+    backToMenu () {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        const data = JSON.stringify({ type: 'back_to_menu' });
         this.socket.send(data);
       }
     },

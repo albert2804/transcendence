@@ -110,6 +110,14 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 				# general message handling for connected players
 				if data.get('type') == 'slow_device':
 					player.fps = 12 # (worked with 12fps on esp8266)
+				elif data.get('type') == 'back_to_menu':
+					if player.get_game_handler() != None:
+						player.get_game_handler().give_up(player)
+					if player in RemoteGameConsumer.training_waiting_room:
+						RemoteGameConsumer.training_waiting_room.remove(player)
+					if player in RemoteGameConsumer.ranked_waiting_room:
+						RemoteGameConsumer.ranked_waiting_room.remove(player)
+					await player.send_state()
 				# message handling for players in a game
 				if player.get_game_handler() != None:
 					if (data.get('type') == 'give_up'):

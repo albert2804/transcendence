@@ -21,11 +21,7 @@ tabs = [
 
 def callback(request):
     code = request.GET.get('code')
-    print("HOST: " + request.get_host())
-    print("CODE: " + code)
-    print("URL: " + request.get_full_path())
     state = request.GET.get('state')
-    print("STATE: " + state)
     client_id = os.environ.get('42INTRA_CLIENT_ID')
     client_secret = os.environ.get('42INTRA_CLIENT_SECRET')
     url = "https://api.intra.42.fr/oauth/token"
@@ -36,47 +32,33 @@ def callback(request):
     url += "&state=" + state
     url += "&redirect_uri=" + quote("https://" + request.get_host() + "/endpoint/auth/callback", safe='')
 
-    print("URL: " + url)
     response = requests.post(url)
-    print(response.json())
-    print (response.text)
+
 
 
     #TODO: handle error if there is no access_token
     token = response.json()['access_token'] 
-    print("TOKEN: " + token)
 
     headers = {'Authorization': f'Bearer {token}'}
     endpoint = "https://api.intra.42.fr/v2/"
-    print(endpoint + "me/")
     response = requests.get(endpoint + "me/", headers=headers)
 
     user_details = ""
     if response.status_code == 200:
         user_details = response.json()
-        print(user_details)
     else:
-        print(f'Error: {response.status_code}')
+        print(f'Error authorizing with 42 intra: {response.status_code}')
 
     user, created = CustomUser.objects.get_or_create(
         username=user_details['login'],
         defaults={'email': user_details['email'],
                   'is_42_login': True })
-        print(f'User {user.username} created')
-    else:
-        print(f'User {user.username} already exists')
 
     if user is not None:
         backend = ModelBackend()
         user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
-        print(f'User {user.username} logged in')
-# ...
 
-    print ("IMAGE LINK: ")
-    print(user_details['image']['versions']['small'])
-    print(user_details['first_name'])
-    print(user_details['last_name'])
     user.first_name = user_details['first_name']
     user.last_name = user_details['last_name']
     user.alias = user.username

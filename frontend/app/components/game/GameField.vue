@@ -54,12 +54,20 @@
 			<button type="button" class="btn btn-primary" @click="changeDevice">Play on this device</button>
 		</div>
     <!-- alias screen -->
-    <div v-if="showAliasScreen">
+    <div v-if="showAliasScreen || showAliasScreen2">
       <input type="text" class="form-control" v-model="alias" placeholder="Enter alias" maxlength="20"> 
     </div>
-    <div v-if="showAliasScreen" style="height: 5px;"></div>
+    <div v-if="showAliasScreen || showAliasScreen2" style="height: 8px;"></div>
     <div v-if="showAliasScreen">
-      <button type="button" class="btn btn-primary" @click="create_guest_player">Enter</button>
+      <button type="button" class="btn btn-primary" @click="createGuestPlayer">Enter</button>
+    </div>
+    <div v-if="showAliasScreen2">
+      <button type="button" class="btn btn-primary" @click="createGuestPlayer2">Enter</button>
+    </div>
+    <!-- Back to menu - button --->
+    <div v-if="waiting || showAliasScreen || showAliasScreen2" style="height: 5px;"></div>
+    <div v-if="waiting || showAliasScreen || showAliasScreen2">
+      <button type="button" class="btn btn-primary" @click="backToMenu">Back to Menu</button>
     </div>
 	</li>
   </div>
@@ -75,6 +83,7 @@
       message: '',
       pointsP1: 0,
       pointsP2: 0,
+      waiting: false,
       playing: false,
       showMenu: false,
       p1_name: '',
@@ -96,6 +105,7 @@
 	    playOnThisDevice: true,
       // Following only for guest users:
       showAliasScreen: false,
+      showAliasScreen2: false,
       alias: '',
     }
   },
@@ -140,29 +150,42 @@
           const data = JSON.parse(event.data);
           if (data.type === "redirect") {
             this.showAliasScreen = false;
+            this.showAliasScreen2 = false;
             if (data.page === "playing") {
               this.message = '';
+              this.waiting = false;
               this.playing = true;
               this.showMenu = false;
             } else if (data.page === "waiting") {
               this.message = 'Waiting for opponent...';
+              this.waiting = true;
               this.playing = false;
               this.showMenu = false;
             } else if (data.page === "menu") {
               this.message = '';
+              this.waiting = false;
               this.playing = false;
               this.showMenu = true;
             } else if (data.page === "other_device") {
               this.message = 'You are connected with another device!';
+              this.waiting = false;
               this.playing = false;
               this.showMenu = false;
 			        this.playOnThisDevice = false;
-            } else if (data.page === "alias_screen") {
-              this.message = 'hello guest, please enter your alias!';
+            } else if (data.page === "alias_screen" || data.page === "alias_screen_2") {
+              this.waiting = false;
               this.playing = false;
               this.showMenu = false;
               this.alias = '';
-              this.showAliasScreen = true;
+              if (data.page === "alias_screen") {
+                this.message = 'hello guest, please enter your alias!';
+                this.showAliasScreen = true;
+                this.showAliasScreen2 = false;
+              } else if (data.page === "alias_screen_2") {
+                this.message = 'please enter an alias for the second player!';
+                this.showAliasScreen = false;
+                this.showAliasScreen2 = true;
+              }
             }
           } else if (data.type === "game_result") {
             this.playing = false;
@@ -235,12 +258,29 @@
       console.log("create Tournament (for now does nothing)");
     },
     // function to create a guest player (send alias to server)
-    create_guest_player () {
+    createGuestPlayer () {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
           type: 'create_guest_player',
           alias: this.alias,
         });
+        this.socket.send(data);
+      }
+    },
+    // create second guest player
+    createGuestPlayer2 () {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        const data = JSON.stringify({
+          type: 'create_guest_player_2',
+          alias: this.alias,
+        });
+        this.socket.send(data);
+      }
+    },
+    // go back to the menu
+    backToMenu () {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        const data = JSON.stringify({ type: 'back_to_menu' });
         this.socket.send(data);
       }
     },

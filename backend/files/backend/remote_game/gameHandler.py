@@ -66,11 +66,17 @@ class GameHandler:
 	# gets called at start of the game
 	async def send_player_names(self):
 		if self.local_game:
-			player1_name = ""
-			player2_name = ""
+			player1_name = self.player1.alias
+			player2_name = self.player1.alias_2
 		else:
-			player1_name = self.player1.get_username()
-			player2_name = self.player2.get_username()
+			if self.player1.get_user().is_authenticated:
+				player1_name = self.player1.alias
+			else:
+				player1_name = self.player1.alias + " (guest)"
+			if self.player2.get_user().is_authenticated:
+				player2_name = self.player2.alias
+			else:
+				player2_name = self.player2.alias + " (guest)"
 		await self.channel_layer.group_send(
 			self.game_group,
 			{
@@ -130,11 +136,11 @@ class GameHandler:
 	async def start_game(self):
 		self.game_start_time = timezone.now()
 		if self.local_game:
-			print(f"Started local game {self.game_group} --- {self.player1.get_user().username}.")
+			print(f"Started local game {self.game_group} --- {self.player1.get_user().alias}.")
 		elif self.ranked:
-			print(f"Started ranked {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username}.")
+			print(f"Started ranked {self.game_group} between {self.player1.get_user().alias} and {self.player2.get_user().alias}.")
 		else:
-			print(f"Started {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username}.")
+			print(f"Started {self.game_group} between {self.player1.get_user().alias} and {self.player2.get_user().alias}.")
 		# send player names to game group
 		await self.send_player_names()
 		# send redirect to playing page
@@ -154,15 +160,16 @@ class GameHandler:
 		if self.ranked:
 			await self.save_result_to_db()
 		if self.local_game:
+			self.player1.alias_2 = None
 			print(f"Local game {self.game_group} finished.")
 		elif self.ranked:
-			print(f"Ranked {self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username} finished.")
+			print(f"Ranked {self.game_group} between {self.player1.get_user().alias} and {self.player2.get_user().alias} finished.")
 		else:
-			print(f"{self.game_group} between {self.player1.get_user().username} and {self.player2.get_user().username} finished.")
+			print(f"{self.game_group} between {self.player1.get_user().alias} and {self.player2.get_user().alias} finished.")
 		# send game result to game group
 		await self.send_game_result()
 		# wait 3 seconds
-		await asyncio.sleep(3)
+		await asyncio.sleep(2)
 		# redirect players to menu
 		await self.channel_layer.group_send(
 			self.game_group,

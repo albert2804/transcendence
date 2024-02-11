@@ -27,20 +27,21 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 			}))
 			return
 		for p in Player.all_players:
-			if p.get_user().username == alias:
+			if p.alias == alias:
 				await self.send(text_data=json.dumps({
 					'type': 'alias_exists',
 				}))
 				return
 		from api.models import CustomUser
-		exists = await sync_to_async(CustomUser.objects.filter(username=alias).exists)()
+		exists = await sync_to_async(CustomUser.objects.filter(alias=alias).exists)()
 		if exists:
 			await self.send(text_data=json.dumps({
 				'type': 'alias_exists',
 			}))
 			return
+		self.scope["user"].alias = alias
 		player = Player(self.scope["user"], self.channel_name)
-		player.get_user().username = alias
+		# player.alias = alias
 		await player.send_state()
 		print(f"Anonymous user upgraded to guest player with alias {alias}.")
 
@@ -73,7 +74,6 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		await self.accept()
 		if self.scope["user"].is_authenticated:
-			username = self.scope["user"].username
 			if Player.get_channel_by_user(self.scope["user"]) != None:
 				await self.send(text_data=json.dumps({
 					'type': 'redirect',
@@ -83,7 +83,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 				return
 			player = Player(self.scope["user"], self.channel_name)
 			await player.send_state()
-			print(f"{self.scope['user'].username} connected to game-websocket.")
+			print(f"{self.scope['user'].alias} connected to game-websocket.")
 		else:
 			print(f"Anonymous user connected to game-websocket.")
 			await self.send(text_data=json.dumps({
@@ -110,6 +110,27 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 				# general message handling for connected players
 				if data.get('type') == 'slow_device':
 					player.fps = 12 # (worked with 12fps on esp8266)
+				elif data.get('type') == 'back_to_menu':
+					if player.get_game_handler() != None:
+						player.get_game_handler().give_up(player)
+					if player in RemoteGameConsumer.training_waiting_room:
+						RemoteGameConsumer.training_waiting_room.remove(player)
+					if player in RemoteGameConsumer.ranked_waiting_room:
+						RemoteGameConsumer.ranked_waiting_room.remove(player)
+					await player.send_state()
+				elif data.get('type') == 'create_guest_player_2':
+					if data.get('alias') == "":
+						await self.send(text_data=json.dumps({
+							'type': 'alias_exists',
+						}))
+						return
+					player.alias_2 = data.get('alias')
+					# start local game after both players have chosen an alias
+					if player.get_game_handler() == None and player.alias_2 != None:
+						game_group = await GameHandler.create(player, player)
+						asyncio.ensure_future(game_group.start_game())
+					else:
+						await player.send_state()
 				# message handling for players in a game
 				if player.get_game_handler() != None:
 					if (data.get('type') == 'give_up'):
@@ -123,8 +144,14 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 					elif data.get('type') == 'start_ranked_game':
 						await self.add_to_ranked_waiting_room(player)
 					elif data.get('type') == 'start_local_game':
-						game_group = await GameHandler.create(player, player)
-						asyncio.ensure_future(game_group.start_game())
+						if (player.alias_2 != None):
+							game_group = await GameHandler.create(player, player)
+							asyncio.ensure_future(game_group.start_game())
+						else:
+							await self.send(text_data=json.dumps({
+								'type': 'redirect',
+								'page': "alias_screen_2",
+							}))
 		except json.JSONDecodeError:
 			print(f"Error handling received message from a game-websocket: {text_data}")
 	
@@ -141,7 +168,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 			if player in RemoteGameConsumer.ranked_waiting_room:
 				RemoteGameConsumer.ranked_waiting_room.remove(player)
 			Player.all_players.remove(Player.get_player_by_channel(self.channel_name))
-			print(f"{self.scope['user'].username} disconnected from game-websocket.")
+			print(f"{self.scope['user'].alias} disconnected from game-websocket.")
 
 
 	#####################

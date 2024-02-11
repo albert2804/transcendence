@@ -22,3 +22,5 @@ backend/files/backend/custom_auth/migrations
 backend/files/backend/remote_game/migrations
 backend/files/backend/users/migrations
 backend/files/backend/tournament/migrations
+backend/files/backend/user/migrations
+backend/files/backend/users/migrations/

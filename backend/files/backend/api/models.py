@@ -6,6 +6,9 @@ class CustomUser(AbstractUser):
 	chat_online = models.BooleanField(default=False)
 	profile_pic = models.FileField(upload_to='profilepic', default='profilepic/default.jpeg', blank=True, null=True)
 	alias = models.CharField(max_length=150, blank=True, null=True, verbose_name='Alias')
+	# list of friends
+	friends = models.ManyToManyField('self', blank=True)
+	blocked_users = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='blocked_by_users')
 
 	# mobile = models.CharField(max_length=20, blank=True, null=True)
 	def __str__(self):

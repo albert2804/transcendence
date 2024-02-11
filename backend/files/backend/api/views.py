@@ -54,7 +54,7 @@ def get_auth_status(request):
         return JsonResponse({'authenticated': False}, status=200)
 
 # login user
-# 400: invalid json data
+# 400: invalid json data or request
 # 200: user is authenticated
 # 403: user is not authenticated
 def userlogin(request):
@@ -80,7 +80,8 @@ def userlogin(request):
                 'message': 'Successfully logged in as ' + request.user.username,
                 'userid': user_id,
                 }, status=200)
-    return JsonResponse({'error': 'Invalid credentials'}, status=403)
+        return JsonResponse({'error': 'Invalid credentials'}, status=403)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 # logout user
 # 200: user logged out
@@ -131,3 +132,39 @@ def userregister(request):
             return JsonResponse({'error': 'invalid credentials'}, status=403)
     return JsonResponse({'error': 'Something went wrong'}, status=400)
 
+
+##########################
+### USER ACCOUNT STUFF ###
+##########################
+
+def get_users_friends(request):
+    if request.method == 'POST':
+        # validate json data
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            username = data.get('user_id')
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Something went wrong'}, status=400)
+        # get the friends of the user
+        user = CustomUser.objects.get(id=username)
+        if user is not None:
+            friends = user.friends.all()
+            return JsonResponse({'friends': friends}, status=200)
+        return JsonResponse({'error': 'User not found'}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def get_users_block_list(request):
+    if request.method == 'POST':
+        # validate json data
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            username = data.get('user_id')
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Something went wrong'}, status=400)
+        # get the block list of the user
+        user = CustomUser.objects.get(id=username)
+        if user is not None:
+            block_list = user.block_list.all()
+            return JsonResponse({'block_list': block_list}, status=200)
+        return JsonResponse({'error': 'User not found'}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)

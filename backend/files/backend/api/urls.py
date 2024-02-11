@@ -9,4 +9,6 @@ urlpatterns = [
     path('userlogin', views.userlogin),
     path('userlogout', views.userlogout),
     path('userregister', views.userregister),
+    path('get_users_friends', views.get_users_friends),
+    path('get_users_block_list', views.get_users_block_list),
 ]

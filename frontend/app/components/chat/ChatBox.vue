@@ -127,7 +127,14 @@ export default {
   methods: {
     getMessageType (message) {
       const parsedMessage = JSON.parse(message)
-      return parsedMessage.sender_id === this.own_id ? 'message-item-sent' : 'message-item-received'
+      if (parsedMessage.subtype === 'info') {
+        return 'message-item-info'
+      } else if (parsedMessage.sender_id === this.own_id) {
+        return 'message-item-sent'
+      } else {
+        return 'message-item-received'
+      }
+      // return parsedMessage.sender_id === this.own_id ? 'message-item-sent' : 'message-item-received'
     },
     scrollDown () {
       this.$nextTick(() => {
@@ -298,6 +305,16 @@ export default {
   margin-right: 4px;
   display: flex;
   justify-content: flex-end;
+}
+
+.message-item-info {
+  margin-bottom: 2px;
+  margin-top: 2px;
+  margin-left: 4px;
+  margin-right: 4px;
+  display: flex;
+  justify-content: center;
+  color: #a01d1d;
 }
 
 .message {

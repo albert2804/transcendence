@@ -8,17 +8,21 @@ RESET = "\033[0m"
 def send_userinfo(request):
 	if request.user.is_authenticated:
 		try:
-			statistics_data, created = Statistics.objects.get_or_create(user=request.user)
+			username = request.GET.get('username', '')
+			if not username or username == 'undefined':
+				username = request.user
+			user_data = CustomUser.objects.get(username=username)
 		except Exception as e: 
 			return JsonResponse({'error': f'Could not get statistics data for user. Error: {str(e)}'}, status=500)
 		try:
 			response_data = {
-				'userid:':statistics_data.user.id,
-				'username':statistics_data.user.username,
-				'date_joined':statistics_data.user.date_joined, 
-				'games_played':statistics_data.games_played,
-				'mmr':statistics_data.mmr,
-				'ranking':statistics_data.ranking,
+				'username': user_data.username,
+				#'date_joined':statistics_data.user.date_joined,
+				'alias': user_data.alias,
+				'games_played': user_data.num_games_played,
+				'games_won': user_data.num_games_won,
+				#'mmr':statistics_data.mmr,
+				#'ranking':statistics_data.ranking,
 				}
 			return JsonResponse(response_data,
 				status=200)
@@ -35,7 +39,10 @@ def handle_profilepic(request):
 	if request.user.is_authenticated:
 		if request.method == 'GET':
 			try:
-				profilepic_url = CustomUser.objects.get(username=request.user).profile_pic.url
+				username = request.GET.get('username', '')
+				if not username or username == 'undefined':
+					username = request.user
+				profilepic_url = CustomUser.objects.get(username=username).profile_pic.url
 				print(f"{profilepic_url}")
 				return JsonResponse({'url': profilepic_url},
 					status=200)

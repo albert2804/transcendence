@@ -18,7 +18,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         User = get_user_model()
         return list(User.objects.all())
 
-    # @database_sync_to_async
     async def save_and_send_message(self, sender, receiver_id, message, date):
         from .models import ChatMessage
         User = get_user_model()
@@ -93,6 +92,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'unread': unread,
                 'date': local_created_at.strftime(date_format),
             }))
+    
+    async def handle_block_command(self, text_data):
+        blocked_user_id = text_data.get('receiver_id')
+        if blocked_user_id:
+            blocked_user = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(blocked_user_id)))()
+            if blocked_user:
+                # add blocked user to the senders block list
+                await database_sync_to_async(lambda: self.scope['user'].blocked_users.add(blocked_user))()
+                # send info message to the sender
+                await self.channel_layer.group_send(
+                    f"chat_{self.scope['user'].id}",
+                    {
+                        'type': 'chat_message',
+                        'message': "You blocked this user.",
+                        'subtype': 'info',
+                        'sender_id': self.scope["user"].id.__str__(),
+                        'chat_id': blocked_user_id,
+                        'unread' : False,
+                        'date': datetime.now().strftime("%H:%M"),
+                    })
 
     async def connect(self):
         await self.accept()
@@ -126,7 +145,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         try:
             text_data_json = json.loads(text_data)
-            if (text_data_json.get('type') == 'message'):
+            # check for command type
+            if (text_data_json.get('type') == 'command'):
+                command = text_data_json.get('command')
+                if command == '/block':
+                    await self.handle_block_command(text_data_json)
+            elif (text_data_json.get('type') == 'message'):
                 message = text_data_json.get('message')
                 receiver_id = text_data_json.get('receiver_id')
                 # date = models.DateTimeField(auto_now_add=True)

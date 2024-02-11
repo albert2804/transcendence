@@ -212,7 +212,11 @@ export default {
     },
     sendMessage () {
       if (this.newMessage.trim() !== '') {
+        if (this.newMessage.charAt(0) === '/') {
+          this.socket.send(JSON.stringify({ type: "command", command: this.newMessage, receiver_id: this.chatid }))
+        } else {
         this.socket.send(JSON.stringify({ type: "message", message: this.newMessage, receiver_id: this.chatid }))
+        }
         this.newMessage = ''
       }
     }

@@ -79,6 +79,7 @@ def callback(request):
     print(user_details['last_name'])
     user.first_name = user_details['first_name']
     user.last_name = user_details['last_name']
+    user.alias = user.username
     user.save()
 
 

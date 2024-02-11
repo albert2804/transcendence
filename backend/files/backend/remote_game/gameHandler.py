@@ -169,7 +169,7 @@ class GameHandler:
 		# send game result to game group
 		await self.send_game_result()
 		# wait 3 seconds
-		await asyncio.sleep(3)
+		await asyncio.sleep(2)
 		# redirect players to menu
 		await self.channel_layer.group_send(
 			self.game_group,

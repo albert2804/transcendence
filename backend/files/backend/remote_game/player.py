@@ -29,6 +29,8 @@ class Player:
 	# Constructor for the Player object
 	def __init__(self, user, channel):
 		self.user = user
+		self.alias = user.alias
+		self.alias_2 = None # for guest player in local game
 		self.channel = channel
 		self.channel_layer = get_channel_layer()
 		self.game_handler = None
@@ -38,14 +40,6 @@ class Player:
 	# Getter for the user object (CustomUser) of the player
 	def get_user(self):
 		return self.user
-	
-	# Getter for the username of the player
-	# If the player is a guest, a (Guest) is added to the username
-	def get_username(self):
-		if self.user.is_authenticated:
-			return self.user.username
-		else:
-			return self.user.username + " (Guest)"
 
 	# Getter for the channel of the player
 	def get_channel(self):
@@ -59,8 +53,8 @@ class Player:
 			group = GameHandler.get_game_handler_by_name(self.game_handler)
 			await self.send({
 				'type': 'player_names',
-				'p1_name': group.player1.get_username(),
-				'p2_name': group.player2.get_username(),
+				'p1_name': group.player1.alias,
+				'p2_name': group.player2.alias,
 			})
 			await self.send({
 				'type': 'redirect',
@@ -85,7 +79,7 @@ class Player:
 			'type': 'redirect',
 			'page': "other_device",
 		})
-		print(f"Player {self.user.username} changed his device/channel")
+		print(f"Player {self.user.alias} changed his device/channel")
 		if self.game_handler != None:
 			await self.channel_layer.group_discard(self.game_handler, self.channel)
 			await self.channel_layer.group_add(self.game_handler, new_channel)

@@ -112,6 +112,37 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         'unread' : False,
                         'date': datetime.now().strftime("%H:%M"),
                     })
+    
+    async def handle_unblock_command(self, text_data):
+        blocked_user_id = text_data.get('receiver_id')
+        if blocked_user_id:
+            blocked_user = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(blocked_user_id)))()
+            if blocked_user:
+                if not await database_sync_to_async(lambda: self.scope['user'].blocked_users.filter(id=blocked_user_id).exists())():
+                    await self.channel_layer.group_send(
+                        f"chat_{self.scope['user'].id}",
+                        {
+                            'type': 'chat_message',
+                            'message': "This user is not blocked.",
+                            'subtype': 'info',
+                            'sender_id': self.scope["user"].id.__str__(),
+                            'chat_id': blocked_user_id,
+                            'unread' : False,
+                            'date': datetime.now().strftime("%H:%M"),
+                        })
+                else:
+                    await database_sync_to_async(lambda: self.scope['user'].blocked_users.remove(blocked_user))()
+                    await self.channel_layer.group_send(
+                        f"chat_{self.scope['user'].id}",
+                        {
+                            'type': 'chat_message',
+                            'message': "You unblocked this user.",
+                            'subtype': 'info',
+                            'sender_id': self.scope["user"].id.__str__(),
+                            'chat_id': blocked_user_id,
+                            'unread' : False,
+                            'date': datetime.now().strftime("%H:%M"),
+                        })
 
     async def connect(self):
         await self.accept()
@@ -150,6 +181,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 command = text_data_json.get('command')
                 if command == '/block':
                     await self.handle_block_command(text_data_json)
+                elif command == '/unblock':
+                    await self.handle_unblock_command(text_data_json)
             elif (text_data_json.get('type') == 'message'):
                 message = text_data_json.get('message')
                 receiver_id = text_data_json.get('receiver_id')

@@ -18,12 +18,38 @@ class ChatConsumer(AsyncWebsocketConsumer):
         User = get_user_model()
         return list(User.objects.all())
 
-    @database_sync_to_async
-    def save_message(self, sender, receiver_id, message, date):
+    # @database_sync_to_async
+    async def save_and_send_message(self, sender, receiver_id, message, date):
         from .models import ChatMessage
         User = get_user_model()
-        receiver = User.objects.get(id=int(receiver_id))
-        ChatMessage.objects.create(sender=sender, receiver=receiver, message=message, created_at=date)
+        # receiver = User.objects.get(id=int(receiver_id))
+        receiver = await database_sync_to_async(lambda: User.objects.get(id=int(receiver_id)))()
+        # ChatMessage.objects.create(sender=sender, receiver=receiver, message=message, created_at=date)
+        await database_sync_to_async(lambda: ChatMessage.objects.create(sender=sender, receiver=receiver, message=message, created_at=date))()
+        # send message to the senders group (to update chat history)
+        await self.channel_layer.group_send(
+            f"chat_{self.scope['user'].id}",
+                {
+                    'type': 'chat_message',
+                    'message': message,
+                    'subtype': 'msg',
+                    'sender_id': self.scope["user"].id.__str__(),
+                    'chat_id': receiver_id,
+                    'unread' : False,
+                    'date': date.strftime("%H:%M"),
+                })
+        # send message to the receivers group
+        await self.channel_layer.group_send(
+            f"chat_{receiver_id}",
+            {
+                'type': 'chat_message',
+                'message': message,
+                'subtype': 'msg',
+                'sender_id': self.scope["user"].id.__str__(),
+                'chat_id': self.scope["user"].id.__str__(),
+                'unread' : True,
+                'date': date.strftime("%H:%M"),
+            })
 
     # get all saved messages for the user (sent and received) from the database
     @database_sync_to_async
@@ -60,6 +86,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 'type': 'chat_message',
                 'message': message.message,
+                'subtype': 'msg',
                 'sender_id': sender_id,
                 'receiver_id': self.scope["user"].id.__str__(),
                 'chat_id': chat_id,
@@ -101,35 +128,30 @@ class ChatConsumer(AsyncWebsocketConsumer):
             text_data_json = json.loads(text_data)
             if (text_data_json.get('type') == 'message'):
                 message = text_data_json.get('message')
-                receiver = text_data_json.get('receiver_id')
+                receiver_id = text_data_json.get('receiver_id')
                 # date = models.DateTimeField(auto_now_add=True)
                 date = datetime.now()
-                if message and receiver:
-                    await self.save_message(self.scope["user"], receiver, message, date)
-                    # send message to the sender itself
-                    await self.channel_layer.group_send(
-                        f"chat_{self.scope['user'].id}",
-                        {
-                            'type': 'chat_message',
-                            'message': message,
-                            'sender_id': self.scope["user"].id.__str__(),
-                            'chat_id': receiver,
-                            'unread' : False,
-                            'date': date.strftime("%H:%M"),
-                        }
-                    )
-                    # send message to the receivers group
-                    await self.channel_layer.group_send(
-                        f"chat_{receiver}",
-                        {
-                            'type': 'chat_message',
-                            'message': message,
-                            'sender_id': self.scope["user"].id.__str__(),
-                            'chat_id': self.scope["user"].id.__str__(),
-                            'unread' : True,
-                            'date': date.strftime("%H:%M"),
-                        }
-                    )
+                if message and receiver_id:
+                    # check if sender is in the receivers block list
+                    receiver_user = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
+                    if receiver_user:
+                        if await database_sync_to_async(lambda: receiver_user.blocked_users.filter(id=self.scope['user'].id).exists())():
+                            # send info message to the sender that he is blocked by the receiver
+                            await self.channel_layer.group_send(
+                                f"chat_{self.scope['user'].id}",
+                                {
+                                    'type': 'chat_message',
+                                    'message': "You are blocked by this user.",
+                                    'subtype': 'info',
+                                    'sender_id': self.scope["user"].id.__str__(),
+                                    'chat_id': receiver_id,
+                                    'unread' : False,
+                                    'date': date.strftime("%H:%M"),
+                                })
+                            return
+                        else:
+                            # save and send message
+                            await self.save_and_send_message(self.scope["user"], receiver_id, message, date)
             elif (text_data_json.get('type') == 'read_info'):
                 chat_id = text_data_json.get('chat_id')
                 if chat_id:
@@ -145,6 +167,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'type': 'chat_message',
             'message': event['message'],
+            'subtype': event.get('subtype'), # should be 'msg' or 'info' --- 'info' is for system messages like blocked user...
             'sender_id': event['sender_id'],
             'receiver_id': self.scope["user"].id.__str__(),
             'chat_id': event['chat_id'],

@@ -32,15 +32,40 @@ export default {
   },
 	created() 
   {
-		fetch('https://localhost/endpoint/user/get_all_users?attributes=username,alias,num_games_played,num_games_won')
-      .then(response => response.json())
-      .then(data =>  this.users = data.response)
-      .catch(error => console.error('Error:', error));
+    this.fetchUsers();
 	},
-  computed: {
+  computed: 
+  {
     sortedUsers() 
     {
       return this.users.slice().sort((a, b) => b.num_games_won - a.num_games_won);
+    }
+  },
+  methods: 
+  {
+    async fetchUsers() 
+    {
+      try 
+      {
+        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+        const response = await fetch('/endpoint/user/get_all_users?attributes=username,alias,num_games_played,num_games_won', 
+          {
+            method: 'GET',
+            headers: 
+            {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken,
+            }
+          }
+        )
+        const jsonResponse = await response.json();
+        this.users = jsonResponse.response;
+        alert(JSON.stringify(this.users));
+      } 
+      catch (error) 
+      {
+        console.error('Error:', error)
+      }
     }
   }
 }

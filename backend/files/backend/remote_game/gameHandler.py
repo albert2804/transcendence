@@ -195,6 +195,7 @@ class GameHandler:
 	# saves the game result to the db entry (only for ranked games)
 	async def save_result_to_db(self):
 		from .models import RemoteGame
+		# fill the db entry with the game result
 		self.db_entry.started_at = self.game_start_time
 		self.db_entry.finished_at = timezone.now()
 		self.db_entry.pointsP1 = int(self.game.pointsP1)
@@ -209,6 +210,15 @@ class GameHandler:
 		print("Hits Player 1:", self.game.pointsP1)
 		print("Hits Player 2:", self.game.pointsP2)
 		await sync_to_async(self.db_entry.save)()
+		# update the stats of the players CustomUser objects
+		self.player1.get_user().num_games_played += 1
+		self.player2.get_user().num_games_played += 1
+		if self.game.winner == 1:
+			self.player1.get_user().num_games_won += 1
+		elif self.game.winner == 2:
+			self.player2.get_user().num_games_won += 1
+		await sync_to_async(self.player1.get_user().save)()
+		await sync_to_async(self.player2.get_user().save)()
 
 	# This function is called when a player gives up or disconnects
 	# The other player wins the game

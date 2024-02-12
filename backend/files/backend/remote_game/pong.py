@@ -148,7 +148,7 @@ class PongGame:
 
 		# Increase ball speed
 		# if self.currentSpeed < 20:
-		self.currentSpeed = min(self.currentSpeed + 1, 10)
+		self.currentSpeed = min(self.currentSpeed + 1, 9)
 		
 		# Change the ball's angle based on the position on the paddle
 		self.ball['dy'] = self.currentSpeed * angle_factor

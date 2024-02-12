@@ -19,10 +19,7 @@
             <div id="collapseOnline" class="accordion-collapse collapse show">
               <ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
                 <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
-                  <span class="badge rounded-pill bg-danger" v-if="unreadMessageCountMap.get(String(user.id)) != 0">
-                    {{ unreadMessageCountMap.get(String(user.id)) }}
-                  </span>
-                  {{ user.username }}
+                  <ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
                 </li>
               </ul>
             </div>
@@ -37,10 +34,7 @@
               <ul class="contacts-list">
                 <ul v-for="(user, index) in offlineUsers" :key="index" class="list-group">
                   <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
-                    <span class="badge rounded-pill bg-danger" v-if="unreadMessageCountMap.get(String(user.id)) != 0">
-                      {{ unreadMessageCountMap.get(String(user.id)) }}
-                    </span>
-                    {{ user.username }}
+                    <ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
                   </li>
                 </ul>
               </ul>
@@ -52,6 +46,7 @@
       <div v-show="chatid !== null" style="padding: 5px;">
         <div class="chat-container">
           <div class="header-bar">
+            {{ active_chat_user ? active_chat_user.username : '' }}
             <p class="m-0">
             </p>
             <button type="button" class="btn-close" @click="this.chatid = null" aria-label="Close"></button>
@@ -92,6 +87,7 @@ export default {
       unreadMessageCountMap: new Map(),
       newMessage: '',
       chatid: null,
+      active_chat_user: null,
       own_id: null
     }
   },
@@ -144,6 +140,7 @@ export default {
     },
     selectUser (user) {
       this.chatid = user.id
+      this.active_chat_user = user
       this.scrollDown()
       // remove unread message count for selected chat
       if (this.unreadMessageCountMap.has(String(user.id))) {
@@ -250,10 +247,31 @@ export default {
   flex-direction: column;
 }
 
+.accordion-header{
+  background-color: #ffffff;
+  padding: 2px;
+}
+
+.accordion-button {
+  background-color: #d1e7ff;
+  border: 1px solid #c2c3c5;
+  text-align: left;
+  width: 100%;
+  padding: 10px;
+  margin: 0;
+  border-radius: 5px;
+}
+
+.list-group-item.active {
+  background-color: #ecedee;
+  border-color: #c2c3c5;
+}
+
 .online-dot {
   height: 10px;
   width: 10px;
   background-color: #02ce02;
+
   border-radius: 50%;
   display: inline-block;
 }

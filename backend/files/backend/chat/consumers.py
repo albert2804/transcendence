@@ -108,6 +108,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     await database_sync_to_async(lambda: self.scope['user'].blocked_users.add(blocked_user))()
                     await self.save_and_send_message(blocked_user, self.scope["user"], "You blocked this user.", datetime.now(), 'info')
                     await self.save_and_send_message(self.scope["user"], blocked_user, "You are blocked by this user.", datetime.now(), 'info')
+                    # update user list
+                    await self.channel_layer.group_send(f"chat_{self.scope['user'].id}",{'type': 'user_list',})
+                    await self.channel_layer.group_send(f"chat_{blocked_user.id}",{'type': 'user_list',})
     
     async def handle_unblock_command(self, text_data):
         blocked_user_id = text_data.get('receiver_id')
@@ -120,6 +123,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     await database_sync_to_async(lambda: self.scope['user'].blocked_users.remove(blocked_user))()
                     await self.save_and_send_message(blocked_user, self.scope["user"], "You unblocked this user.", datetime.now(), 'info')
                     await self.save_and_send_message(self.scope["user"], blocked_user, "You are unblocked by this user.", datetime.now(), 'info')
+                    # update user list
+                    await self.channel_layer.group_send(f"chat_{self.scope['user'].id}",{'type': 'user_list',})
+                    await self.channel_layer.group_send(f"chat_{blocked_user.id}",{'type': 'user_list',})
     
     async def handle_friend_command(self, text_data):
         receiver_id = text_data.get('receiver_id')
@@ -132,6 +138,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 elif result == 1:
                     await self.save_and_send_message(receiver, self.scope["user"], "You are now friends.", datetime.now(), 'info')
                     await self.save_and_send_message(self.scope["user"], receiver, "You are now friends.", datetime.now(), 'info')
+                    # update user list
+                    await self.channel_layer.group_send(f"chat_{self.scope['user'].id}",{'type': 'user_list',})
+                    await self.channel_layer.group_send(f"chat_{receiver.id}",{'type': 'user_list',})
                 elif result == 2:
                     await self.save_and_send_message(receiver, self.scope["user"], "Friend request sent.", datetime.now(), 'info')
                     await self.save_and_send_message(self.scope["user"], receiver, "Friend request received.", datetime.now(), 'info')
@@ -150,6 +159,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 elif result == 2:
                     await self.save_and_send_message(receiver, self.scope["user"], "Friend removed.", datetime.now(), 'info')
                     await self.save_and_send_message(self.scope["user"], receiver, "Friend removed.", datetime.now(), 'info')
+                    # update user list
+                    await self.channel_layer.group_send(f"chat_{self.scope['user'].id}",{'type': 'user_list',})
+                    await self.channel_layer.group_send(f"chat_{receiver.id}",{'type': 'user_list',})
 
     async def connect(self):
         await self.accept()
@@ -237,7 +249,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     async def user_list(self, event):
         reg_users = await self.get_registered_users()
-        users = [{'username': user.username, 'id': user.id, 'chat_online': user.chat_online} for user in reg_users]
+        # friends = self.scope["user"].friends.all()
+        # blocked_by = self.scope["user"].blocked_by_users.all()
+        users = []
+        for user in reg_users:
+            if user.id != self.scope["user"].id:
+                # check if user is online
+                chat_online = user.chat_online
+                # check if user is a friend
+                # is_friend = user in friends
+                is_friend = await database_sync_to_async(lambda: self.scope["user"].friends.filter(id=user.id).exists())()
+                # check if user has blocked the client
+                # is_blocked = user in blocked_by
+                blocks = await database_sync_to_async(lambda: self.scope["user"].blocked_by_users.filter(id=user.id).exists())()
+                # add user to list
+                users.append({'username': user.username, 'id': user.id, 'chat_online': chat_online, 'is_friend': is_friend, 'blocks': blocks})
+        # users = [{'username': user.username, 'id': user.id, 'chat_online': user.chat_online} for user in reg_users]
         await self.send(text_data=json.dumps({
             'type': 'user_list',
             'users': users,

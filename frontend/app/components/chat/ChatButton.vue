@@ -11,12 +11,10 @@
     <ChatBox v-show="showChatBox" class="chat-box" @closeChat="toggleChatBox" @connected="setToConnected" @disconnected="setToDisconnected" @loading="loading = true" @unreadMessages="handleMessageAlert" />
     <button v-if="connected && !showChatBox" class="btn btn-primary round-button" @click="toggleChatBox">
       <div style="position: relative; text-align: center;">
-      <span class="badge rounded-pill bg-danger" v-if="messageAlert != 0" style="position: absolute; transform: translate(-140%, -140%);">
+      <span class="badge rounded-pill bg-danger" v-if="messageAlert != 0" style="position: absolute; transform: translate(-150%, -140%);">
         {{ messageAlert }}
       </span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-chat" viewBox="0 0 16 16" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-          <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894m-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
-        </svg>
+		<div class="bi bi-chat" style="font-size: 2.0rem; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
       </div>
     </button>
     <button v-else-if="loading && !showChatBox"  class="btn btn-primary round-button" @click="toggleChatBox">
@@ -27,6 +25,27 @@
       </div>
     </button>
   </div>
+  <!--  CHAT HELP MODAL -->
+	<div class="modal" tabindex="-1" id="helpmodal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Chat Help</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<p><i class="bi bi-star-fill" style="color: #007bff; font-size: 1.2rem;"></i> - You are friends</p>
+				<p><i class="bi bi-x-circle" style="color: red; font-size: 1.2rem;"></i> - You blocked this user</p>
+				<p><i class="bi bi-x-circle-fill" style="color: red; font-size: 1.2rem;"></i> - This user blocked you</p>
+				<p style="margin-top: 10px; font-weight: bold;">Helpful chat commands:</p>
+				<p><code>/block</code> - Block user</p>
+				<p><code>/unblock</code> - Unblock user</p>
+				<p><code>/friend</code> - Invite/Accpet friend request</p>
+				<p><code>/unfriend</code> - Unfriend user</p>
+			</div>
+			</div>
+		</div>
+	</div>
 </template>
 
 <script>
@@ -41,6 +60,13 @@ export default {
     }
   },
   methods: {
+	closeHelpModal() {
+		this.$nextTick(() => {
+			var mood = document.getElementById('helpmodal');
+			var bsModal = bootstrap.Modal.getInstance(mood);
+			bsModal.hide();
+		});
+	},
     handleMessageAlert(value) {
       this.messageAlert = value;
     },

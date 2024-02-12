@@ -26,6 +26,9 @@ export default defineNuxtConfig({
       ]
     }
   },
+  css: [
+    '~/assets/styles/global.css',
+  ],
 })
 
 // CDN via jsDelivr ( https://getbootstrap.com/docs/5.3/getting-started/download/#cdn-via-jsdelivr )

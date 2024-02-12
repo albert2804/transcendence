@@ -1,76 +1,79 @@
 <template>
 	<div>
-    <!-- CONTAINER WITH CONTACTS... -->
-    <div class="contacts-container">
-      <div class="header-bar">
-        <p class="m-0">
-        Contacts
-        </p>
-        <button type="button" class="btn-close" @click="this.$emit('closeChat'); chatid = null;" aria-label="Close"></button>
-      </div>
-      <ul class="contacts-list">
-        <div class="accordion" id="contactListAccordion">
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
-                <span class="online-dot"/>&nbsp;Online
-              </button>
-            </h2>
-            <div id="collapseOnline" class="accordion-collapse collapse show">
-              <ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
-                <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
-                  <ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffline" aria-expanded="true" aria-controls="collapseOffline">
-                <span class="offline-dot"/>&nbsp;Offline
-              </button>
-            </h2>
-            <div id="collapseOffline" class="accordion-collapse collapse show">
-              <ul class="contacts-list">
-                <ul v-for="(user, index) in offlineUsers" :key="index" class="list-group">
-                  <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
-                    <ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
-                  </li>
-                </ul>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </ul>
-      <!-- CHATBOX -->
-      <div v-show="chatid !== null" style="padding: 5px;">
-        <div class="chat-container">
-          <div class="header-bar">
-            {{ active_chat_user ? active_chat_user.username : '' }}
-            <p class="m-0">
-            </p>
-            <button type="button" class="btn-close" @click="this.chatid = null" aria-label="Close"></button>
-          </div>
-          <ul class="chat-messages">
-            <li v-for="(message, index) in filteredMessages" :key="index" :class="getMessageType(message)">
-                <span class="message">
-                  {{ JSON.parse(message).message }}
-                  <span class="date" style="font-size: 0.8em; text-align: right; display: block;">
-                    {{ JSON.parse(message).date }}
-                  </span>
-                </span>
+		<!-- CONTAINER WITH CONTACTS... -->
+		<div class="contacts-container">
+		<div class="header-bar">
+			<p class="m-0"  >
+				<i type="button" class="bi bi-question-circle" style="color: white; font-size: 1.2em; margin-left: 5px;" @click="openHelpModal"></i>
+				Contacts
+			</p>
+			<div>
+				<button type="button" class="btn-close" @click="this.$emit('closeChat'); chatid = null;" aria-label="Close"></button>
+			</div>
+		</div>
+		<ul class="contacts-list">
+			<div class="accordion" id="contactListAccordion">
+			<div class="accordion-item">
+				<h2 class="accordion-header">
+				<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
+					<span class="online-dot"/>&nbsp;Online
+				</button>
+				</h2>
+				<div id="collapseOnline" class="accordion-collapse collapse show">
+				<ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
+					<li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
+					<ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
+					</li>
+				</ul>
+				</div>
+			</div>
+			<div class="accordion-item">
+				<h2 class="accordion-header">
+				<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffline" aria-expanded="true" aria-controls="collapseOffline">
+					<span class="offline-dot"/>&nbsp;Offline
+				</button>
+				</h2>
+				<div id="collapseOffline" class="accordion-collapse collapse show">
+				<ul class="contacts-list">
+					<ul v-for="(user, index) in offlineUsers" :key="index" class="list-group">
+					<li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
+						<ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
+					</li>
+					</ul>
+				</ul>
+				</div>
+			</div>
+			</div>
+		</ul>
+		<!-- CHATBOX -->
+		<div v-show="chatid !== null" style="padding: 5px;">
+			<div class="chat-container">
+			<div class="header-bar">
+				{{ active_chat_user ? active_chat_user.username : '' }}
+				<p class="m-0">
+				</p>
+				<button type="button" class="btn-close" @click="this.chatid = null" aria-label="Close"></button>
+			</div>
+			<ul class="chat-messages">
+				<li v-for="(message, index) in filteredMessages" :key="index" :class="getMessageType(message)">
+					<span class="message">
+					{{ JSON.parse(message).message }}
+					<span class="date" style="font-size: 0.8em; text-align: right; display: block;">
+						{{ JSON.parse(message).date }}
+					</span>
+					</span>
 
-            </li>
-          </ul>
-          <div class="chat-input-container">
-            <input v-model="newMessage" type="text" placeholder="Type your message..." class="form-control chat-input" @keyup.enter="sendMessage" />
-            <button class="btn btn-primary send-button" @click="sendMessage">
-            Send
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+				</li>
+			</ul>
+			<div class="chat-input-container">
+				<input v-model="newMessage" type="text" placeholder="Type your message..." class="form-control chat-input" @keyup.enter="sendMessage" />
+				<button class="btn btn-primary send-button" @click="sendMessage">
+				Send
+				</button>
+			</div>
+			</div>
+		</div>
+		</div>
 	</div>
 </template>
   
@@ -121,6 +124,11 @@ export default {
     });
   },
   methods: {
+	openHelpModal() {
+		this.$nextTick(() => {
+			new bootstrap.Modal(document.getElementById('helpmodal')).show();
+		});	
+	},
     getMessageType (message) {
       const parsedMessage = JSON.parse(message)
       if (parsedMessage.subtype === 'info') {

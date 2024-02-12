@@ -26,7 +26,6 @@ class PongGame:
 		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.initialSpeed, 'dy': self.initialSpeed, 'radius': 6}
 
 
-
 	def update_game(self):
 		# If the game is paused, the game will not be updated
 		if self.isGamePaused:
@@ -47,58 +46,54 @@ class PongGame:
 		# Bounce off the top or bottom of the canvas
 		if self.ball['y'] - self.ball['radius'] < 0 or self.ball['y'] + self.ball['radius'] > self.canvasHeight:
 			self.ball['dy'] = -self.ball['dy']
+		
+			# Ensure the ball stays within the canvas after bouncing off the bottom
+			self.ball['y'] = max(self.ball['radius'], min(self.canvasHeight - self.ball['radius'], self.ball['y']))
+
 
 		# Bounce off paddles and increase ball speed
 		if (
 			self.ball['x'] - self.ball['radius'] < self.leftPaddle['x'] + self.leftPaddle['width'] and
 			self.leftPaddle['y'] < self.ball['y'] < self.leftPaddle['y'] + self.leftPaddle['height']
 		):
-			
 			self.adjust_ball_angle(self.leftPaddle)
-			# if self.currentSpeed < 6:
-			# 	self.currentSpeed += 0.5
-			# self.ball['dy'] = -self.currentSpeed
-			# self.ball['dx'] = self.currentSpeed
-			# # print('Current speed:', self.currentSpeed)
 
 		if (
 			self.ball['x'] + self.ball['radius'] > self.rightPaddle['x'] and
 			self.rightPaddle['y'] < self.ball['y'] < self.rightPaddle['y'] + self.rightPaddle['height']
 		):
-			
 			self.adjust_ball_angle(self.rightPaddle)
-			# if self.currentSpeed < 6:
-			# 	self.currentSpeed += 0.5
-			# self.ball['dy'] = self.currentSpeed
-			# self.ball['dx'] = -self.currentSpeed
-			# print('Current speed:', self.currentSpeed)
 
 		# Check for scoring
 		if self.ball['x'] - self.ball['radius'] < 0 or self.ball['x'] + self.ball['radius'] > self.canvasWidth:
+			# Reset speed
 			self.currentSpeed = self.initialSpeed
-			self.ball['dx'] = -self.currentSpeed
 			self.ball['dy'] = self.currentSpeed
 
+			# Reset speed and ball direction depending on the person scoring
 			if self.ball['x'] + self.ball['radius'] > self.canvasWidth:
 				self.pointsP1 += 1
-				# Set new speed and direction
+				self.ball['dx'] = -self.currentSpeed
 			elif self.ball['x'] - self.ball['radius'] < 0:
 				self.pointsP2 += 1
+				self.ball['dx'] = self.currentSpeed
 
 			# Reset ball position to center
 			self.ball['x'] = self.canvasWidth/2
+		# Ensure the ball stays within the canvas after scoring
+		self.ball['x'] = max(self.ball['radius'], min(self.canvasWidth - self.ball['radius'], self.ball['x']))
 	
 	def paddle_up(self, player):
 		if player == 1:
-			self.leftPaddle['dy'] = -4
+			self.leftPaddle['dy'] = -7
 		elif player == 2:
-			self.rightPaddle['dy'] = -4
+			self.rightPaddle['dy'] = -7
 	
 	def paddle_down(self, player):
 		if player == 1:
-			self.leftPaddle['dy'] = 4
+			self.leftPaddle['dy'] = 7
 		elif player == 2:
-			self.rightPaddle['dy'] = 4
+			self.rightPaddle['dy'] = 7
 	
 	def paddle_stop(self, player):
 		if player == 1:
@@ -146,11 +141,22 @@ class PongGame:
 			await self.save_game_state()
 			await asyncio.sleep(0.01)
 
+	# make game more interesting by adding different angles
 	def adjust_ball_angle(self, paddle):
 		angle_factor = (self.ball['y'] - paddle['y'] - paddle['height'] / 2) / (paddle['height'] / 2)
 		max_angle = math.pi / 3  # Maximum angle change (adjust as needed)
 
+		# Increase ball speed
+		# if self.currentSpeed < 20:
+		self.currentSpeed = min(self.currentSpeed + 1, 20)
+		
 		# Change the ball's angle based on the position on the paddle
-		self.ball['dy'] = self.current_speed * angle_factor
+		self.ball['dy'] = self.currentSpeed * angle_factor
 		self.ball['dy'] = min(max(self.ball['dy'], -max_angle), max_angle)
 		self.ball['dx'] = -self.ball['dx']  # Reverse the horizontal direction
+
+		if self.ball['dx'] > 0:
+			self.ball['dx'] = self.currentSpeed
+		else:
+			self.ball['dx'] = -self.currentSpeed
+

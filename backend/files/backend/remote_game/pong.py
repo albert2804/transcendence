@@ -1,17 +1,22 @@
 import random
 import math
+import asyncio
 
 class PongGame:
 	def __init__(self):
-		self.numberOfHitsP1 = 0
-		self.numberOfHitsP2 = 0
+		self.pointsP1 = 0
+		self.pointsP2 = 0
 		self.isGameExited = False
 		self.isGamePaused = False
-		self.initialSpeed = 2
+		self.initialSpeed = 4
 		self.currentSpeed = self.initialSpeed
 		self.canvasWidth = 800
 		self.canvasHeight = 400
 		self.winner = 0
+
+		# Game state saved as json (ready to be sent to the client)
+		self.latest_game_state = None
+		self.game_state_lock = asyncio.Lock() # Lock to prevent race conditions
 
 		# Paddle initialization
 		self.leftPaddle = {'x': 0, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
@@ -71,20 +76,68 @@ class PongGame:
 			self.ball['dy'] = self.currentSpeed
 
 			if self.ball['x'] + self.ball['radius'] > self.canvasWidth:
-				self.numberOfHitsP1 += 1
+				self.pointsP1 += 1
 				# Set new speed and direction
 			elif self.ball['x'] - self.ball['radius'] < 0:
-				self.numberOfHitsP2 += 1
+				self.pointsP2 += 1
 
 			# Reset ball position to center
 			self.ball['x'] = self.canvasWidth/2
+	
+	def paddle_up(self, player):
+		if player == 1:
+			self.leftPaddle['dy'] = -4
+		elif player == 2:
+			self.rightPaddle['dy'] = -4
+	
+	def paddle_down(self, player):
+		if player == 1:
+			self.leftPaddle['dy'] = 4
+		elif player == 2:
+			self.rightPaddle['dy'] = 4
+	
+	def paddle_stop(self, player):
+		if player == 1:
+			self.leftPaddle['dy'] = 0
+		elif player == 2:
+			self.rightPaddle['dy'] = 0
 
 	def game_loop(self):
-		if self.numberOfHitsP1 < 10 and self.numberOfHitsP2 < 10:
+		if self.pointsP1 < 10 and self.pointsP2 < 10:
 			self.update_game()
 		else:
-			if self.numberOfHitsP1 == 10:
+			if self.pointsP1 == 10:
 				self.winner = 1
-			elif self.numberOfHitsP2 == 10:
+			elif self.pointsP2 == 10:
 				self.winner = 2
 			self.isGameExited = True
+
+	async def save_game_state(self):
+		state = {
+			'ball': {
+				'x': (self.ball['x'] / self.canvasWidth) * 100,
+				'y': (self.ball['y'] / self.canvasHeight) * 100,
+			},
+			'leftPaddle': {
+				'y': (self.leftPaddle['y'] / self.canvasHeight) * 100,
+			},
+			'rightPaddle': {
+				'y': (self.rightPaddle['y'] / self.canvasHeight) * 100,
+			},
+		}
+		high_score = {
+			'pointsP1': self.pointsP1,
+			'pointsP2': self.pointsP2,
+		}
+		async with self.game_state_lock:
+			self.latest_game_state = {
+				'type': 'game_update',
+				'state': state,
+				'high_score': high_score,
+			}
+	
+	async def run_game(self):
+		while not self.isGameExited:
+			self.game_loop()
+			await self.save_game_state()
+			await asyncio.sleep(0.01)

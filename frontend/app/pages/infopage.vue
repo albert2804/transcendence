@@ -14,7 +14,7 @@
           <ProfilePic />
         </div>
         <div v-else>
-          <p>No user statistics available.</p>
+          <h2>No user statistics available.</h2>
         </div>
       </div>
     </div>

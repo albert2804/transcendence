@@ -1,13 +1,15 @@
 <template>
   <div class="user-stats">
-    <h2>User Statistics</h2>
-    <div v-if="userStats.username != ''">
-      <p>Username: {{ userStats.username }}</p>
-      <p>Date Joined: {{ userStats.date_joined }}</p>
-      <p>Games Played: {{ userStats.games_played }}</p>
-      <p>Matchmade Ranking: {{ userStats.mmr }}</p>
-      <p>Overall Ranking: {{ userStats.ranking }}</p>
-    </div>
+    <!-- <div class="centered-headings"> -->
+      <h1>User Statistics</h1>
+      <div v-if="userStats.username != ''">
+        <p>Username: {{ userStats.username }}</p>
+        <p>Date Joined: {{ userStats.date_joined }}</p>
+        <p>Games Played: {{ userStats.games_played }}</p>
+        <p>Matchmade Ranking: {{ userStats.mmr }}</p>
+        <p>Overall Ranking: {{ userStats.ranking }}</p>
+      </div>
+    <!-- </div> -->
   </div>
 </template>
 
@@ -50,7 +52,7 @@ export default {
 </script>
 
 <style>
-  .card-size {
+  /* .card-size {
     min-width: px;
     max-width: 400px;
   }
@@ -67,5 +69,5 @@ export default {
     bottom: 0;
     left: 0;
     background: rgba(255,255,255,0.7);
-  }
+  } */
 </style>

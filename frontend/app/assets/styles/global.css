@@ -1,0 +1,51 @@
+/* assets/styles/global.css */
+
+body {
+	background-color: #0f4c81;
+	color: #ffffff;
+	font-family: 'Arial', sans-serif;
+  }
+
+.button {
+	background-color: #a48d7f; /* Default background color for buttons */
+	color: #ffffff; /* Default text color for buttons */
+	padding: 10px 15px;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+  }
+
+.card-size {
+    min-width: px;
+    max-width: 400px;
+	background-color: #b5c7d3;
+  }
+
+.button-list {
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+.shade-bg {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(255,255,255,0.7);
+  }
+
+.centered-headings {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center; /* Optional: Center the text within headings */
+	height: 100vh;
+	margin: 10vh;
+  }
+  
+  /* Add more styles as needed */
+  
+  /* Add more global styles as needed */

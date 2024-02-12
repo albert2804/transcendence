@@ -1,13 +1,12 @@
 <template>
-  <div class="modal fade"
+  <div
+    @keydown.esc="closeModal"
+    class="modal fade"
     :id="modalId" tabindex="-1"
     :aria-labelledby="ariaLabel"
     aria-hidden="true"
     data-bs-backdrop="static"
-    data-bs-keyboard="false"
-    @keydown.esc="closeModal"
-    @keydown="handleKeyPress"
-    @keyup="handleKeyRelease">
+    data-bs-keyboard="false">
     <div class="modal-dialog fullscreen-modal align-items-center">
       <div class="modal-content">
         <div class="modal-body">
@@ -15,7 +14,7 @@
         </div>
       </div>
     </div>
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 10px; right: 10px;"></button>
+    <button @click="closeModal" type="button" class="btn-close" aria-label="Close" style="position: absolute; top: 10px; right: 10px;"></button>
   </div>
 </template>
 
@@ -23,30 +22,20 @@
 export default {
   name: 'GameModal',
   props: {
-    modalTitle: String,
     modalId: String,
     ariaLabel: String,
   },
   methods: {
     closeModal() {
-      // console.log('close modal');
+      if (this.$refs.ponggamefieldRef) {
+        this.$refs.ponggamefieldRef.giveUpGame();
+      }
       setTimeout(() => {
         var mood = document.getElementById(this.modalId);
         var bsModal = bootstrap.Modal.getInstance(mood);
         bsModal.hide();
-      // }, 1000);
       }, 0);
     },
-    handleKeyPress(event) {
-      if (this.$refs.ponggamefieldRef) {
-        this.$refs.ponggamefieldRef.handleKeyPress(event);
-      }
-    },
-    handleKeyRelease(event) {
-      if (this.$refs.ponggamefieldRef) {
-        this.$refs.ponggamefieldRef.handleKeyRelease(event);
-      }
-    }
   },
 };
 </script>

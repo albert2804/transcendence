@@ -65,7 +65,7 @@
 import LocalTournamentBracket from './LocalTournamentBracket.vue';
 
 export default {
-  props: ['startGameTour', 'gameFinish', 'gameExited'],
+  props: ['startGameTour', 'gameFinish', 'gameExited', 'leftScore', 'rightScore'],
   name: 'LocalTournament',
   data() {
     return {
@@ -110,6 +110,7 @@ export default {
             name: `Player-${i}`,
             games_won: '[]',
             player_or_bot: 'Player',
+            index: i - 1,
           });
         }
       } else if (this.nbr_players < currentCount) {
@@ -117,53 +118,79 @@ export default {
         this.all_players.splice(this.nbr_players);
       }
     },
+    async sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    },
 
     async startTournament() {
-      console.log(this.all_players)
-      this.updatePlayerName()
-      this.formVisible = false;
-      this.ongoingTournament = true;
-
-      console.log("nbr of players" + this.nbr_players);
-      const total_games = this.nbr_players - 1; 
-      console.log(total_games);
-      console.log("start game")
-      for (let match = 0; match < total_games; match++) {
-        console.log(Math.log2(total_games) - Math.floor(Math.log2(match + 1)))
-        this.all_matches.push({
-          is_round: Math.floor(Math.log2(total_games + 1)) - Math.floor(Math.log2(total_games - match)),
-          game_nbr: match + 1, 
-          l_player: -1,
-          r_player: -1,
-          l_score: 0,
-          r_score: 0,
-        });
-        if (this.all_matches[match].is_round == 1) {
-          this.all_matches[match].l_player = this.all_players[match * 2];
-          this.all_matches[match].r_player = this.all_players[match * 2 + 1];
-        }
-      }
-      console.log(this.all_matches)
-      const playGame = async () => {
+      if (!this.ongoingTournament) {
+        console.log(this.all_players)
+        this.updatePlayerName()
+        this.formVisible = false;
+        this.ongoingTournament = true;
+        console.log("nbr of players" + this.nbr_players);
+        const total_games = this.nbr_players - 1; 
+        console.log(total_games);
+        console.log("start game")
         for (let match = 0; match < total_games; match++) {
-
-          console.log("Before startGameTour");
-          await this.startGameTour();
-          console.log("After startGameTour, before waitForVariableChange");
-          if (this.gameExited) {
-            this.ongoingTournament = false;
-            console.log("tournament exited")
-            break;
+          console.log(Math.log2(total_games) - Math.floor(Math.log2(match + 1)))
+          this.all_matches.push({
+            is_round: Math.floor(Math.log2(total_games + 1)) - Math.floor(Math.log2(total_games - match)),
+            game_nbr: match + 1, 
+            l_player: -1,
+            r_player: -1,
+            l_score: 0,
+            r_score: 0,
+          });
+          if (this.all_matches[match].is_round == 1) {
+            this.all_matches[match].l_player = this.all_players[match * 2];
+            this.all_matches[match].r_player = this.all_players[match * 2 + 1];
           }
-          await this.waitForVariableChange(() => this.gameFinish);
-          console.log("After waitForVariableChange");
         }
-      };
-      playGame().then(() => {
-        
-        this.ongoingTournament = false;
-        console.log("Tournament finished")
-      });
+        console.log(this.all_matches)
+        const playGame = async () => {
+          for (let match = 0; match < total_games; match++) {
+
+            await this.startGameTour();
+            if (this.gameExited) {
+              this.ongoingTournament = false;
+              console.log("tournament exited")
+              break;
+            }
+            await this.waitForVariableChange(() => this.gameFinish);
+            this.all_matches[match].l_score = this.leftScore;
+            this.all_matches[match].r_score = this.rightScore;
+            let winner = -1;
+            if (this.leftScore > this.rightScore)
+              winner = this.all_matches[match].l_player.index;
+            else
+              winner = this.all_matches[match].r_player.index;
+            for (let next_match = match; next_match < total_games; next_match++) {
+              if (this.all_matches[next_match].l_player == -1) {
+                this.all_matches[next_match].l_player = this.all_players[winner];
+                break;
+              }
+              else if (this.all_matches[next_match].r_player == -1) {
+                this.all_matches[next_match].r_player = this.all_players[winner];
+                break;
+              }
+            }
+            if (match + 1 != total_games) {
+              this.player_one = this.all_matches[match + 1].l_player.index;
+              this.player_two = this.all_matches[match + 1].r_player.index;
+            }
+            await this.sleep(3000);
+          }
+        };
+        playGame().then(() => {
+
+          this.ongoingTournament = false;
+          this.all_matches = [];
+          this.player_one = 0;
+          this.player_two = 1;
+          console.log("Tournament finished")
+        });
+      }
     },
 
     async waitForVariableChange(conditionalCallback) {
@@ -190,7 +217,7 @@ export default {
         this.all_players[index - 1].player_or_bot = 'Player';
     },
     updatePlayerName(index, event) {
-      if (index >= 0 && index < this.all_players.length)
+      if (index >= 0 && index <= this.all_players.length)
         this.all_players[index - 1].name = event.target.value;
     },
     getPlayerValue(index) {

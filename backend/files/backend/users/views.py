@@ -1,6 +1,7 @@
 from django.http import JsonResponse, HttpResponse
 from .models import Statistics
 from api.models import CustomUser
+import os
 
 RED = "\033[31m"
 RESET = "\033[0m"
@@ -36,6 +37,7 @@ def handle_profilepic(request):
 		if request.method == 'GET':
 			try:
 				user = CustomUser.objects.get(username=request.user)
+				print(f"{RED}NAME: {user.profile_pic}{RESET}")
 				profilepic_url = user.profile_pic.url
 				print(f"{RED}GET: profilepic_url {profilepic_url}{RESET}")
 				return JsonResponse({'url': profilepic_url},
@@ -47,6 +49,13 @@ def handle_profilepic(request):
 			try:
 				user = CustomUser.objects.get(username=request.user)
 				if 'newPic' in request.FILES:
+					try:
+						print(f"{RED}TRY: {user.profile_pic}{RESET}")
+						if user.profile_pic != "profilepic/default.jpeg":
+							os.remove(f"/media/{user.profile_pic}")
+					except:
+						print(f"{RED}EXCEPT: {user.profile_pic}{RESET}")
+						pass			
 					user.profile_pic = request.FILES['newPic']
 					user.save()
 					print(f"{RED}POST: user.profile_pic.url: {user.profile_pic.url}{RESET}")

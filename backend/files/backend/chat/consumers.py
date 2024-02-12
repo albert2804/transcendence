@@ -18,34 +18,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
         User = get_user_model()
         return list(User.objects.all())
 
-    async def save_and_send_message(self, sender, receiver_id, message, date):
+    async def save_and_send_message(self, sender, receiver , message, date, subtype='msg'):
         from .models import ChatMessage
         User = get_user_model()
-        # receiver = User.objects.get(id=int(receiver_id))
-        receiver = await database_sync_to_async(lambda: User.objects.get(id=int(receiver_id)))()
-        # ChatMessage.objects.create(sender=sender, receiver=receiver, message=message, created_at=date)
-        await database_sync_to_async(lambda: ChatMessage.objects.create(sender=sender, receiver=receiver, message=message, created_at=date))()
-        # send message to the senders group (to update chat history)
-        await self.channel_layer.group_send(
-            f"chat_{self.scope['user'].id}",
-                {
-                    'type': 'chat_message',
-                    'message': message,
-                    'subtype': 'msg',
-                    'sender_id': self.scope["user"].id.__str__(),
-                    'chat_id': receiver_id,
-                    'unread' : False,
-                    'date': date.strftime("%H:%M"),
-                })
+        await database_sync_to_async(lambda: ChatMessage.objects.create(sender=sender, receiver=receiver, message=message, created_at=date, subtype=subtype))()
+        # if the subtype is 'info', do not send the message to the sender
+        if subtype != 'info':
+            await self.channel_layer.group_send(
+                f"chat_{self.scope['user'].id}",
+                    {
+                        'type': 'chat_message',
+                        'message': message,
+                        'subtype': subtype,
+                        'sender_id': sender.id.__str__(),
+                        'chat_id': receiver.id.__str__(),
+                        'unread' : False,
+                        'date': date.strftime("%H:%M"),
+                    })
         # send message to the receivers group
         await self.channel_layer.group_send(
-            f"chat_{receiver_id}",
+            f"chat_{receiver.id}",
             {
                 'type': 'chat_message',
                 'message': message,
-                'subtype': 'msg',
-                'sender_id': self.scope["user"].id.__str__(),
-                'chat_id': self.scope["user"].id.__str__(),
+                'subtype': subtype,
+                'sender_id': sender.id.__str__(),
+                'chat_id': sender.id.__str__(),
                 'unread' : True,
                 'date': date.strftime("%H:%M"),
             })
@@ -75,17 +73,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender_id = str(await database_sync_to_async(lambda: message.sender.id)())
             chat_id = str(await database_sync_to_async(lambda: message.receiver.id if sender_id == self.scope["user"].id.__str__() else sender_id)())
             unread = not (sender_id == self.scope["user"].id.__str__()) and message.unread
+            subtype = str(await database_sync_to_async(lambda: message.subtype)())
             # check if message is from today (only send time if it is from today)
             local_created_at = message.created_at.astimezone(timezone('Europe/Berlin'))
             if local_created_at.date() == current_date:
                 date_format = "%H:%M"
             else:
                 date_format = "%d.%m.%Y %H:%M"
+            # do not send message if subtype is 'info' and the sender is the user itself
+            if subtype == 'info' and sender_id == self.scope["user"].id.__str__():
+                continue
             # send message to the user
             await self.send(text_data=json.dumps({
                 'type': 'chat_message',
                 'message': message.message,
-                'subtype': 'msg',
+                'subtype': subtype,
                 'sender_id': sender_id,
                 'receiver_id': self.scope["user"].id.__str__(),
                 'chat_id': chat_id,
@@ -98,20 +100,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if blocked_user_id:
             blocked_user = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(blocked_user_id)))()
             if blocked_user:
-                # add blocked user to the senders block list
-                await database_sync_to_async(lambda: self.scope['user'].blocked_users.add(blocked_user))()
-                # send info message to the sender
-                await self.channel_layer.group_send(
-                    f"chat_{self.scope['user'].id}",
-                    {
-                        'type': 'chat_message',
-                        'message': "You blocked this user.",
-                        'subtype': 'info',
-                        'sender_id': self.scope["user"].id.__str__(),
-                        'chat_id': blocked_user_id,
-                        'unread' : False,
-                        'date': datetime.now().strftime("%H:%M"),
-                    })
+                # check if already blocked
+                if await database_sync_to_async(lambda: self.scope['user'].blocked_users.filter(id=blocked_user_id).exists())():
+                    await self.save_and_send_message(blocked_user, self.scope["user"], "This user is already blocked.", datetime.now(), 'info')
+                else:
+                    # add blocked user to the senders block list
+                    await database_sync_to_async(lambda: self.scope['user'].blocked_users.add(blocked_user))()
+                    await self.save_and_send_message(blocked_user, self.scope["user"], "You blocked this user.", datetime.now(), 'info')
+                    await self.save_and_send_message(self.scope["user"], blocked_user, "You are blocked by this user.", datetime.now(), 'info')
     
     async def handle_unblock_command(self, text_data):
         blocked_user_id = text_data.get('receiver_id')
@@ -119,30 +115,41 @@ class ChatConsumer(AsyncWebsocketConsumer):
             blocked_user = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(blocked_user_id)))()
             if blocked_user:
                 if not await database_sync_to_async(lambda: self.scope['user'].blocked_users.filter(id=blocked_user_id).exists())():
-                    await self.channel_layer.group_send(
-                        f"chat_{self.scope['user'].id}",
-                        {
-                            'type': 'chat_message',
-                            'message': "This user is not blocked.",
-                            'subtype': 'info',
-                            'sender_id': self.scope["user"].id.__str__(),
-                            'chat_id': blocked_user_id,
-                            'unread' : False,
-                            'date': datetime.now().strftime("%H:%M"),
-                        })
+                    await self.save_and_send_message(blocked_user, self.scope["user"], "This user is not blocked.", datetime.now(), 'info')
                 else:
                     await database_sync_to_async(lambda: self.scope['user'].blocked_users.remove(blocked_user))()
-                    await self.channel_layer.group_send(
-                        f"chat_{self.scope['user'].id}",
-                        {
-                            'type': 'chat_message',
-                            'message': "You unblocked this user.",
-                            'subtype': 'info',
-                            'sender_id': self.scope["user"].id.__str__(),
-                            'chat_id': blocked_user_id,
-                            'unread' : False,
-                            'date': datetime.now().strftime("%H:%M"),
-                        })
+                    await self.save_and_send_message(blocked_user, self.scope["user"], "You unblocked this user.", datetime.now(), 'info')
+                    await self.save_and_send_message(self.scope["user"], blocked_user, "You are unblocked by this user.", datetime.now(), 'info')
+    
+    async def handle_friend_command(self, text_data):
+        receiver_id = text_data.get('receiver_id')
+        if receiver_id:
+            receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
+            if receiver:
+                result = await database_sync_to_async(lambda: self.scope['user'].request_friend(receiver))()
+                if result == 0:
+                    await self.save_and_send_message(receiver, self.scope["user"], "You are already friends or you already requested this user.", datetime.now(), 'info')
+                elif result == 1:
+                    await self.save_and_send_message(receiver, self.scope["user"], "You are now friends.", datetime.now(), 'info')
+                    await self.save_and_send_message(self.scope["user"], receiver, "You are now friends.", datetime.now(), 'info')
+                elif result == 2:
+                    await self.save_and_send_message(receiver, self.scope["user"], "Friend request sent.", datetime.now(), 'info')
+                    await self.save_and_send_message(self.scope["user"], receiver, "Friend request received.", datetime.now(), 'info')
+
+    async def handle_unfriend_command(self, text_data):
+        receiver_id = text_data.get('receiver_id')
+        if receiver_id:
+            receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
+            if receiver:
+                result = await database_sync_to_async(lambda: self.scope['user'].remove_friend(receiver))()
+                if result == 0:
+                    await self.save_and_send_message(receiver, self.scope["user"], "You are not friends and have no friend requests.", datetime.now(), 'info')
+                elif result == 1:
+                    await self.save_and_send_message(receiver, self.scope["user"], "Friend request canceled.", datetime.now(), 'info')
+                    await self.save_and_send_message(self.scope["user"], receiver, "Friend request canceled.", datetime.now(), 'info')
+                elif result == 2:
+                    await self.save_and_send_message(receiver, self.scope["user"], "Friend removed.", datetime.now(), 'info')
+                    await self.save_and_send_message(self.scope["user"], receiver, "Friend removed.", datetime.now(), 'info')
 
     async def connect(self):
         await self.accept()
@@ -183,6 +190,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     await self.handle_block_command(text_data_json)
                 elif command == '/unblock':
                     await self.handle_unblock_command(text_data_json)
+                elif command == '/friend':
+                    await self.handle_friend_command(text_data_json)
+                elif command == '/unfriend':
+                    await self.handle_unfriend_command(text_data_json)
             elif (text_data_json.get('type') == 'message'):
                 message = text_data_json.get('message')
                 receiver_id = text_data_json.get('receiver_id')
@@ -194,21 +205,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     if receiver_user:
                         if await database_sync_to_async(lambda: receiver_user.blocked_users.filter(id=self.scope['user'].id).exists())():
                             # send info message to the sender that he is blocked by the receiver
-                            await self.channel_layer.group_send(
-                                f"chat_{self.scope['user'].id}",
-                                {
-                                    'type': 'chat_message',
-                                    'message': "You are blocked by this user.",
-                                    'subtype': 'info',
-                                    'sender_id': self.scope["user"].id.__str__(),
-                                    'chat_id': receiver_id,
-                                    'unread' : False,
-                                    'date': date.strftime("%H:%M"),
-                                })
+                            await self.save_and_send_message(receiver_user, self.scope["user"], "You are blocked by this user.", datetime.now(), 'info')
                             return
                         else:
                             # save and send message
-                            await self.save_and_send_message(self.scope["user"], receiver_id, message, date)
+                            receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
+                            if receiver:
+                                await self.save_and_send_message(self.scope["user"], receiver, message, date)
             elif (text_data_json.get('type') == 'read_info'):
                 chat_id = text_data_json.get('chat_id')
                 if chat_id:

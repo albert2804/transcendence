@@ -318,7 +318,7 @@ export default {
   margin-right: 4px;
   display: flex;
   justify-content: center;
-  color: #a01d1d;
+  color: #007bff;
 }
 
 .message {

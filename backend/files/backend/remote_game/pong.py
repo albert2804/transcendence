@@ -85,15 +85,15 @@ class PongGame:
 	
 	def paddle_up(self, player):
 		if player == 1:
-			self.leftPaddle['dy'] = -7
+			self.leftPaddle['dy'] = -6
 		elif player == 2:
-			self.rightPaddle['dy'] = -7
+			self.rightPaddle['dy'] = -6
 	
 	def paddle_down(self, player):
 		if player == 1:
-			self.leftPaddle['dy'] = 7
+			self.leftPaddle['dy'] = 6
 		elif player == 2:
-			self.rightPaddle['dy'] = 7
+			self.rightPaddle['dy'] = 6
 	
 	def paddle_stop(self, player):
 		if player == 1:
@@ -148,7 +148,7 @@ class PongGame:
 
 		# Increase ball speed
 		# if self.currentSpeed < 20:
-		self.currentSpeed = min(self.currentSpeed + 1, 20)
+		self.currentSpeed = min(self.currentSpeed + 1, 10)
 		
 		# Change the ball's angle based on the position on the paddle
 		self.ball['dy'] = self.currentSpeed * angle_factor

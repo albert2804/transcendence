@@ -10,8 +10,8 @@
     <div>
       <div style="display: flex; justify-content: center; margin-top: 20vh;">
         <div v-if="isLoggedIn === 1">
-          <InfoComponent />
-          <ProfilePic />
+          <UserInfo />
+          <UserProfilePic />
         </div>
         <div v-else>
           <p>No user statistics available.</p>
@@ -24,3 +24,4 @@
   export default {
   };
 </script>
+

@@ -31,7 +31,7 @@ vclean:
 	@echo "\033[32mRemoved all volumes\033[0m"
 
 # does not remove the frontend modules
-clean: iclean vclean
+clean: iclean vclean mclean
 	@echo "\033[32mRemoved all containers(except frontend and migrations), images and volumes\033[0m"
 	
 fclean: iclean vclean mclean

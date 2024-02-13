@@ -127,10 +127,14 @@ class CustomUser(AbstractUser):
 			# start the game in another thread
 			asyncio.ensure_future(game_handler.start_game())
 			return
-		# invite the other user
-		await sync_to_async(self.game_invites.add)(user)
-		await consumer.save_and_send_message(user, self, 'You sent a game invite.', datetime.now(), 'info')
-		await consumer.save_and_send_message(self, user, 'You got a game invite.', datetime.now(), 'info')
+		# check if already invited
+		if user in await sync_to_async(list)(self.game_invites.all()):
+			await consumer.save_and_send_message(user, self, 'You already invited this user.', datetime.now(), 'info')
+		else:
+			# invite the other user
+			await sync_to_async(self.game_invites.add)(user)
+			await consumer.save_and_send_message(user, self, 'You sent a game invite.', datetime.now(), 'info')
+			await consumer.save_and_send_message(self, user, 'You got a game invite.', datetime.now(), 'info')
   
 	# remove a game invite
 	# removes the incoming and outgoing game invites between this user and the other user

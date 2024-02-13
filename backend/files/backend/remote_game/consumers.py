@@ -6,11 +6,6 @@ from .gameHandler import GameHandler
 from asgiref.sync import sync_to_async
 
 
-# TODO: In Frontend: if websocket connection is closed -> show message "Connection lost. Please reload the page."
-#       hmm maybe send a disconnection code to the frontend and show a message there (for example if the user is already connected with another device)
-#       google about close_code for the disconnect function ;)
-
-
 class RemoteGameConsumer(AsyncWebsocketConsumer):
 
 	# list of players in the waiting group for unranked games (mixed room for guests and registered users)

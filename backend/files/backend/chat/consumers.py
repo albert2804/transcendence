@@ -166,6 +166,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			if receiver:
 				# call the remove_game_invite method of the CustomUser model
 				await self.scope['user'].remove_game_invite(receiver)
+    
+	async def handle_help_command(self, text_data):
+		receiver_id = text_data.get('receiver_id')
+		if receiver_id:
+			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
+			if receiver:
+				await self.save_and_send_message(receiver, self.scope["user"], "Commands:\n/play - Invite/Accept user to play game\n/dont_play - Reject game invitation\n/block - Block user\n/unblock - Unblock user\n/friend - Invite/Accept friend request\n/unfriend - Unfriend user", datetime.now(), 'info')
+
+	async def handle_unknown_command(self, text_data):
+		receiver_id = text_data.get('receiver_id')
+		if receiver_id:
+			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
+			if receiver:
+				await self.save_and_send_message(receiver, self.scope["user"], "Unknown command.\nType '/help' for a list of commands.", datetime.now(), 'info')
 
 	async def connect(self):
 		await self.accept()
@@ -214,6 +228,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
 					await self.handle_play_command(text_data_json)
 				elif command == '/dont_play':
 					await self.handle_dont_play_command(text_data_json)
+				elif command == '/help':
+					await self.handle_help_command(text_data_json)
+				else:
+					await self.handle_unknown_command(text_data_json)
 			elif (text_data_json.get('type') == 'message'):
 				message = text_data_json.get('message')
 				receiver_id = text_data_json.get('receiver_id')

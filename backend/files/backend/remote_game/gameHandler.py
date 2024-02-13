@@ -142,13 +142,13 @@ class GameHandler:
 			p2_points = int(self.game.pointsP2)
 			# send the game result to the chat
 			if self.game.winner == 0:
-				await chat_consumer.save_and_send_message(self.player1.get_user(), self.player2.get_user(), "The game ended in a tie.", timezone.now(), "info")
-				await chat_consumer.save_and_send_message(self.player2.get_user(), self.player1.get_user(), "The game ended in a tie.", timezone.now(), "info")
+				await chat_consumer.save_and_send_message(self.player1.get_user(), self.player2.get_user(), "A ranked game ended in a tie.", timezone.now(), "info")
+				await chat_consumer.save_and_send_message(self.player2.get_user(), self.player1.get_user(), "A ranked game ended in a tie.", timezone.now(), "info")
 			elif self.game.winner == 1:
-				await chat_consumer.save_and_send_message(self.player2.get_user(), self.player1.get_user(), "You won the game with " + str(p1_points) + " to " + str(p2_points) + " points.", timezone.now(), "info")
-				await chat_consumer.save_and_send_message(self.player1.get_user(), self.player2.get_user(), "You lost the game with " + str(p2_points) + " to " + str(p1_points) + " points.", timezone.now(), "info")
+				await chat_consumer.save_and_send_message(self.player2.get_user(), self.player1.get_user(), "You won a ranked game with " + str(p1_points) + " to " + str(p2_points) + " points.", timezone.now(), "info")
+				await chat_consumer.save_and_send_message(self.player1.get_user(), self.player2.get_user(), "You lost a ranked game with " + str(p2_points) + " to " + str(p1_points) + " points.", timezone.now(), "info")
 			elif self.game.winner == 2:
-				await chat_consumer.save_and_send_message(self.player1.get_user(), self.player2.get_user(), "You won the game with " + str(p2_points) + " to " + str(p1_points) + " points.", timezone.now(), "info")
+				await chat_consumer.save_and_send_message(self.player1.get_user(), self.player2.get_user(), "You won a ranked game with " + str(p2_points) + " to " + str(p1_points) + " points.", timezone.now(), "info")
 				await chat_consumer.save_and_send_message(self.player2.get_user(), self.player1.get_user(), "You lost the game with " + str(p1_points) + " to " + str(p2_points) + " points.", timezone.now(), "info")
 				
 

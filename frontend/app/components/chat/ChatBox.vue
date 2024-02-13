@@ -56,7 +56,7 @@
 			</div>
 			<ul class="chat-messages">
 				<li v-for="(message, index) in filteredMessages" :key="index" :class="getMessageType(message)">
-					<span class="message">
+					<span class="message" style="white-space: pre-line;">
 					{{ JSON.parse(message).message }}
 					<span class="date" style="font-size: 0.8em; text-align: right; display: block;">
 						{{ JSON.parse(message).date }}

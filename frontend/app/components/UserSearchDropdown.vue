@@ -22,7 +22,7 @@ export default {
       searchQuery: '',
       searchResults: [],
       selectedUser: null,
-      showResults: false,
+      showResults: true,
       noUserFound: false,
       error: '',
     };
@@ -37,6 +37,7 @@ export default {
       try {
         if (this.searchQuery === "") {
           this.noUserFound = false;
+          this.showResults = true;
           return;
         }
         const response = await fetch(`/endpoint/user/search/?search=${this.searchQuery}`);
@@ -58,7 +59,6 @@ export default {
 
     selectUser(event) {
       this.showResults = false;
-      this.noUserFound = false;
       this.selectedUser = this.searchResults.find(result => result.name === event.target.value);
       if (this.selectedUser)
         this.$emit('user-selected', this.selectedUser.name, this.index)

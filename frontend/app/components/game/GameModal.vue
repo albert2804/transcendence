@@ -10,7 +10,7 @@
     <div class="modal-dialog fullscreen-modal align-items-center">
       <div class="modal-content">
         <div class="modal-body">
-          <GameField ref="ponggamefieldRef"/>
+          <GameField ref="ponggamefieldRef" @openModal="openModal" />
         </div>
       </div>
     </div>
@@ -26,6 +26,15 @@ export default {
     ariaLabel: String,
   },
   methods: {
+    openModal() {
+      var mood = document.getElementById(this.modalId);
+      // check if the modal is already shown
+      if (mood.classList.contains('show')) {
+        return;
+      }
+      var bsModal = new bootstrap.Modal(mood);
+      bsModal.show();
+    },
     closeModal() {
       if (this.$refs.ponggamefieldRef) {
         this.$refs.ponggamefieldRef.giveUpGame();

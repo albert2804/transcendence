@@ -220,3 +220,9 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 		await self.send(text_data=json.dumps({
 			'type': 'alias_exists',
 		}))
+
+	# This message is used to open the modal in the clients browser
+	async def open_game_modal(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'open_game_modal',
+		}))

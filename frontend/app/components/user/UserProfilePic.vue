@@ -6,11 +6,6 @@
 	  <div v-else>
 		<p>Loading failure for Profile Pic</p>
 	  </div>
-	  
-	  <div>
-      <input type="file" ref="fileInput" @change="uploadProfilePic" />
-      <button @click="changeProfilePicture">Change</button>
-  	 </div>
 	</div>
   </template>
 
@@ -42,42 +37,7 @@
 				console.error('Error fetching user profile pic:', error);
 			}
 		},
-		async uploadProfilePic(event) {
-      	
-		try {
-        	const fileInput = event.target;
-			this.newPic = fileInput.files[0];
-
-        	if (!this.newPic) {
-          		console.error('No file selected.');
-          	return;
-        		}
-			} catch(error) {
-				console.error('Error selecting Picture:', error);
-			}
-		},
-
-		async changeProfilePicture () {
-			try {
-				const formData = new FormData();
-				formData.append('newPic', this.newPic);
-				for (const entry of formData.entries()) {
-					console.log(entry[0], entry[1]);
-				}
-				const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-				const response = await fetch('/endpoint/user/profilepic/', {
-        			method: 'POST',
-          			headers: {
-            		'X-CSRFToken': csrfToken,
-          	    	},
-					body: formData
-       		 	});
-			if (response.ok)
-				await this.fetch_picture();
-			} catch (error) {
-				console.error('Error sending picture to backend', error);
-			}
-		},
+		
 	}
 }
 </script>

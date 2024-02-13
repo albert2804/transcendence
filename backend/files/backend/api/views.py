@@ -54,7 +54,7 @@ def get_auth_status(request):
         return JsonResponse({'authenticated': False}, status=200)
 
 # login user
-# 400: invalid json data
+# 400: invalid json data or request
 # 200: user is authenticated
 # 403: user is not authenticated
 def userlogin(request):
@@ -80,7 +80,8 @@ def userlogin(request):
                 'message': 'Successfully logged in as ' + request.user.username,
                 'userid': user_id,
                 }, status=200)
-    return JsonResponse({'error': 'Invalid credentials'}, status=403)
+        return JsonResponse({'error': 'Invalid credentials'}, status=403)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 # logout user
 # 200: user logged out
@@ -130,4 +131,3 @@ def userregister(request):
             # any other errors
             return JsonResponse({'error': 'invalid credentials'}, status=403)
     return JsonResponse({'error': 'Something went wrong'}, status=400)
-

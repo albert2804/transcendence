@@ -150,6 +150,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			if receiver:
 				# call the remove_friend method of the CustomUser model (it also sends the messages)
 				await self.scope['user'].remove_friend(receiver)
+	
+	async def handle_play_command(self, text_data):
+		receiver_id = text_data.get('receiver_id')
+		if receiver_id:
+			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
+			if receiver:
+				print("play command received from", self.scope['user'].username, "to", receiver.username)
+				# call the request_play method of the CustomUser model (it also sends the messages)
+				# await self.scope['user'].request_play(receiver)
+	
+	async def handle_dont_play_command(self, text_data):
+		receiver_id = text_data.get('receiver_id')
+		if receiver_id:
+			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
+			if receiver:
+				print("dont_play command received from", self.scope['user'].username, "to", receiver.username)
+				# call the remove_play method of the CustomUser model (it also sends the messages)
+				# await self.scope['user'].remove_play(receiver)
 
 	async def connect(self):
 		await self.accept()
@@ -194,6 +212,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
 					await self.handle_friend_command(text_data_json)
 				elif command == '/unfriend':
 					await self.handle_unfriend_command(text_data_json)
+				elif command == '/play':
+					await self.handle_play_command(text_data_json)
+				elif command == '/dont_play':
+					await self.handle_dont_play_command(text_data_json)
 			elif (text_data_json.get('type') == 'message'):
 				message = text_data_json.get('message')
 				receiver_id = text_data_json.get('receiver_id')

@@ -138,7 +138,6 @@ export default {
       } else {
         return 'message-item-received'
       }
-      // return parsedMessage.sender_id === this.own_id ? 'message-item-sent' : 'message-item-received'
     },
     scrollDown () {
       this.$nextTick(() => {
@@ -151,20 +150,11 @@ export default {
       }
       // send read message info to server
       this.socket.send(JSON.stringify({ type: "read_info", chat_id: this.chatid }))
-      // scroll down
-
-
     },
     selectUser (user) {
       this.chatid = user.id
       this.active_chat_user = user
       this.scrollDown()
-      // // remove unread message count for selected chat
-      // if (this.unreadMessageCountMap.has(String(user.id))) {
-      //   this.unreadMessageCountMap.delete(String(user.id));
-      // }
-      // // send read message info to server
-      // // this.socket.send(JSON.stringify({ type: "read_info", chat_id: user.id }))
     },
     createWebSocket () {
       const currentDomain = window.location.hostname;

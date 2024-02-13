@@ -5,9 +5,10 @@ from django.contrib.auth import get_user_model
 from datetime import datetime
 from pytz import timezone
 import json
+from channels.layers import get_channel_layer
 
 class ChatConsumer(AsyncWebsocketConsumer):
-
+    
 	@database_sync_to_async
 	def update_user_status(self, user, status):
 		user.chat_online = status
@@ -20,12 +21,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 	async def save_and_send_message(self, sender, receiver , message, date, subtype='msg'):
 		from .models import ChatMessage
+		channel_layer = get_channel_layer()
 		User = get_user_model()
 		await database_sync_to_async(lambda: ChatMessage.objects.create(sender=sender, receiver=receiver, message=message, created_at=date, subtype=subtype))()
 		# if the subtype is 'info', do not send the message to the sender
 		if subtype != 'info':
-			await self.channel_layer.group_send(
-				f"chat_{self.scope['user'].id}",
+			await channel_layer.group_send(
+				f"chat_{sender.id.__str__()}",
 					{
 						'type': 'chat_message',
 						'message': message,
@@ -36,7 +38,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 						'date': date.strftime("%H:%M"),
 					})
 		# send message to the receivers group
-		await self.channel_layer.group_send(
+		await channel_layer.group_send(
 			f"chat_{receiver.id}",
 			{
 				'type': 'chat_message',
@@ -94,6 +96,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				'unread': unread,
 				'date': local_created_at.strftime(date_format),
 			}))
+   
+	# updates the user list for the given user
+	# (userlist includes status of chat_online, is_friend, blocks, is_blocked...)
+	async def update_user_list(self, user):
+		channel_layer = get_channel_layer()
+		await channel_layer.group_send(f"chat_{user.id}",{'type': 'user_list',})
 	
 	async def handle_block_command(self, text_data):
 		blocked_user_id = text_data.get('receiver_id')
@@ -126,42 +134,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
 					# update user list
 					await self.channel_layer.group_send(f"chat_{self.scope['user'].id}",{'type': 'user_list',})
 					await self.channel_layer.group_send(f"chat_{blocked_user.id}",{'type': 'user_list',})
-	
+
 	async def handle_friend_command(self, text_data):
 		receiver_id = text_data.get('receiver_id')
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:
-				result = await database_sync_to_async(lambda: self.scope['user'].request_friend(receiver))()
-				if result == 0:
-					await self.save_and_send_message(receiver, self.scope["user"], "You are already friends or you already requested this user.", datetime.now(), 'info')
-				elif result == 1:
-					await self.save_and_send_message(receiver, self.scope["user"], "You are now friends.", datetime.now(), 'info')
-					await self.save_and_send_message(self.scope["user"], receiver, "You are now friends.", datetime.now(), 'info')
-					# update user list
-					await self.channel_layer.group_send(f"chat_{self.scope['user'].id}",{'type': 'user_list',})
-					await self.channel_layer.group_send(f"chat_{receiver.id}",{'type': 'user_list',})
-				elif result == 2:
-					await self.save_and_send_message(receiver, self.scope["user"], "Friend request sent.", datetime.now(), 'info')
-					await self.save_and_send_message(self.scope["user"], receiver, "Friend request received.", datetime.now(), 'info')
-
+				# call the request_friend method of the CustomUser model (it also sends the messages)
+				await self.scope['user'].request_friend(receiver)
+    
 	async def handle_unfriend_command(self, text_data):
 		receiver_id = text_data.get('receiver_id')
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:
-				result = await database_sync_to_async(lambda: self.scope['user'].remove_friend(receiver))()
-				if result == 0:
-					await self.save_and_send_message(receiver, self.scope["user"], "You are not friends and have no friend requests.", datetime.now(), 'info')
-				elif result == 1:
-					await self.save_and_send_message(receiver, self.scope["user"], "Friend request canceled.", datetime.now(), 'info')
-					await self.save_and_send_message(self.scope["user"], receiver, "Friend request canceled.", datetime.now(), 'info')
-				elif result == 2:
-					await self.save_and_send_message(receiver, self.scope["user"], "Friend removed.", datetime.now(), 'info')
-					await self.save_and_send_message(self.scope["user"], receiver, "Friend removed.", datetime.now(), 'info')
-					# update user list
-					await self.channel_layer.group_send(f"chat_{self.scope['user'].id}",{'type': 'user_list',})
-					await self.channel_layer.group_send(f"chat_{receiver.id}",{'type': 'user_list',})
+				# call the remove_friend method of the CustomUser model (it also sends the messages)
+				await self.scope['user'].remove_friend(receiver)
 
 	async def connect(self):
 		await self.accept()

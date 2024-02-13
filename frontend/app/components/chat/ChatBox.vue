@@ -145,17 +145,26 @@ export default {
         const container = this.$el.querySelector('.chat-messages')
         container.scrollTop = container.scrollHeight
       })
+      // remove unread message count for selected chat
+      if (this.unreadMessageCountMap.has(String(this.chatid))) {
+        this.unreadMessageCountMap.delete(String(this.chatid));
+      }
+      // send read message info to server
+      this.socket.send(JSON.stringify({ type: "read_info", chat_id: this.chatid }))
+      // scroll down
+
+
     },
     selectUser (user) {
       this.chatid = user.id
       this.active_chat_user = user
       this.scrollDown()
-      // remove unread message count for selected chat
-      if (this.unreadMessageCountMap.has(String(user.id))) {
-        this.unreadMessageCountMap.delete(String(user.id));
-      }
-      // send read message info to server
-      this.socket.send(JSON.stringify({ type: "read_info", chat_id: user.id }))
+      // // remove unread message count for selected chat
+      // if (this.unreadMessageCountMap.has(String(user.id))) {
+      //   this.unreadMessageCountMap.delete(String(user.id));
+      // }
+      // // send read message info to server
+      // // this.socket.send(JSON.stringify({ type: "read_info", chat_id: user.id }))
     },
     createWebSocket () {
       const currentDomain = window.location.hostname;

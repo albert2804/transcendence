@@ -156,18 +156,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:
-				print("play command received from", self.scope['user'].username, "to", receiver.username)
-				# call the request_play method of the CustomUser model (it also sends the messages)
-				# await self.scope['user'].request_play(receiver)
+				# call the invite_to_game method of the CustomUser model
+				await self.scope['user'].invite_to_game(receiver)
 	
 	async def handle_dont_play_command(self, text_data):
 		receiver_id = text_data.get('receiver_id')
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:
-				print("dont_play command received from", self.scope['user'].username, "to", receiver.username)
-				# call the remove_play method of the CustomUser model (it also sends the messages)
-				# await self.scope['user'].remove_play(receiver)
+				# call the remove_game_invite method of the CustomUser model
+				await self.scope['user'].remove_game_invite(receiver)
 
 	async def connect(self):
 		await self.accept()

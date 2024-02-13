@@ -38,9 +38,11 @@
 				<p><i class="bi bi-x-circle" style="color: red; font-size: 1.2rem;"></i> - You blocked this user</p>
 				<p><i class="bi bi-x-circle-fill" style="color: red; font-size: 1.2rem;"></i> - This user blocked you</p>
 				<p style="margin-top: 10px; font-weight: bold;">Helpful chat commands:</p>
+        <p><code>/play</code> - Invite/Accept user to play game</p>
+        <p><code>/dont_play</code> - Reject game invitation</p>
 				<p><code>/block</code> - Block user</p>
 				<p><code>/unblock</code> - Unblock user</p>
-				<p><code>/friend</code> - Invite/Accpet friend request</p>
+				<p><code>/friend</code> - Invite/Accept friend request</p>
 				<p><code>/unfriend</code> - Unfriend user</p>
 			</div>
 			</div>

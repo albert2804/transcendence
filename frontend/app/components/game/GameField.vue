@@ -212,6 +212,8 @@
             this.updateGameUI(gameState);
           } else if (data.type === "alias_exists") {
             this.message = "Alias already taken!";
+          } else if (data.type === "open_game_modal") {
+            this.$emit('openModal');
           } else {
             console.error('Received message of unknown type:', data);
           }
@@ -375,7 +377,7 @@
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({ type: 'give_up' });
         this.socket.send(data);
-        console.log('gave up game');
+        // console.log('gave up game');
       }
     }
     //

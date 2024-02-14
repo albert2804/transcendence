@@ -8,7 +8,7 @@
 
 <template>
   <div v-show="isLoggedIn === 1">
-    <ChatBox v-show="showChatBox" class="chat-box" @closeChat="toggleChatBox" @connected="setToConnected" @disconnected="setToDisconnected" @loading="loading = true" @unreadMessages="handleMessageAlert" />
+    <ChatBox v-show="showChatBox" class="chat-box" @closeChat="toggleChatBox" @connected="setToConnected" @disconnected="setToDisconnected" @loading="loading = true" @unreadMessages="handleMessageAlert"/>
     <button v-if="connected && !showChatBox" class="btn btn-primary round-button" @click="toggleChatBox">
       <div style="position: relative; text-align: center;">
       <span class="badge rounded-pill bg-danger" v-if="messageAlert != 0" style="position: absolute; transform: translate(-150%, -140%);">
@@ -38,9 +38,11 @@
 				<p><i class="bi bi-x-circle" style="color: red; font-size: 1.2rem;"></i> - You blocked this user</p>
 				<p><i class="bi bi-x-circle-fill" style="color: red; font-size: 1.2rem;"></i> - This user blocked you</p>
 				<p style="margin-top: 10px; font-weight: bold;">Helpful chat commands:</p>
+        <p><code>/play</code> - Invite/Accept user to play game</p>
+        <p><code>/dont_play</code> - Reject game invitation</p>
 				<p><code>/block</code> - Block user</p>
 				<p><code>/unblock</code> - Unblock user</p>
-				<p><code>/friend</code> - Invite/Accpet friend request</p>
+				<p><code>/friend</code> - Invite/Accept friend request</p>
 				<p><code>/unfriend</code> - Unfriend user</p>
 			</div>
 			</div>
@@ -95,7 +97,7 @@ export default {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  position: absolute;
+  position: fixed;
   bottom: 20px;
   right: 20px;
   z-index: 2;
@@ -108,7 +110,7 @@ export default {
 }
 
 .chat-box {
-  position: absolute;
+  position: fixed;
   bottom: 10px;
   right: 20px;
   z-index: 2;

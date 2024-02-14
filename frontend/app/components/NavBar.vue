@@ -25,7 +25,7 @@
               <NuxtLink class="nav-link active" to="/localGame">Local Game</NuxtLink>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" @click="showGameModal">Remote Game</a>
+              <NuxtLink class="nav-link active" to="#" @click.prevent="showGameModal">Play</NuxtLink>
             </li>
             <li class="nav-item" v-if="isLoggedIn != 1">
               <NuxtLink class="nav-link active" to="/login">Login</NuxtLink>

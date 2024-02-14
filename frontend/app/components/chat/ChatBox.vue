@@ -56,7 +56,7 @@
 			</div>
 			<ul class="chat-messages">
 				<li v-for="(message, index) in filteredMessages" :key="index" :class="getMessageType(message)">
-					<span class="message">
+					<span class="message" style="white-space: pre-line;">
 					{{ JSON.parse(message).message }}
 					<span class="date" style="font-size: 0.8em; text-align: right; display: block;">
 						{{ JSON.parse(message).date }}
@@ -138,24 +138,23 @@ export default {
       } else {
         return 'message-item-received'
       }
-      // return parsedMessage.sender_id === this.own_id ? 'message-item-sent' : 'message-item-received'
     },
     scrollDown () {
       this.$nextTick(() => {
         const container = this.$el.querySelector('.chat-messages')
         container.scrollTop = container.scrollHeight
       })
+      // remove unread message count for selected chat
+      if (this.unreadMessageCountMap.has(String(this.chatid))) {
+        this.unreadMessageCountMap.delete(String(this.chatid));
+      }
+      // send read message info to server
+      this.socket.send(JSON.stringify({ type: "read_info", chat_id: this.chatid }))
     },
     selectUser (user) {
       this.chatid = user.id
       this.active_chat_user = user
       this.scrollDown()
-      // remove unread message count for selected chat
-      if (this.unreadMessageCountMap.has(String(user.id))) {
-        this.unreadMessageCountMap.delete(String(user.id));
-      }
-      // send read message info to server
-      this.socket.send(JSON.stringify({ type: "read_info", chat_id: user.id }))
     },
     createWebSocket () {
       const currentDomain = window.location.hostname;

@@ -56,11 +56,6 @@
             <li class="nav-item">
               <a class="nav-link disabled" aria-disabled="true">Disabled</a>
             </li>
-            <li class="nav-item">
-              <div class="ms-auto">
-              <NuxtLink class="nav-link active" to="/settings">⚙</NuxtLink>
-              </div>
-            </li>
           </ul>
         </div>
       </div>

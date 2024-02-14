@@ -7,10 +7,10 @@
 		<p style="color: rgb(0, 255, 98); font-size: 200px;"> Goal!!!</p>
 		<!-- <button type="button" class="btn btn-primary" @click="closePopup">Close</button> -->
 	  </div>
-	  <!-- <div>
+	  <div>
     	<p v-if="countdown > 0">Countdown: {{ countdown }}</p>
     	<p v-else>Countdown finished!</p>
-  	  </div> -->
+  	  </div>
 	</div>
   </template>
   
@@ -18,7 +18,7 @@
   export default {
 	data() {
     return {
-      countdown: 1,
+      countdown: 4,
       intervalId: null,
     };
   },

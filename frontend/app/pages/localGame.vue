@@ -17,7 +17,7 @@
 <!-- pages/index.vue -->
 
 <script>
-import Popup from '~/components/popup/Goal.vue';
+import Popup from '~/components/popup/Announcement.vue';
 
 export default {
   components: {

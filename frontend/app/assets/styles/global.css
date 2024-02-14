@@ -6,20 +6,24 @@ body {
 	font-family: 'Arial', sans-serif;
   }
 
-.button {
+/* .button {
 	background-color: #a48d7f; /* Default background color for buttons */
-	color: #ffffff; /* Default text color for buttons */
-	padding: 10px 15px;
-	border: none;
-	border-radius: 5px;
-	cursor: pointer;
-  }
+	/* color: #ffffff; Default text color for buttons */
+	/* padding: 10px 15px; */
+	/* border: none; */
+	/* border-radius: 5px; */
+	/* cursor: pointer; */
+  /* } */
 
 .card-size {
     min-width: px;
     max-width: 400px;
 	background-color: #b5c7d3;
   }
+
+.navbar {
+    background-color: aqua;
+}
 
 .button-list {
     padding-top: 10px;

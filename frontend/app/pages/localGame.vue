@@ -4,7 +4,7 @@
       <h1>You're on the local game site</h1>
       </div>
       <!-- Button to open the pop-up -->
-      <button type="button" @click="openPopup">Open Popup</button>
+      <button type="button" class="btn btn-primary" @click="openPopup">Open Popup</button>
 
       <!-- Conditionally render the Popup component -->
       <Popup v-if="isPopupOpen" @close="closePopup" />
@@ -17,7 +17,7 @@
 <!-- pages/index.vue -->
 
 <script>
-import Popup from '~/components/Popup.vue';
+import Popup from '~/components/popup/Goal.vue';
 
 export default {
   components: {

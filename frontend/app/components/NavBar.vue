@@ -52,10 +52,10 @@
               <a class="nav-link disabled" aria-disabled="true">Disabled</a>
             </li> -->
             <li class="nav-item" v-if="isLoggedIn != 1">
-              <NuxtLink class="nav-link active" to="/login">Login</NuxtLink>
+              <NuxtLink class="nav-link active ms-auto" to="/login">Login</NuxtLink>
             </li>
             <li class="nav-item" v-if="isLoggedIn === 1">
-              <NuxtLink class="nav-link active" to="/login">Logout</NuxtLink>
+              <NuxtLink class="nav-link active ms-auto" to="/login">Logout</NuxtLink>
             </li>
           </ul>
         </div>

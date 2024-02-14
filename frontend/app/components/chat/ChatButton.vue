@@ -8,7 +8,7 @@
 
 <template>
   <div v-show="isLoggedIn === 1">
-    <ChatBox v-show="showChatBox" class="chat-box" @closeChat="toggleChatBox" @connected="setToConnected" @disconnected="setToDisconnected" @loading="loading = true" @unreadMessages="handleMessageAlert" />
+    <ChatBox v-show="showChatBox" class="chat-box" @closeChat="toggleChatBox" @connected="setToConnected" @disconnected="setToDisconnected" @loading="loading = true" @unreadMessages="handleMessageAlert"/>
     <button v-if="connected && !showChatBox" class="btn btn-primary round-button" @click="toggleChatBox">
       <div style="position: relative; text-align: center;">
       <span class="badge rounded-pill bg-danger" v-if="messageAlert != 0" style="position: absolute; transform: translate(-150%, -140%);">
@@ -97,7 +97,7 @@ export default {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  position: absolute;
+  position: fixed;
   bottom: 20px;
   right: 20px;
   z-index: 2;
@@ -110,7 +110,7 @@ export default {
 }
 
 .chat-box {
-  position: absolute;
+  position: fixed;
   bottom: 10px;
   right: 20px;
   z-index: 2;

@@ -65,8 +65,8 @@
       <button type="button" class="btn btn-primary" @click="createGuestPlayer2">Enter</button>
     </div>
     <!-- Back to menu - button --->
-    <div v-if="waiting || showAliasScreen || showAliasScreen2" style="height: 5px;"></div>
-    <div v-if="waiting || showAliasScreen || showAliasScreen2">
+    <div v-if="waiting || showAliasScreen2" style="height: 5px;"></div>
+    <div v-if="waiting || showAliasScreen2">
       <button type="button" class="btn btn-primary" @click="backToMenu">Back to Menu</button>
     </div>
 	</li>

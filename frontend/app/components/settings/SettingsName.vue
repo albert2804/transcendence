@@ -1,42 +1,19 @@
 <template>
-	<div class="profilepic_container">
-	  <div v-if="userProfilePic">
-		<img :src=userProfilePic.url alt="Profile Picture">
-	  </div>
-	  <div v-else>
-		<p>Loading failure for Profile Pic</p>
-	  </div>
-	  <div class="btn_profilepic">
-		<input type="file" ref="fileInput" style="display: none;" @change="changeProfilePicture">
-		<button @click="selectProfilePicture">Change Profile Picture</button>
-	 </div>
-	</div>
-	<div class="username_container">
-		<label for="username">Change Username:</label>
-		<input type="text" v-model="editedName" @keydown.enter="saveChanges" @blur="cancelChanges">
-	 </div>
-	 <div class="password_container">
-		<div class="password">
-			<label for="old_password">Current Password:</label>
-			<input type="password" id="old_password" name="old_password">
-		</div>
-		<div class="password">
-			<label for="new_password">New Password:</label>
-			<input type="password" id="new_password" name="new_password">
-		</div>
-		<div>
-			<label for="confirm_password">Confirm Password:</label>
-			<input type="password" id="confirm_password" name="confirm_password">
-	 	</div>
-		<div class="btn_password">
-			<button @click="confirm">Confirm new password</button>
+	<div v-if="openPopup" class="popup">
+		<button type="button" @click="closePopup" class="btn-close" aria-label="Close"></button>
+		<div class="username_container">
+			<label for="username">Change Username:</label>
+			<input type="text" v-model="editedName" @keydown.enter="saveChanges" @blur="cancelChanges">
 		</div>
 	</div>
   </template>
 
   <script>
-  export default{
-	data(){
+export default {
+  props: {
+    openPopup: Boolean
+  },
+  data(){
 		return {
 			userProfilePic: '{}',
 			editedName: '',
@@ -45,72 +22,11 @@
 			error: '',
 		};
 	},
-
 	mounted() {
-		this.fetch_picture();
 		this.fetch_name();
 	},
 
 	methods: {
-		async fetch_picture() {
-		  try {
-		    const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-			const response = await fetch('/endpoint/user/profilepic/', {
-        		method: 'GET',
-          		headers: {
-            	'Content-Type': 'application/json',
-            	'X-CSRFToken': csrfToken,
-          	    }
-       		 })
-			this.userProfilePic = await response.json();
-			} catch (error) {
-				console.error('Error fetching user profile pic:', error);
-			}
-		},
-
-		async selectProfilePicture() {
-     	 try {
-        	const fileInput = this.$refs.fileInput;
-        	fileInput.click(); // Trigger file input click event
-      	} catch (error) {
-       	 console.error('Error selecting picture:', error);
-      	}
-    	},
-
-		async changeProfilePicture (event) {
-			try {
-				const fileInput = event.target;
-				this.newPic = fileInput.files[0];
-	
-				if (!this.newPic) {
-					  console.error('No file selected.');
-				  return;
-					}
-				} catch(error) {
-					console.error('Error selecting Picture:', error);
-				}
-
-			try {
-				const formData = new FormData();
-				formData.append('newPic', this.newPic);
-				for (const entry of formData.entries()) {
-					console.log(entry[0], entry[1]);
-				}
-				const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-				const response = await fetch('/endpoint/user/profilepic/', {
-        			method: 'POST',
-          			headers: {
-            		'X-CSRFToken': csrfToken,
-          	    	},
-					body: formData
-       		 	});
-			if (response.ok)
-				await this.fetch_picture();
-			} catch (error) {
-				console.error('Error sending picture to backend', error);
-			}
-		},
-
 		async fetch_name() {
 		  try {
 		    const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
@@ -153,9 +69,9 @@
 			this.fetch_name();
      		this.editedName = this.originalName;
     	},
-		
-		confirm() {
-			
+
+		closePopup() {
+			this.$emit('close-popup');
 		}
 	},
 }
@@ -180,19 +96,16 @@
     left: 0;
     background: rgba(255,255,255,0.7);
   }
-  .profilepic_container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-bottom: 10px;
-}
-.password_container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-	margin-bottom: 10px;
-}
-.password {
-    margin-bottom: 10px;
+
+.popup {
+  position: fixed; /* Fixed positioning to overlay on top of other content */
+  top: 50%; /* Position it in the vertical center of the viewport */
+  left: 50%; /* Position it in the horizontal center of the viewport */
+  transform: translate(-50%, -50%); /* Center the popup exactly */
+  background-color: white; /* Background color */
+  padding: 20px; /* Padding around the content */
+  border: 1px solid #ccc; /* Border */
+  border-radius: 8px; /* Border radius */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Box shadow for a subtle depth effect */
 }
 </style>

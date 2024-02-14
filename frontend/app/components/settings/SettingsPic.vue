@@ -1,4 +1,6 @@
 <template>
+	<div v-if="openPopup" class="popup">
+	<button type="button" @click="closePopup" class="btn-close" aria-label="Close"></button>
 	<div class="profilepic_container">
 	  <div v-if="userProfilePic">
 		<img :src=userProfilePic.url alt="Profile Picture">
@@ -8,35 +10,19 @@
 	  </div>
 	  <div class="btn_profilepic">
 		<input type="file" ref="fileInput" style="display: none;" @change="changeProfilePicture">
-		<button @click="selectProfilePicture">Change Profile Picture</button>
+		
+		<button type="button" class="btn btn-primary" @click="selectProfilePicture">Change Profile Picture</button>
 	 </div>
 	</div>
-	<div class="username_container">
-		<label for="username">Change Username:</label>
-		<input type="text" v-model="editedName" @keydown.enter="saveChanges" @blur="cancelChanges">
-	 </div>
-	 <div class="password_container">
-		<div class="password">
-			<label for="old_password">Current Password:</label>
-			<input type="password" id="old_password" name="old_password">
-		</div>
-		<div class="password">
-			<label for="new_password">New Password:</label>
-			<input type="password" id="new_password" name="new_password">
-		</div>
-		<div>
-			<label for="confirm_password">Confirm Password:</label>
-			<input type="password" id="confirm_password" name="confirm_password">
-	 	</div>
-		<div class="btn_password">
-			<button @click="confirm">Confirm new password</button>
-		</div>
-	</div>
+</div>
   </template>
 
   <script>
   export default{
-	data(){
+	props: {
+    openPopup: Boolean
+  },
+  data(){
 		return {
 			userProfilePic: '{}',
 			editedName: '',
@@ -48,7 +34,6 @@
 
 	mounted() {
 		this.fetch_picture();
-		this.fetch_name();
 	},
 
 	methods: {
@@ -110,52 +95,9 @@
 				console.error('Error sending picture to backend', error);
 			}
 		},
-
-		async fetch_name() {
-		  try {
-		    const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-			const response = await fetch('/endpoint/user/info/', {
-        		method: 'GET',
-          		headers: {
-            	'Content-Type': 'application/json',
-            	'X-CSRFToken': csrfToken,
-          	    }
-       		 })
-			this.nameResponse = await response.json();
-			if (response.ok) {
-				this.originalName = this.nameResponse.username;
-				this.editedName = this.originalName;
-				}
-			} catch (error) {
-				console.error('Error fetching user alias:', error);
-			}
-		},
-
-		async saveChanges() {
-			try {
-		    const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-			const response = await fetch('/endpoint/user/info/', {
-        		method: 'POST',
-          		headers: {
-            	'Content-Type': 'application/json',
-            	'X-CSRFToken': csrfToken,
-          	    },
-				body: JSON.stringify({ newUsername: this.editedName })
-       		 })
-			 if (response.ok)
-			 	console.log("Changed username worked");
-			} catch (error) {
-				console.error('Error updating user alias:', error);
-			}
-		},
 		
-		cancelChanges() {
-			this.fetch_name();
-     		this.editedName = this.originalName;
-    	},
-		
-		confirm() {
-			
+		closePopup() {
+			this.$emit('close-popup');
 		}
 	},
 }
@@ -186,13 +128,11 @@
   align-items: flex-start;
   margin-bottom: 10px;
 }
-.password_container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-	margin-bottom: 10px;
-}
-.password {
-    margin-bottom: 10px;
+
+  .btn_profilepic {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 10px;
 }
 </style>

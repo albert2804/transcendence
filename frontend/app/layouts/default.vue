@@ -15,6 +15,7 @@ Example:
   <div>
     <NavBar />
     <ChatButton />
+    <SettingsBtn />
     <slot />
   </div>
 </template>

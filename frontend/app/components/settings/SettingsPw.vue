@@ -1,20 +1,6 @@
 <template>
-	<div class="profilepic_container">
-	  <div v-if="userProfilePic">
-		<img :src=userProfilePic.url alt="Profile Picture">
-	  </div>
-	  <div v-else>
-		<p>Loading failure for Profile Pic</p>
-	  </div>
-	  <div class="btn_profilepic">
-		<input type="file" ref="fileInput" style="display: none;" @change="changeProfilePicture">
-		<button @click="selectProfilePicture">Change Profile Picture</button>
-	 </div>
-	</div>
-	<div class="username_container">
-		<label for="username">Change Username:</label>
-		<input type="text" v-model="editedName" @keydown.enter="saveChanges" @blur="cancelChanges">
-	 </div>
+	<div v-if="openPopup" class="popup">
+	<button type="button" @click="closePopup" class="btn-close" aria-label="Close"></button>
 	 <div class="password_container">
 		<div class="password">
 			<label for="old_password">Current Password:</label>
@@ -24,18 +10,22 @@
 			<label for="new_password">New Password:</label>
 			<input type="password" id="new_password" name="new_password">
 		</div>
-		<div>
+		<div class="password">
 			<label for="confirm_password">Confirm Password:</label>
 			<input type="password" id="confirm_password" name="confirm_password">
 	 	</div>
 		<div class="btn_password">
-			<button @click="confirm">Confirm new password</button>
+			<button type="button" class="btn btn-primary" @click="confirm">Confirm new password</button>
 		</div>
+	 </div>
 	</div>
   </template>
 
   <script>
   export default{
+	props: {
+    openPopup: Boolean
+  },
 	data(){
 		return {
 			userProfilePic: '{}',
@@ -156,6 +146,10 @@
 		
 		confirm() {
 			
+		},
+		
+		closePopup() {
+			this.$emit('close-popup');
 		}
 	},
 }
@@ -180,12 +174,6 @@
     left: 0;
     background: rgba(255,255,255,0.7);
   }
-  .profilepic_container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-bottom: 10px;
-}
 .password_container {
     display: flex;
     flex-direction: column;

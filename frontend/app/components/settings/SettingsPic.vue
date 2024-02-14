@@ -10,7 +10,6 @@
 	  </div>
 	  <div class="btn_profilepic">
 		<input type="file" ref="fileInput" style="display: none;" @change="changeProfilePicture">
-		
 		<button type="button" class="btn btn-primary" @click="selectProfilePicture">Change Profile Picture</button>
 	 </div>
 	</div>
@@ -25,9 +24,6 @@
   data(){
 		return {
 			userProfilePic: '{}',
-			editedName: '',
-			originalName: '',
-			nameResponse: null,
 			error: '',
 		};
 	},
@@ -90,13 +86,14 @@
 					body: formData
        		 	});
 			if (response.ok)
-				await this.fetch_picture();
+				this.fetch_picture();
 			} catch (error) {
 				console.error('Error sending picture to backend', error);
 			}
 		},
 		
 		closePopup() {
+			this.fetch_picture();
 			this.$emit('close-popup');
 		}
 	},

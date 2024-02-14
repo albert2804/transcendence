@@ -1,6 +1,8 @@
 from django.http import JsonResponse, HttpResponse
 from .models import Statistics
 from api.models import CustomUser
+from api.forms import CustomUserCreationForm
+from django.shortcuts import redirect
 import os, json
 
 RED = "\033[31m"
@@ -86,6 +88,41 @@ def handle_profilepic(request):
 	else:
 		return JsonResponse({'error': 'User not authenticated'},
 			status=401)
+
+
+def verify(request):
+	if request.user.is_authenticated:
+		if request.method == 'POST':
+			try:
+				user = CustomUser.objects.get(username=request.user)
+			except Exception as e: 
+				return JsonResponse({'error': f'Could not get CustomUser. Error: {str(e)}'}, status=400)
+			except CustomUser.DoesNotExist:
+				return JsonResponse({'error': 'User not found'}, status=404)
+			# try:
+			data = json.loads(request.body.decode('utf-8'))
+			print(f"{RED}{data.get('old_pw') = }{RESET}")
+			print(f"{RED}{data.get('password1') = }{RESET}")
+			print(f"{RED}form: {user.password}{RESET}")
+
+			if user.check_password(data.get('old_pw')):
+				user.set_password(data.get('password1'))
+				user.save()
+				return redirect('/endpoint/api/userlogin')
+			else:
+				return JsonResponse({'message': 'New password does not match with the old password'},
+						status=400)
+			# except:
+			# 	return JsonResponse({'error': 'pw could not be updated'},
+			# 			status=400)
+	else:
+		return JsonResponse({'error': 'User not authenticated'},
+			status=401)
+
+
+
+
+
 
 # sends the results of the games which the user played as response to the frontend
 # def send_usergames(request):

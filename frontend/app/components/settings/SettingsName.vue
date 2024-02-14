@@ -15,15 +15,11 @@ export default {
   },
   data(){
 		return {
-			userProfilePic: '{}',
 			editedName: '',
 			originalName: '',
 			nameResponse: null,
 			error: '',
 		};
-	},
-	mounted() {
-		this.fetch_name();
 	},
 
 	methods: {
@@ -66,8 +62,7 @@ export default {
 		},
 		
 		cancelChanges() {
-			this.fetch_name();
-     		this.editedName = this.originalName;
+			this.editedName = this.originalName;
     	},
 
 		closePopup() {

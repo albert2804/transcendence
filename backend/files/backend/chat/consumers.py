@@ -11,8 +11,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
 	@database_sync_to_async
 	def update_user_status(self, user, status):
-		user.chat_online = status
-		user.save()
+		dbuser = get_user_model().objects.get(id=user.id)
+		dbuser.chat_online = status
+		dbuser.save()
 
 	@database_sync_to_async
 	def get_registered_users(self):
@@ -22,7 +23,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 	async def save_and_send_message(self, sender, receiver , message, date, subtype='msg'):
 		from .models import ChatMessage
 		channel_layer = get_channel_layer()
-		User = get_user_model()
 		await database_sync_to_async(lambda: ChatMessage.objects.create(sender=sender, receiver=receiver, message=message, created_at=date, subtype=subtype))()
 		# if the subtype is 'info', do not send the message to the sender
 		if subtype != 'info':
@@ -277,11 +277,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		users = []
 		for user in reg_users:
 			if user.id != self.scope["user"].id:
-				chat_online = user.chat_online
 				is_friend = await database_sync_to_async(lambda: self.scope["user"].friends.filter(id=user.id).exists())()
 				blocks = await database_sync_to_async(lambda: self.scope["user"].blocked_by_users.filter(id=user.id).exists())()
 				is_blocked = await database_sync_to_async(lambda: self.scope["user"].blocked_users.filter(id=user.id).exists())()
-				users.append({'username': user.username, 'id': user.id, 'chat_online': chat_online, 'is_friend': is_friend, 'blocks': blocks, 'is_blocked': is_blocked})
+				users.append({'username': user.username, 'id': user.id, 'chat_online': user.chat_online, 'is_friend': is_friend, 'blocks': blocks, 'is_blocked': is_blocked})
 		await self.send(text_data=json.dumps({
 			'type': 'user_list',
 			'users': users,

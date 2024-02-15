@@ -70,7 +70,8 @@ async def invite_to_tournament(user1, user):
   else:
     # invite the other user
     await sync_to_async(user1.game_invites.add)(user)
-    await consumer.save_and_send_message(user, user1, 'You sent a game invite.', datetime.now(), 'info')
+    await sync_to_async(user.game_invites.add)(user1)
+    await consumer.save_and_send_message(user, user1, 'You got a game invite.', datetime.now(), 'info')
     await consumer.save_and_send_message(user1, user, 'You got a game invite.', datetime.now(), 'info')
 
 async def startTournament(request):

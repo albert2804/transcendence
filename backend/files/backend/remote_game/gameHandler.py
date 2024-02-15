@@ -4,7 +4,9 @@ from .pong import PongGame
 from chat.consumers import ChatConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async
+from channels.db import database_sync_to_async
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 
 # This class is used to handle the PongGame between the two Player objects (player1 and player2)
 # Create a new instance of this class with GAME_XXX = GameHandler.create(player1, player2)
@@ -231,14 +233,27 @@ class GameHandler:
 		self.db_entry.finished = True
 		await sync_to_async(self.db_entry.save)()
 		# update the stats of the players CustomUser objects
-		self.player1.get_user().num_games_played += 1
-		self.player2.get_user().num_games_played += 1
+		# db_p1_user = get_user_model().objects.get(id=self.player1.get_user().id)
+		# db_p2_user = get_user_model().objects.get(id=self.player2.get_user().id)
+#   You cannot call this from an async context - use a thread or sync_to_async.
+		db_p1_user = await database_sync_to_async(get_user_model().objects.get)(id=self.player1.get_user().id)
+		db_p2_user = await database_sync_to_async(get_user_model().objects.get)(id=self.player2.get_user().id)
+		db_p1_user.num_games_played += 1
+		db_p2_user.num_games_played += 1
 		if self.game.winner == 1:
-			self.player1.get_user().num_games_won += 1
+			db_p1_user.num_games_won += 1
 		elif self.game.winner == 2:
-			self.player2.get_user().num_games_won += 1
-		await sync_to_async(self.player1.get_user().save)()
-		await sync_to_async(self.player2.get_user().save)()
+			db_p2_user.num_games_won += 1
+		await database_sync_to_async(db_p1_user.save)()
+		await database_sync_to_async(db_p2_user.save)()
+		# self.player1.get_user().num_games_played += 1
+		# self.player2.get_user().num_games_played += 1
+		# if self.game.winner == 1:
+		# 	self.player1.get_user().num_games_won += 1
+		# elif self.game.winner == 2:
+		# 	self.player2.get_user().num_games_won += 1
+		# await sync_to_async(self.player1.get_user().save)()
+		# await sync_to_async(self.player2.get_user().save)()
 
 	# This function is called when a player gives up or disconnects
 	# The other player wins the game

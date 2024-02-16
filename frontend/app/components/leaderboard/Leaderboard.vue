@@ -9,6 +9,7 @@
             <th scope="col">Games Won</th>
             <th scope="col">Games Played</th>
             <th scope="col">Win Ratio</th>
+            <th scope="col">User profile</th>
           </tr>
         </thead>
         <tbody>
@@ -18,6 +19,11 @@
             <td>{{ user.num_games_won }}</td>
             <td>{{ user.num_games_played }}</td>
             <td>{{ user.num_games_played / user.num_games_won }}</td>
+            <td>
+              <router-link :to="{ name: 'infopage', query: { username: user.username } }">
+                <button type="button" class="btn btn-primary">View Profile</button>
+              </router-link>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -60,7 +66,6 @@ export default {
         )
         const jsonResponse = await response.json();
         this.users = jsonResponse.response;
-        alert(JSON.stringify(this.users));
       } 
       catch (error) 
       {

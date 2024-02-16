@@ -6,7 +6,7 @@ urlpatterns = [
     path('test_json', views.getTestJsonData),
     path('test_text', views.getTestTextData),
     path('auth_status', views.get_auth_status),
-    path('userlogin', views.userlogin),
+    path('userlogin', views.userlogin, name='login'),
     path('userlogout', views.userlogout),
     path('userregister', views.userregister),
 ]

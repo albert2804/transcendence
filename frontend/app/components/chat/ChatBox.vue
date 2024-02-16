@@ -1,81 +1,79 @@
 <template>
 	<div>
-    <!-- CONTAINER WITH CONTACTS... -->
-    <div class="contacts-container">
-      <div class="header-bar">
-        <p class="m-0">
-        Contacts
-        </p>
-        <button type="button" class="btn-close" @click="this.$emit('closeChat'); chatid = null;" aria-label="Close"></button>
-      </div>
-      <ul class="contacts-list">
-        <div class="accordion" id="contactListAccordion">
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
-                <span class="online-dot"/>&nbsp;Online
-              </button>
-            </h2>
-            <div id="collapseOnline" class="accordion-collapse collapse show">
-              <ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
-                <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
-                  <span class="badge rounded-pill bg-danger" v-if="unreadMessageCountMap.get(String(user.id)) != 0">
-                    {{ unreadMessageCountMap.get(String(user.id)) }}
-                  </span>
-                  {{ user.username }}
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffline" aria-expanded="true" aria-controls="collapseOffline">
-                <span class="offline-dot"/>&nbsp;Offline
-              </button>
-            </h2>
-            <div id="collapseOffline" class="accordion-collapse collapse show">
-              <ul class="contacts-list">
-                <ul v-for="(user, index) in offlineUsers" :key="index" class="list-group">
-                  <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
-                    <span class="badge rounded-pill bg-danger" v-if="unreadMessageCountMap.get(String(user.id)) != 0">
-                      {{ unreadMessageCountMap.get(String(user.id)) }}
-                    </span>
-                    {{ user.username }}
-                  </li>
-                </ul>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </ul>
-      <!-- CHATBOX -->
-      <div v-show="chatid !== null" style="padding: 5px;">
-        <div class="chat-container">
-          <div class="header-bar">
-            <p class="m-0">
-            </p>
-            <button type="button" class="btn-close" @click="this.chatid = null" aria-label="Close"></button>
-          </div>
-          <ul class="chat-messages">
-            <li v-for="(message, index) in filteredMessages" :key="index" :class="getMessageType(message)">
-                <span class="message">
-                  {{ JSON.parse(message).message }}
-                  <span class="date" style="font-size: 0.8em; text-align: right; display: block;">
-                    {{ JSON.parse(message).date }}
-                  </span>
-                </span>
+		<!-- CONTAINER WITH CONTACTS... -->
+		<div class="contacts-container">
+		<div class="header-bar">
+			<p class="m-0"  >
+				<i type="button" class="bi bi-question-circle" style="color: white; font-size: 1.2em; margin-left: 5px;" @click="openHelpModal"></i>
+				Contacts
+			</p>
+			<div>
+				<button type="button" class="btn-close" @click="this.$emit('closeChat'); chatid = null;" aria-label="Close"></button>
+			</div>
+		</div>
+		<ul class="contacts-list">
+			<div class="accordion" id="contactListAccordion">
+			<div class="accordion-item">
+				<h2 class="accordion-header">
+				<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
+					<span class="online-dot"/>&nbsp;Online
+				</button>
+				</h2>
+				<div id="collapseOnline" class="accordion-collapse collapse show">
+				<ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
+					<li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
+					<ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
+					</li>
+				</ul>
+				</div>
+			</div>
+			<div class="accordion-item">
+				<h2 class="accordion-header">
+				<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffline" aria-expanded="true" aria-controls="collapseOffline">
+					<span class="offline-dot"/>&nbsp;Offline
+				</button>
+				</h2>
+				<div id="collapseOffline" class="accordion-collapse collapse show">
+				<ul class="contacts-list">
+					<ul v-for="(user, index) in offlineUsers" :key="index" class="list-group">
+					<li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
+						<ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
+					</li>
+					</ul>
+				</ul>
+				</div>
+			</div>
+			</div>
+		</ul>
+		<!-- CHATBOX -->
+		<div v-show="chatid !== null" style="padding: 5px;">
+			<div class="chat-container">
+			<div class="header-bar">
+				{{ active_chat_user ? active_chat_user.username : '' }}
+				<p class="m-0">
+				</p>
+				<button type="button" class="btn-close" @click="this.chatid = null" aria-label="Close"></button>
+			</div>
+			<ul class="chat-messages">
+				<li v-for="(message, index) in filteredMessages" :key="index" :class="getMessageType(message)">
+					<span class="message" style="white-space: pre-line;">
+					{{ JSON.parse(message).message }}
+					<span class="date" style="font-size: 0.8em; text-align: right; display: block;">
+						{{ JSON.parse(message).date }}
+					</span>
+					</span>
 
-            </li>
-          </ul>
-          <div class="chat-input-container">
-            <input v-model="newMessage" type="text" placeholder="Type your message..." class="form-control chat-input" @keyup.enter="sendMessage" />
-            <button class="btn btn-primary send-button" @click="sendMessage">
-            Send
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+				</li>
+			</ul>
+			<div class="chat-input-container">
+				<input v-model="newMessage" type="text" placeholder="Type your message..." class="form-control chat-input" @keyup.enter="sendMessage" />
+				<button class="btn btn-primary send-button" @click="sendMessage">
+				Send
+				</button>
+			</div>
+			</div>
+		</div>
+		</div>
 	</div>
 </template>
   
@@ -92,6 +90,7 @@ export default {
       unreadMessageCountMap: new Map(),
       newMessage: '',
       chatid: null,
+      active_chat_user: null,
       own_id: null
     }
   },
@@ -125,25 +124,37 @@ export default {
     });
   },
   methods: {
+	openHelpModal() {
+		this.$nextTick(() => {
+			new bootstrap.Modal(document.getElementById('helpmodal')).show();
+		});	
+	},
     getMessageType (message) {
       const parsedMessage = JSON.parse(message)
-      return parsedMessage.sender_id === this.own_id ? 'message-item-sent' : 'message-item-received'
+      if (parsedMessage.subtype === 'info') {
+        return 'message-item-info'
+      } else if (parsedMessage.sender_id === this.own_id) {
+        return 'message-item-sent'
+      } else {
+        return 'message-item-received'
+      }
     },
     scrollDown () {
       this.$nextTick(() => {
         const container = this.$el.querySelector('.chat-messages')
         container.scrollTop = container.scrollHeight
       })
+      // remove unread message count for selected chat
+      if (this.unreadMessageCountMap.has(String(this.chatid))) {
+        this.unreadMessageCountMap.delete(String(this.chatid));
+      }
+      // send read message info to server
+      this.socket.send(JSON.stringify({ type: "read_info", chat_id: this.chatid }))
     },
     selectUser (user) {
       this.chatid = user.id
+      this.active_chat_user = user
       this.scrollDown()
-      // remove unread message count for selected chat
-      if (this.unreadMessageCountMap.has(String(user.id))) {
-        this.unreadMessageCountMap.delete(String(user.id));
-      }
-      // send read message info to server
-      this.socket.send(JSON.stringify({ type: "read_info", chat_id: user.id }))
     },
     createWebSocket () {
       const currentDomain = window.location.hostname;
@@ -205,7 +216,11 @@ export default {
     },
     sendMessage () {
       if (this.newMessage.trim() !== '') {
+        if (this.newMessage.charAt(0) === '/') {
+          this.socket.send(JSON.stringify({ type: "command", command: this.newMessage, receiver_id: this.chatid }))
+        } else {
         this.socket.send(JSON.stringify({ type: "message", message: this.newMessage, receiver_id: this.chatid }))
+        }
         this.newMessage = ''
       }
     }
@@ -239,10 +254,31 @@ export default {
   flex-direction: column;
 }
 
+.accordion-header{
+  background-color: #ffffff;
+  padding: 2px;
+}
+
+.accordion-button {
+  background-color: #d1e7ff;
+  border: 1px solid #c2c3c5;
+  text-align: left;
+  width: 100%;
+  padding: 10px;
+  margin: 0;
+  border-radius: 5px;
+}
+
+.list-group-item.active {
+  background-color: #ecedee;
+  border-color: #c2c3c5;
+}
+
 .online-dot {
   height: 10px;
   width: 10px;
   background-color: #02ce02;
+
   border-radius: 50%;
   display: inline-block;
 }
@@ -298,6 +334,16 @@ export default {
   margin-right: 4px;
   display: flex;
   justify-content: flex-end;
+}
+
+.message-item-info {
+  margin-bottom: 2px;
+  margin-top: 2px;
+  margin-left: 4px;
+  margin-right: 4px;
+  display: flex;
+  justify-content: center;
+  color: #007bff;
 }
 
 .message {

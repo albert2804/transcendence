@@ -65,8 +65,8 @@
       <button type="button" class="btn btn-primary" @click="createGuestPlayer2">Enter</button>
     </div>
     <!-- Back to menu - button --->
-    <div v-if="waiting || showAliasScreen || showAliasScreen2" style="height: 5px;"></div>
-    <div v-if="waiting || showAliasScreen || showAliasScreen2">
+    <div v-if="waiting || showAliasScreen2" style="height: 5px;"></div>
+    <div v-if="waiting || showAliasScreen2">
       <button type="button" class="btn btn-primary" @click="backToMenu">Back to Menu</button>
     </div>
 	</li>
@@ -212,6 +212,8 @@
             this.updateGameUI(gameState);
           } else if (data.type === "alias_exists") {
             this.message = "Alias already taken!";
+          } else if (data.type === "open_game_modal") {
+            this.$emit('openModal');
           } else {
             console.error('Received message of unknown type:', data);
           }
@@ -375,7 +377,7 @@
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({ type: 'give_up' });
         this.socket.send(data);
-        console.log('gave up game');
+        // console.log('gave up game');
       }
     }
     //

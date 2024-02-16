@@ -25,7 +25,7 @@
               <NuxtLink class="nav-link active" to="/localGame">Local Game</NuxtLink>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" @click="showGameModal">Remote Game</a>
+              <NuxtLink class="nav-link active" @click="showGameModal" style="cursor: pointer;">Play</NuxtLink>
             </li>
             <li>
               <NuxtLink class="nav-link active" to="/tournament">Tournament</NuxtLink>

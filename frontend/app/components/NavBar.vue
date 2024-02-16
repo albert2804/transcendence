@@ -30,16 +30,22 @@
             <li class="nav-item" v-if="isLoggedIn != 1">
               <NuxtLink class="nav-link active" to="/login">Login</NuxtLink>
             </li>
-            <li class="nav-item" v-if="isLoggedIn === 1">
-              <NuxtLink class="nav-link active" to="/infopage">Info</NuxtLink>
-            </li>
             <li>
               <NuxtLink class="nav-link active" to="/tournament">Tournament</NuxtLink>
             </li>
             <li>
               <NuxtLink class="nav-link active" to="/leaderboard">Leaderboard</NuxtLink>
             </li>
-            <!-- <li class="nav-item dropdown">
+            <li class="nav-item">
+              <NuxtLink class="nav-link active" to="/userinfopage">Info</NuxtLink>
+            </li>
+            <li class="nav-item" v-if="isLoggedIn != 1">
+              <NuxtLink class="nav-link active" to="/login">Login</NuxtLink>
+            </li>
+            <li class="nav-item" v-if="isLoggedIn === 1">
+              <NuxtLink class="nav-link active" to="/login">Logout</NuxtLink>
+            </li>
+            <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Dropdown
               </a>

@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from remote_game.gameHandler import GameHandler
 from remote_game.consumers import RemoteGameConsumer
 from django.contrib.auth.models import AbstractUser
+from api.models import CustomUser
 from remote_game.player import Player
 from chat.consumers import ChatConsumer
 from asgiref.sync import async_to_sync
@@ -12,8 +13,27 @@ from django.utils import timezone
 from datetime import datetime
 from .models import Tournament
 from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import make_password
 import asyncio
 import json
+
+def signUpTwoDummies(request):
+  if request.method == 'POST':
+    user = CustomUser.objects.get_or_create(
+     username="dummy1",
+     password=make_password('Hallo9595'),
+     defaults={'email': "random@ass.de",
+     'is_42_login': False })
+    # user.set_password("Hallo9595");
+    # user.save()
+    user = CustomUser.objects.get_or_create(
+      username="dummy2",
+      password=make_password('Hallo9595'),
+      defaults={'email': "random@ass.de",
+      'is_42_login': False })
+    return JsonResponse({'message': 'Data received'})
+  else:
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 @sync_to_async
 def get_user_by_username(username):
@@ -78,18 +98,6 @@ async def invite_to_tournament(user1, user):
 async def startTournament(request):
   if await sync_to_async(lambda: request.user.is_authenticated)():
     if request.method == 'POST':
-      CustomUser.objects.get_or_create(
-        username="dummy1",
-        password="Hallo9595",
-        defaults={'email': "random@ass.de",
-                  'is_42_login': False })
-      authenticate(username="dummy1", password="Hallo9595")
-      CustomUser.objects.get_or_create(
-        username="dummy2",
-        password="Hallo9595",
-        defaults={'email': "random@ass.de",
-                  'is_42_login': False })
-      authenticate(username="dummy2", password="Hallo9595")
       data = json.loads(request.body)
       User = get_user_model()
       print(len(data))

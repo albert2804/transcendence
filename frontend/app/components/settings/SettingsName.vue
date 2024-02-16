@@ -3,7 +3,7 @@
 		<button type="button" @click="closePopup" class="btn-close" aria-label="Close"></button>
 		<div class="username_container">
 			<label for="username">Change Username:</label>
-			<input type="text" v-model="editedName" @keydown.enter="saveChanges" @blur="cancelChanges">
+			<input type="text" id="username" name="username" v-model="editedName" @keydown.enter="saveChanges" @blur="cancelChanges">
 		</div>
 	</div>
   </template>

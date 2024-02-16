@@ -24,7 +24,7 @@
           @input="updatePlayerName(index, $event)">
         </div>
         <div v-else>
-          <UserSearchDropdown />
+          <UserSearchDropdown :index="index" @user-selected="handleUserSelected"/>
         </div>
       </div>
     </div>
@@ -85,6 +85,12 @@ export default {
         return this.all_players[index - 1].name;
     },
 
+    handleUserSelected(userName, index) {
+      console.log(userName);
+      console.log(index);
+      this.all_players[index - 1].name = userName;
+    },
+
     // Pushes new Player Object into all_players list if the range/number 
     // of players is adjusted 
     updatePlayerCount () {
@@ -94,7 +100,6 @@ export default {
         for (let i = currentCount + 1; i <= this.nbr_players; i++) {
           this.all_players.push({
             name: `Player-${i}`,
-            games_won: '[]',
             player_or_bot: 'Player',
             index: i - 1,
           });
@@ -105,11 +110,24 @@ export default {
       }
     },
 
-    startTournament(event) {
+    async startTournament(event) {
       event.preventDefault();
       // TODO: needs to call backend for tournament handling which is not yet implementet
       console.log(this.all_players);
       console.log("Tournament handling not yet implemented in backend");
+      const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+      const response = await fetch('/endpoint/tournament/logic/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify(this.all_players),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status ${response.status}`);
+      }
     }
   },  
 }

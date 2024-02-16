@@ -21,18 +21,26 @@
             <li class="nav-item">
               <NuxtLink class="nav-link active" to="/">Home</NuxtLink>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <NuxtLink class="nav-link active" to="/localGame">Local Game</NuxtLink>
-            </li>
+            </li> -->
             <li class="nav-item">
               <NuxtLink class="nav-link active" @click="showGameModal" style="cursor: pointer;">Play</NuxtLink>
             </li>
+            <li class="nav-item" v-if="isLoggedIn != 1">
+              <NuxtLink class="nav-link active" to="/login">Login</NuxtLink>
+            </li>
+            <li class="nav-item" v-if="isLoggedIn === 1">
+              <NuxtLink class="nav-link active" to="/infopage">Info</NuxtLink>
+            </li>
+>>>>>>> main
             <li>
               <NuxtLink class="nav-link active" to="/tournament">Tournament</NuxtLink>
             </li>
             <li>
               <NuxtLink class="nav-link active" to="/leaderboard">Leaderboard</NuxtLink>
             </li>
+<<<<<<< HEAD
             <li class="nav-item">
               <NuxtLink class="nav-link active" to="/userinfopage">Info</NuxtLink>
             </li>
@@ -43,6 +51,9 @@
               <NuxtLink class="nav-link active" to="/login">Logout</NuxtLink>
             </li>
             <li class="nav-item dropdown">
+=======
+            <!-- <li class="nav-item dropdown">
+>>>>>>> main
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Dropdown
               </a>
@@ -55,6 +66,12 @@
             </li>
             <li class="nav-item">
               <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+            </li> -->
+            <li class="nav-item" v-if="isLoggedIn != 1">
+              <NuxtLink class="nav-link active ms-auto" to="/login">Login</NuxtLink>
+            </li>
+            <li class="nav-item" v-if="isLoggedIn === 1">
+              <NuxtLink class="nav-link active ms-auto" to="/login">Logout</NuxtLink>
             </li>
           </ul>
         </div>

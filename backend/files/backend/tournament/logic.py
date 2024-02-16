@@ -11,6 +11,7 @@ from asgiref.sync import sync_to_async
 from django.utils import timezone
 from datetime import datetime
 from .models import Tournament
+from django.contrib.auth import authenticate
 import asyncio
 import json
 
@@ -77,6 +78,18 @@ async def invite_to_tournament(user1, user):
 async def startTournament(request):
   if await sync_to_async(lambda: request.user.is_authenticated)():
     if request.method == 'POST':
+      CustomUser.objects.get_or_create(
+        username="dummy1",
+        password="Hallo9595",
+        defaults={'email': "random@ass.de",
+                  'is_42_login': False })
+      authenticate(username="dummy1", password="Hallo9595")
+      CustomUser.objects.get_or_create(
+        username="dummy2",
+        password="Hallo9595",
+        defaults={'email': "random@ass.de",
+                  'is_42_login': False })
+      authenticate(username="dummy2", password="Hallo9595")
       data = json.loads(request.body)
       User = get_user_model()
       print(len(data))

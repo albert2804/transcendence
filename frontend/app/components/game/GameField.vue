@@ -69,6 +69,19 @@
     <div v-if="waiting || showAliasScreen2">
       <button type="button" class="btn btn-primary" @click="backToMenu">Back to Menu</button>
     </div>
+    <div v-if="showMenu && isLoggedIn == 1" style="height: 5px;"></div>
+    <div v-if="showMenu && isLoggedIn == 1">
+      <button type="button" class="btn btn-primary" @click="showControls">Controls</button>
+      <div v-if="showmodal">
+        <div class="modal-dialog fullscreen-modal align-items-center">
+          <div class="modal-content">
+            <div class="modal-body">
+              <img v-if="controls" :src="controls" alt="Controls">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 	</li>
   </div>
 </template>
@@ -107,6 +120,8 @@
       showAliasScreen: false,
       showAliasScreen2: false,
       alias: '',
+      controls: '',
+      showmodal: false,
     }
   },
   mounted () {
@@ -379,8 +394,14 @@
         this.socket.send(data);
         // console.log('gave up game');
       }
+    },
+    // show controls in form of a gif
+    async showControls() {
+      this.showmodal=true;
+      this.controls='https://media.tenor.com/Ycl8mXFNE_8AAAAi/get-real-cat.gif';
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      this.showmodal=false;
     }
-    //
   }
 };
 </script>

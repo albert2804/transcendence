@@ -85,8 +85,10 @@
           	    	},
 					body: formData
        		 	});
-			if (response.ok)
-				this.fetch_picture();
+			if (response.ok){
+				this.closePopup();
+				location.reload();
+			}
 			} catch (error) {
 				console.error('Error sending picture to backend', error);
 			}

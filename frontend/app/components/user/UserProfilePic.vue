@@ -10,6 +10,8 @@
   </template>
 
   <script>
+  import { useRoute } from 'vue-router';
+
   export default{
 	data(){
 		return {
@@ -24,8 +26,11 @@
 	methods: {
 		async fetch_picture() {
 		  try {
+			const route = useRoute();
+        	const username = route.query.username;
 		    const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-			const response = await fetch('/endpoint/user/profilepic/', {
+			const params = new URLSearchParams({ username: username });
+			const response = await fetch(`/endpoint/user/profilepic?${params.toString()}`, {
         		method: 'GET',
           		headers: {
             	'Content-Type': 'application/json',

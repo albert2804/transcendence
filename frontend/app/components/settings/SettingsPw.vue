@@ -51,8 +51,13 @@
 						password1: encodeURIComponent(this.password1),
 						password2: encodeURIComponent(this.password2)})
 					})
-					if (response.ok)
+					if (response.ok){
+						
+						this.closePopup();
+						await this.$router.push('/login');
+						location.reload();
 						console.log("Changed pw worked");
+					}
 					else
 						console.log("Changed pw didnt work:", response.status);
 

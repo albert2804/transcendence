@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="container-fluid vh-100">
       <div class="centered-headings">
       <h1>You're on the local game site</h1>
       </div>

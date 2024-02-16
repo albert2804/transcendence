@@ -1,7 +1,12 @@
 /* assets/styles/global.css */
 
 body {
-	background-color: #0f4c81;
+  margin: 0;
+  padding: 0;
+  background-image: linear-gradient(to right bottom, #051937, #004d7a, #008793, #00bf72, #a8eb12);
+	/* background-color: #0f4c81; */
+  background-size: cover;
+  background-position: center;
 	color: #ffffff;
 	font-family: 'Arial', sans-serif;
   }

@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="container-fluid vh-100">
 	  <form @submit.prevent="submitData" id="loginForm">
 		<h2>Login</h2>
 		<label for="username">Username:</label>

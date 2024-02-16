@@ -28,7 +28,7 @@ def send_userinfo(request):
 					status=200)
 			except:
 				return JsonResponse({'error': 'No statistics data found for the user'},
-						status=404)
+						status=400)
 		elif request.method == 'POST':
 			try:
 				user = CustomUser.objects.get(username=request.user)
@@ -43,7 +43,7 @@ def send_userinfo(request):
 					status=200)
 			except:
 				return JsonResponse({'error': 'username could not be updated'},
-						status=405)
+						status=500)
 	else:
 		return JsonResponse({'error': 'User not authenticated'},
 			status=401)
@@ -89,32 +89,29 @@ def handle_profilepic(request):
 		return JsonResponse({'error': 'User not authenticated'},
 			status=401)
 
-
+# TO-DO Redirect to login page again, so the user has to login woth his new password to update teh session
 def verify(request):
 	if request.user.is_authenticated:
 		if request.method == 'POST':
 			try:
 				user = CustomUser.objects.get(username=request.user)
 			except Exception as e: 
-				return JsonResponse({'error': f'Could not get CustomUser. Error: {str(e)}'}, status=400)
+				return JsonResponse({'error': f'Could not get CustomUser. Error: {str(e)}'}, status=500)
 			except CustomUser.DoesNotExist:
 				return JsonResponse({'error': 'User not found'}, status=404)
-			# try:
-			data = json.loads(request.body.decode('utf-8'))
-			print(f"{RED}{data.get('old_pw') = }{RESET}")
-			print(f"{RED}{data.get('password1') = }{RESET}")
-			print(f"{RED}form: {user.password}{RESET}")
-
-			if user.check_password(data.get('old_pw')):
-				user.set_password(data.get('password1'))
-				user.save()
-				return redirect('/endpoint/api/userlogin')
-			else:
-				return JsonResponse({'message': 'New password does not match with the old password'},
-						status=400)
-			# except:
-			# 	return JsonResponse({'error': 'pw could not be updated'},
-			# 			status=400)
+			try:
+				data = json.loads(request.body.decode('utf-8'))
+				if user.check_password(data.get('old_pw')):
+					user.set_password(data.get('password1'))
+					user.save()
+					return HttpResponse("password changed")
+					# return redirect('login')
+				else:
+					return JsonResponse({'message': 'New password does not match with the old password'},
+							status=500)
+			except:
+				return JsonResponse({'error': 'pw could not be updated'},
+						status=500)
 	else:
 		return JsonResponse({'error': 'User not authenticated'},
 			status=401)

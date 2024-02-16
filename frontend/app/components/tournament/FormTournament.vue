@@ -50,8 +50,8 @@ export default {
       all_players: [],
       all_matches: [],
       tournamentSize: [4, 8, 16, 32],
-      selectPos: 1,
-      nbr_players: '8',
+      selectPos: 0,
+      nbr_players: '4',
     };
   },
   computed: {
@@ -95,11 +95,12 @@ export default {
     // of players is adjusted 
     updatePlayerCount () {
       const currentCount = this.all_players.length;
+      const list_player = ["phipno", "dummy1", "pnolte", "dummy2"]
 
       if (this.nbr_players > currentCount) {
         for (let i = currentCount + 1; i <= this.nbr_players; i++) {
           this.all_players.push({
-            name: `Player-${i}`,
+            name: list_player[i - 1],
             player_or_bot: 'Player',
             index: i - 1,
           });

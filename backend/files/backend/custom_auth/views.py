@@ -75,7 +75,7 @@ def callback(request):
             user.profile_pic.save(f'{user.username}_avatar.jpg', image_content)
             user.save()
     print(user.profile_pic.url)
-    # print(f"username: {user_details['login']}")
+
 
     return HttpResponse("This is the callback view.\n") # + json.dumps(user_details)
 

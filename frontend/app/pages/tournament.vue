@@ -18,6 +18,7 @@ import { isLoggedIn } from '~/store';
     <div v-if="formVisible">
       <FormTournament v-bind:local="false"/>
     </div>
+    <button @click="callSignUp" class="btn btn-primary"></button>
   </div>
 </template>
 
@@ -35,6 +36,20 @@ export default {
     toggleForm() {
       this.formVisible = !this.formVisible
     },
-  },
+    async callSignUp() {
+      const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+      const response = await fetch('/endpoint/tournament/sign_up/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+        },
+        body: null,
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status ${response.status}`);
+      }
+    },
+  }
 }
 </script>

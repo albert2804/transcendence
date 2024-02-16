@@ -29,6 +29,7 @@ urlpatterns = [
     path('endpoint/api/', include('api.urls')),
     path('endpoint/auth/', include("custom_auth.urls")),
     path('endpoint/user/', include("users.urls")),
+    path('endpoint/tournament/', include("tournament.urls")),
 ]
 
 #Let us access the media files when DEBUG is set to True

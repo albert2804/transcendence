@@ -7,14 +7,14 @@
 </script>
 
 <template>
-    <div>
+    <div class="container-fluid vh-100">
       <div style="display: flex; justify-content: center; margin-top: 20vh;">
         <div v-if="isLoggedIn === 1">
           <UserInfo />
           <UserProfilePic />
         </div>
         <div v-else>
-          <p>No user statistics available.</p>
+          <h2>No user statistics available.</h2>
         </div>
       </div>
     </div>

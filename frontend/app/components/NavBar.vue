@@ -56,15 +56,9 @@
                 <li><a class="dropdown-item" href="#">Something else here</a></li>
               </ul>
             </li>
-            <li class="nav-item">
+            <!--<li class="nav-item">
               <a class="nav-link disabled" aria-disabled="true">Disabled</a>
             </li> -->
-            <li class="nav-item" v-if="isLoggedIn != 1">
-              <NuxtLink class="nav-link active ms-auto" to="/login">Login</NuxtLink>
-            </li>
-            <li class="nav-item" v-if="isLoggedIn === 1">
-              <NuxtLink class="nav-link active ms-auto" to="/login">Logout</NuxtLink>
-            </li>
           </ul>
         </div>
       </div>

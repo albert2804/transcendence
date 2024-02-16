@@ -7,7 +7,7 @@ import { isLoggedIn } from '~/store';
 </script>
 
 <template>
-  <div>
+  <div class="container-fluid vh-100">
     <div style="display: flex; flex-direction: column; align-items: center;">
       <h1>Youre on the tournament site</h1>
       <div v-if="isLoggedIn">

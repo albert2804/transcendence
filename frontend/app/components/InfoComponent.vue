@@ -57,7 +57,7 @@ export default {
 </script>
 
 <style>
-  .card-size {
+  /* .card-size {
     min-width: px;
     max-width: 400px;
   }
@@ -74,5 +74,5 @@ export default {
     bottom: 0;
     left: 0;
     background: rgba(255,255,255,0.7);
-  }
+  } */
 </style>

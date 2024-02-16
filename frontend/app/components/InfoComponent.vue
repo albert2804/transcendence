@@ -1,28 +1,30 @@
 <template>
   <div class="user-stats">
-    <!-- <div class="centered-headings"> -->
-      <h1>User Statistics</h1>
-      <div v-if="userStats.username != ''">
-        <p>Username: {{ userStats.username }}</p>
-        <p>Date Joined: {{ userStats.date_joined }}</p>
-        <p>Games Played: {{ userStats.games_played }}</p>
-        <p>Matchmade Ranking: {{ userStats.mmr }}</p>
-        <p>Overall Ranking: {{ userStats.ranking }}</p>
-      </div>
-    <!-- </div> -->
+    <h2>User Statistics</h2>
+    <div v-if="userStats.username != ''">
+      <p>Username: {{ userStats.username }}</p>
+      <p>Alias: {{ userStats.alias }}</p>
+      <p>Games Won: {{ userStats.games_won }}</p>
+      <!-- <p>Date Joined: {{ userStats.date_joined }}</p> -->
+      <p>Games Played: {{ userStats.games_played }}</p>
+      <!-- <p>Matchmade Ranking: {{ userStats.mmr }}</p>
+      <p>Overall Ranking: {{ userStats.ranking }}</p> -->
+    </div>
   </div>
 </template>
 
 <script>
+import { useRoute } from 'vue-router';
+
 export default {
   name: 'InfoComponent',
     data() {
     return {
       userStats: {
         username: '',
-        date_joined: '',
         games_played: '0',
-        mmr: '0',
+        games_won: '0',
+        alias: '',
         ranking: '0',
       },
       error: '',
@@ -34,8 +36,11 @@ export default {
   methods: {
     async fetchStatistics() {
       try {
+        const route = useRoute();
+        const username = route.query.username;
         const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-        const response = await fetch('/endpoint/user/info', {
+        const params = new URLSearchParams({ username: username });
+        const response = await fetch(`/endpoint/user/info?${params.toString()}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

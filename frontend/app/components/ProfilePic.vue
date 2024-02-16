@@ -14,8 +14,9 @@
 	</div>
   </template>
 
-  <script>
-  export default{
+<script>
+	import { useRoute } from 'vue-router';
+	export default{
 	data(){
 		return {
 			userProfilePic: '',
@@ -28,15 +29,18 @@
 
 	methods: {
 		async fetch_picture() {
-		  try {
-		    const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-			const response = await fetch('/endpoint/user/profilepic/', {
-        		method: 'GET',
-          		headers: {
-            	'Content-Type': 'application/json',
-            	'X-CSRFToken': csrfToken,
-          	    }
-       		 })
+		try {
+			const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+			const route = useRoute();
+			const username = route.query.username;
+			const params = new URLSearchParams({ username: username });
+			const response = await fetch(`/endpoint/user/profilepic/?${params.toString()}`, {
+				method: 'GET',
+				headers: {
+				'Content-Type': 'application/json',
+				'X-CSRFToken': csrfToken,
+				}
+			})
 			this.userProfilePic = await response.json();
 			} catch (error) {
 				console.error('Error fetching user profile pic:', error);

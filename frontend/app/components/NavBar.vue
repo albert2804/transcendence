@@ -25,9 +25,11 @@
               <NuxtLink class="nav-link active" to="/localGame">Local Game</NuxtLink>
             </li> -->
             <li class="nav-item">
-              <a class="nav-link active" @click="showGameModal">Play</a>
+              <NuxtLink class="nav-link active" @click="showGameModal" style="cursor: pointer;">Play</NuxtLink>
             </li>
-
+            <li class="nav-item" v-if="isLoggedIn != 1">
+              <NuxtLink class="nav-link active" to="/login">Login</NuxtLink>
+            </li>
             <li class="nav-item" v-if="isLoggedIn === 1">
               <NuxtLink class="nav-link active" to="/infopage">Info</NuxtLink>
             </li>

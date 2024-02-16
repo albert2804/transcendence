@@ -1,9 +1,12 @@
 import random
 import asyncio
 from .pong import PongGame
+from chat.consumers import ChatConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async
+from channels.db import database_sync_to_async
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 
 # This class is used to handle the PongGame between the two Player objects (player1 and player2)
 # Create a new instance of this class with GAME_XXX = GameHandler.create(player1, player2)
@@ -132,6 +135,25 @@ class GameHandler:
 				'result': 'winner',
 			})
 
+	# send the game rusult to the players chat
+	async def send_game_result_to_chat(self):
+		chat_consumer = ChatConsumer()
+		if self.ranked:
+			# get the points of the players
+			p1_points = int(self.game.pointsP1)
+			p2_points = int(self.game.pointsP2)
+			# send the game result to the chat
+			if self.game.winner == 0:
+				await chat_consumer.save_and_send_message(self.player1.get_user(), self.player2.get_user(), "A ranked game ended in a tie.", timezone.now(), "info")
+				await chat_consumer.save_and_send_message(self.player2.get_user(), self.player1.get_user(), "A ranked game ended in a tie.", timezone.now(), "info")
+			elif self.game.winner == 1:
+				await chat_consumer.save_and_send_message(self.player2.get_user(), self.player1.get_user(), "You won a ranked game with " + str(p1_points) + " to " + str(p2_points) + " points.", timezone.now(), "info")
+				await chat_consumer.save_and_send_message(self.player1.get_user(), self.player2.get_user(), "You lost a ranked game with " + str(p2_points) + " to " + str(p1_points) + " points.", timezone.now(), "info")
+			elif self.game.winner == 2:
+				await chat_consumer.save_and_send_message(self.player1.get_user(), self.player2.get_user(), "You won a ranked game with " + str(p2_points) + " to " + str(p1_points) + " points.", timezone.now(), "info")
+				await chat_consumer.save_and_send_message(self.player2.get_user(), self.player1.get_user(), "You lost the game with " + str(p1_points) + " to " + str(p2_points) + " points.", timezone.now(), "info")
+				
+
 	# Starts the game and runs the game loop until the game is finished or stopped
 	async def start_game(self):
 		self.game_start_time = timezone.now()
@@ -168,7 +190,9 @@ class GameHandler:
 			print(f"{self.game_group} between {self.player1.get_user().alias} and {self.player2.get_user().alias} finished.")
 		# send game result to game group
 		await self.send_game_result()
-		# wait 3 seconds
+		# send game result to the chat (only for ranked games)
+		await self.send_game_result_to_chat()
+		# wait 2 seconds
 		await asyncio.sleep(2)
 		# redirect players to menu
 		await self.channel_layer.group_send(
@@ -207,18 +231,18 @@ class GameHandler:
 			self.db_entry.winner = self.player2.get_user()
 			self.db_entry.loser = self.player1.get_user()
 		self.db_entry.finished = True
-		print("Hits Player 1:", self.game.pointsP1)
-		print("Hits Player 2:", self.game.pointsP2)
 		await sync_to_async(self.db_entry.save)()
-		# update the stats of the players CustomUser objects
-		self.player1.get_user().num_games_played += 1
-		self.player2.get_user().num_games_played += 1
+		# update the user stats in CustomUser
+		db_p1_user = await database_sync_to_async(get_user_model().objects.get)(id=self.player1.get_user().id)
+		db_p2_user = await database_sync_to_async(get_user_model().objects.get)(id=self.player2.get_user().id)
+		db_p1_user.num_games_played += 1
+		db_p2_user.num_games_played += 1
 		if self.game.winner == 1:
-			self.player1.get_user().num_games_won += 1
+			db_p1_user.num_games_won += 1
 		elif self.game.winner == 2:
-			self.player2.get_user().num_games_won += 1
-		await sync_to_async(self.player1.get_user().save)()
-		await sync_to_async(self.player2.get_user().save)()
+			db_p2_user.num_games_won += 1
+		await database_sync_to_async(db_p1_user.save)()
+		await database_sync_to_async(db_p2_user.save)()
 
 	# This function is called when a player gives up or disconnects
 	# The other player wins the game

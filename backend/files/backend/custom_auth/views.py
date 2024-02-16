@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 import json
 import requests
 import os
@@ -75,16 +75,14 @@ def callback(request):
             user.profile_pic.save(f'{user.username}_42avatar.jpeg', image_content)
             user.save()
     print(user.profile_pic.url)
-
-
-    return HttpResponse("This is the callback view.\n") # + json.dumps(user_details)
+    frontend_route="/"
+    return HttpResponseRedirect(f'http://{request.get_host()}/redirect?to={frontend_route}')
 
 
 def home(request):
     context = {
         'tabs':tabs
     }
-
     return render(request, 'auth_view.html', context)
 
 

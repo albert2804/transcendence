@@ -47,13 +47,14 @@ def callback(request):
     if response.status_code == 200:
         user_details = response.json()
     else:
-        print(f'Error authorizing with 42 intra: {response.status_code}')
+        return HttpResponse(f'Error authorizing with 42 intra: {response.status_code}')
 
-    user, created = CustomUser.objects.get_or_create(
-        username=user_details['login'],
-        defaults={'email': user_details['email'],
-                  'is_42_login': True })
+    user = CustomUser.objects.filter(username=user_details['login']).first()
+    if user is not None and user.is_42_login == False:
+        return HttpResponse("This account is already registered locally, please log in with username and password.\n")
 
+    user, created = CustomUser.objects.get_or_create( username=user_details['login'],
+                        defaults={'email': user_details['email'], 'is_42_login': True, 'alias': user_details['login'] })
     if user is not None:
         backend = ModelBackend()
         user.backend = 'django.contrib.auth.backends.ModelBackend'
@@ -61,7 +62,6 @@ def callback(request):
 
     user.first_name = user_details['first_name']
     user.last_name = user_details['last_name']
-    user.alias = user.username
     user.save()
 
     if created:
@@ -69,20 +69,8 @@ def callback(request):
         if image_get.status_code == 200:
             print("IMAGE GET OK")
             image_content = ContentFile(image_get.content)
-            # image_path = ("profilepic/" + user.username + "_avatar.jpg")
-            # image_path = os.path.join(settings.MEDIA_ROOT, image_path)
-            # print("IMAGE PATH: " + image_path)
             user.profile_pic.save(f'{user.username}_42avatar.jpeg', image_content)
             user.save()
     print(user.profile_pic.url)
     frontend_route="/"
     return HttpResponseRedirect(f'http://{request.get_host()}/redirect?to={frontend_route}')
-
-
-def home(request):
-    context = {
-        'tabs':tabs
-    }
-    return render(request, 'auth_view.html', context)
-
-

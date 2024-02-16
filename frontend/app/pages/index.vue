@@ -1,13 +1,15 @@
 <template>
-  <div>
-    <h1>hello world</h1>
+  <div class="container-fluid vh-100">
     <div style="display: flex; justify-content: center; margin-top: 20vh;">
-      <ul>
+      <h1>Welcome to FT_TRANSCENDENCE</h1>
+    </div>
+    <div>
+      <!-- <ul>
         <FetchButton :fetchUrl="'/endpoint/api/test_json'" :showErrModal=true @data-received="openJsonModal">get json!</FetchButton>
         <br>
         <FetchButton :fetchUrl="'/endpoint/api/test_text'" :showErrModal=true @data-received="openTextModal">get text!</FetchButton>
         <br>
-      </ul>
+      </ul> -->
     </div>
     <SimpleModal v-show="modalContent" :content="modalContent" :modalTitle="'Response:'" modalId="exampleModal" ariaLabel="A simple modal to show html content" />
   </div>

@@ -3,9 +3,8 @@
     <h2>User Statistics</h2>
     <div v-if="userStats.username != ''">
       <p>Username: {{ userStats.username }}</p>
-      <p>Alias: {{ userStats.alias }}</p>
+      <p>Alias: {{ userStats.alias }} </p>
       <p>Games Won: {{ userStats.games_won }}</p>
-      <!-- <p>Date Joined: {{ userStats.date_joined }}</p> -->
       <p>Games Played: {{ userStats.games_played }}</p>
       <!-- <p>Matchmade Ranking: {{ userStats.mmr }}</p>
       <p>Overall Ranking: {{ userStats.ranking }}</p> -->
@@ -19,7 +18,7 @@ import { useRoute } from 'vue-router';
 export default {
   name: 'InfoComponent',
     data() {
-    return {
+     return {
       userStats: {
         username: '',
         games_played: '0',
@@ -30,6 +29,7 @@ export default {
       error: '',
     };
   },
+
   mounted() {
     this.fetchStatistics();
   },
@@ -46,7 +46,7 @@ export default {
             'Content-Type': 'application/json',
             'X-CSRFToken': csrfToken,
           }
-        })
+        });
         this.userStats = await response.json();
       } catch (error) {
         console.error('Error:', error)

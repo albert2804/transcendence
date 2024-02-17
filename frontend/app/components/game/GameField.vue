@@ -69,7 +69,6 @@
     <div v-if="waiting || showAliasScreen2">
       <button type="button" class="btn btn-primary" @click="backToMenu">Back to Menu</button>
     </div>
-    <div v-if="showMenu && isLoggedIn == 1" style="height: 5px;"></div>
     <div v-if="showMenu && isLoggedIn == 1">
       <button type="button" class="btn btn-primary" @click="showControls">Controls</button>
       <div v-if="showmodal">

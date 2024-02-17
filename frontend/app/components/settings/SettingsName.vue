@@ -54,7 +54,11 @@ export default {
           	    },
 				body: JSON.stringify({ newUsername: this.editedName })
        		 })
-			 if (response.ok)
+			 if (response.ok){
+				this.closePopup();
+				location.reload();
+				
+			 }
 			 	console.log("Changed username worked");
 			} catch (error) {
 				console.error('Error updating user alias:', error);
@@ -63,6 +67,7 @@ export default {
 		
 		cancelChanges() {
 			this.editedName = this.originalName;
+			this.$emit('close-popup');
     	},
 
 		closePopup() {

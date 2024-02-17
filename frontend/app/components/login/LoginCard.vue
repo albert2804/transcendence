@@ -22,6 +22,12 @@
     const url =`https://api.intra.42.fr/oauth/authorize?client_id=${client_id}&redirect_uri=${redirect_uri.value}&state=${generateRandomString()}&response_type=code`;
     window.location.href = url;
   };
+  
+  const redirectToHomePage =() => {
+    const url =`https://localhost`;
+    window.location.href = url;
+  }
+
 </script>
 
 
@@ -45,6 +51,7 @@
         <div class="button-list">
           <button type="button" @keyup.enter="$refs.loginnamefield.focus()" ref="loginbutton" class="btn btn-primary" @click="login">Login</button>
           <a class="btn btn-link btn-sm" @click="reg_form = true; error = ''; message = ''">create account</a>
+          
         </div>
       </form>
       <form v-if="isLoggedIn != 1 && !reg_form">
@@ -69,7 +76,6 @@
         </div>
         <div class="button-list">
           <button type="button" @keyup.enter="$refs.regnamefield.focus()" ref="regbutton" class="btn btn-primary" @click="register">Register</button>
-          <a class="btn btn-link btn-sm" @click="reg_form = false; error = ''; message = ''">login</a>
         </div>
       </form>
       <!-- LOGGED IN -->
@@ -125,6 +131,7 @@ export default {
           this.password = ''
           this.message = data.message
           sessionStorage.setItem('userid',data.userid)
+          window.location.href = 'https://localhost';
         } else if (response.status === 403 || response.status === 400) {
           isLoggedIn.value = 0 
           this.password = ''
@@ -173,12 +180,14 @@ export default {
           body: `username=${encodeURIComponent(this.username)}&password1=${encodeURIComponent(this.password)}&password2=${encodeURIComponent(this.password2)}&alias=${encodeURIComponent(this.username)}`,
         });
         if (response.status === 200) {
+          
           isLoggedIn.value = 1
           this.password = ''
           this.password2 = ''
           const data = await response.json()
           this.message = data.message
           sessionStorage.setItem('userid',data.userid);
+          window.location.href = 'https://localhost';
         } else if (response.status === 403 || response.status === 400) {
           isLoggedIn.value = 0
           this.password = ''

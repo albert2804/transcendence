@@ -3,16 +3,127 @@
   import { isLoggedIn } from '~/store';
   watchEffect(() => {
   isLoggedIn.value = isLoggedIn.value
-})
+  })
 
   import { ref, onMounted } from 'vue';
+  import { useRoute } from 'vue-router';
   
   const client_id = import.meta.env.VITE_42INTRA_CLIENT_ID.split('"').join('');
   const redirect_uri = ref('');
+  const route = useRoute();
+  const router = useRouter();
+  const message = ref('');
+  const error = ref('');
+  const qmessage = ref('');
+  const qerror = ref('');
+  const username = ref('');
+  const password = ref('');
+  const password2 = ref('');
+  const reg_form = ref(false);
+  // const isLoggedIn = ref(2);
 
   onMounted(() => {
     redirect_uri.value = encodeURIComponent(window.location.origin + "/endpoint/auth/callback");
+    qerror.value = route.query.error;
+    qmessage.value = route.query.message;
+
+    router.replace({ path: route.path });
   });
+  const login = async () => 
+  {
+    isLoggedIn.value = 2
+    message.value = ''
+    message.error = ''
+    qerror.value = ''
+    try {
+      const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+      const response = await fetch('/endpoint/api/userlogin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+          'username': username.value,
+          'password': password.value,
+        })
+      });
+      const data = await response.json()
+      if (response.status === 200) {
+        isLoggedIn.value = 1
+        password.value = ''
+        error.value = ''
+        message.value = data.message
+        sessionStorage.setItem('userid',data.userid)
+      } else if (response.status === 403 || response.status === 400) {
+        isLoggedIn.value = 0 
+        password.value = ''
+        message.value=''
+        error.value = data.error
+      }
+      } catch (error) {
+        console.error('Error:', error)
+      }
+  };
+
+  const logout = async () => {
+  isLoggedIn.value = 2;
+  message.value = '';
+  error.value = '';
+  try {
+    const response = await fetch('/endpoint/api/userlogout', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    const data = await response.json();
+    if (response.status === 200) {
+      isLoggedIn.value = 0;
+      username.value = '';
+      password.value = '';
+      message.value = data.message;
+      sessionStorage.removeItem('userid');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+
+const register = async () => {
+  isLoggedIn.value = 2;
+  message.value = '';
+  error.value = '';
+  try {
+    const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value;
+    const response = await fetch('/endpoint/api/userregister', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': csrfToken,
+      },
+      body: `username=${encodeURIComponent(username.value)}&password1=${encodeURIComponent(password.value)}&password2=${encodeURIComponent(password2.value)}&alias=${encodeURIComponent(username.value)}`,
+    });
+    if (response.status === 200) {
+      isLoggedIn.value = 1;
+      password.value = '';
+      password2.value = '';
+      const data = await response.json();
+      error.value = '';
+      message.value = data.message;
+      sessionStorage.setItem('userid', data.userid);
+    } else if (response.status === 403 || response.status === 400) {
+      isLoggedIn.value = 0;
+      password.value = '';
+      password2.value = '';
+      const data = await response.json();
+      message.value='';
+      error.value = data.error;
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  }};
 
   const generateRandomString = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -31,7 +142,9 @@
     <div class="card-body">
       <!-- ALERTS -->
       <div v-if="message" class="alert alert-success" role="alert">{{ message }}</div>
+      <div v-if="qmessage" class="alert alert-success" role="alert">{{ qmessage }}</div>
       <div v-if="error" class="alert alert-danger" role="alert">{{ error }}</div>
+      <div v-if="qerror" class="alert alert-danger" role="alert">{{ qerror }}</div>
       <!-- LOGIN FORM -->
       <form v-if="isLoggedIn != 1 && !reg_form">
         <div class="mb-3">
@@ -88,7 +201,7 @@
   </div>
 </template>
 
-<script>
+<!-- <script>
 export default {
   name: 'LoginCard',
     data() {
@@ -102,38 +215,6 @@ export default {
     }
   },
   methods: {
-    async login() {
-      isLoggedIn.value = 2
-      this.message = ''
-      this.error = ''
-      try {
-        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-        const response = await fetch('/endpoint/api/userlogin', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-          },
-          body: JSON.stringify({
-            'username': this.username,
-            'password': this.password,
-          })
-        });
-        const data = await response.json()
-        if (response.status === 200) {
-          isLoggedIn.value = 1
-          this.password = ''
-          this.message = data.message
-          sessionStorage.setItem('userid',data.userid)
-        } else if (response.status === 403 || response.status === 400) {
-          isLoggedIn.value = 0 
-          this.password = ''
-          this.error = data.error
-        }
-      } catch (error) {
-        console.error('Error:', error)
-      }
-    },
     async logout() {
       isLoggedIn.value = 2
       this.message = ''
@@ -192,7 +273,7 @@ export default {
     },
   }
 }
-</script>
+</script> -->
 
 <style>
   .card-size {

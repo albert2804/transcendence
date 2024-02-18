@@ -15,7 +15,9 @@
 </template>
 
 <script>
+
 export default {
+  name: 'BracketsTournament',
   props: ['numberOfPlayers', 'matches'],
   data() {
     return {

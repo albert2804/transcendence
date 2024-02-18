@@ -9,8 +9,8 @@
       </div>
     </div>
 
-    <div style="margin-bottom: 3%;" class="name-box row">
-      <div v-for="index in nbr_players" style="min-width: 50%; margin-bottom: 1%" :key="index" class="name-input d-flex col">
+    <div style="margin-bottom: 3%;" class="name-box row flex-wrap">
+      <div v-for="index in nbr_players" style="min-width: 50%; margin-bottom: 1%" :key="index" class="name-input d-flex col-12 col-lg-1">
         <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
           <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio1' + index"
             autocomplete="off" checked @change="setActiveRadio('Player', index)"/>
@@ -30,13 +30,19 @@
     </div>
 
     <button type="submit" @click="startTournament($event)" class="btn btn-primary">Start Tournament</button>
+    <div v-if="this.tournamentStarted">
+      <BracketsTournament :numberOfPlayers="nbr_players" :matches="all_matches"/>
+    </div>
   </form>
 </template>
 
 
 <script>
+import tournamentVue from '../../pages/tournament.vue';
+import BracketsTournament from './BracketsTournament.vue';
 
 export default {
+  components: { BracketsTournament },
   name: 'FormTournament',
   props: {
     local: Boolean,
@@ -52,6 +58,7 @@ export default {
       tournamentSize: [4, 8, 16, 32],
       selectPos: 0,
       nbr_players: '4',
+      tournamentStarted: false,
     };
   },
   computed: {
@@ -111,11 +118,32 @@ export default {
       }
     },
 
+    createMatches() {
+      const total_games = this.nbr_players - 1; 
+      for (let match = 0; match < total_games; match++) {
+          console.log(Math.log2(total_games) - Math.floor(Math.log2(match + 1)))
+          this.all_matches.push({
+            is_round: Math.floor(Math.log2(total_games + 1)) - Math.floor(Math.log2(total_games - match)),
+            game_nbr: match + 1, 
+            l_player: -1,
+            r_player: -1,
+            l_score: 0,
+            r_score: 0,
+          });
+          if (this.all_matches[match].is_round == 1) {
+            this.all_matches[match].l_player = this.all_players[match * 2];
+            this.all_matches[match].r_player = this.all_players[match * 2 + 1];
+          }
+        }
+    },
+
     async startTournament(event) {
       event.preventDefault();
+      this.createMatches()
       // TODO: needs to call backend for tournament handling which is not yet implementet
       console.log(this.all_players);
       console.log("Tournament handling not yet implemented in backend");
+      this.tournamentStarted = true;
       const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
       const response = await fetch('/endpoint/tournament/logic/', {
         method: 'POST',

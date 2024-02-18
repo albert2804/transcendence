@@ -45,62 +45,62 @@ def get_user_by_username(username):
     return get_user_model().objects.get(username=username)
 
 
-async def invite_to_tournament(user1, user2):
-  consumer = ChatConsumer()
-  # check if the other user already invited this user
-  # if user in await sync_to_async(list)(user1.game_invites_received.all()):
-    # check if both player object exist
-      # (player object is created when the user connects and deleted when the user disconnects)
-  player1 = Player.get_player_by_user(user1)
-  player2 = Player.get_player_by_user(user2)
-  print("PLAYERS")
-  print(player1.user);
-  print(player2.user);
-  if player1 == None or player2 == None:
-    await consumer.save_and_send_message(user2, user1, 'Player seems to be offline. Try again later.', datetime.now(), 'info')
-    return
-  # check if already playing
-  # (a playing player has a game_handler attribute which is not None)
-  if player1.game_handler != None or player2.game_handler != None:
-    await consumer.save_and_send_message(user2, user1, 'Player is already playing. Try again later.', datetime.now(), 'info')
-    return
-  # remove players from the waiting rooms
-    # (to avoid multiple games running for the same players)
-  game_consumer = RemoteGameConsumer()
-  if player1 in game_consumer.training_waiting_room:
-    game_consumer.training_waiting_room.remove(player1)
-  if player1 in game_consumer.ranked_waiting_room:
-    game_consumer.ranked_waiting_room.remove(player1)
-  if player2 in game_consumer.training_waiting_room:
-    game_consumer.training_waiting_room.remove(player2)
-  if player2 in game_consumer.ranked_waiting_room:
-    game_consumer.ranked_waiting_room.remove(player2)
-  # send info message to both users
-  await consumer.save_and_send_message(user2, user1, 'You accepted the game invite.', datetime.now(), 'info')
-  await consumer.save_and_send_message(user1, user2, 'Game invite got accepted.', datetime.now(), 'info')
-  # remove invites from both users
-  await sync_to_async(user1.game_invites.remove)(user2)
-  await sync_to_async(user2.game_invites.remove)(user1)
-  # create a new game handler
-  game_handler = await GameHandler.create(player1, player2, ranked=False)
-  # open the game modal for both players
-  await game_handler.channel_layer.group_send(
-    game_handler.game_group,
-    {
-      'type': 'open_game_modal',
-    })
-  # start the game in another thread
-  asyncio.ensure_future(game_handler.start_game())
-  return
-  #check if already invited
-  #if user in await sync_to_async(list)(user1.game_invites.all()):
-  #  await consumer.save_and_send_message(user2, user1, 'You already invited this user.', datetime.now(), 'info')
-  #else:
-  # invite the other user
-  await sync_to_async(user1.game_invites.add)(user2)
-  await sync_to_async(user2.game_invites.add)(user1)
-  await consumer.save_and_send_message(user2, user1, 'You got a game invite.', datetime.now(), 'info')
-  await consumer.save_and_send_message(user1, user2, 'You got a game invite.', datetime.now(), 'info')
+# async def invite_to_tournament(user1, user2):
+#   consumer = ChatConsumer()
+#   # check if the other user already invited this user
+#   # if user in await sync_to_async(list)(user1.game_invites_received.all()):
+#     # check if both player object exist
+#       # (player object is created when the user connects and deleted when the user disconnects)
+#   player1 = Player.get_player_by_user(user1)
+#   player2 = Player.get_player_by_user(user2)
+#   print("PLAYERS")
+#   print(player1.user);
+#   print(player2.user);
+#   if player1 == None or player2 == None:
+#     await consumer.save_and_send_message(user2, user1, 'Player seems to be offline. Try again later.', datetime.now(), 'info')
+#     return
+#   # check if already playing
+#   # (a playing player has a game_handler attribute which is not None)
+#   if player1.game_handler != None or player2.game_handler != None:
+#     await consumer.save_and_send_message(user2, user1, 'Player is already playing. Try again later.', datetime.now(), 'info')
+#     return
+#   # remove players from the waiting rooms
+#     # (to avoid multiple games running for the same players)
+#   game_consumer = RemoteGameConsumer()
+#   if player1 in game_consumer.training_waiting_room:
+#     game_consumer.training_waiting_room.remove(player1)
+#   if player1 in game_consumer.ranked_waiting_room:
+#     game_consumer.ranked_waiting_room.remove(player1)
+#   if player2 in game_consumer.training_waiting_room:
+#     game_consumer.training_waiting_room.remove(player2)
+#   if player2 in game_consumer.ranked_waiting_room:
+#     game_consumer.ranked_waiting_room.remove(player2)
+#   # send info message to both users
+#   await consumer.save_and_send_message(user2, user1, 'You accepted the game invite.', datetime.now(), 'info')
+#   await consumer.save_and_send_message(user1, user2, 'Game invite got accepted.', datetime.now(), 'info')
+#   # remove invites from both users
+#   await sync_to_async(user1.game_invites.remove)(user2)
+#   await sync_to_async(user2.game_invites.remove)(user1)
+#   # create a new game handler
+#   game_handler = await GameHandler.create(player1, player2, ranked=False)
+#   # open the game modal for both players
+#   await game_handler.channel_layer.group_send(
+#     game_handler.game_group,
+#     {
+#       'type': 'open_game_modal',
+#     })
+#   # start the game in another thread
+#   asyncio.ensure_future(game_handler.start_game())
+#   return
+#   #check if already invited
+#   #if user in await sync_to_async(list)(user1.game_invites.all()):
+#   #  await consumer.save_and_send_message(user2, user1, 'You already invited this user.', datetime.now(), 'info')
+#   #else:
+#   # invite the other user
+#   await sync_to_async(user1.game_invites.add)(user2)
+#   await sync_to_async(user2.game_invites.add)(user1)
+#   await consumer.save_and_send_message(user2, user1, 'You got a game invite.', datetime.now(), 'info')
+#   await consumer.save_and_send_message(user1, user2, 'You got a game invite.', datetime.now(), 'info')
 
 async def startTournament(request):
   if await sync_to_async(lambda: request.user.is_authenticated)():

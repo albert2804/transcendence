@@ -9,7 +9,7 @@
 <template>
     <div class="container-fluid vh-100">
       <div style="display: flex; justify-content: center; margin-top: 20vh;">
-        <div v-if="isLoggedIn === 1">
+        <div v-if="isLoggedIn === 1" style="display: flex; justify-content: center;">
           <UserInfo />
           <UserProfilePic />
         </div>

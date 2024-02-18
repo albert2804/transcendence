@@ -1,7 +1,8 @@
 <template>
   <div class="container-fluid vh-100">
       <h1 class="text-center">Leaderboard</h1>
-      <table class="table table-striped table-hover">
+      <!-- <table class="table table-striped table-hover"> -->
+        <table class="table nes-table is-bordered is-centered table-hover">
         <thead class="thread-dark">
           <tr>
             <th scope = "col">#</th>
@@ -21,7 +22,7 @@
             <td>{{ user.num_games_played / user.num_games_won }}</td>
             <td>
               <router-link :to="{ name: 'userinfopage', query: { username: user.username } }">
-                <button type="button" class="btn btn-primary">View Profile</button>
+                <button type="button" class="btn nes-btn btn-primary">View Profile</button>
               </router-link>
             </td>
           </tr>

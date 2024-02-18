@@ -10,13 +10,22 @@ Example:
   })  
 </script>
 -->
-
 <template>
-  <div>
-    <NavBar />
-    <ChatButton />
+  <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"> -->
+  <!-- minify -->
+  <!-- <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" /> -->
+  <!-- core style only -->
+  <!-- <link href="https://unpkg.com/nes.css/css/nes-core.min.css" rel="stylesheet" /> -->
+  <div class="nes-container  is-rounded with-title vh-80 is-centered" style="display: flex; height: calc(100vh - 20px); justify-content: center; align-items: center;">
+    <!-- <div style="display: flex; justify-content: center; margin-top: 20vh;"> -->
+    <!-- <p class="title">A 42 PONG GAME</p> -->
     <SettingsBtn />
     <slot />
+    <ChatButton />
+    
+    <NavBar />
   </div>
 </template>
 

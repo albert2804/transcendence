@@ -20,7 +20,7 @@
             <td>{{ user.num_games_played }}</td>
             <td>{{ user.num_games_played / user.num_games_won }}</td>
             <td>
-              <router-link :to="{ name: 'infopage', query: { username: user.username } }">
+              <router-link :to="{ name: 'userinfopage', query: { username: user.username } }">
                 <button type="button" class="btn btn-primary">View Profile</button>
               </router-link>
             </td>

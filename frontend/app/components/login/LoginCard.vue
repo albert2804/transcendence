@@ -137,8 +137,9 @@ const register = async () => {
 
 
 <template>
-  <div class="card card-size">
-    <div class="card-header">Login / Register</div>
+  <section class="nes-container with-title is-centered" style="max-width: 30%">
+    <p class="title" v-if="isLoggedIn!=1 && !reg_form">Login</p>
+    <p class="title" v-if="isLoggedIn == 0 && reg_form">Register</p>
     <div class="card-body">
       <!-- ALERTS -->
       <div v-if="message" class="alert alert-success" role="alert">{{ message }}</div>
@@ -147,48 +148,48 @@ const register = async () => {
       <div v-if="qerror" class="alert alert-danger" role="alert">{{ qerror }}</div>
       <!-- LOGIN FORM -->
       <form v-if="isLoggedIn != 1 && !reg_form">
-        <div class="mb-3">
+        <div class="nes-field mb-3">
           <label for="InputUsername" class="form-label">Username</label>
-          <input v-model="username" @keyup.enter="$refs.loginpwfield.focus()" ref="loginnamefield" type="text" class="form-control" id="InputUsername" aria-describedby="usernameHelp">
+          <input v-model="username" @keyup.enter="$refs.loginpwfield.focus()" ref="loginnamefield" type="text" class="form-control nes-input" id="InputUsername" aria-describedby="usernameHelp">
         </div>
-        <div class="mb-3">
+        <div class="nes-field mb-3">
           <label for="InputPassword" class="form-label">Password</label>
-          <input v-model="password" @keyup.enter="$refs.loginbutton.focus()" ref="loginpwfield" type="password" class="form-control" id="InputPassword">
+          <input v-model="password" @keyup.enter="$refs.loginbutton.focus()" ref="loginpwfield" type="password" class="form-control nes-input" id="InputPassword">
         </div>
         <div class="button-list">
-          <button type="button" @keyup.enter="$refs.loginnamefield.focus()" ref="loginbutton" class="btn btn-primary" @click="login">Login</button>
-          <a class="btn btn-link btn-sm" @click="reg_form = true; error = ''; message = ''">create account</a>
+          <button type="button" @keyup.enter="$refs.loginnamefield.focus()" ref="loginbutton" class="btn nes-btn btn-primary" @click="login">Login</button>
+          <a class="nes-btn btn-primary btn-sm" @click="reg_form = true; error = ''; message = ''">create account</a>
         </div>
       </form>
       <form v-if="isLoggedIn != 1 && !reg_form">
+        <p> Alternatively, 42 students can log in with their 42 intra accounts.<br> Just click on the magic button below.</p>
       <div class="button-list">
-        Alternatively, 42 students can just log in with their intra accounts at 42. Just click on the magic button below
-        <button type="button" ref="loginbutton_42intra" class="btn btn-primary" @click="redirectToIntraLogin">CLICK ME TO 42!</button>
+        <button type="button" ref="loginbutton_42intra" class="btn nes-btn" @click="redirectToIntraLogin">CLICK ME TO 42!</button>
       </div>
       </form>
       <!-- REGISTRATION FORM -->
       <form v-if="isLoggedIn == 0 && reg_form">
-        <div class="mb-3">
+        <div class="nes-field mb-3">
           <label for="InputUsername" class="form-label">Username</label>
-          <input v-model="username" @keyup.enter="$refs.regpwfield.focus()" ref="regnamefield" type="text" class="form-control" id="InputUsername" aria-describedby="usernameHelp">
+          <input v-model="username" @keyup.enter="$refs.regpwfield.focus()" ref="regnamefield" type="text" class="form-control nes-input" id="InputUsername" aria-describedby="usernameHelp">
         </div>
-        <div class="mb-3">
+        <div class="nes-field mb-3">
           <label for="InputPassword" class="form-label">Password</label>
-          <input v-model="password" @keyup.enter="$refs.regpw2field.focus()" ref="regpwfield" type="password" class="form-control" id="InputPassword">
+          <input v-model="password" @keyup.enter="$refs.regpw2field.focus()" ref="regpwfield" type="password" class="form-control nes-input" id="InputPassword">
         </div>
-        <div class="mb-3">
+        <div class="nes-field mb-3">
           <label for="InputPassword2" class="form-label">Password (repeat)</label>
-          <input v-model="password2" @keyup.enter="$refs.regbutton.focus()" ref="regpw2field" type="password" class="form-control" id="InputPassword2">
+          <input v-model="password2" @keyup.enter="$refs.regbutton.focus()" ref="regpw2field" type="password" class="form-control nes-input" id="InputPassword2">
         </div>
         <div class="button-list">
-          <button type="button" @keyup.enter="$refs.regnamefield.focus()" ref="regbutton" class="btn btn-primary" @click="register">Register</button>
-          <a class="btn btn-link btn-sm" @click="reg_form = false; error = ''; message = ''">login</a>
+          <button type="button" @keyup.enter="$refs.regnamefield.focus()" ref="regbutton" class="btn nes-btn btn-primary" @click="register">Register</button>
+          <a class="btn nes-btn btn-link btn-sm" @click="reg_form = false; error = ''; message = ''">login</a>
         </div>
       </form>
       <!-- LOGGED IN -->
       <div v-if="isLoggedIn == 1">
         <div class="button-list">
-          <button type="button" class="btn btn-primary" @click="logout">Logout</button>
+          <button type="button" class="btn nes-btn btn-primary" @click="logout">Logout</button>
         </div>
       </div>
       <!-- LOADING SPINNER -->
@@ -198,7 +199,7 @@ const register = async () => {
           </div>
         </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <!-- <script>

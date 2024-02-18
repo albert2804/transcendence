@@ -35,24 +35,40 @@
         <!-- Start game - button --->
 
         <div v-if="showMenu">
-          <button type="button" class="btn nes-btn btn-primary" @click="startTrainingGame">Start Training Game</button>
+          <div class="row">
+            <div class="col">
+              <button type="button" class="btn nes-btn btn-primary" @click="startTrainingGame">Start Training Game</button>
+            </div>
+          </div>
         </div>
-        <div v-if="showMenu" style="height: 5px;"></div>
         <div v-if="showMenu">
-          <button type="button" class="btn nes-btn btn-primary" @click="startLocalGame">Start Local Game</button>
+          <div class="row">
+            <div class="col">
+              <button type="button" class="btn nes-btn btn-primary" @click="startLocalGame">Start Local Game</button>
+            </div>
+          </div>
         </div>
-        <div v-if="showMenu && isLoggedIn == 1" style="height: 5px;"></div>
         <div v-if="showMenu && isLoggedIn == 1">
-          <button type="button" class="btn nes-btn btn-primary" @click="startRankedGame">Start Ranked Game</button>
+          <div class="row">
+            <div class="col">
+              <button type="button" class="btn nes-btn btn-primary" @click="startRankedGame">Start Ranked Game</button>
+            </div>
+          </div>
         </div>
-        <div v-if="showMenu && isLoggedIn == 1" style="height: 5px;"></div>
         <div v-if="showMenu && isLoggedIn == 1">
-          <button type="button" class="btn nes-btn btn-primary" @click="createTournament">Create Tournament</button>
+          <div class="row">
+            <div class="col">
+              <button type="button" class="btn nes-btn btn-primary" @click="createTournament">Create Tournament</button>
+            </div>
+          </div>
         </div>
         <!-- play on this device - button --->
-        <div v-if="!playOnThisDevice" style="height: 5px;"></div>
         <div v-if="!playOnThisDevice">
-          <button type="button" class="btn nes-btn btn-primary" @click="changeDevice">Play on this device</button>
+          <div class="row">
+            <div class="col">
+              <button type="button" class="btn nes-btn btn-primary" @click="changeDevice">Play on this device</button>
+            </div>
+          </div>
         </div>
         <!-- alias screen -->
         <div class= "nes-field" v-if="showAliasScreen || showAliasScreen2">
@@ -443,6 +459,10 @@
   height: 3%;
   background-color: pink;
   border-radius: 50%;
+}
+
+.btn-primary{
+  width: 97%;
 }
 
 </style>

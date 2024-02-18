@@ -4,25 +4,12 @@ html body {
   margin: 0;
   padding: 0;
   height: 100%;
-  /* background-image: linear-gradient(to right bottom, #051937, #004d7a, #008793, #00bf72, #a8eb12); */
-	/* background-color: #0f4c81; */
   background-size: cover;
   background-position: center;
-	/* background-color: #111111; */
   font-family: 'Press Start 2P', system-ui;
-  /* color: #33ff33; */
   font-weight: 100;
   font-style: normal;
   }
-
-/* .button {
-	background-color: #a48d7f; /* Default background color for buttons */
-	/* color: #ffffff; Default text color for buttons */
-	/* padding: 10px 15px; */
-	/* border: none; */
-	/* border-radius: 5px; */
-	/* cursor: pointer; */
-  /* } */
 
 .card-size {
     min-width: px;
@@ -41,15 +28,6 @@ html body {
     align-items: center;
   }
 
-/* .shade-bg {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(255,255,255,0.7);
-  } */
-
 .centered-headings {
 	display: flex;
 	flex-direction: column;
@@ -58,7 +36,3 @@ html body {
 	height: 100vh;
 	margin: 10vh;
   }
-  
-  /* Add more styles as needed */
-  
-  /* Add more global styles as needed */

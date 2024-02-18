@@ -12,10 +12,9 @@
 			{
 				const urlParams = new URLSearchParams(window.location.search);
 				const redirectTo = urlParams.get('to');
-				if (redirectTo) 
-				{
-					this.$router.push(redirectTo);
-				}
+				const error = urlParams.get('error');
+				if (redirectTo)
+					this.$router.push({ name: redirectTo, query: { error: error } });
 			}
 		}
 	};

@@ -125,12 +125,6 @@
     }
   },
   mounted () {
-    // // set the game canvas to the correct size
-    // // this.$refs.gameFieldRef.style.width = `${window.innerWidth}px`;
-    // this.$refs.gameFieldRef.style.height = `${window.innerHeight * 0.90}px`;
-
-    // window.addEventListener('resize', this.handleResize);
-    // watch for changes in the login status (need to close and reopen the websocket when the user logs in or out)
     watchEffect(() => {
       if (isLoggedIn.value === 1) {
         this.closeWebSocket();
@@ -143,7 +137,6 @@
   },
   beforeDestroy () {
     this.closeWebSocket();
-    // window.removeEventListener('resize', this.handleResize);
   },
   expose: ['giveUpGame'], // expose function to parent component
   methods: {
@@ -408,11 +401,6 @@
       await new Promise(resolve => setTimeout(resolve, 3000));
       this.showmodal=false;
     },
-    // // function to handle the window resize event
-    // handleResize() {
-    //   // this.$refs.gameFieldRef.style.width = `${window.innerWidth}px`;
-    //   this.$refs.gameFieldRef.style.height = `${window.innerHeight* 0.90}px`;
-    // },
   }
 };
 </script>
@@ -422,9 +410,7 @@
   
   .game-canvas {
   width: 100%;
-  height: 90vh;
-  padding-bottom: 50%;
-  /* border: 3px solid #0b51b4; */
+  height: 97vh;
   background-color: #000;
   position: relative;
   overflow: hidden;

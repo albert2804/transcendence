@@ -7,8 +7,8 @@ import { isLoggedIn } from '~/store';
 </script>
 
 <template>
-  <div class="container-fluid vh-100">
-    <div style="display: flex; flex-direction: column; align-items: center;">
+  <div>
+    <div>
       <h1>Youre on the tournament site</h1>
       <div v-if="isLoggedIn">
         <button @click="toggleForm" class="btn btn-primary">

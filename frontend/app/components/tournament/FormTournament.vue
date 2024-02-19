@@ -1,5 +1,5 @@
 <template>
-  <form style="min-width: 400px; max-width: 800px; margin: auto;">
+  <form style="max-width: 800px; margin: auto; overflow: hidden;">
     <div class="mb-3">
       <label for="nbrPlayerRange" class="form-label">Number of Total Players</label>
       <div class="d-flex align-items-center">

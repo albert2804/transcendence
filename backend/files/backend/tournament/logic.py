@@ -15,6 +15,7 @@ from .models import Tournament
 import time
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
+from django.core.exceptions import ObjectDoesNotExist
 import asyncio
 import json
 
@@ -40,13 +41,17 @@ def signUpTwoDummies(request):
   else:
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
-@sync_to_async
 def get_user_by_username(username):
-    return get_user_model().objects.get(username=username)
+    try:
+        user = CustomUser.objects.get(username=username)
+        return user
+    except ObjectDoesNotExist:
+        return None
+# def ready_player():
 
+# async def invite_to_tournament(user1, player1, user2, player2):
+  # consumer = ChatConsumer()
 
-# async def invite_to_tournament(user1, user2):
-#   consumer = ChatConsumer()
 #   # check if the other user already invited this user
 #   # if user in await sync_to_async(list)(user1.game_invites_received.all()):
 #     # check if both player object exist
@@ -102,29 +107,44 @@ def get_user_by_username(username):
 #   await consumer.save_and_send_message(user2, user1, 'You got a game invite.', datetime.now(), 'info')
 #   await consumer.save_and_send_message(user1, user2, 'You got a game invite.', datetime.now(), 'info')
 
-async def startTournament(request):
-  if await sync_to_async(lambda: request.user.is_authenticated)():
+def initTournament(request):
+  if request.user.is_authenticated:
     if request.method == 'POST':
       data = json.loads(request.body)
-      User = get_user_model()
-      print(len(data))
-      print(data)
-      number = await sync_to_async(Tournament.objects.count)()
-      curr_tour = await sync_to_async(Tournament.objects.create)(tournament_name="Tournament" + str(number), start_date=timezone.now())
+      number = Tournament.objects.count()
+      curr_tour = Tournament.objects.create(tournament_name="Tournament" + str(number), start_date=timezone.now())
       total_games = len(data) - 1
-      print(total_games)
+      print(data);
       for match in range(total_games):
         # initiate games of the first round
         if match <= total_games / 2:
-          user1 = await get_user_by_username(data[match * 2]['name'])
-          user2 = await get_user_by_username(data[match * 2 + 1]['name'])
-          time.sleep(1)
-          await invite_to_tournament(user1, user2)
-        # else:
+          user1 = get_user_by_username(data[match * 2]['name']);
+          player1 = Player.get_player_by_user(user1);
+          user2 = get_user_by_username(data[match * 2 + 1]['name']);
+          player2 = Player.get_player_by_user(user2);
+          print(match)
+          print(user1.alias)
+          print(player1)
+          print(user2.alias)
+          print(player2)
+          if player1 is None or player2 is None:
+            print("ERROR Player isnt None\n"); 
+          game = RemoteGame.objects.create(
+				    player1=player1.get_user(),
+				    player2=player2.get_user(),
+			    )
+          curr_tour.games.add(game);
+          # await invite_to_tournament(user1, player1, user2, player2)
+        else:
+          print("YOU HERE")
+          game =RemoteGame.objects.create()
+          curr_tour.games.add(game);
+
+          
           # await invite_to_tournament(user1, user2)
       # Your existing code for tournament logic goes here
       # TODO: implement tournament logic
       # TODO: finished
-      return JsonResponse({'message': 'Data received'})
+      return JsonResponse({'update': 'Tournament Finished'})
     else:
       return JsonResponse({'error': 'Invalid request'}, status=400)

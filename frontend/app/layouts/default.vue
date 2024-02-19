@@ -18,7 +18,9 @@ Example:
   <!-- <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" /> -->
   <!-- core style only -->
   <!-- <link href="https://unpkg.com/nes.css/css/nes-core.min.css" rel="stylesheet" /> -->
-  <div class="nes-container is-rounded with-title vh-80 is-centered" style="display: flex; flex-direction: column; justify-content: space-between; height: 100vh;">
+  <div class="nes-container is-rounded with-title vh-80 is-centered" 
+  style="display: flex; flex-direction: column; justify-content: space-between; height: 95vh;
+  margin: 20px 30px 30px">
     <div style="overflow: auto;">
     <!-- <div style="display: flex; justify-content: center; margin-top: 20vh;"> -->
       <!-- <p class="title">A 42 PONG GAME</p> -->

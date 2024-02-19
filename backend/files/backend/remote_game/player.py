@@ -29,6 +29,7 @@ class Player:
 	# Returns the player object of the given user
 	@classmethod
 	def get_player_by_user(cls, user):
+		print(Player.all_players)
 		for player in Player.all_players:
 			if player.get_user() == user:
 				return player

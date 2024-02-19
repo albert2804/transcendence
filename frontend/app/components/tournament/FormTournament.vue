@@ -31,22 +31,19 @@
 
     <button type="submit" @click="startTournament($event)" class="btn btn-primary">Start Tournament</button>
     <div v-if="this.tournamentStarted">
-      <BracketsTournament :numberOfPlayers="nbr_players" :matches="all_matches"/>
+      <BracketsTournament :numberOfPlayers="nbr_players" :matches="all_matches" :loggedInUser="loggedInUser"/>
     </div>
   </form>
 </template>
 
 
 <script>
-import tournamentVue from '../../pages/tournament.vue';
 import BracketsTournament from './BracketsTournament.vue';
 
 export default {
   components: { BracketsTournament },
   name: 'FormTournament',
-  props: {
-    local: Boolean,
-  },
+  props: ['local', 'loggedInUser'],
   mounted() {
     this.all_players = [];
     this.updatePlayerCount();

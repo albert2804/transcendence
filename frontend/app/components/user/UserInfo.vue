@@ -6,8 +6,8 @@
       <p>Alias: {{ userStats.alias }} </p>
       <p>Games Won: {{ userStats.games_won }}</p>
       <p>Games Played: {{ userStats.games_played }}</p>
-      <!-- <p>Matchmade Ranking: {{ userStats.mmr }}</p>
-      <p>Overall Ranking: {{ userStats.ranking }}</p> -->
+      <p>Matchmade Ranking: {{ userStats.mmr }}</p>
+      <p>Overall Ranking: {{ userStats.ranking }}</p>
     </div>
   </div>
 </template>

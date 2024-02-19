@@ -10,8 +10,8 @@
     <div class="container-fluid vh-100">
       <div style="display: flex; justify-content: center; margin-top: 20vh;">
         <div v-if="isLoggedIn === 1">
-          <UserInfo />
           <UserProfilePic />
+          <UserInfo />
         </div>
         <div v-else>
           <h2>No user statistics available.</h2>

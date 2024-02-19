@@ -2,6 +2,8 @@ from django.http import JsonResponse, HttpResponse
 from api.models import CustomUser
 from api.forms import CustomUserCreationForm
 from django.shortcuts import redirect
+from django.core.validators import FileExtensionValidator
+from django.core.exceptions import ValidationError
 import os, json
 
 RED = "\033[31m"
@@ -20,12 +22,9 @@ def send_userinfo(request):
 			try:
 				response_data = {
 					'username': user_data.username,
-					#'date_joined':statistics_data.user.date_joined,
 					'alias': user_data.alias,
 					'games_played': user_data.num_games_played,
 					'games_won': user_data.num_games_won,
-					#'mmr':statistics_data.mmr,
-					#'ranking':statistics_data.ranking,
 					}
 				return JsonResponse(response_data,
 					status=200)
@@ -71,12 +70,17 @@ def handle_profilepic(request):
 				user = CustomUser.objects.get(username=request.user)
 				if 'newPic' in request.FILES:	
 					user.profile_pic = request.FILES['newPic']
+					validators=[FileExtensionValidator(allowed_extensions=['jpeg','png'])]
+					for validator in validators:
+						validator(request.FILES['newPic'])
 					user.save()
 					return JsonResponse({'url': user.profile_pic.url}, status=200)
 				else:
 					return JsonResponse({'error': 'No Profile Picture found for the user'}, status=404)
 			except CustomUser.DoesNotExist:
 				return JsonResponse({'error': 'User not found'}, status=404)
+			except ValidationError:
+				return JsonResponse({'error': 'File Extension not allowed'}, status=422)
 			except Exception as e:
 				return JsonResponse({'error': 'Changing profilePic failed'}, status=400) 
 	else:
@@ -98,8 +102,6 @@ def verify(request):
 				if user.check_password(data.get('old_pw')):
 					user.set_password(data.get('password1'))
 					user.save()
-					return HttpResponse("password changed")
-					# return redirect('login')
 				else:
 					return JsonResponse({'message': 'New password does not match with the old password'},
 							status=500)

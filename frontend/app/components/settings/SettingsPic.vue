@@ -55,18 +55,21 @@
         	fileInput.click(); // Trigger file input click event
       	} catch (error) {
        	 console.error('Error selecting picture:', error);
-      	}
+      		}
     	},
 
 		async changeProfilePicture (event) {
 			try {
 				const fileInput = event.target;
 				this.newPic = fileInput.files[0];
-	
+				if (this.newPic && this.newPic.size > 4000000) {
+					console.log('File size exceeds the maximum allowed size (~4MB)');
+					return ;
+				}
 				if (!this.newPic) {
-					  console.error('No file selected.');
-				  return;
-					}
+					console.error('No file selected.');
+					return ;
+				}
 				} catch(error) {
 					console.error('Error selecting Picture:', error);
 				}
@@ -90,7 +93,13 @@
 				location.reload();
 			}
 			} catch (error) {
-				console.error('Error sending picture to backend', error);
+				console.log(response.status);
+				if (response.status === 422) {
+					console.log(response.error);
+				}
+				else {
+					console.error("Unknown Error");
+				} 
 			}
 		},
 		

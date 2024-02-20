@@ -3,7 +3,7 @@
     <div :class="noUserFound ? 'col-9' : 'col-11'">
       <input class="form-control" :list="'datalistOptions' + index" :id="'exampleDataList' + index" 
               placeholder="User to search..." v-model="searchQuery" 
-              @input="searchUsers" @change="selectUser">
+              @input="searchUsers" @change="selectUser" style="min-width: 200px;">
       <datalist v-if="showResults" :id="'datalistOptions' + index">
         <option v-for="result in searchResults" :value="result.name" :key="result.id"></option>
       </datalist>

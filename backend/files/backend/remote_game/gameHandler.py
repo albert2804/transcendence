@@ -27,6 +27,7 @@ class GameHandler:
 			self.local_game = True
 		else:
 			self.local_game = False
+		# ? Why random.randint?
 		self.game_group = f"game_{random.randint(0, 1000000)}"
 		self.game = PongGame()
 		self.channel_layer = get_channel_layer()
@@ -61,6 +62,15 @@ class GameHandler:
 			)
 		return instance
 	
+	@classmethod
+	def create_tournament_game(cls, player1, player2, ranked=False):
+		return 
+
+	@classmethod
+	def create_placeholder(cls):
+		instance = cls()
+		return instance
+
 	# Returns the game handler instance from the given game group name
 	@classmethod
 	def get_game_handler_by_name(cls, game_group_name):

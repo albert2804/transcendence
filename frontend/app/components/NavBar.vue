@@ -7,61 +7,29 @@
 </script>
 
 <template>
-  <div>
-
+  <div class="nes-container vh-5" style="background-color:#f8f9fa; width: 98%">
     <GameModal modalId="pongmodal" ariaLabel="A modal to play our remote Pong Game" />
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">ft_transcendence</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <NuxtLink class="nav-link active" to="/">Home</NuxtLink>
-            </li>
-            <!-- <li class="nav-item">
-              <NuxtLink class="nav-link active" to="/localGame">Local Game</NuxtLink>
-            </li> -->
-            <li class="nav-item">
-              <NuxtLink class="nav-link active" @click="showGameModal" style="cursor: pointer;">Play</NuxtLink>
-            </li>
-            <li>
-              <NuxtLink class="nav-link active" to="/tournament">Tournament</NuxtLink>
-            </li>
-            <li>
-              <NuxtLink class="nav-link active" to="/leaderboard">Leaderboard</NuxtLink>
-            </li>
-            <li class="nav-item">
-              <NuxtLink class="nav-link active" to="/userinfopage">Info</NuxtLink>
-            </li>
-            <li class="nav-item" v-if="isLoggedIn != 1">
-              <NuxtLink class="nav-link active" to="/login">Login</NuxtLink>
-            </li>
-            <li class="nav-item" v-if="isLoggedIn === 1">
-              <NuxtLink class="nav-link active" to="/login">Logout</NuxtLink>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Dropdown
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">Something else here</a></li>
-              </ul>
-            </li>
-            <!--<li class="nav-item">
-              <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-            </li> -->
-          </ul>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#pongNavbar" 
+      data-target="#pongNavbar" aria-controls="pongNavbar" aria-expanded="false" aria-label="Toggle navigation"
+      style="width: 100%; border: none;">
+        <span style="color: black; float:left;">MENU</span>
+        <span style="color: black;">MENU</span>
+        <span style="color: black; float:right;">MENU</span>
+        <progress class="nes-progress is-pattern" value="100" max="100"></progress>
+      </button>
+        <div class="collapse navbar-collapse" id="pongNavbar">
+              <NuxtLink class="nes-btn is-primary nav-item" v-if="isLoggedIn != 1" to="/login">Login</NuxtLink>
+              <NuxtLink class="nes-btn is-primary nav-item" v-if="isLoggedIn === 1" to="/login">Logout</NuxtLink>
+              <NuxtLink class="nes-btn is-success nav-item" to="/">Home</NuxtLink>
+              <NuxtLink class="nes-btn is-warning nav-item" @click="showGameModal" style="cursor: pointer;">Play</NuxtLink>
+              <NuxtLink class="nes-btn is-warning nav-item" to="/tournament">Tournament</NuxtLink>
+              <NuxtLink class="nes-btn is-error nav-item" to="/leaderboard">Leaderboard</NuxtLink>
+              <NuxtLink class="nes-btn is-error nav-item" to="/userinfopage">UserProfile</NuxtLink>
         </div>
-      </div>
     </nav>
   </div>
-  </template>
+</template>
 
 <script>
 export default {
@@ -75,3 +43,29 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+  .nes-btn{
+    min-width: 15%;
+    color: #000000;
+    margin-right: 1%;
+    overflow: hidden;
+
+  }
+  .nes-btn:focus{
+    color: #ffffff;
+  }
+
+  .nes-progress{
+    position: relative;
+    top: 0;
+    transition: linear 0.1s;
+  }
+  .nes-progress:hover{
+    top: -3px
+  }
+
+  .nes-navbar{
+    color: black;
+  }
+</style>

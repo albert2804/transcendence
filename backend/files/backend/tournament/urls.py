@@ -1,6 +1,8 @@
 from django.urls import path
-from .logic import startTournament
+from .logic import initTournament
+from .logic import signUpTwoDummies
 
 urlpatterns = [
-    path('logic/', startTournament),
+    path('logic/', initTournament),
+    path('sign_up/', signUpTwoDummies)
 ]

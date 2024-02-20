@@ -16,8 +16,10 @@ import time
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 import asyncio
 import json
+import math
 
 def signUpTwoDummies(request):
   if request.method == 'POST':
@@ -47,8 +49,92 @@ def get_user_by_username(username):
         return user
     except ObjectDoesNotExist:
         return None
-# def ready_player():
 
+def getTournaments(request):
+  if request.user.is_authenticated:
+    if request.method == 'POST':
+      data = json.loads(request.body);
+      user = CustomUser.objects.get(username=data["name"])
+      tournament_list = Tournament.objects.filter(Q(games__player1=user) | Q(games__player2=user)).distinct()
+      json_data = Tournament.queryset_to_json(tournament_list)
+
+      return JsonResponse({'data': json_data})
+  else:
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def readyPlayer(request):
+  if request.user.is_authenticated:
+    if request.method == 'POST':
+      data = json.loads(request.body)
+      user = get_user_by_username(data["username"])
+      player = Player.get_player_by_user(user)
+      if player.game_handler != None:
+        return JsonResponse({'error': 'You have an active game'})
+      game_consumer = RemoteGameConsumer()
+      if player in game_consumer.training_waiting_room:
+        game_consumer.training_waiting_room.remove(player)
+      if player in game_consumer.ranked_waiting_room:
+        game_consumer.ranked_waiting_room.remove(player)
+      
+
+
+      print(data)
+      return JsonResponse({'message': 'Player is Ready'})
+  else:
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def initTournament(request):
+  if request.user.is_authenticated:
+    if request.method == 'POST':
+      data = json.loads(request.body)
+
+      print(data)
+      tournament_count = Tournament.objects.filter(tournament_name__startswith=data["name"]).count()
+      print(tournament_count)
+      if tournament_count == 0:
+        curr_tour = Tournament.objects.create(tournament_name=data["name"], start_date=timezone.now())
+      else:
+        curr_tour = Tournament.objects.create(tournament_name=data["name"] + str(tournament_count), start_date=timezone.now())
+
+      total_games = len(data["player"]) - 1
+      game_list = []
+      for match in range(total_games):
+        # initiate games of the first round
+        if match <= total_games / 2:
+          user1 = get_user_by_username(data["player"][match * 2]['name']);
+          user2 = get_user_by_username(data["player"][match * 2 + 1]['name']);
+          if user1 is None:
+            return JsonResponse({'error': f'Username {data["player"][match * 2]["name"]} does not exist'}, status=666)
+          if user2 is None:
+            return JsonResponse({'error': f'Username {data["player"][match * 2 + 1]["name"]} does not exit'}, status=666)
+          game = RemoteGame.objects.create(
+				    player1=user1,
+				    player2=user2,
+			    )
+          curr_tour.games.add(game);
+          game_list.append({'game_nbr': match, 'is_round': 1, 
+                            'l_player': game.player1.username, 'r_player': game.player2.username, 
+                            'l_score': game.pointsP1, 'r_score': game.pointsP2,})
+          # await invite_to_tournament(user1, player1, user2, player2)
+        else:
+          game = RemoteGame.objects.create()
+          game_list.append({'game_nbr': match, 
+                            'is_round': math.floor(math.log2(total_games + 1)) - math.floor(math.log2(total_games - match)),
+                            'l_player': "", 'r_player': "",
+                            'l_score': game.pointsP1, 'r_score': game.pointsP2,}) 
+          curr_tour.games.add(game);
+        # player1 = Player.get_player_by_user(user1);
+        # player2 = Player.get_player_by_user(user2);
+      # TODO: implement tournament logic
+      # TODO: finished
+      data_curr_tour = {
+        'tour_name': curr_tour.tournament_name,
+        'games': game_list,
+      }
+      return JsonResponse({'data': data_curr_tour})
+  else:
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+    
 # async def invite_to_tournament(user1, player1, user2, player2):
   # consumer = ChatConsumer()
 
@@ -106,45 +192,3 @@ def get_user_by_username(username):
 #   await sync_to_async(user2.game_invites.add)(user1)
 #   await consumer.save_and_send_message(user2, user1, 'You got a game invite.', datetime.now(), 'info')
 #   await consumer.save_and_send_message(user1, user2, 'You got a game invite.', datetime.now(), 'info')
-
-def initTournament(request):
-  if request.user.is_authenticated:
-    if request.method == 'POST':
-      data = json.loads(request.body)
-      number = Tournament.objects.count()
-      curr_tour = Tournament.objects.create(tournament_name="Tournament" + str(number), start_date=timezone.now())
-      total_games = len(data) - 1
-      print(data);
-      for match in range(total_games):
-        # initiate games of the first round
-        if match <= total_games / 2:
-          user1 = get_user_by_username(data[match * 2]['name']);
-          player1 = Player.get_player_by_user(user1);
-          user2 = get_user_by_username(data[match * 2 + 1]['name']);
-          player2 = Player.get_player_by_user(user2);
-          print(match)
-          print(user1.alias)
-          print(player1)
-          print(user2.alias)
-          print(player2)
-          if player1 is None or player2 is None:
-            print("ERROR Player isnt None\n"); 
-          game = RemoteGame.objects.create(
-				    player1=player1.get_user(),
-				    player2=player2.get_user(),
-			    )
-          curr_tour.games.add(game);
-          # await invite_to_tournament(user1, player1, user2, player2)
-        else:
-          print("YOU HERE")
-          game =RemoteGame.objects.create()
-          curr_tour.games.add(game);
-
-          
-          # await invite_to_tournament(user1, user2)
-      # Your existing code for tournament logic goes here
-      # TODO: implement tournament logic
-      # TODO: finished
-      return JsonResponse({'update': 'Tournament Finished'})
-    else:
-      return JsonResponse({'error': 'Invalid request'}, status=400)

@@ -66,11 +66,6 @@ class GameHandler:
 	def create_tournament_game(cls, player1, player2, ranked=False):
 		return 
 
-	@classmethod
-	def create_placeholder(cls):
-		instance = cls()
-		return instance
-
 	# Returns the game handler instance from the given game group name
 	@classmethod
 	def get_game_handler_by_name(cls, game_group_name):

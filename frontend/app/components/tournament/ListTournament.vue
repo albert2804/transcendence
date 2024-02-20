@@ -1,22 +1,26 @@
 <template>
-  <div class="container mt-5">
-    <div class="row">
-      <div class="col-md-6">
-        <h2>Ongoing Tournaments</h2>
-        <select class="form-select" v-model="selectedOngoing">
-          <option value="select">Select a tournament</option>
-          <!-- Use v-for to dynamically generate ongoing tournament options -->
-          <option v-for="tournament in ongoingTournaments" :key="tournament.id" :value="tournament.id">{{ tournament.name }}</option>
-        </select>
+  <div class="container is-centered">
+    <div class="row" style="width: 100%;">
+      <h2>Ongoing Tournaments</h2>
+      <div class="nes-container is-rounded" style="height:100%">
+        <button @click="getTournamets" style="width: 100%; height: 100%; background-color: transparent; border-color: transparent;">
+          <progress class="nes-progress is-pattern" value="100" max="100"></progress>
+        </button>
+        <!-- insert here -->
+        <div v-if="openOngoing">
+          <div v-for="(tournament, index) in ongoingTournaments" :key="index"
+            class="nes-container is-rounded">
+            <div>
+              <strong>Tournament Name:</strong> {{ tournament.tournament_name }}<br>
+              <strong>Created At:</strong> {{ tournament.created_at }}
+            </div>
+          </div>
+        </div>
       </div>
       
-      <div class="col-md-6">
-        <h2>Ended Tournaments</h2>
-        <select class="form-select" v-model="selectedEnded">
-          <option value="select">Select a tournament</option>
-          <!-- Use v-for to dynamically generate ended tournament options -->
-          <option v-for="tournament in endedTournaments" :key="tournament.id" :value="tournament.id">{{ tournament.name }}</option>
-        </select>
+      <h2>Ended Tournaments</h2>
+      <div class="nes-container is-rounded">
+
       </div>
     </div>
   </div>
@@ -25,21 +29,59 @@
 <script>
 export default {
   name: 'ListTournament',
+  props: ['loggedInUser'],
   data() {
     return {
-      selectedOngoing: 'select',
-      selectedEnded: 'select',
-      ongoingTournaments: [
-          { id: 'tournament1', name: 'Tournament 1' },
-          { id: 'tournament2', name: 'Tournament 2' },
-          { id: 'tournament3', name: 'Tournament 3' }
-      ],
-      endedTournaments: [
-          { id: 'tournament4', name: 'Tournament 4' },
-          { id: 'tournament5', name: 'Tournament 5' },
-          { id: 'tournament6', name: 'Tournament 6' }
-      ]
+      openOngoing: false,
+      tournaments: [],
+      ongoingTournaments: [],
     };
+  },
+  methods: {
+    async getTournamets() {
+      if (!this.openOngoing) {
+        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+        try {
+          const response = await fetch('/endpoint/tournament/getTournaments/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({name: this.loggedInUser}),
+          });
+          const responseData = await response.json();
+          this.tournaments = JSON.parse(responseData.data);
+          console.log('Backend response:', responseData);
+
+          this.tournaments.forEach((tournament) => {
+            this.ongoingTournaments.push(tournament);
+          });
+          console.log(this.ongoingTournaments);
+          
+          this.openOngoing = true;
+        } catch (error) {
+          console.log('Error sending signal to backend:', error);
+        }
+      }
+      else {
+        this.openOngoing = false;
+        this.tournaments = [];
+        this.ongoingTournaments = [];
+      }
+    },
   },
 };
 </script>
+
+<style>
+  .nes-progress{
+    position: relative;
+    top: 0;
+    transition: linear 0.1s;
+  }
+  .nes-progress:hover{
+    top: -3px
+  }
+
+</style>

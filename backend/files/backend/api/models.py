@@ -6,6 +6,7 @@ from django.db import models
 from chat.consumers import ChatConsumer
 from datetime import datetime
 from asgiref.sync import sync_to_async
+
 import asyncio
 
 class CustomUser(AbstractUser):
@@ -23,6 +24,7 @@ class CustomUser(AbstractUser):
 	mmr = models.IntegerField(default=200)
 	ranking = models.IntegerField(default=0)
 	date_joined = models.DateTimeField(auto_now_add=True)
+    # ... other fields ...
 	
 	# mobile = models.CharField(max_length=20, blank=True, null=True)
 	def __str__(self):

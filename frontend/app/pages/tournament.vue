@@ -20,7 +20,7 @@ import { isLoggedIn } from '~/store';
       <FormTournament v-bind:local="false" :loggedInUser="loggedInUser"/>
     </div>
     <div v-if="isLoggedIn">
-      <ListTournament />
+      <ListTournament :loggedInUser="loggedInUser"/>
     </div>
   </div>
 </template>
@@ -51,9 +51,7 @@ export default {
         }
       });
       const data = await response.json();
-      console.log(data)
       this.loggedInUser = data.username;
-      console.log(this.loggedInUser)
     } catch (error) {
       console.error('Error:', error)
     }

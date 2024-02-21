@@ -2,14 +2,14 @@
   <div class="container mt-5">
     <div class="bracket">
       <div v-for="(round, index) in rounds" :key="index" class="round list-group">
-        <div v-for="match in getMatches(round)" :key="match.id" class="match list-group-item">
-          <p>Round {{ match.is_round }}, Match {{ match.game_nbr }}</p>
-          <p>Left Player: {{ match.l_player }}</p>
-          <p>Right Player: {{ match.r_player }}</p>
-          <p>Left Score: {{ match.l_score }}</p>
-          <p>Right Score: {{ match.r_score }}</p>
-          <div v-if="match.l_player == this.loggedInUser || match.r_player == this.loggedInUser && this.loggedInUser != undefined">
-            <button class="nes-btn" @click="sendReadyPlayer($event, match.game_nbr)">Play</button>
+        <div v-for="match in getMatches(round)" :key="match.is_match" class="match list-group-item">
+          <p>Round {{ match.is_round }}, Match {{ match.is_match }}</p>
+          <p>Player 1: {{ match.player1 }}</p>
+          <p>Player 2: {{ match.player2 }}</p>
+          <p>Player1 Score: {{ match.pointsP1 }}</p>
+          <p>Player2 Score: {{ match.pointsP2 }}</p>
+          <div v-if="match.player1 == this.loggedInUser || match.player2 == this.loggedInUser && this.loggedInUser != undefined">
+            <button class="nes-btn" :class="{ goGreen: playerReady }" @click="sendReadyPlayer($event, match.is_match)">Play</button>
           </div>
         </div>
       </div>
@@ -21,7 +21,7 @@
 
 export default {
   name: 'BracketsTournament',
-  props: ['numberOfPlayers', 'matches', 'loggedInUser', 'tournamentName'],
+  props: ['matches', 'loggedInUser', 'tournamentName'],
   data() {
     return {
       playerReady: false,
@@ -30,7 +30,9 @@ export default {
   },
   computed: {
     rounds() {
-      return Math.log2(this.numberOfPlayers);
+      //this needs the amount of total players in the tournament
+      console.log(Math.log2(this.matches.length + 1))
+      return Math.log2(this.matches.length + 1);
     },
   },
   methods: {
@@ -45,7 +47,7 @@ export default {
             'Content-Type': 'application/json',
             'X-CSRFToken': csrfToken,
           },
-          body: JSON.stringify({username: this.loggedInUser, isPlayerReady:this.playerReady, game_index: game_index, tour_name: this.tournamentName}),
+          body: JSON.stringify({username: this.loggedInUser, isPlayerReady:this.playerReady, game_nbr: game_index, tour_name: this.tournamentName}),
         });
 
         const responseData = await response.json();
@@ -55,7 +57,7 @@ export default {
       }
     },
     getMatches(round) {
-      console.log(this.loggedInUser)
+      console.log(round)
       return this.matches.filter(match => match.is_round === round);
     },
   },
@@ -81,5 +83,9 @@ export default {
   display: flex;
   align-items: center;
   gap: 20px;
+}
+
+.goGreen {
+  background-color: greenyellow;
 }
 </style>

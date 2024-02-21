@@ -62,10 +62,6 @@ class GameHandler:
 			)
 		return instance
 	
-	@classmethod
-	def create_tournament_game(cls, player1, player2, ranked=False):
-		return 
-
 	# Returns the game handler instance from the given game group name
 	@classmethod
 	def get_game_handler_by_name(cls, game_group_name):
@@ -316,3 +312,6 @@ class GameHandler:
 			if game_state is not None:
 				await self.player2.send(game_state)
 			await asyncio.sleep(1 / self.player2.fps)
+
+
+

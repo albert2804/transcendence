@@ -7,8 +7,6 @@ import json
 class RemoteGame(models.Model) :
 	player1 = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='player1', null=True, blank=True)
 	player2 = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='player2', null=True, blank=True)
-	player1_ready = models.BooleanField(default=False);
-	player2_ready = models.BooleanField(default=False);
 	created_at = models.DateTimeField(auto_now_add=True)
 	started_at = models.DateTimeField(null=True)
 	finished_at = models.DateTimeField(null=True)
@@ -17,6 +15,12 @@ class RemoteGame(models.Model) :
 	winner = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True, related_name='games_won')
 	loser = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True, related_name='games_lost')
 	finished = models.BooleanField(default=False)
+	# for the tournament
+	player1_ready = models.BooleanField(default=False);
+	player2_ready = models.BooleanField(default=False);
+	# # if 0 then default game
+	is_match_nbr = models.IntegerField(default=0)
+	is_round = models.IntegerField(default=0)
 
 	def to_dict(self):
 		return {
@@ -33,6 +37,8 @@ class RemoteGame(models.Model) :
       'winner': self.winner.username if self.winner else None,
       'loser': self.loser.username if self.loser else None,
       'finished': self.finished,
+			'is_round': self.is_round,
+			'is_match': self.is_match_nbr,
     }
 	
 	def to_json(self):

@@ -7,7 +7,7 @@
 </script>
 
 <template>
-  <div class="nes-container vh-5" style="background-color:#f8f9fa; width: 98%">
+  <div class="nes-container vh-5" style="background-color:#f8f9fa; width: 98%; justify-content: center; margin: 0 auto;">
     <GameModal modalId="pongmodal" ariaLabel="A modal to play our remote Pong Game" />
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#pongNavbar" 
@@ -18,15 +18,11 @@
         <span style="color: black; float:right;">MENU</span>
         <progress class="nes-progress is-pattern" value="100" max="100"></progress>
       </button>
-        <div class="collapse navbar-collapse" id="pongNavbar">
-              <NuxtLink class="nes-btn is-primary nav-item" v-if="isLoggedIn != 1" to="/login">Login</NuxtLink>
-              <NuxtLink class="nes-btn is-primary nav-item" v-if="isLoggedIn === 1" to="/login">Logout</NuxtLink>
+        <div class="collapse navbar-collapse justify-content-center" id="pongNavbar">
               <NuxtLink class="nes-btn is-success nav-item" to="/">Home</NuxtLink>
-              <NuxtLink class="nes-btn is-warning nav-item" @click="showGameModal" style="cursor: pointer;">Play</NuxtLink>
               <NuxtLink class="nes-btn is-warning nav-item" to="/tournament">Tournament</NuxtLink>
               <NuxtLink class="nes-btn is-error nav-item" to="/leaderboard">Leaderboard</NuxtLink>
               <NuxtLink class="nes-btn is-error nav-item" to="/userinfopage">UserProfile</NuxtLink>
-              <ChatButton id="chatbutton" />
         </div>
     </nav>
   </div>
@@ -36,11 +32,6 @@
 export default {
   name: 'NavBar',
   methods: {
-    showGameModal() {
-      this.$nextTick(() => {
-        new bootstrap.Modal(document.getElementById('pongmodal')).show();
-      });
-    },
   },
 }
 </script>

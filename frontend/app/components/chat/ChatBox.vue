@@ -1,20 +1,19 @@
 <template>
 	<div>
-		<!-- CONTAINER WITH CONTACTS... -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="chatCanvas" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="chatCanvas" aria-labelledby="chatCanvasLabel">
       <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasRightLabel">
+        <h5 class="offcanvas-title" id="chatCanvasLabel">
           <i type="button" class="bi bi-question-circle" style="font-size: 1.2em; margin-left: 5px;" @click="openHelpModal"></i>
           Contacts
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
-        <!--  -->
-          <ul class="contacts-list">
+        <!--  BODY -->
+          <ul class="contacts-list nes-container">
             <div class="accordion" id="contactListAccordion">
             <div class="accordion-item">
-              <h2 class="accordion-header">
+              <h2 class="accordion-header nes-container">
               <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
                 <span class="online-dot"/>&nbsp;Online
               </button>
@@ -28,7 +27,7 @@
               </div>
             </div>
             <div class="accordion-item">
-              <h2 class="accordion-header">
+              <h2 class="accordion-header nes-container">
               <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffline" aria-expanded="true" aria-controls="collapseOffline">
                 <span class="offline-dot"/>&nbsp;Offline
               </button>
@@ -36,7 +35,7 @@
               <div id="collapseOffline" class="accordion-collapse collapse show">
               <ul class="contacts-list">
                 <ul v-for="(user, index) in offlineUsers" :key="index" class="list-group">
-                <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
+                <li class="list-group-item nes-container" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
                   <ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
                 </li>
                 </ul>
@@ -82,7 +81,6 @@
 import { isLoggedIn } from '~/store';
 export default {
   name: 'ChatBox',
-
   data () {
     return {
       socket: null,
@@ -121,19 +119,15 @@ export default {
       for (const count of this.unreadMessageCountMap.values()) {
         totalUnreadMessages += count;
       }
-      // this.$emit('unreadMessages', totalUnreadMessages);
-      // trigger handleMessageAlert in ChatButton with id="chatbutton"
-      if (this.$refs.chatbutton) {
-        this.$refs.chatbutton.handleMessageAlert(totalUnreadMessages);
-      }
+      this.$emit('unreadMessages', totalUnreadMessages);
     });
   },
   methods: {
-	openHelpModal() {
-		this.$nextTick(() => {
-			new bootstrap.Modal(document.getElementById('helpmodal')).show();
-		});	
-	},
+    openHelpModal() {
+      this.$nextTick(() => {
+        new bootstrap.Modal(document.getElementById('helpmodal')).show();
+      });	
+    },
     getMessageType (message) {
       const parsedMessage = JSON.parse(message)
       if (parsedMessage.subtype === 'info') {
@@ -167,23 +161,17 @@ export default {
       this.socket = new WebSocket(sockurl)
 
       this.socket.onopen = () => {
-        // this.$emit('loading')
+        this.$emit('loading')
       }
 
       this.socket.onclose = () => {
-        // this.$emit('disconnected')
-        if (this.$refs.chatbutton) {
-          this.$refs.chatbutton.setToDisconnected()
-        }
+        this.$emit('disconnected')
         this.unreadMessageCountMap.clear()
       }
 
       this.socket.onerror = (error) => {
         console.error(`WebSocket-Error: ${error}`)
-        // this.$emit('disconnected')
-        if (this.$refs.chatbutton) {
-          this.$refs.chatbutton.setToDisconnected()
-        }
+        this.$emit('disconnected')
         this.unreadMessageCountMap.clear()
       }
 
@@ -192,18 +180,7 @@ export default {
         if (data.type === 'user_list') {
           this.own_id = data.own_id
           this.userlist = data.users.filter(user => user.id != this.own_id)
-          // this.$emit('connected')
-          if (this.$refs.chatbutton) {
-            console.log('setting chatbutton to connected')
-            this.$refs.chatbutton.setToConnected()
-          }
-          // this.$nextTick(() => {
-          //   var mood = document.getElementById('chatbutton');
-          //   mood.setToConnected();
-          //   // var mood = document.getElementById('helpmodal');
-          //   // var bsModal = bootstrap.Modal.getInstance(mood);
-          //   // bsModal.hide();
-          // });
+          this.$emit('connected')
         } else if (data.type === 'chat_message') {
           // add message to messages array
           this.messages.push(event.data)
@@ -264,13 +241,11 @@ export default {
 }
 
 .accordion-header{
-  background-color: #ffffff;
-  padding: 2px;
+  padding: 0px;
 }
 
 .accordion-button {
-  background-color: #d1e7ff;
-  border: 1px solid #c2c3c5;
+  background-color: #ffffff;
   text-align: left;
   width: 100%;
   padding: 10px;
@@ -278,9 +253,17 @@ export default {
   border-radius: 5px;
 }
 
+.list-group-item {
+  padding: 0px;
+  margin: 0;
+  border-color: #000000;
+  border-width: 3px;
+}
+
 .list-group-item.active {
   background-color: #ecedee;
-  border-color: #c2c3c5;
+  border-color: #000000;
+  border-width: 3px;
 }
 
 .online-dot {

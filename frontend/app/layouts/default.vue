@@ -16,7 +16,7 @@ Example:
   style="display: flex; flex-direction: column; justify-content: space-between; height: 95vh; margin: 20px 30px 30px">
     <div style="position: absolute; display: flex; flex-direction: column; gap: 2px; margin-right: 15px; z-index: 2; right: 0;">
       <SettingsBtn />
-      <div style="height: 10px;"></div>
+      <div style="height: 5px;"></div>
       <ChatButton />
       <GameButton />
     </div>

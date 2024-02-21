@@ -24,9 +24,13 @@ Example:
     <div style="overflow: auto;">
     <!-- <div style="display: flex; justify-content: center; margin-top: 20vh;"> -->
       <!-- <p class="title">A 42 PONG GAME</p> -->
+      <!--  -->
+      <ChatBox />
+      <!-- <ChatBox v-show="showChatBox" class="chat-box" @closeChat="toggleChatBox" @connected="setToConnected" @disconnected="setToDisconnected" @loading="loading = true" @unreadMessages="handleMessageAlert"/> -->
+      <!--  -->
       <SettingsBtn />
       <slot />
-      <ChatButton />
+      <!-- <ChatButton /> -->
       
     </div>
     <div>

@@ -1,79 +1,80 @@
 <template>
 	<div>
 		<!-- CONTAINER WITH CONTACTS... -->
-		<div class="contacts-container">
-		<div class="header-bar">
-			<p class="m-0"  >
-				<i type="button" class="bi bi-question-circle" style="color: white; font-size: 1.2em; margin-left: 5px;" @click="openHelpModal"></i>
-				Contacts
-			</p>
-			<div>
-				<button type="button" class="btn-close" @click="this.$emit('closeChat'); chatid = null;" aria-label="Close"></button>
-			</div>
-		</div>
-		<ul class="contacts-list">
-			<div class="accordion" id="contactListAccordion">
-			<div class="accordion-item">
-				<h2 class="accordion-header">
-				<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
-					<span class="online-dot"/>&nbsp;Online
-				</button>
-				</h2>
-				<div id="collapseOnline" class="accordion-collapse collapse show">
-				<ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
-					<li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
-					<ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
-					</li>
-				</ul>
-				</div>
-			</div>
-			<div class="accordion-item">
-				<h2 class="accordion-header">
-				<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffline" aria-expanded="true" aria-controls="collapseOffline">
-					<span class="offline-dot"/>&nbsp;Offline
-				</button>
-				</h2>
-				<div id="collapseOffline" class="accordion-collapse collapse show">
-				<ul class="contacts-list">
-					<ul v-for="(user, index) in offlineUsers" :key="index" class="list-group">
-					<li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
-						<ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
-					</li>
-					</ul>
-				</ul>
-				</div>
-			</div>
-			</div>
-		</ul>
-		<!-- CHATBOX -->
-		<div v-show="chatid !== null" style="padding: 5px;">
-			<div class="chat-container">
-			<div class="header-bar">
-				{{ active_chat_user ? active_chat_user.username : '' }}
-				<p class="m-0">
-				</p>
-				<button type="button" class="btn-close" @click="this.chatid = null" aria-label="Close"></button>
-			</div>
-			<ul class="chat-messages">
-				<li v-for="(message, index) in filteredMessages" :key="index" :class="getMessageType(message)">
-					<span class="message" style="white-space: pre-line;">
-					{{ JSON.parse(message).message }}
-					<span class="date" style="font-size: 0.8em; text-align: right; display: block;">
-						{{ JSON.parse(message).date }}
-					</span>
-					</span>
-
-				</li>
-			</ul>
-			<div class="chat-input-container">
-				<input v-model="newMessage" type="text" placeholder="Type your message..." class="form-control chat-input" @keyup.enter="sendMessage" />
-				<button class="btn btn-primary send-button" @click="sendMessage">
-				Send
-				</button>
-			</div>
-			</div>
-		</div>
-		</div>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="chatCanvas" aria-labelledby="offcanvasRightLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasRightLabel">
+          <i type="button" class="bi bi-question-circle" style="font-size: 1.2em; margin-left: 5px;" @click="openHelpModal"></i>
+          Contacts
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <!--  -->
+          <ul class="contacts-list">
+            <div class="accordion" id="contactListAccordion">
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
+                <span class="online-dot"/>&nbsp;Online
+              </button>
+              </h2>
+              <div id="collapseOnline" class="accordion-collapse collapse show">
+              <ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
+                <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
+                <ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
+                </li>
+              </ul>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffline" aria-expanded="true" aria-controls="collapseOffline">
+                <span class="offline-dot"/>&nbsp;Offline
+              </button>
+              </h2>
+              <div id="collapseOffline" class="accordion-collapse collapse show">
+              <ul class="contacts-list">
+                <ul v-for="(user, index) in offlineUsers" :key="index" class="list-group">
+                <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
+                  <ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
+                </li>
+                </ul>
+              </ul>
+              </div>
+            </div>
+            </div>
+          </ul>
+          <!-- CHATBOX -->
+          <div v-show="chatid !== null" style="padding: 5px;">
+            <div class="chat-container">
+            <div class="header-bar">
+              {{ active_chat_user ? active_chat_user.username : '' }}
+              <p class="m-0">
+              </p>
+              <button type="button" class="btn-close" @click="this.chatid = null" aria-label="Close"></button>
+            </div>
+            <ul class="chat-messages">
+              <li v-for="(message, index) in filteredMessages" :key="index" :class="getMessageType(message)">
+                <span class="message" style="white-space: pre-line;">
+                {{ JSON.parse(message).message }}
+                <span class="date" style="font-size: 0.8em; text-align: right; display: block;">
+                  {{ JSON.parse(message).date }}
+                </span>
+                </span>
+      
+              </li>
+            </ul>
+            <div class="chat-input-container">
+              <input v-model="newMessage" type="text" placeholder="Type your message..." class="form-control chat-input" @keyup.enter="sendMessage" />
+              <button class="btn btn-primary send-button" @click="sendMessage">
+              Send
+              </button>
+            </div>
+            </div>
+          </div>
+      </div>
+    </div>
 	</div>
 </template>
   
@@ -120,7 +121,11 @@ export default {
       for (const count of this.unreadMessageCountMap.values()) {
         totalUnreadMessages += count;
       }
-      this.$emit('unreadMessages', totalUnreadMessages);
+      // this.$emit('unreadMessages', totalUnreadMessages);
+      // trigger handleMessageAlert in ChatButton with id="chatbutton"
+      if (this.$refs.chatbutton) {
+        this.$refs.chatbutton.handleMessageAlert(totalUnreadMessages);
+      }
     });
   },
   methods: {
@@ -162,17 +167,23 @@ export default {
       this.socket = new WebSocket(sockurl)
 
       this.socket.onopen = () => {
-        this.$emit('loading')
+        // this.$emit('loading')
       }
 
       this.socket.onclose = () => {
-        this.$emit('disconnected')
+        // this.$emit('disconnected')
+        if (this.$refs.chatbutton) {
+          this.$refs.chatbutton.setToDisconnected()
+        }
         this.unreadMessageCountMap.clear()
       }
 
       this.socket.onerror = (error) => {
         console.error(`WebSocket-Error: ${error}`)
-        this.$emit('disconnected')
+        // this.$emit('disconnected')
+        if (this.$refs.chatbutton) {
+          this.$refs.chatbutton.setToDisconnected()
+        }
         this.unreadMessageCountMap.clear()
       }
 
@@ -181,7 +192,18 @@ export default {
         if (data.type === 'user_list') {
           this.own_id = data.own_id
           this.userlist = data.users.filter(user => user.id != this.own_id)
-          this.$emit('connected')
+          // this.$emit('connected')
+          if (this.$refs.chatbutton) {
+            console.log('setting chatbutton to connected')
+            this.$refs.chatbutton.setToConnected()
+          }
+          // this.$nextTick(() => {
+          //   var mood = document.getElementById('chatbutton');
+          //   mood.setToConnected();
+          //   // var mood = document.getElementById('helpmodal');
+          //   // var bsModal = bootstrap.Modal.getInstance(mood);
+          //   // bsModal.hide();
+          // });
         } else if (data.type === 'chat_message') {
           // add message to messages array
           this.messages.push(event.data)
@@ -230,19 +252,6 @@ export default {
 
 <style>
 /* CONTACTS-CARD */
-
-.contacts-container {
-  background-color: #fff;
-  display: flex;
-  min-width: 250px;
-  width: 350px;
-  height: 90vh;
-  border: 1px solid #ced4da;
-  border-radius: 5px;
-  overflow: hidden;
-  margin-bottom: 10px;
-  flex-direction: column;
-}
 
 .contacts-list {
   list-style-type: none;

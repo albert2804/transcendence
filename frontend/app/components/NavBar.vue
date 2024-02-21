@@ -26,6 +26,7 @@
               <NuxtLink class="nes-btn is-warning nav-item" to="/tournament">Tournament</NuxtLink>
               <NuxtLink class="nes-btn is-error nav-item" to="/leaderboard">Leaderboard</NuxtLink>
               <NuxtLink class="nes-btn is-error nav-item" to="/userinfopage">UserProfile</NuxtLink>
+              <ChatButton id="chatbutton" />
         </div>
     </nav>
   </div>

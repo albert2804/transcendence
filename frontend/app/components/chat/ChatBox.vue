@@ -4,7 +4,7 @@
       <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="chatCanvasLabel">
           <i type="button" class="bi bi-question-circle" style="font-size: 1.2em; margin-left: 5px;" @click="openHelpModal"></i>
-          Contacts
+          Chat
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
@@ -13,8 +13,8 @@
           <ul class="contacts-list nes-container">
             <div class="accordion" id="contactListAccordion">
             <div class="accordion-item">
-              <h2 class="accordion-header nes-container">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
+              <h2 class="accordion-header">
+              <button class="accordion-button nes-container" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
                 <span class="online-dot"/>&nbsp;Online
               </button>
               </h2>
@@ -27,8 +27,8 @@
               </div>
             </div>
             <div class="accordion-item">
-              <h2 class="accordion-header nes-container">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffline" aria-expanded="true" aria-controls="collapseOffline">
+              <h2 class="accordion-header">
+              <button class="accordion-button nes-container" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffline" aria-expanded="true" aria-controls="collapseOffline">
                 <span class="offline-dot"/>&nbsp;Offline
               </button>
               </h2>
@@ -45,7 +45,7 @@
             </div>
           </ul>
           <!-- CHATBOX -->
-          <div v-show="chatid !== null" style="padding: 5px;">
+          <div v-show="chatid !== null" style="margin-top: 5px;">
             <div class="chat-container">
             <div class="header-bar">
               {{ active_chat_user ? active_chat_user.username : '' }}
@@ -249,7 +249,14 @@ export default {
   text-align: left;
   width: 100%;
   padding: 10px;
-  margin: 0;
+  margin: 0px;
+  border-width: 4px;
+  border-radius: 5px;
+}
+
+.accordion-button:focus {
+  border-color: #000000;
+  border-width: 4px;
   border-radius: 5px;
 }
 
@@ -291,8 +298,9 @@ export default {
   min-width: 250px;
   height: 50vh;
   flex-shrink: 1;
-  border: 1px solid #ced4da;
-  border-radius: 5px;
+  border: 1px solid #000000;
+  border-width: 4px;
+  border-radius: 0px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -339,14 +347,16 @@ export default {
 }
 
 .message {
-  background-color: #d7d7d7;
-  border-bottom: 1px solid #ced4da;
+  background-color: #eeeeee;
+  border-bottom: 1px solid #c8c8c8;
+  border-width: 3px;
   padding: 8px;
   border-radius: 8px;
   display: inline-block;
   word-wrap: break-word;
   max-width: 80%;
   align-self: flex-end;
+  font-size: 0.8em;
 }
 
 .date {
@@ -354,7 +364,7 @@ export default {
 }
 
 .chat-input-container {
-  background-color: #ebeaea;
+  background-color: #d7d7d7;
   display: flex;
   align-items: center;
   padding: 8px;
@@ -363,18 +373,22 @@ export default {
 .chat-input {
   flex-grow: 1;
   margin-right: 8px;
+  font-size: 0.8em;
 }
 
 .send-button {
   width: 70px;
+  font-size: 0.8em;
+  margin-right: 8px;
+  margin-top: 8px;
 }
 
 
 /* GENERAL */
 
 .header-bar {
-  background-color: #007bff;
-  color: #fff;
+  background-color: #d7d7d7;
+  color: #000000;
   padding: 10px;
   display: flex;
   justify-content: space-between;

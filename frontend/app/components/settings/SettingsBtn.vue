@@ -8,7 +8,7 @@
 
 <template>
     <div class="nes-container is-rounded" style="background-color: #ff7c7c; position: relative; text-align: center;" type="button" data-bs-toggle="offcanvas" data-bs-target="#settingsCanvas" aria-controls="settingsCanvas">
-      <i class="bi bi-gear-fill" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -57%);"></i>
+      <i class="bi bi-gear" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -57%);"></i>
     </div>
     <div class="offcanvas offcanvas-end" tabindex="-1" id="settingsCanvas" aria-labelledby="settingsCanvasLabel">
       <div class="offcanvas-header">

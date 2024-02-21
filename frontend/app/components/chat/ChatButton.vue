@@ -13,10 +13,10 @@
       <span class="badge rounded-pill bg-danger" v-if="messageAlert != 0" style="position: absolute; transform: translate(-150%, -140%);">
         {{ messageAlert }}
       </span>
-      <i class="bi bi-chat-fill" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -60%);"></i>
+      <i class="bi bi-chat" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -60%);"></i>
     </div>
     <div v-if="loading" class="nes-container is-rounded" style="background-color: #ffea76; position: relative; text-align: center;">
-      <i class="bi bi-hourglass-split" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -57%);"></i>
+      <i class="bi bi-hourglass" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -57%);"></i>
     </div>
   </div>
 </template>

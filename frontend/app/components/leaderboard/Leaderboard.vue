@@ -1,8 +1,7 @@
 <template>
-  <div class="container-fluid vh-100">
-      <h1 class="text-center">Leaderboard</h1>
-      <!-- <table class="table table-striped table-hover"> -->
-        <table class="table nes-table is-bordered is-centered table-hover">
+  <div class="container-fluid">
+    <h1 class="text-center">Leaderboard</h1>
+      <table class="table nes-table is-bordered is-centered table-hover">
         <thead class="thread-dark">
           <tr>
             <th scope = "col">#</th>
@@ -19,7 +18,7 @@
             <td>{{ user.username }}</td>
             <td>{{ user.num_games_won }}</td>
             <td>{{ user.num_games_played }}</td>
-            <td>{{ user.num_games_played / user.num_games_won }}</td>
+            <td>{{ (user.num_games_won !== 0) ? ((user.num_games_played / user.num_games_won) * 100).toFixed(0) + '%' : '0%' }}</td>
             <td>
               <router-link :to="{ name: 'userinfopage', query: { username: user.username } }">
                 <button type="button" class="btn nes-btn btn-primary">View Profile</button>
@@ -76,9 +75,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.vh-100 {
-  height: 100vh; /* Set the height to 100% of the viewport height */
-}
-</style>

@@ -7,21 +7,34 @@
 </script>
 
 <template>
-    <div class="container-fluid vh-100">
-      <div style="display: flex; justify-content: center; margin-top: 20vh;">
-        <div v-if="isLoggedIn === 1">
-          <UserInfo />
-          <UserProfilePic />
+    <div class="nes-container container-fluid is-rounded with-title" style="width: 50vw; margin: auto; text-align: left; min-width: 580px">
+      <p class="title">User profile</p>
+      <div style="display: flex; align-items: center">
+        <div v-if="isLoggedIn === 1" class="user-info-container">
+          <div class="col">
+            <UserProfilePic />
+          </div>
+          <div class="col">
+            <UserInfo />
+          </div>
         </div>
         <div v-else>
-          <h2>No user statistics available.</h2>
+          <h4>No user statistics available. Please log in to view user profiles.</h4>
         </div>
       </div>
     </div>
-  </template>
+</template>
 
   <script>
   export default {
   };
 </script>
 
+<style scoped>
+  .user-info-container {
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    width: 100%;
+  }
+</style>

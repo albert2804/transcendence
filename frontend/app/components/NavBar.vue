@@ -22,7 +22,9 @@
               <NuxtLink class="nes-btn is-success nav-item" to="/">Home</NuxtLink>
               <NuxtLink class="nes-btn is-warning nav-item" to="/tournament">Tournament</NuxtLink>
               <NuxtLink class="nes-btn is-error nav-item" to="/leaderboard">Leaderboard</NuxtLink>
-              <NuxtLink class="nes-btn is-error nav-item" to="/userinfopage">UserProfile</NuxtLink>
+              <NuxtLink v-if="!isLoggedIn" class="nes-btn is-error nav-item" to="/login">Login</NuxtLink>
+              <NuxtLink v-if="isLoggedIn" class="nes-btn is-error nav-item" to="/userinfopage">UserProfile</NuxtLink>
+              <NuxtLink v-if="isLoggedIn" class="nes-btn is-error nav-item" to="/login">Logout</NuxtLink>
         </div>
     </nav>
   </div>

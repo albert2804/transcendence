@@ -137,7 +137,7 @@ const register = async () => {
 
 
 <template>
-  <section class="nes-container with-title is-centered" style="max-width: 30%">
+  <section class="nes-container with-title is-centered">
     <p class="title" v-if="isLoggedIn!=1 && !reg_form">Login</p>
     <p class="title" v-if="isLoggedIn == 0 && reg_form">Register</p>
     <div class="card-body">

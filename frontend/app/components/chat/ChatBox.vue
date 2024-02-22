@@ -1,79 +1,79 @@
 <template>
 	<div>
-		<!-- CONTAINER WITH CONTACTS... -->
-		<div class="contacts-container">
-		<div class="header-bar">
-			<p class="m-0"  >
-				<i type="button" class="bi bi-question-circle" style="color: white; font-size: 1.2em; margin-left: 5px;" @click="openHelpModal"></i>
-				Contacts
-			</p>
-			<div>
-				<button type="button" class="btn-close" @click="this.$emit('closeChat'); chatid = null;" aria-label="Close"></button>
-			</div>
-		</div>
-		<ul class="contacts-list">
-			<div class="accordion" id="contactListAccordion">
-			<div class="accordion-item">
-				<h2 class="accordion-header">
-				<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
-					<span class="online-dot"/>&nbsp;Online
-				</button>
-				</h2>
-				<div id="collapseOnline" class="accordion-collapse collapse show">
-				<ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
-					<li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
-					<ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
-					</li>
-				</ul>
-				</div>
-			</div>
-			<div class="accordion-item">
-				<h2 class="accordion-header">
-				<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffline" aria-expanded="true" aria-controls="collapseOffline">
-					<span class="offline-dot"/>&nbsp;Offline
-				</button>
-				</h2>
-				<div id="collapseOffline" class="accordion-collapse collapse show">
-				<ul class="contacts-list">
-					<ul v-for="(user, index) in offlineUsers" :key="index" class="list-group">
-					<li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
-						<ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
-					</li>
-					</ul>
-				</ul>
-				</div>
-			</div>
-			</div>
-		</ul>
-		<!-- CHATBOX -->
-		<div v-show="chatid !== null" style="padding: 5px;">
-			<div class="chat-container">
-			<div class="header-bar">
-				{{ active_chat_user ? active_chat_user.username : '' }}
-				<p class="m-0">
-				</p>
-				<button type="button" class="btn-close" @click="this.chatid = null" aria-label="Close"></button>
-			</div>
-			<ul class="chat-messages">
-				<li v-for="(message, index) in filteredMessages" :key="index" :class="getMessageType(message)">
-					<span class="message" style="white-space: pre-line;">
-					{{ JSON.parse(message).message }}
-					<span class="date" style="font-size: 0.8em; text-align: right; display: block;">
-						{{ JSON.parse(message).date }}
-					</span>
-					</span>
-
-				</li>
-			</ul>
-			<div class="chat-input-container">
-				<input v-model="newMessage" type="text" placeholder="Type your message..." class="form-control chat-input" @keyup.enter="sendMessage" />
-				<button class="btn btn-primary send-button" @click="sendMessage">
-				Send
-				</button>
-			</div>
-			</div>
-		</div>
-		</div>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="chatCanvas" aria-labelledby="chatCanvasLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="chatCanvasLabel">
+          <i type="button" class="bi bi-question-circle" style="font-size: 1.2em; margin-left: 5px;" @click="openHelpModal"></i>
+          Chat
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <!--  BODY -->
+          <ul class="contacts-list nes-container">
+            <div class="accordion" id="contactListAccordion">
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+              <button class="accordion-button nes-container" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
+                <span class="online-dot"/>&nbsp;Online
+              </button>
+              </h2>
+              <div id="collapseOnline" class="accordion-collapse collapse show">
+              <ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
+                <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
+                <ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
+                </li>
+              </ul>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+              <button class="accordion-button nes-container" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffline" aria-expanded="true" aria-controls="collapseOffline">
+                <span class="offline-dot"/>&nbsp;Offline
+              </button>
+              </h2>
+              <div id="collapseOffline" class="accordion-collapse collapse show">
+              <ul class="contacts-list">
+                <ul v-for="(user, index) in offlineUsers" :key="index" class="list-group">
+                <li class="list-group-item nes-container" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
+                  <ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
+                </li>
+                </ul>
+              </ul>
+              </div>
+            </div>
+            </div>
+          </ul>
+          <!-- CHATBOX -->
+          <div v-show="chatid !== null" style="margin-top: 5px;">
+            <div class="chat-container">
+            <div class="header-bar">
+              {{ active_chat_user ? active_chat_user.username : '' }}
+              <p class="m-0">
+              </p>
+              <button type="button" class="btn-close" @click="this.chatid = null" aria-label="Close"></button>
+            </div>
+            <ul class="chat-messages">
+              <li v-for="(message, index) in filteredMessages" :key="index" :class="getMessageType(message)">
+                <span class="message" style="white-space: pre-line;">
+                {{ JSON.parse(message).message }}
+                <span class="date" style="font-size: 0.8em; text-align: right; display: block;">
+                  {{ JSON.parse(message).date }}
+                </span>
+                </span>
+      
+              </li>
+            </ul>
+            <div class="chat-input-container">
+              <input v-model="newMessage" type="text" placeholder="Type your message..." class="form-control chat-input" @keyup.enter="sendMessage" />
+              <button class="btn btn-primary send-button" @click="sendMessage">
+              Send
+              </button>
+            </div>
+            </div>
+          </div>
+      </div>
+    </div>
 	</div>
 </template>
   
@@ -81,7 +81,6 @@
 import { isLoggedIn } from '~/store';
 export default {
   name: 'ChatBox',
-
   data () {
     return {
       socket: null,
@@ -124,11 +123,11 @@ export default {
     });
   },
   methods: {
-	openHelpModal() {
-		this.$nextTick(() => {
-			new bootstrap.Modal(document.getElementById('helpmodal')).show();
-		});	
-	},
+    openHelpModal() {
+      this.$nextTick(() => {
+        new bootstrap.Modal(document.getElementById('helpmodal')).show();
+      });	
+    },
     getMessageType (message) {
       const parsedMessage = JSON.parse(message)
       if (parsedMessage.subtype === 'info') {
@@ -231,19 +230,6 @@ export default {
 <style>
 /* CONTACTS-CARD */
 
-.contacts-container {
-  background-color: #fff;
-  display: flex;
-  min-width: 250px;
-  width: 350px;
-  height: 90vh;
-  border: 1px solid #ced4da;
-  border-radius: 5px;
-  overflow: hidden;
-  margin-bottom: 10px;
-  flex-direction: column;
-}
-
 .contacts-list {
   list-style-type: none;
   padding: 0;
@@ -255,23 +241,36 @@ export default {
 }
 
 .accordion-header{
-  background-color: #ffffff;
-  padding: 2px;
+  padding: 0px;
 }
 
 .accordion-button {
-  background-color: #d1e7ff;
-  border: 1px solid #c2c3c5;
+  background-color: #ffffff;
   text-align: left;
   width: 100%;
   padding: 10px;
-  margin: 0;
+  margin: 0px;
+  border-width: 4px;
   border-radius: 5px;
+}
+
+.accordion-button:focus {
+  border-color: #000000;
+  border-width: 4px;
+  border-radius: 5px;
+}
+
+.list-group-item {
+  padding: 0px;
+  margin: 0;
+  border-color: #000000;
+  border-width: 3px;
 }
 
 .list-group-item.active {
   background-color: #ecedee;
-  border-color: #c2c3c5;
+  border-color: #000000;
+  border-width: 3px;
 }
 
 .online-dot {
@@ -299,8 +298,9 @@ export default {
   min-width: 250px;
   height: 50vh;
   flex-shrink: 1;
-  border: 1px solid #ced4da;
-  border-radius: 5px;
+  border: 1px solid #000000;
+  border-width: 4px;
+  border-radius: 0px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -347,14 +347,16 @@ export default {
 }
 
 .message {
-  background-color: #d7d7d7;
-  border-bottom: 1px solid #ced4da;
+  background-color: #eeeeee;
+  border-bottom: 1px solid #c8c8c8;
+  border-width: 3px;
   padding: 8px;
   border-radius: 8px;
   display: inline-block;
   word-wrap: break-word;
   max-width: 80%;
   align-self: flex-end;
+  font-size: 0.8em;
 }
 
 .date {
@@ -362,7 +364,7 @@ export default {
 }
 
 .chat-input-container {
-  background-color: #ebeaea;
+  background-color: #d7d7d7;
   display: flex;
   align-items: center;
   padding: 8px;
@@ -371,18 +373,22 @@ export default {
 .chat-input {
   flex-grow: 1;
   margin-right: 8px;
+  font-size: 0.8em;
 }
 
 .send-button {
   width: 70px;
+  font-size: 0.8em;
+  margin-right: 8px;
+  margin-top: 8px;
 }
 
 
 /* GENERAL */
 
 .header-bar {
-  background-color: #007bff;
-  color: #fff;
+  background-color: #d7d7d7;
+  color: #000000;
   padding: 10px;
   display: flex;
   justify-content: space-between;

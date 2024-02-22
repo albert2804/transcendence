@@ -8,6 +8,9 @@
           <p>Right Player: {{ match.r_player.name }}</p>
           <p>Left Score: {{ match.l_score }}</p>
           <p>Right Score: {{ match.r_score }}</p>
+          <div v-if="match.l_player.name == this.loggedInUser || match.r_player.name == this.loggedInUser && this.loggedInUser != undefined">
+            <button class="nes-btn" @click="readyPlayer">Play</button>
+          </div>
         </div>
       </div>
     </div>
@@ -15,8 +18,10 @@
 </template>
 
 <script>
+
 export default {
-  props: ['numberOfPlayers', 'matches'],
+  name: 'BracketsTournament',
+  props: ['numberOfPlayers', 'matches', 'loggedInUser'],
   data() {
     return {
       // No need for additional data in this case
@@ -28,7 +33,11 @@ export default {
     },
   },
   methods: {
+    readyPlayer() {
+      
+    },
     getMatches(round) {
+      console.log(this.loggedInUser)
       return this.matches.filter(match => match.is_round === round);
     },
   },

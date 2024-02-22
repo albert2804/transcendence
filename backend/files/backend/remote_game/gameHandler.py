@@ -7,10 +7,12 @@ from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+from datetime import datetime
+import asyncio
 
 # This class is used to handle the PongGame between the two Player objects (player1 and player2)
 # Create a new instance of this class with GAME_XXX = GameHandler.create(player1, player2)
-# Start this created instance with asyncio.ensure_future(GAME_XXX.start_game())
+# Start this created instance with asyncio.create_task(GAME_XXX.start_game())
 # After the game is finished, the instance gets deleted automatically
 
 # TODO: implement a bool to decide if the game is a training game or a ranked game
@@ -27,7 +29,6 @@ class GameHandler:
 			self.local_game = True
 		else:
 			self.local_game = False
-		# ? Why random.randint?
 		self.game_group = f"game_{random.randint(0, 1000000)}"
 		self.game = PongGame()
 		self.channel_layer = get_channel_layer()
@@ -175,10 +176,11 @@ class GameHandler:
 			})
 		# start two separate threads for sending the game state to player 1 and player 2
 		# I used separate threads because so we can handle different fps for each player
-		asyncio.ensure_future(self.send_game_state_to_player_1())
-		asyncio.ensure_future(self.send_game_state_to_player_2())
-		# run the game loop until the game is finished
+		asyncio.create_task(self.send_game_state_to_player_1())
+		asyncio.create_task(self.send_game_state_to_player_2())
+
 		await self.game.run_game()
+		# run the game loop until the game is finished
 		# if ranked game, fill the db entry
 		if self.ranked:
 			await self.save_result_to_db()
@@ -305,6 +307,7 @@ class GameHandler:
 	
 	# sends the latest game state to player 2
 	# gets called in a separate thread
+
 	async def send_game_state_to_player_2(self):
 		while not self.game.isGameExited:
 			async with self.game.game_state_lock:

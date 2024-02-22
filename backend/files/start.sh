@@ -35,11 +35,14 @@ python manage.py createsuperuser --noinput
 # python manage.py createsuperuser --noinput --username=nikkka
 # python manage.py createsuperuser --noinput --username=stephanie
 
-# Collect static files (needed for serving static files with daphne)
+# Collect static files (needed for serving static files with daphne)  
 python manage.py collectstatic --noinput
 
 # Start the ASGI server (Daphne in this case)
 # daphne -b 0.0.0.0 -p 8000 backend.asgi:application
+
+# PYTHONASYNCIODEBUG=1 daphne -b 0.0.0.0 -p 8000 backend.asgi:application
+
 
 tail -f /dev/null
 

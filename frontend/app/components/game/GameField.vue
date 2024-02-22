@@ -45,9 +45,6 @@
       <button type="button" class="btn btn-primary" @click="startRankedGame">Start Ranked Game</button>
     </div>
     <div v-if="showMenu && isLoggedIn == 1" style="height: 5px;"></div>
-    <div v-if="showMenu && isLoggedIn == 1">
-      <button type="button" class="btn btn-primary" @click="createTournament">Create Tournament</button>
-    </div>
 		<!-- play on this device - button --->
     <div v-if="!playOnThisDevice" style="height: 5px;"></div>
 		<div v-if="!playOnThisDevice">
@@ -161,6 +158,7 @@
 
       this.socket.onmessage = (event) => {
         try {
+          console.log('Received WebSocket message:', event.data);
           const data = JSON.parse(event.data);
           if (data.type === "redirect") {
             this.showAliasScreen = false;
@@ -269,9 +267,6 @@
         });
         this.socket.send(data);
       }
-    },
-    createTournamen() {
-      console.log("create Tournament (for now does nothing)");
     },
     // function to create a guest player (send alias to server)
     createGuestPlayer () {

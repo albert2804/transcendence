@@ -46,7 +46,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 			player1 = RemoteGameConsumer.training_waiting_room[0]
 			RemoteGameConsumer.training_waiting_room.pop(0)
 			game_group = await GameHandler.create(player1, player)
-			asyncio.ensure_future(game_group.start_game())
+			asyncio.create_task(game_group.start_game())
 		else:
 			RemoteGameConsumer.training_waiting_room.append(player)
 		await player.send_state()
@@ -58,7 +58,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 				player1 = RemoteGameConsumer.ranked_waiting_room[0]
 				RemoteGameConsumer.ranked_waiting_room.pop(0)
 				game_group = await GameHandler.create(player1, player, ranked=True)
-				asyncio.ensure_future(game_group.start_game())
+				asyncio.create_task(game_group.start_game())
 			else:
 				RemoteGameConsumer.ranked_waiting_room.append(player)
 			await player.send_state()
@@ -123,7 +123,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 					# start local game after both players have chosen an alias
 					if player.get_game_handler() == None and player.alias_2 != None:
 						game_group = await GameHandler.create(player, player)
-						asyncio.ensure_future(game_group.start_game())
+						asyncio.create_task(game_group.start_game())
 					else:
 						await player.send_state()
 				# message handling for players in a game
@@ -132,6 +132,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 						player.get_game_handler().give_up(player)
 					elif (data.get('type') == 'key_pressed' or data.get('type') == 'key_released'):
 						player.get_game_handler().update_paddle(player, data.get('key'), data.get('type'))
+
 				# message handling for players in the menu
 				else:
 					if data.get('type') == 'start_training_game':
@@ -141,7 +142,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 					elif data.get('type') == 'start_local_game':
 						if (player.alias_2 != None):
 							game_group = await GameHandler.create(player, player)
-							asyncio.ensure_future(game_group.start_game())
+							asyncio.create_task(game_group.start_game())
 						else:
 							await self.send(text_data=json.dumps({
 								'type': 'redirect',

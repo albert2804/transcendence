@@ -51,8 +51,8 @@ export default {
   mounted() {
     // listen to modal events to open and close fullscreen
     var mood = document.getElementById(this.modalId);
-    mood.addEventListener('shown.bs.modal', this.openFullscreen);
-    mood.addEventListener('hidden.bs.modal', this.closeFullscreen);
+    // mood.addEventListener('shown.bs.modal', this.openFullscreen);
+    // mood.addEventListener('hidden.bs.modal', this.closeFullscreen);
   },
   methods: {
     openModal() {

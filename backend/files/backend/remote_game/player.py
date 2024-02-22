@@ -42,7 +42,7 @@ class Player:
 		self.channel = channel
 		self.channel_layer = get_channel_layer()
 		self.game_handler = None
-		self.fps = 40 # default fps
+		self.fps = 30 # default fps
 		Player.all_players.append(self)
 	
 	# Getter for the user object (CustomUser) of the player

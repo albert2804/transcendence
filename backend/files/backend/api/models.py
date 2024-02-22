@@ -130,7 +130,7 @@ class CustomUser(AbstractUser):
 					'type': 'open_game_modal',
 				})
 			# start the game in another thread
-			asyncio.ensure_future(game_handler.start_game())
+			asyncio.create_task(game_handler.start_game())
 			return
 		# check if already invited
 		if user in await sync_to_async(list)(self.game_invites.all()):
@@ -155,3 +155,5 @@ class CustomUser(AbstractUser):
 		# send info message to both users
 		await consumer.save_and_send_message(user, self, 'You canceled the game invite.', datetime.now(), 'info')
 		await consumer.save_and_send_message(self, user, 'The game invite got canceled.', datetime.now(), 'info')
+
+	

@@ -20,7 +20,6 @@
   const password = ref('');
   const password2 = ref('');
   const reg_form = ref(false);
-  // const isLoggedIn = ref(2);
 
   onMounted(() => {
     redirect_uri.value = encodeURIComponent(window.location.origin + "/endpoint/auth/callback");

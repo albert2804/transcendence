@@ -44,7 +44,7 @@ export default {
     overflow: hidden;
 
   }
-  .nes-btn:focus{
+  .nes-btn:hover{
     color: #ffffff;
   }
 

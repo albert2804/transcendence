@@ -10,13 +10,22 @@ Example:
   })  
 </script>
 -->
-
 <template>
-  <div>
-    <NavBar />
-    <ChatButton />
-    <SettingsBtn />
-    <slot />
+  <ChatHelpModal />
+  <div class="nes-container is-rounded with-title vh-80 is-centered" 
+  style="display: flex; flex-direction: column; justify-content: space-between; height: 95vh; margin: 20px 30px 30px">
+    <div style="position: absolute; display: flex; flex-direction: column; gap: 2px; margin-right: 15px; z-index: 2; right: 0;">
+      <SettingsBtn />
+      <div style="height: 5px;"></div>
+      <ChatButton />
+      <GameButton />
+    </div>
+    <div style="overflow: auto;">
+      <slot />
+    </div>
+    <div>
+      <NavBar />
+    </div>
   </div>
 </template>
 

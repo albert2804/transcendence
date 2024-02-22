@@ -22,9 +22,12 @@ def send_userinfo(request):
 			try:
 				response_data = {
 					'username': user_data.username,
+					'date_joined': user_data.date_joined.date(),
 					'alias': user_data.alias,
 					'games_played': user_data.num_games_played,
 					'games_won': user_data.num_games_won,
+					'mmr': user_data.mmr,
+					'ranking': user_data.ranking,
 					}
 				return JsonResponse(response_data,
 					status=200)

@@ -3,7 +3,8 @@
     <h2>User Statistics</h2>
     <div v-if="userStats.username != ''">
       <p>Username: {{ userStats.username }}</p>
-      <p>Alias: {{ userStats.alias }} </p>
+      <p>Alias: {{ userStats.alias }}</p>
+      <p>Date Joined: {{ userStats.date_joined }}</p>
       <p>Games Won: {{ userStats.games_won }}</p>
       <p>Games Played: {{ userStats.games_played }}</p>
       <p>Matchmade Ranking: {{ userStats.mmr }}</p>

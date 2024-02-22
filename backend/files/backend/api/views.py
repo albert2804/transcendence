@@ -2,7 +2,6 @@ from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
 from .models import CustomUser
-from users.models import Statistics
 from .forms import CustomUserCreationForm
 from django.middleware.csrf import get_token
 from django.db import IntegrityError
@@ -110,7 +109,6 @@ def userregister(request):
             if user is not None:
                 login(request, user)
                 user_id = user.id
-                Statistics.objects.create(user=user_stats)
                 return JsonResponse({
                     'message': 'Successfully registered as ' + request.user.username,
                     'userid': user_id,

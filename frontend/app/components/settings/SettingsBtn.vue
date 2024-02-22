@@ -25,7 +25,10 @@
           <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false"/>
           <SettingsPw :openPopup="PopupPw" @close-popup="PopupPw = false"/>
         </div>
-        <LoginCard />
+        <div v-if="! isLoggedIn">
+          <p>Please log in to access settings</p>
+          <router-link to="/login" tag="button" class="btn nes-btn btn-primary" data-bs-dismiss="offcanvas">Login</router-link>
+        </div>
       </div>
     </div> 
   </template>

@@ -7,7 +7,8 @@
     :aria-labelledby="ariaLabel"
     aria-hidden="true"
     data-bs-backdrop="static"
-    data-bs-keyboard="false">
+    data-bs-keyboard="false"
+    style="max-height: 100vh;">
     <div class="modal-dialog fullscreen-modal align-items-center">
       <div class="modal-content">
         <div class="modal-body">
@@ -86,7 +87,11 @@ export default {
   .modal-dialog.fullscreen-modal {
     max-width: 100%;
     margin: 0;
-    height: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
     display: flex;
     overflow: hidden;
   }

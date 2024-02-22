@@ -1,5 +1,6 @@
 <template>
-	<div class="profilepic">
+
+	<div class="container profilepic">
 	  <div v-if="userProfilePic">
 		<img :src=userProfilePic.url alt="Profile Picture">
 	  </div>
@@ -48,22 +49,26 @@
 </script>
 
 <style>
-  .card-size {
-    min-width: px;
-    max-width: 400px;
-  }
-  .button-list {
-    padding-top: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .shade-bg {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(255,255,255,0.7);
-  }
+	/* img {
+		image-rendering: pixelated;
+
+	}
+	.card-size {
+		min-width: px;
+		max-width: 400px;
+	}
+	.button-list {
+		padding-top: 10px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	.shade-bg {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background: rgba(255,255,255,0.7);
+	} */
 </style>

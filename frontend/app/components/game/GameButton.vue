@@ -7,11 +7,28 @@
 <script>
 export default {
   name: 'GameButton',
+  // setup() {
+  //   const fullscreen = ref(false);
+  //   const { toggle } = useFullscreen();
+
+  //   function openFullscreen() {
+  //     // console.log('openFullscreen');
+  //     fullscreen.value = !fullscreen.value;
+  //     toggle();
+  //   }
+
+  //   return {
+  //     fullscreen,
+  //     openFullscreen,
+  //   }
+  // },
   methods: {
     showGameModal() {
       this.$nextTick(() => {
           new bootstrap.Modal(document.getElementById('pongmodal')).show();
       });
+      // useFullscreen
+      // this.openFullscreen();
     },
   },
 }

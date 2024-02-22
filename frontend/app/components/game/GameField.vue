@@ -8,80 +8,97 @@
 
 <template>
   <div
-      @keydown="handleKeyPress"
-      @keyup="handleKeyRelease"
-      class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease">
-      <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
-      <div v-show="playing" class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
-      <div v-show="playing" class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%' }"></div>
-      <div v-show="playing" class="midline"></div>
-      <div v-show="playing" style="position: absolute; top: 0; left: 2%; font-size: 1.2em; color: #ffffff;">
-        {{ p1_name }}
-      </div>
-      <div v-show="playing" style="position: absolute; top: 0; right: 2%; font-size: 1.2em; color: #ffffff;">
-        {{ p2_name }}
-      </div>
-      <div v-show="playing" style="position: absolute; bottom: 0; left: 2%; font-size: 2.0em; color: #ffffff;">
-        {{ pointsP1 }}
-      </div>
-      <div v-show="playing" style="position: absolute; bottom: 0; right: 2%; font-size: 2.0em; color: #ffffff;">
-        {{ pointsP2 }}
-      </div>
-	  <li style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; position: absolute;">
-		<!-- Message --->
-		<div style="font-size: 1.6em; font-weight: bold; color: #ffffff; text-align: center;">
-			<div>{{ message }}</div>
-		</div>
-		<!-- Start game - button --->
-		<div v-if="showMenu">
-			<button type="button" class="btn btn-primary" @click="startTrainingGame">Start Training Game</button>
-		</div>
-    <div v-if="showMenu" style="height: 5px;"></div>
-    <div v-if="showMenu">
-      <button type="button" class="btn btn-primary" @click="startLocalGame">Start Local Game</button>
+    @keydown="handleKeyPress"
+    @keyup="handleKeyRelease"
+    class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease">
+    <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
+    <div v-show="playing" class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
+    <div v-show="playing" class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%' }"></div>
+    <div v-show="playing" class="midline"></div>
+    <div v-show="playing" style="position: absolute; top: 0; left: 2%; font-size: 1.2em; color: #ffffff;">
+      {{ p1_name }}
     </div>
-    <div v-if="showMenu && isLoggedIn == 1" style="height: 5px;"></div>
-    <div v-if="showMenu && isLoggedIn == 1">
-      <button type="button" class="btn btn-primary" @click="startRankedGame">Start Ranked Game</button>
+    <div v-show="playing" style="position: absolute; top: 0; right: 2%; font-size: 1.2em; color: #ffffff;">
+      {{ p2_name }}
     </div>
-    <div v-if="showMenu && isLoggedIn == 1" style="height: 5px;"></div>
-    <div v-if="showMenu && isLoggedIn == 1">
-      <button type="button" class="btn btn-primary" @click="createTournament">Create Tournament</button>
+    <div v-show="playing" style="position: absolute; bottom: 0; left: 2%; font-size: 2.0em; color: #ffffff;">
+      {{ pointsP1 }}
     </div>
-		<!-- play on this device - button --->
-    <div v-if="!playOnThisDevice" style="height: 5px;"></div>
-		<div v-if="!playOnThisDevice">
-			<button type="button" class="btn btn-primary" @click="changeDevice">Play on this device</button>
-		</div>
-    <!-- alias screen -->
-    <div v-if="showAliasScreen || showAliasScreen2">
-      <input type="text" class="form-control" v-model="alias" placeholder="Enter alias" maxlength="20"> 
+    <div v-show="playing" style="position: absolute; bottom: 0; right: 2%; font-size: 2.0em; color: #ffffff;">
+      {{ pointsP2 }}
     </div>
-    <div v-if="showAliasScreen || showAliasScreen2" style="height: 8px;"></div>
-    <div v-if="showAliasScreen">
-      <button type="button" class="btn btn-primary" @click="createGuestPlayer">Enter</button>
-    </div>
-    <div v-if="showAliasScreen2">
-      <button type="button" class="btn btn-primary" @click="createGuestPlayer2">Enter</button>
-    </div>
-    <!-- Back to menu - button --->
-    <div v-if="waiting || showAliasScreen2" style="height: 5px;"></div>
-    <div v-if="waiting || showAliasScreen2">
-      <button type="button" class="btn btn-primary" @click="backToMenu">Back to Menu</button>
-    </div>
-    <div v-if="showMenu">
-      <button type="button" class="btn btn-primary" @click="showControls">Controls</button>
-      <div v-if="showmodal">
-        <div class="modal-dialog fullscreen-modal align-items-center">
-          <div class="modal-content">
-            <div class="modal-body">
-              <img v-if="controls" :src="controls" alt="Controls">
+    <div class="container nes-container is-rounded is-centered" v-if="!playing" style="max-width: 25vw; max-height: 60vh; color: #ffffff; background-color: #eeeeee; display: inline-block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+        <!-- Message --->
+        <div style="color: #000000; text-align: center;">
+          <div>{{ message }}</div>
+        </div>
+        <!-- Start game - button --->
+
+        <div v-if="showMenu">
+          <div class="row">
+            <div class="col">
+              <button type="button" class="btn nes-btn btn-primary" @click="startTrainingGame">Start Training Game</button>
             </div>
           </div>
         </div>
-      </div>
+        <div v-if="showMenu">
+          <div class="row">
+            <div class="col">
+              <button type="button" class="btn nes-btn btn-primary" @click="startLocalGame">Start Local Game</button>
+            </div>
+          </div>
+        </div>
+        <div v-if="showMenu && isLoggedIn == 1">
+          <div class="row">
+            <div class="col">
+              <button type="button" class="btn nes-btn btn-primary" @click="startRankedGame">Start Ranked Game</button>
+            </div>
+          </div>
+        </div>
+        <div v-if="showMenu && isLoggedIn == 1">
+          <div class="row">
+            <div class="col">
+              <button type="button" class="btn nes-btn btn-primary" @click="createTournament">Create Tournament</button>
+            </div>
+          </div>
+        </div>
+        <!-- play on this device - button --->
+        <div v-if="!playOnThisDevice">
+          <div class="row">
+            <div class="col">
+              <button type="button" class="btn nes-btn btn-primary" @click="changeDevice">Play on this device</button>
+            </div>
+          </div>
+        </div>
+        <!-- alias screen -->
+        <div class= "nes-field" v-if="showAliasScreen || showAliasScreen2">
+          <input type="text" class="form-control nes-input" v-model="alias" placeholder="Enter alias" maxlength="20"> 
+        </div>
+        <div v-if="showAliasScreen || showAliasScreen2" style="height: 8px;"></div>
+        <div v-if="showAliasScreen">
+          <button type="button" class="btn nes-btn btn-primary" @click="createGuestPlayer">Enter</button>
+        </div>
+        <div v-if="showAliasScreen2">
+          <button type="button" class="btn nes-btn btn-primary" @click="createGuestPlayer2">Enter</button>
+        </div>
+        <!-- Back to menu - button --->
+        <div v-if="waiting || showAliasScreen2" style="height: 5px;"></div>
+        <div v-if="waiting || showAliasScreen2">
+          <button type="button" class="btn nes-btn btn-primary" @click="backToMenu">Back to Menu</button>
+        </div>
+        <div v-if="showMenu && isLoggedIn == 1">
+          <button type="button" class="btn nes-btn btn-primary" @click="showControls">Controls</button>
+          <div v-if="showmodal">
+            <div class="modal-dialog fullscreen-modal align-items-center">
+              <div class="modal-content">
+                <div class="modal-body">
+                  <img v-if="controls" :src="controls" alt="Controls">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
-	</li>
   </div>
 </template>
   
@@ -124,7 +141,6 @@
     }
   },
   mounted () {
-    // watch for changes in the login status (need to close and reopen the websocket when the user logs in or out)
     watchEffect(() => {
       if (isLoggedIn.value === 1) {
         this.closeWebSocket();
@@ -192,11 +208,11 @@
               this.showMenu = false;
               this.alias = '';
               if (data.page === "alias_screen") {
-                this.message = 'hello guest, please enter your alias!';
+                this.message = 'Hello guest, please enter your alias!';
                 this.showAliasScreen = true;
                 this.showAliasScreen2 = false;
               } else if (data.page === "alias_screen_2") {
-                this.message = 'please enter an alias for the second player!';
+                this.message = 'Please enter an alias for the second player!';
                 this.showAliasScreen = false;
                 this.showAliasScreen2 = true;
               }
@@ -400,7 +416,7 @@
       this.controls='https://media.tenor.com/Ycl8mXFNE_8AAAAi/get-real-cat.gif';
       await new Promise(resolve => setTimeout(resolve, 3000));
       this.showmodal=false;
-    }
+    },
   }
 };
 </script>
@@ -410,8 +426,7 @@
   
   .game-canvas {
   width: 100%;
-  padding-bottom: 50%;
-  border: 3px solid #0b51b4;
+  height: 97vh;
   background-color: #000;
   position: relative;
   overflow: hidden;
@@ -432,7 +447,6 @@
 .midline {
     position: absolute;
     width: 1px;
-    height: 100%;
     top: 0;
     left: 50%;
     transform: translateX(-50%);
@@ -445,6 +459,10 @@
   height: 3%;
   background-color: pink;
   border-radius: 50%;
+}
+
+.btn-primary{
+  width: 97%;
 }
 
 </style>

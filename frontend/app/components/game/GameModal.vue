@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="modalRef"
     @keydown.esc="closeModal"
     class="modal fade"
     :id="modalId" tabindex="-1"
@@ -10,7 +11,7 @@
     <div class="modal-dialog fullscreen-modal align-items-center">
       <div class="modal-content">
         <div class="modal-body">
-          <GameField ref="ponggamefieldRef" @openModal="openModal" />
+          <GameField ref="ponggamefieldRef" @openModal="openModal"/>
         </div>
       </div>
     </div>
@@ -21,9 +22,37 @@
 <script>
 export default {
   name: 'GameModal',
+  setup() {
+    const modalRef = ref(null);
+    const { toggle } = useFullscreen(modalRef);
+    // function to open fullscreen
+    function openFullscreen() {
+      if (document.fullscreenElement !== modalRef.value) {
+        toggle();
+      }
+    }
+    // function to close fullscreen
+    function closeFullscreen() {
+      if (document.fullscreenElement === modalRef.value) {
+        toggle();
+      }
+    }
+
+    return {
+      openFullscreen,
+      closeFullscreen,
+      modalRef,
+    }
+  },
   props: {
     modalId: String,
     ariaLabel: String,
+  },
+  mounted() {
+    // listen to modal events to open and close fullscreen
+    var mood = document.getElementById(this.modalId);
+    mood.addEventListener('shown.bs.modal', this.openFullscreen);
+    mood.addEventListener('hidden.bs.modal', this.closeFullscreen);
   },
   methods: {
     openModal() {
@@ -36,6 +65,7 @@ export default {
       bsModal.show();
     },
     closeModal() {
+      this.closeFullscreen(); // smoother than closing fullscreen after modal is hidden
       if (this.$refs.ponggamefieldRef) {
         this.$refs.ponggamefieldRef.giveUpGame();
       }
@@ -50,14 +80,14 @@ export default {
 </script>
 
 <style>
+  .btn-close {
+    background-color: white;
+  }
   .modal-dialog.fullscreen-modal {
     max-width: 100%;
     margin: 0;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 100vh;
+    height: 100%;
     display: flex;
+    overflow: hidden;
   }
 </style>

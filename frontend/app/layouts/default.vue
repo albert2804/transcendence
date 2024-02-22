@@ -11,23 +11,17 @@ Example:
 </script>
 -->
 <template>
-  <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"> -->
-  <!-- minify -->
-  <!-- <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" /> -->
-  <!-- core style only -->
-  <!-- <link href="https://unpkg.com/nes.css/css/nes-core.min.css" rel="stylesheet" /> -->
+  <ChatHelpModal />
   <div class="nes-container is-rounded with-title vh-80 is-centered" 
-  style="display: flex; flex-direction: column; justify-content: space-between; height: 95vh;
-  margin: 20px 30px 30px">
-    <div style="overflow: auto;">
-    <!-- <div style="display: flex; justify-content: center; margin-top: 20vh;"> -->
-      <!-- <p class="title">A 42 PONG GAME</p> -->
+  style="display: flex; flex-direction: column; justify-content: space-between; height: 95vh; margin: 20px 30px 30px">
+    <div style="position: absolute; display: flex; flex-direction: column; gap: 2px; margin-right: 15px; z-index: 2; right: 0;">
       <SettingsBtn />
-      <slot />
+      <div style="height: 5px;"></div>
       <ChatButton />
-      
+      <GameButton />
+    </div>
+    <div style="overflow: auto;">
+      <slot />
     </div>
     <div>
       <NavBar />

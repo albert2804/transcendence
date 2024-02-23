@@ -42,7 +42,7 @@ class GameHandler:
 
 	# Use this function to create a new instance of this class
 	@classmethod
-	async def create(cls, player1, player2, ranked=False):
+	async def create(cls, player1, player2, ranked=False, db_entry=None):
 		instance = cls(player1, player2, ranked)
 		player1.game_handler = instance.game_group
 		await instance.channel_layer.group_add(
@@ -57,10 +57,13 @@ class GameHandler:
 		# create db entry if ranked (the rest will be filled after the game is finished)
 		if ranked:
 			from .models import RemoteGame
-			instance.db_entry = await sync_to_async(RemoteGame.objects.create)(
-				player1=player1.get_user(),
-				player2=player2.get_user(),
-			)
+			if db_entry == None:
+				instance.db_entry = await sync_to_async(RemoteGame.objects.create)(
+					player1=player1.get_user(),
+					player2=player2.get_user(),
+				)
+			else:
+				instance.db_entry = db_entry
 		return instance
 	
 	# Returns the game handler instance from the given game group name

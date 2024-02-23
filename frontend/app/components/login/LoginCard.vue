@@ -1,8 +1,10 @@
 <script setup>
   // Listen to changes of the isLoggedIn from store/index.js
-  import { isLoggedIn } from '~/store';
+  import { isLoggedIn, userName, userId} from '~/store';
   watchEffect(() => {
-  isLoggedIn.value = isLoggedIn.value
+	isLoggedIn.value = isLoggedIn.value
+	userName.value = userName.value
+	userId.value = userId.value
   })
 
   import { ref, onMounted } from 'vue';
@@ -30,7 +32,7 @@
   });
   const login = async () => 
   {
-    isLoggedIn.value = 2
+    isLoggedIn.value = 2 // Store
     message.value = ''
     message.error = ''
     qerror.value = ''
@@ -49,13 +51,17 @@
       });
       const data = await response.json()
       if (response.status === 200) {
-        isLoggedIn.value = 1
+        isLoggedIn.value = 1 // Store
+		userName.value = data.username // Store
+		userId.value = data.userid // Store
         password.value = ''
         error.value = ''
         message.value = data.message
         sessionStorage.setItem('userid',data.userid)
       } else if (response.status === 403 || response.status === 400) {
-        isLoggedIn.value = 0 
+        isLoggedIn.value = 0 // Store
+		userName.value = '' // Store
+		userId.value = '' // Store
         password.value = ''
         message.value=''
         error.value = data.error
@@ -66,7 +72,7 @@
   };
 
   const logout = async () => {
-  isLoggedIn.value = 2;
+  isLoggedIn.value = 2; // Store
   message.value = '';
   error.value = '';
   try {
@@ -79,7 +85,9 @@
     });
     const data = await response.json();
     if (response.status === 200) {
-      isLoggedIn.value = 0;
+      isLoggedIn.value = 0; //Store
+	  userName.value = ''; // Store
+	  userId.value = ''; // Store   
       username.value = '';
       password.value = '';
       message.value = data.message;
@@ -91,7 +99,7 @@
 };
 
 const register = async () => {
-  isLoggedIn.value = 2;
+  isLoggedIn.value = 2; // Store
   message.value = '';
   error.value = '';
   try {
@@ -105,15 +113,19 @@ const register = async () => {
       body: `username=${encodeURIComponent(username.value)}&password1=${encodeURIComponent(password.value)}&password2=${encodeURIComponent(password2.value)}&alias=${encodeURIComponent(username.value)}`,
     });
     if (response.status === 200) {
-      isLoggedIn.value = 1;
+	  const data = await response.json();
+      isLoggedIn.value = 1; // Store
+	  userName.value = data.username; // Store
+	  userId.value = data.userid; // Store
       password.value = '';
       password2.value = '';
-      const data = await response.json();
       error.value = '';
       message.value = data.message;
       sessionStorage.setItem('userid', data.userid);
     } else if (response.status === 403 || response.status === 400) {
-      isLoggedIn.value = 0;
+      isLoggedIn.value = 0; // Store
+	  userName.value = ''; // Store
+	  userId.value = ''; // Store
       password.value = '';
       password2.value = '';
       const data = await response.json();

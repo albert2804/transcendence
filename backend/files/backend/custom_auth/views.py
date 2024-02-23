@@ -34,9 +34,9 @@ def callback(request):
 
     response = requests.post(url)
 
-
-
-    #TODO: handle error if there is no access_token
+    if 'token' not in response.json():
+        error = "Error authenticating with 42 intra. The API secret might be invalid."
+        return HttpResponseRedirect(f'http://{request.get_host()}/login?error={error}')
     token = response.json()['access_token'] 
 
     headers = {'Authorization': f'Bearer {token}'}
@@ -48,7 +48,7 @@ def callback(request):
         user_details = response.json()
     else:
         login_route = "login"
-        error = "Error authorizing with 42 intra."
+        error = "Error authenticating with 42 intra."
         return HttpResponseRedirect(f'http://{request.get_host()}/login?error={error}')
         #return HttpResponseRedirect(f'http://{request.get_host()}/redirect?to={login_route}&error={error}')
 
@@ -79,4 +79,3 @@ def callback(request):
             user.save()
     message = "Successfully logged in to 42 intra."
     return HttpResponseRedirect(f'http://{request.get_host()}/login?message={message}')
-    #return HttpResponseRedirect(f'http://{request.get_host()}/redirect?to={frontend_route}')

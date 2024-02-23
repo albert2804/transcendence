@@ -1,6 +1,6 @@
 <template>
-    <div class="container-fluid vh-100">
-      <div style="display: flex; justify-content: center; margin-top: 20vh;">
+    <div class="container-fluid">
+      <div style="display: flex; justify-content: center; margin-top: 20vh; max-height: 95vh">
           <Leaderboard />
       </div>
     </div>

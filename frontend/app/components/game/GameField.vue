@@ -81,6 +81,12 @@
         <div v-if="showAliasScreen2">
           <button type="button" class="btn nes-btn btn-primary" @click="createGuestPlayer2">Enter</button>
         </div>
+        <div v-if="showAliasScreen && !showAliasScreen2">
+          <div style="color: #000000; text-align: center;">
+            <p><br>Or you can log in instead!</p>
+          </div>
+          <router-link to="/login" tag="button" class="btn nes-btn btn-primary" @click.native="$emit('close-modal')">Login</router-link>
+        </div>
         <!-- Back to menu - button --->
         <div v-if="waiting || showAliasScreen2" style="height: 5px;"></div>
         <div v-if="waiting || showAliasScreen2">

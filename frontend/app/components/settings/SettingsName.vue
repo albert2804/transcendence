@@ -1,9 +1,9 @@
 <template>
 	<div v-if="openPopup" class="popup">
-		<button type="button" @click="closePopup" class="btn-close" aria-label="Close"></button>
 		<div class="username_container">
 			<label for="username">Change Username:</label>
 			<input type="text" id="username" name="username" v-model="editedName" @keydown.enter="saveChanges" @blur="cancelChanges">
+			<button type="button" @click="closePopup" class="btn-close" aria-label="Close"></button>
 		</div>
 	</div>
   </template>
@@ -86,7 +86,7 @@ export default {
     padding-top: 10px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-end;
   }
   .shade-bg {
     position: absolute;

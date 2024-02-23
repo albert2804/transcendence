@@ -3,5 +3,3 @@
 // You can listen to, use, and modify this variable from any component
 // see components/Login.vue for an example
 export const isLoggedIn = ref(2); // 0 = not logged in, 1 = logged in, 2 = unknown (waiting)
-export const userName = ref("");
-export const userId = ref("");

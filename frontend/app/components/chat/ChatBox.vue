@@ -105,9 +105,6 @@ export default {
     },
   },
   mounted () {
-    // add event listener for offcanvas collapse
-    const offcanvasElement = document.getElementById('chatCanvas');
-    offcanvasElement.addEventListener('hidden.bs.offcanvas', this.handleOffcanvasCollapse);
     // watch for changes in isLoggedIn from store/index.js
     watchEffect(() => {
       if (isLoggedIn.value === 1) {
@@ -125,15 +122,7 @@ export default {
       this.$emit('unreadMessages', totalUnreadMessages);
     });
   },
-  beforeUnmount() {
-    // remove event listener for offcanvas collapse
-    const offcanvasElement = document.getElementById('chatCanvas');
-    offcanvasElement.removeEventListener('hidden.bs.offcanvas', this.handleOffcanvasCollapse);
-  },
   methods: {
-    handleOffcanvasCollapse() {
-      this.chatid = null;
-    },
     openHelpModal() {
       this.$nextTick(() => {
         new bootstrap.Modal(document.getElementById('helpmodal')).show();

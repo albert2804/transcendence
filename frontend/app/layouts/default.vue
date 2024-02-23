@@ -30,7 +30,7 @@ Example:
 </template>
 
 <script>
-  import { isLoggedIn, userName, userId } from '~/store';
+  import { isLoggedIn } from '~/store';
   export default {
     setup() {
       onMounted(async () => {
@@ -55,8 +55,6 @@ Example:
           const data = await response.json();
           if (data.authenticated) {
             isLoggedIn.value = 1
-			userName.value = data.username
-			userId.value = data.user_id
           } else {
             isLoggedIn.value = 0
           }

@@ -135,47 +135,47 @@ class ChatConsumer(AsyncWebsocketConsumer):
 					await self.channel_layer.group_send(f"chat_{self.scope['user'].id}",{'type': 'user_list',})
 					await self.channel_layer.group_send(f"chat_{blocked_user.id}",{'type': 'user_list',})
 
-	async def handle_friend_command(self, event):
-		receiver_id = event.get('receiver_id')
+	async def handle_friend_command(self, text_data):
+		receiver_id = text_data.get('receiver_id')
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:
 				# call the request_friend method of the CustomUser model (it also sends the messages)
 				await self.scope['user'].request_friend(receiver)
     
-	async def handle_unfriend_command(self, event):
-		receiver_id = event.get('receiver_id')
+	async def handle_unfriend_command(self, text_data):
+		receiver_id = text_data.get('receiver_id')
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:
 				# call the remove_friend method of the CustomUser model (it also sends the messages)
 				await self.scope['user'].remove_friend(receiver)
 	
-	async def handle_play_command(self, event):
-		receiver_id = event.get('receiver_id')
+	async def handle_play_command(self, text_data):
+		receiver_id = text_data.get('receiver_id')
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:
 				# call the invite_to_game method of the CustomUser model
 				await self.scope['user'].invite_to_game(receiver)
 	
-	async def handle_dont_play_command(self, event):
-		receiver_id = event.get('receiver_id')
+	async def handle_dont_play_command(self, text_data):
+		receiver_id = text_data.get('receiver_id')
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:
 				# call the remove_game_invite method of the CustomUser model
 				await self.scope['user'].remove_game_invite(receiver)
     
-	async def handle_help_command(self, event):
-		receiver_id = event.get('receiver_id')
+	async def handle_help_command(self, text_data):
+		receiver_id = text_data.get('receiver_id')
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:
 				await self.save_and_send_message(receiver, self.scope["user"], "Commands:\n/play - Invite/Accept user to play game\n/dont_play - Reject game invitation\n/block - Block user\n/unblock - Unblock user\n/friend - Invite/Accept friend request\n/unfriend - Unfriend user", datetime.now(), 'info')
 
-	async def handle_unknown_command(self, event):
-		receiver_id = event.get('receiver_id')
+	async def handle_unknown_command(self, text_data):
+		receiver_id = text_data.get('receiver_id')
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:

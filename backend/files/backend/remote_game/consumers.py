@@ -4,7 +4,7 @@ import asyncio
 from .player import Player
 from .gameHandler import GameHandler
 from asgiref.sync import sync_to_async
-
+from django.contrib.auth import get_user_model
 
 class RemoteGameConsumer(AsyncWebsocketConsumer):
 
@@ -12,6 +12,42 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	training_waiting_room = []
 	# list of players in the waiting group for ranked games (only registered users)
 	ranked_waiting_room = []
+
+	##################### TEST #####################
+	async def fast_game(self, event): # NOT USED BUT INTERESTING (UNRANKED GAME)
+		print("fast_game called")
+		user_id_1 = event['user_id_1']
+		user_id_2 = event['user_id_2']
+		user_1 = await sync_to_async(get_user_model().objects.get)(id=user_id_1)
+		user_2 = await sync_to_async(get_user_model().objects.get)(id=user_id_2)
+		player1 = Player.get_player_by_user(user_1)
+		player2 = Player.get_player_by_user(user_2)
+		if player1 == None or player2 == None:
+			print("Error: player not found")
+			return
+		game_group = await GameHandler.create(player1, player2)
+		# open the game modal for both players
+		await self.channel_layer.group_send(
+			f"game_{player1.get_user().id}_{player2.get_user().id}",
+			{
+				'type': 'open_game_modal',
+			})
+		await player1.send_state()
+		await player2.send_state()
+		asyncio.ensure_future(game_group.start_game())
+
+	async def invite_to_game(self, event):
+		user_id_1 = event['user_id_1']
+		user_id_2 = event['user_id_2']
+		user_1 = await sync_to_async(get_user_model().objects.get)(id=user_id_1)
+		user_2 = await sync_to_async(get_user_model().objects.get)(id=user_id_2)
+		if user_1 == None or user_2 == None:
+			print("Error: user not found")
+			return
+		await user_1.invite_to_game(user_2)
+	
+	##################### TEST END #####################
+
 
 	# Tries to create a guest player with the given alias
 	# If the alias is already taken or empty, the player gets an "alias_exists" message
@@ -69,6 +105,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		await self.accept()
 		if self.scope["user"].is_authenticated:
+			await self.channel_layer.group_add(f"gameconsumer_{self.scope['user'].id}", self.channel_name)
 			if Player.get_channel_by_user(self.scope["user"]) != None:
 				await self.send(text_data=json.dumps({
 					'type': 'redirect',
@@ -153,6 +190,8 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	# This function is called when the connection is closed
 	# Removes the player from game and waiting room and deletes the player object
 	async def disconnect(self, close_code):
+		if self.scope["user"].is_authenticated:
+			await self.channel_layer.group_discard(f"gameconsumer_{self.scope['user'].id}", self.channel_name)
 		player = Player.get_player_by_channel(self.channel_name)
 		if player != None:
 			# give up if the user is in a game

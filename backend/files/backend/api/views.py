@@ -6,20 +6,8 @@ from .forms import CustomUserCreationForm
 from django.middleware.csrf import get_token
 from django.db import IntegrityError
 import json
-
-
-################
-### EXAMPLES ###
-################
-
-# application/json
-def getTestJsonData(request):
-    test = {'message':"hello world", 'city': "Heilbronn", 'school': 42}
-    return JsonResponse(test)
-
-# text/plain or text/html
-def getTestTextData(request):
-    return HttpResponse("Hello World")
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 ################
@@ -129,3 +117,60 @@ def userregister(request):
             # any other errors
             return JsonResponse({'error': 'invalid credentials'}, status=403)
     return JsonResponse({'error': 'Something went wrong'}, status=400)
+
+######################
+### GAME FUNCTIONS ###
+######################
+
+def invite_to_game(request):
+    if request.method == 'POST':
+        try:
+            if not request.user.is_authenticated:
+                return JsonResponse({'error': 'You are not logged in'}, status=403)
+            data = json.loads(request.body.decode('utf-8'))
+            if 'receiver' in data:
+                receiver = CustomUser.objects.get(username=data['receiver'])
+                if receiver == None:
+                    return JsonResponse({'error': 'User not found'}, status=403)
+                if receiver == request.user:
+                    return JsonResponse({'error': 'You cannot invite yourself'}, status=403)
+                channel_layer = get_channel_layer()
+                async_to_sync(channel_layer.group_send)('gameconsumer_' + str(request.user.id), {
+                    'type': 'invite_to_game',
+                    'user_id_1': request.user.id,
+                    'user_id_2': receiver.id,
+                })
+                return JsonResponse({'message': 'success'}, status=200)
+            else:
+                return JsonResponse({'error': 'Receiver not specified'}, status=400)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Something went wrong'}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+#####################
+### FRIEND SYSTEM ###
+#####################
+
+def add_friend(request):
+    if request.method == 'POST':
+        try:
+            if not request.user.is_authenticated:
+                return JsonResponse({'error': 'You are not logged in'}, status=403)
+            data = json.loads(request.body.decode('utf-8'))
+            if 'receiver' in data:
+                friend = CustomUser.objects.get(username=data['receiver'])
+                if friend == None:
+                    return JsonResponse({'error': 'User not found'}, status=403)
+                if friend == request.user:
+                    return JsonResponse({'error': 'You cannot add yourself'}, status=403)
+                channel_layer = get_channel_layer()
+                async_to_sync(channel_layer.group_send)(f"chat_{request.user.id}", {
+                    'type': 'handle_friend_command',
+                    'receiver_id': friend.id,
+                })
+                return JsonResponse({'message': 'success'}, status=200)
+            else:
+                return JsonResponse({'error': 'Friend not specified'}, status=400)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Something went wrong'}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)

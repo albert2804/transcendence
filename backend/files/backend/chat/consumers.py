@@ -135,8 +135,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
 					await self.channel_layer.group_send(f"chat_{self.scope['user'].id}",{'type': 'user_list',})
 					await self.channel_layer.group_send(f"chat_{blocked_user.id}",{'type': 'user_list',})
 
-	async def handle_friend_command(self, text_data):
-		receiver_id = text_data.get('receiver_id')
+	# async def handle_friend_command(self, text_data):
+	# 	receiver_id = text_data.get('receiver_id')
+	# 	if receiver_id:
+	# 		receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
+	# 		if receiver:
+	# 			# call the request_friend method of the CustomUser model (it also sends the messages)
+	# 			await self.scope['user'].request_friend(receiver)
+	async def handle_friend_command(self, event):
+		# print("handle_friend_command")
+		receiver_id = event['receiver_id']
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:
@@ -221,6 +229,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				elif command == '/unblock':
 					await self.handle_unblock_command(text_data_json)
 				elif command == '/friend':
+					# await self.handle_friend_command(text_data_json)
 					await self.handle_friend_command(text_data_json)
 				elif command == '/unfriend':
 					await self.handle_unfriend_command(text_data_json)

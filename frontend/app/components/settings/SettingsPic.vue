@@ -1,18 +1,18 @@
 <template>
 	<div v-if="openPopup" class="popup">
-	<button type="button" @click="closePopup" class="btn-close" aria-label="Close"></button>
-	<div class="profilepic_container">
-	  <div v-if="userProfilePic">
-		<img :src=userProfilePic.url alt="Profile Picture">
-	  </div>
-	  <div v-else>
-		<p>Loading failure for Profile Pic</p>
-	  </div>
-	  <div class="btn_profilepic">
-		<input type="file" ref="fileInput" style="display: none;" @change="changeProfilePicture">
-		<button type="button" class="btn btn-primary" @click="selectProfilePicture">Change Profile Picture</button>
-	 </div>
-	</div>
+		<div class="profilepic_container">
+			<div v-if="userProfilePic">
+				<img :src=userProfilePic.url alt="Profile Picture">
+			</div>
+			<div v-else>
+				<p>Loading failure for Profile Pic</p>
+			</div>
+			<div class="btn_profilepic">
+				<input type="file" ref="fileInput" style="display: none;" @change="changeProfilePicture">
+				<button type="button" class="nes-btn is-success nav-item" @click="selectProfilePicture">Change Profile Picture</button>
+			</div>
+		</div>
+		<button type="button" @click="closePopup" class="btn-close" aria-label="Close"></button>
 </div>
   </template>
 
@@ -112,29 +112,14 @@
 </script>
 
 <style>
-  .card-size {
-    min-width: px;
-    max-width: 400px;
-  }
-  .button-list {
-    padding-top: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .shade-bg {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(255,255,255,0.7);
-  }
-  .profilepic_container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-bottom: 10px;
+
+
+.popup {
+	display: flex;
+}
+
+.btn-close {
+	align-items: flex-end;
 }
 
   .btn_profilepic {
@@ -143,4 +128,5 @@
   align-items: flex-start;
   margin-top: 10px;
 }
+
 </style>

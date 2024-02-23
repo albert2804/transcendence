@@ -29,10 +29,31 @@ html body {
   }
 
 .centered-headings {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	text-align: center; /* Optional: Center the text within headings */
-	height: 100vh;
-	margin: 10vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center; 
+  height: 100vh;
+  margin: 10vh;
   }
+
+.d-flex {
+  display: flex;
+}
+.align-items-center {
+  align-items: center;
+}
+.justify-content-center {
+  justify-content: center;
+}
+.vh-80 {
+  height: 80vh;
+}
+
+.vw-50 {
+  width: 50vw;
+}
+
+.automargin {
+  margin: auto;
+}

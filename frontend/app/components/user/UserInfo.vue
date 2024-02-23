@@ -9,6 +9,8 @@
       <p>Games Played: {{ userStats.games_played }}</p>
       <p>Matchmade Ranking: {{ userStats.mmr }}</p>
       <p>Overall Ranking: {{ userStats.ranking }}</p>
+      <button type="button" class="btn nes-btn btn-primary" @click="inviteToGame">Invite to Game</button>
+      <button type="button" class="btn nes-btn btn-primary" @click="addFriend">Add Friend</button>
     </div>
   </div>
 </template>
@@ -50,6 +52,44 @@ export default {
         });
         this.userStats = await response.json();
       } catch (error) {
+        console.error('Error:', error)
+      }
+    },
+    async inviteToGame() {
+      // console.log('Invite to game');
+      try {
+        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+        const response = await fetch('/endpoint/api/invite_to_game', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({
+            'receiver': this.userStats.username
+          })
+        });
+      }
+      catch (error) {
+        console.error('Error:', error)
+      }
+    },
+    async addFriend() {
+      // console.log('Add friend');
+      try {
+        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+        const response = await fetch('/endpoint/api/add_friend', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({
+            'receiver': this.userStats.username
+          })
+        });
+      }
+      catch (error) {
         console.error('Error:', error)
       }
     }

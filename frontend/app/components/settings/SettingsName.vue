@@ -87,7 +87,7 @@ export default {
     padding-top: 10px;
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: center;
   }
   .shade-bg {
     position: absolute;

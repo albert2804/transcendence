@@ -2,7 +2,7 @@
 
 	<div class="container profilepic">
 	  <div v-if="userProfilePic">
-		<img :src=userProfilePic.url alt="Profile Picture">
+		<img :src=userProfilePic.url alt="Profile Picture" style="width: 200px; height: auto;">
 	  </div>
 	  <div v-else>
 		<p>Loading failure for Profile Pic</p>

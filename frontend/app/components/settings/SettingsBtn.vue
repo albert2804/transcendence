@@ -17,9 +17,9 @@
       </div>
       <div class="offcanvas-body">
         <div v-if="isLoggedIn === 1">
-          <button type="button" class="btn btn-primary"  @click="openPopupName">Change Username</button>
-          <button type="button" class="btn btn-primary" @click="openPopupPw">Change Password</button>
-          <button type="button" class="btn btn-primary" @click="openPopupPic">Change Profile Picture</button>
+          <button type="button" class="nes-btn is-success"  @click="openPopupName">Change Username</button>
+          <button type="button" class="nes-btn is-success" @click="openPopupPw">Change Password</button>
+          <button type="button" class="nes-btn is-success" @click="openPopupPic">Change Pictures</button>
       
           <SettingsName :openPopup="PopupName" @close-popup="PopupName = false"/>
           <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false"/>

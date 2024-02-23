@@ -90,6 +90,7 @@
        		 	});
 			if (response.ok){
 				this.closePopup();
+				await this.$router.push('/userinfopage');
 				location.reload();
 			}
 			} catch (error) {

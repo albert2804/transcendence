@@ -1,3 +1,14 @@
+<script setup>
+import { isLoggedIn, userName, userId } from '~/store';
+watchEffect(() => {
+  if (!isLoggedIn.value) {
+    isLoggedIn.value = isLoggedIn.value;
+    userName.value = userName.value;
+    userId.value = userId.value;
+  }
+});
+</script>
+
 <template>
   <div class="user-stats">
     <h2>User Statistics</h2>
@@ -9,6 +20,8 @@
       <p>Games Played: {{ userStats.games_played }}</p>
       <p>Matchmade Ranking: {{ userStats.mmr }}</p>
       <p>Overall Ranking: {{ userStats.ranking }}</p>
+      <button v-if="userStats.username != userName && isLoggedIn" type="button" class="btn nes-btn btn-primary block-button" @click="inviteToGame">Invite to Game</button>
+      <button v-if="userStats.username != userName && isLoggedIn" type="button" class="btn nes-btn btn-primary block-button" @click="addFriend">Add Friend</button>
     </div>
   </div>
 </template>
@@ -52,28 +65,51 @@ export default {
       } catch (error) {
         console.error('Error:', error)
       }
+    },
+    async inviteToGame() {
+      try {
+        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+        const response = await fetch('/endpoint/api/invite_to_game', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({
+            'receiver': this.userStats.username
+          })
+        });
+      }
+      catch (error) {
+        console.error('Error:', error)
+      }
+    },
+    async addFriend() {
+      try {
+        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+        const response = await fetch('/endpoint/api/add_friend', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({
+            'receiver': this.userStats.username
+          })
+        });
+      }
+      catch (error) {
+        console.error('Error:', error)
+      }
     }
   }
 }
 </script>
 
 <style>
-  /* .card-size {
-    min-width: px;
-    max-width: 400px;
+  .block-button {
+    display: block;
+    /* width: 100%; */
+    margin-top: 10px;
   }
-  .button-list {
-    padding-top: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .shade-bg {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(255,255,255,0.7);
-  } */
 </style>

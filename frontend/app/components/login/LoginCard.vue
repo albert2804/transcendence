@@ -20,7 +20,6 @@
   const password = ref('');
   const password2 = ref('');
   const reg_form = ref(false);
-  // const isLoggedIn = ref(2);
 
   onMounted(() => {
     redirect_uri.value = encodeURIComponent(window.location.origin + "/endpoint/auth/callback");
@@ -137,15 +136,15 @@ const register = async () => {
 
 
 <template>
-  <section class="nes-container with-title is-centered">
+  <section class="nes-container with-title is-centered" style="max-width: 30vw; min-width: 23em">
     <p class="title" v-if="isLoggedIn!=1 && !reg_form">Login</p>
     <p class="title" v-if="isLoggedIn == 0 && reg_form">Register</p>
     <div class="card-body">
       <!-- ALERTS -->
-      <div v-if="message" class="alert alert-success" role="alert">{{ message }}</div>
-      <div v-if="qmessage" class="alert alert-success" role="alert">{{ qmessage }}</div>
-      <div v-if="error" class="alert alert-danger" role="alert">{{ error }}</div>
-      <div v-if="qerror" class="alert alert-danger" role="alert">{{ qerror }}</div>
+      <div v-if="message" class="alert alert-success" style="min-width: 14em" role="alert">{{ message }}</div>
+      <div v-if="qmessage" class="alert alert-success" style="min-width: 14em" role="alert">{{ qmessage }}</div>
+      <div v-if="error" class="alert alert-danger" style="min-width: 14em" role="alert">{{ error }}</div>
+      <div v-if="qerror" class="alert alert-danger" style="min-width: 14em" role="alert">{{ qerror }}</div>
       <!-- LOGIN FORM -->
       <form v-if="isLoggedIn != 1 && !reg_form">
         <div class="nes-field mb-3">

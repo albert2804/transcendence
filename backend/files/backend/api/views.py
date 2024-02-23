@@ -35,7 +35,8 @@ def get_auth_status(request):
     if request.user.is_authenticated:
         return JsonResponse({
             'authenticated': True,
-            # 'username': request.user.username,
+			'user_id': request.user.id,
+            'username': request.user.username,
             }, status=200)
     else:
         return JsonResponse({'authenticated': False}, status=200)
@@ -65,6 +66,7 @@ def userlogin(request):
             user_id = user.id
             return JsonResponse({
                 'message': 'Successfully logged in as ' + request.user.username,
+				'username': request.user.username,
                 'userid': user_id,
                 }, status=200)
         return JsonResponse({'error': 'Invalid credentials'}, status=403)
@@ -99,6 +101,7 @@ def userregister(request):
                 user_id = user.id
                 return JsonResponse({
                     'message': 'Successfully registered as ' + request.user.username,
+					'username': request.user.username,
                     'userid': user_id,
                     }, status=200)
             else:

@@ -13,29 +13,37 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	# list of players in the waiting group for ranked games (only registered users)
 	ranked_waiting_room = []
 
-	##################### TEST #####################
-	async def fast_game(self, event): # NOT USED BUT INTERESTING (UNRANKED GAME)
-		print("fast_game called")
-		user_id_1 = event['user_id_1']
-		user_id_2 = event['user_id_2']
-		user_1 = await sync_to_async(get_user_model().objects.get)(id=user_id_1)
-		user_2 = await sync_to_async(get_user_model().objects.get)(id=user_id_2)
-		player1 = Player.get_player_by_user(user_1)
-		player2 = Player.get_player_by_user(user_2)
-		if player1 == None or player2 == None:
-			print("Error: player not found")
-			return
-		game_group = await GameHandler.create(player1, player2)
-		# open the game modal for both players
-		await self.channel_layer.group_send(
-			f"game_{player1.get_user().id}_{player2.get_user().id}",
-			{
-				'type': 'open_game_modal',
-			})
-		await player1.send_state()
-		await player2.send_state()
-		asyncio.ensure_future(game_group.start_game())
+	# async def fast_game(self, event): # NOT USED BUT INTERESTING (UNRANKED GAME)
+	# 	print("fast_game called")
+	# 	user_id_1 = event['user_id_1']
+	# 	user_id_2 = event['user_id_2']
+	# 	user_1 = await sync_to_async(get_user_model().objects.get)(id=user_id_1)
+	# 	user_2 = await sync_to_async(get_user_model().objects.get)(id=user_id_2)
+	# 	player1 = Player.get_player_by_user(user_1)
+	# 	player2 = Player.get_player_by_user(user_2)
+	# 	if player1 == None or player2 == None:
+	# 		print("Error: player not found")
+	# 		return
+	# 	game_group = await GameHandler.create(player1, player2)
+	# 	# open the game modal for both players
+	# 	await self.channel_layer.group_send(
+	# 		f"game_{player1.get_user().id}_{player2.get_user().id}",
+	# 		{
+	# 			'type': 'open_game_modal',
+	# 		})
+	# 	await player1.send_state()
+	# 	await player2.send_state()
+	# 	asyncio.ensure_future(game_group.start_game())
 
+
+	# Invites a user to a game (ranked)
+	# Same as sending /play request to a user in the chat
+	# 
+	# async_to_sync(channel_layer.group_send)('gameconsumer_' + str(request.user.id), {
+	# 	'type': 'invite_to_game',
+	# 	'user_id_1': request.user.id,
+	# 	'user_id_2': receiver.id,
+	# })
 	async def invite_to_game(self, event):
 		user_id_1 = event['user_id_1']
 		user_id_2 = event['user_id_2']
@@ -46,8 +54,35 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 			return
 		await user_1.invite_to_game(user_2)
 	
-	##################### TEST END #####################
-
+	# Starts a tournament game between two users.
+	# You have to send the user ids and the db_game id (RemoteGame object) as event data.
+	# 
+	# async_to_sync(channel_layer.group_send)('gameconsumer_' + str(request.user.id), {
+	# 	'type': 'start_tournament_game',
+	# 	'user_1_id': user_1.id,
+	# 	'user_2_id': user_2.id,
+	# 	'db_game_id': db_game.id,
+	# })
+	async def start_tournament_game(self, event):
+		user_1_id = event.get('user_1_id')
+		user_2_id = event.get('user_2_id')
+		db_game_id = event.get('db_game_id')
+		if user_1_id and user_2_id and db_game_id:
+			user_1 = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(user_1_id)))()
+			user_2 = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(user_2_id)))()
+			db_game = await database_sync_to_async(lambda: RemoteGame.objects.get(id=int(db_game_id)))()
+			if user_1 and user_2 and db_game:
+				player_1 = Player.get_player_by_user(user_1)
+				player_2 = Player.get_player_by_user(user_2)
+				if player_1 == None or player_2 == None:
+					return
+				game_group = await GameHandler.create(player_1, player_2, ranked=True, db_game=db_game)
+				await self.channel_layer.group_send(
+					f"game_{player1.get_user().id}_{player2.get_user().id}",
+					{
+						'type': 'open_game_modal',
+					})
+				asyncio.ensure_future(game_group.start_game())
 
 	# Tries to create a guest player with the given alias
 	# If the alias is already taken or empty, the player gets an "alias_exists" message

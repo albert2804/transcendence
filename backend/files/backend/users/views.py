@@ -105,6 +105,8 @@ def verify(request):
 				if user.check_password(data.get('old_pw')):
 					user.set_password(data.get('password1'))
 					user.save()
+					return JsonResponse({'message': 'Password changed succesfully'},
+							status=200)
 				else:
 					return JsonResponse({'message': 'New password does not match with the old password'},
 							status=500)

@@ -5,14 +5,14 @@ from remote_game.player import Player
 from django.db import models
 from chat.consumers import ChatConsumer
 from datetime import datetime
-from asgiref.sync import sync_to_async
-
+from asgiref.sync import sync_to_async	
+from django.core.validators import FileExtensionValidator
 import asyncio
 
 class CustomUser(AbstractUser):
 	# Custom fields
 	chat_online = models.BooleanField(default=False)
-	profile_pic = models.FileField(upload_to='profilepic', default='profilepic/default.jpeg', blank=True, null=True)
+	profile_pic = models.FileField(upload_to='profilepic', default='profilepic/default.jpeg', blank=True, null=True, validators=[FileExtensionValidator(allowed_extensions=['jpeg','png'])])
 	alias = models.CharField(max_length=150, blank=True, null=True, verbose_name='Alias')
 	friends = models.ManyToManyField('self', blank=True)
 	friends_requests = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='friend_requests_received')
@@ -155,5 +155,3 @@ class CustomUser(AbstractUser):
 		# send info message to both users
 		await consumer.save_and_send_message(user, self, 'You canceled the game invite.', datetime.now(), 'info')
 		await consumer.save_and_send_message(self, user, 'The game invite got canceled.', datetime.now(), 'info')
-
-	

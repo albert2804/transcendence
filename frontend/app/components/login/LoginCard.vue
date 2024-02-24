@@ -16,8 +16,6 @@
   const router = useRouter();
   const message = ref('');
   const error = ref('');
-  const qmessage = ref('');
-  const qerror = ref('');
   const username = ref('');
   const password = ref('');
   const password2 = ref('');
@@ -25,8 +23,12 @@
 
   onMounted(() => {
     redirect_uri.value = encodeURIComponent(window.location.origin + "/endpoint/auth/callback");
-    qerror.value = route.query.error;
-    qmessage.value = route.query.message;
+    if (route.query.error) {
+      error.value = route.query.error;
+    }
+    if (route.query.message) {
+      message.value = route.query.message;
+    }
 
     router.replace({ path: route.path });
   });
@@ -35,7 +37,7 @@
     isLoggedIn.value = 2 // Store
     message.value = ''
     message.error = ''
-    qerror.value = ''
+    // qerror.value = ''
     try {
       const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
       const response = await fetch('/endpoint/api/userlogin', {
@@ -141,6 +143,8 @@ const register = async () => {
   };
 
   const redirectToIntraLogin = () => {
+    message.value = '';
+    error.value = '';
     const url =`https://api.intra.42.fr/oauth/authorize?client_id=${client_id}&redirect_uri=${redirect_uri.value}&state=${generateRandomString()}&response_type=code`;
     window.location.href = url;
   };
@@ -160,9 +164,7 @@ const register = async () => {
     <div class="card-body">
       <!-- ALERTS -->
       <div v-if="message" class="alert alert-success" style="min-width: 14em" role="alert">{{ message }}</div>
-      <div v-if="qmessage" class="alert alert-success" style="min-width: 14em" role="alert">{{ qmessage }}</div>
       <div v-if="error" class="alert alert-danger" style="min-width: 14em" role="alert">{{ error }}</div>
-      <div v-if="qerror" class="alert alert-danger" style="min-width: 14em" role="alert">{{ qerror }}</div>
       <!-- LOGIN FORM -->
       <form v-if="isLoggedIn != 1 && !reg_form">
         <div class="nes-field mb-3">
@@ -218,100 +220,3 @@ const register = async () => {
     </div>
   </section>
 </template>
-
-<!-- <script>
-export default {
-  name: 'LoginCard',
-    data() {
-    return {
-      username: '',
-      password: '',
-      password2: '',
-      message: '',
-      error: '',
-      reg_form: false,
-    }
-  },
-  methods: {
-    async logout() {
-      isLoggedIn.value = 2
-      this.message = ''
-      this.error = ''
-      try {
-        const response = await fetch('/endpoint/api/userlogout', {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        const data = await response.json()
-        if (response.status === 200) {
-          isLoggedIn.value = 0
-          this.username = ''
-          this.password = ''
-          this.message = data.message
-          sessionStorage.removeItem('userid');
-        }
-      } catch (error) {
-        console.error('Error:', error)
-      }
-    },
-    async register() {
-      isLoggedIn.value = 2
-      this.message = ''
-      this.error = ''
-      try {
-        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-        const response = await fetch('/endpoint/api/userregister', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': csrfToken
-          },
-          body: `username=${encodeURIComponent(this.username)}&password1=${encodeURIComponent(this.password)}&password2=${encodeURIComponent(this.password2)}&alias=${encodeURIComponent(this.username)}`,
-        });
-        if (response.status === 200) {
-          
-          isLoggedIn.value = 1
-          this.password = ''
-          this.password2 = ''
-          const data = await response.json()
-          this.message = data.message
-          sessionStorage.setItem('userid',data.userid);
-          window.location.href = 'https://localhost';
-        } else if (response.status === 403 || response.status === 400) {
-          isLoggedIn.value = 0
-          this.password = ''
-          this.password2 = ''
-          const data = await response.json()
-          this.error = data.error
-        }
-      } catch (error) {
-        console.error('Error:', error)
-      }
-    },
-  }
-}
-</script> -->
-
-<style>
-  .card-size {
-    min-width: px;
-    max-width: 400px;
-  }
-  .button-list {
-    padding-top: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .shade-bg {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(255,255,255,0.7);
-  }
-</style>

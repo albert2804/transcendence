@@ -20,7 +20,10 @@
               </h2>
               <div id="collapseOnline" class="accordion-collapse collapse show">
               <ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
-                <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
+                <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" 
+                @click="selectUser(user)"
+                @contextmenu.prevent="openProfile(user.username)"
+                >
                 <ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
                 </li>
               </ul>
@@ -47,7 +50,7 @@
           <!-- CHATBOX -->
           <div v-show="chatid !== null" style="margin-top: 5px;">
             <div class="chat-container">
-            <div class="header-bar">
+            <div class="header-bar" @click="openProfile(active_chat_user.username)">
               {{ active_chat_user ? active_chat_user.username : '' }}
               <p class="m-0">
               </p>
@@ -131,6 +134,9 @@ export default {
     offcanvasElement.removeEventListener('hidden.bs.offcanvas', this.handleOffcanvasCollapse);
   },
   methods: {
+    openProfile(username) {
+      this.$router.push({ path: '/userinfopage', query: { username: username } });
+    },
     handleOffcanvasCollapse() {
       this.chatid = null;
     },

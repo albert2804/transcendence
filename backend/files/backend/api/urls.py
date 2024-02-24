@@ -9,4 +9,5 @@ urlpatterns = [
     path('userregister', views.userregister),
     path('invite_to_game', views.invite_to_game),
     path('add_friend', views.add_friend),
+	path('remove_friend', views.remove_friend),
 ]

@@ -1,8 +1,10 @@
 <!-- https://getbootstrap.com/docs/5.3/components/navbar/ -->
 <script setup>
   import { isLoggedIn } from '~/store';
+  import { userName } from '~/store';
   watchEffect(() => {
     isLoggedIn.value = isLoggedIn.value
+    userName.value = userName.value
   })
 </script>
 
@@ -23,7 +25,7 @@
               <NuxtLink class="nes-btn is-warning nav-item" to="/tournament">Tournament</NuxtLink>
               <NuxtLink class="nes-btn is-error nav-item" to="/leaderboard">Leaderboard</NuxtLink>
               <NuxtLink v-if="!isLoggedIn" class="nes-btn is-error nav-item" to="/login">Login</NuxtLink>
-              <NuxtLink v-if="isLoggedIn" class="nes-btn is-error nav-item" to="/userinfopage">UserProfile</NuxtLink>
+              <button v-if="isLoggedIn" class="nes-btn is-error nav-item" @click="reloadUserProfile">UserProfile</button>
               <NuxtLink v-if="isLoggedIn" class="nes-btn is-error nav-item" to="/login">Logout</NuxtLink>
         </div>
     </nav>
@@ -34,6 +36,11 @@
 export default {
   name: 'NavBar',
   methods: {
+    reloadUserProfile() {
+      this.$router.push(`/userinfopage?username=${this.userName}`).then(() => {
+        this.$router.go();
+      });
+    },
   },
 }
 </script>

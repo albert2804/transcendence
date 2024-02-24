@@ -49,14 +49,12 @@ def callback(request):
         login_route = "login"
         error = "Error authenticating with 42 intra."
         return HttpResponseRedirect(f'http://{request.get_host()}/login?error={error}')
-        #return HttpResponseRedirect(f'http://{request.get_host()}/redirect?to={login_route}&error={error}')
 
     user = CustomUser.objects.filter(username=user_details['login']).first()
     if user is not None and user.is_42_login == False:
         login_route = "login"
         error = "This account is already registered locally, please log in with username and password."
         return HttpResponseRedirect(f'http://{request.get_host()}/login?error={error}')
-        #return HttpResponseRedirect(f'http://{request.get_host()}/redirect?to={login_route}&error={error}')
 
     user, created = CustomUser.objects.get_or_create( username=user_details['login'],
                         defaults={'email': user_details['email'], 'is_42_login': True, 'alias': user_details['login'] })

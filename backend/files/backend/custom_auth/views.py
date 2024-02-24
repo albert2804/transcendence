@@ -34,8 +34,7 @@ def callback(request):
 
     response = requests.post(url)
 
-    if 'token' not in response.json():
-        error = "Error authenticating with 42 intra. The API secret might be invalid."
+    if 'access_token' not in response.json():
         return HttpResponseRedirect(f'http://{request.get_host()}/login?error={error}')
     token = response.json()['access_token'] 
 
@@ -73,7 +72,6 @@ def callback(request):
     if created:
         image_get = requests.get(user_details['image']['versions']['small'])
         if image_get.status_code == 200:
-            print("IMAGE GET OK")
             image_content = ContentFile(image_get.content)
             user.profile_pic.save(f'{user.username}_42avatar.jpeg', image_content)
             user.save()

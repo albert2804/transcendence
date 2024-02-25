@@ -9,7 +9,18 @@
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
-        <!-- <RunningBanner /> -->
+        <div v-if="isLoggedIn === 1">
+          <button type="button" class="nes-btn is-success"  @click="openPopupName">Change Username</button>
+          <button type="button" class="nes-btn is-success" @click="openPopupPw">Change Password</button>
+          <button type="button" class="nes-btn is-success" @click="openPopupPic">Change Pictures</button>
+          <button type="button" class="nes-btn is-success" @click="openPopup2FA">Enable 2FA authentication</button>
+          <SettingsName :openPopup="PopupName" @close-popup="PopupName = false"/>
+          <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false"/>
+          <SettingsPw :openPopup="PopupPw" @close-popup="PopupPw = false"/>
+          <SettingsDo2FA :openPopup="Popup2FA" @close-popup="Popup2FA = false"/>
+        </div>
+        <div class="offcanvas-body">
+          <!-- <RunningBanner /> -->
         <!-- ALERTS -->
         <div v-if="recvmessage" class="alert alert-success" style="min-width: 14em" timeout="30s" role="alert">{{ recvmessage }}</div>
         <div v-if="recverror" class="alert alert-danger" style="min-width: 14em" role="alert">{{ recverror }}</div>
@@ -59,6 +70,7 @@ export default {
     let recverror = ref('');
     const PopupMap = ref(false);
     const loginStatus = ref(isLoggedIn.value);
+const Popup2FA = ref(false);
 
     const openPopupName = () => {
       PopupName.value = true;
@@ -72,6 +84,9 @@ export default {
     const openPopupMap = () => {
       PopupMap.value = true;
     };
+const openPopup2FA = () => {
+  Popup2FA.value = true;
+};
 
     watchEffect(() => {
         loginStatus.value = isLoggedIn.value;
@@ -90,6 +105,7 @@ export default {
       openPopupPic,
       openPopupPw,
       openPopupMap
+      Popup2FA,
     };
   },
  
@@ -121,8 +137,9 @@ export default {
   flex-direction: column; 
 }
 
-.btn-primary {
+.nes-btn {
   margin-bottom: 10px;
+  width: 95%;
 }
 
 </style>

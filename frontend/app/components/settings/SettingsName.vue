@@ -6,9 +6,9 @@
 			<button type="button" @click="closePopup" class="btn-close" aria-label="Close"></button>
 		</div>
 	</div>
-  </template>
+</template>
 
-  <script>
+<script>
 export default {
   props: {
     openPopup: Boolean,
@@ -24,14 +24,14 @@ export default {
 	methods: {
 		async fetch_name() {
 		  try {
-		    const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+			const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
 			const response = await fetch('/endpoint/user/info/', {
-        		method: 'GET',
-          		headers: {
-            	'Content-Type': 'application/json',
-            	'X-CSRFToken': csrfToken,
-          	    }
-       		 })
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': csrfToken,
+				}
+			})
 			this.nameResponse = await response.json();
 			if (response.ok) {
 				this.originalName = this.nameResponse.username;

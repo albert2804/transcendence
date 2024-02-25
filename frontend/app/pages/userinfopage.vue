@@ -7,7 +7,8 @@
 </script>
 
 <template>
-    <div class="nes-container container-fluid is-rounded with-title" style="width: 50vw; margin: auto; text-align: left; min-width: 580px">
+  <div class="d-flex align-items-center justify-content-center vh-80">
+    <div class="nes-container container-fluid with-title vw-50 automargin" style="text-align: left; min-width: 580px;">
       <p class="title">User profile</p>
       <div style="display: flex; align-items: center">
         <div v-if="isLoggedIn === 1" class="user-info-container">
@@ -24,6 +25,7 @@
         </div>
       </div>
     </div>
+  </div>
 </template>
 
   <script>

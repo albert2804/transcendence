@@ -12,6 +12,29 @@ from remote_game.consumers import RemoteGameConsumer
 from chat.consumers import ChatConsumer
 from remote_game.player import Player
 
+#2FA stuff
+# import jwt
+# from django_otp.plugins.otp_totp.models import TOTPDevice
+# from django.conf import settings
+# import datetime
+# from django.contrib.auth.decorators import login_required
+# from django.utils.decorators import method_decorator
+# import pyotp
+# import qrcode
+# import base64
+# from io import BytesIO
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django_otp.plugins.otp_totp.models import TOTPDevice
+import datetime
+import pyotp
+import qrcode
+import base64
+import jwt
+from io import BytesIO
+
+
 
 ################
 ### SECURITY ###
@@ -59,32 +82,49 @@ def get_auth_status(request):
 # }'
 # 
 def userlogin(request):
-	if request.method == 'POST':
-		# validate json data
-		try:
-			data = json.loads(request.body.decode('utf-8'))
-			username = data.get('username')
-			password = data.get('password')
-		except json.JSONDecodeError:
-			return JsonResponse({'error': 'Something went wrong'}, status=400)
-		# check if user is already logged in and if form valid
-		if request.user.is_authenticated:
-			return JsonResponse({
-				'message': 'You are already logged in',
-				}, status=200)
-		# try to authenticate and login user
-		user = authenticate(request, username=username, password=password)
-		if user is not None:
-			login(request, user)
-			user_id = user.id
-			return JsonResponse({
-				'message': 'Successfully logged in as ' + request.user.username,
-				'username': request.user.username,
-				'userid': user_id,
-				'sessionid': request.session.session_key,
-				}, status=200)
-		return JsonResponse({'error': 'Invalid credentials'}, status=403)
-	return JsonResponse({'error': 'Invalid request'}, status=400)
+    if request.method == 'POST':
+        # validate json data
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            username = data.get('username')
+            password = data.get('password')
+            token = data.get('token')
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Something went wrong'}, status=400)
+        # check if user is already logged in
+        if request.user.is_authenticated:
+            return JsonResponse({
+                'message': 'You are already logged in',
+                }, status=200)
+        # try to authenticate and login user
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            # check if the user has 2FA enabled
+            try:
+                device = TOTPDevice.objects.get(user=user)
+                # If they do, verify the token
+                if token is None or not device.verify_token(token):
+                    return JsonResponse({'error': 'Invalid 2FA token'}, status=403)
+            except TOTPDevice.DoesNotExist:
+                # If they don't have 2FA enabled, we don't need to check the token
+                pass
+            login(request, user)
+            user_id = user.id
+             # Create JWT token
+            payload = {
+                'user_id': user.id,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
+                'iat': datetime.datetime.utcnow()
+            }
+            jwt_token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+            return JsonResponse({
+                'message': 'Successfully logged in as ' + request.user.username,
+                'username': request.user.username,
+                'userid': user_id,
+                'token': jwt_token,
+                }, status=200)
+        return JsonResponse({'error': 'Invalid credentials'}, status=403)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
 # logout user
@@ -155,6 +195,62 @@ def userregister(request):
 			# any other errors
 			return JsonResponse({'error': 'invalid credentials'}, status=403)
 	return JsonResponse({'error': 'Invalid request'}, status=400)
+
+# get qr code for 2FA
+
+@method_decorator(login_required, name='dispatch')
+def qr_code(request, *args, **kwargs):
+    user = request.user
+
+    # Create a new TOTP device for the user
+    totp_device = TOTPDevice.objects.create(user=user, confirmed=False)
+
+    # Generate a provisioning URI for the TOTP device
+    totp = pyotp.TOTP(totp_device.bin_key)
+    provisioning_uri = totp.provisioning_uri(name=user.username, issuer_name='YourApp')
+
+    # Generate a QR code from the provisioning URI
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(provisioning_uri)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill='black', back_color='white')
+    buffered = BytesIO()
+    img.save(buffered, format="JPEG")
+
+    # Encode the QR code image in base64 and return it in the response
+    qr_code_base64 = base64.b64encode(buffered.getvalue()).decode()
+
+    return JsonResponse({'qr_code': qr_code_base64})
+
+
+# enable 2FA for user
+@method_decorator(login_required, name='dispatch')
+def enable_2fa(request, *args, **kwargs):
+    user = request.user
+    code = request.POST.get('code')
+
+    # Get the unconfirmed TOTP device for the user
+    totp_device = TOTPDevice.objects.filter(user=user, confirmed=False).first()
+
+    if not totp_device:
+        return JsonResponse({'error': 'No TOTP device found for this user'}, status=400)
+
+    # Verify the code
+    totp = pyotp.TOTP(totp_device.bin_key)
+    if totp.verify(code):
+        # If the code is valid, confirm the TOTP device
+        totp_device.confirmed = True
+        totp_device.save()
+
+        return JsonResponse({'success': '2FA enabled successfully'})
+    else:
+        return JsonResponse({'error': 'Invalid code'}, status=400)
 
 
 ######################

@@ -1,6 +1,8 @@
 from django.http import JsonResponse, HttpResponse
 from api.models import CustomUser
+from django.core import serializers
 from api.forms import CustomUserCreationForm
+from remote_game.models import RemoteGame
 from django.shortcuts import redirect
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
@@ -17,6 +19,7 @@ def send_userinfo(request):
 				if not username or username == 'undefined':
 					username = request.user
 				user_data = CustomUser.objects.get(username=username)
+				game_history = user_data.response_gamehistory()
 			except Exception as e: 
 				return JsonResponse({'error': f'Could not get statistics data for user. Error: {str(e)}'}, status=500)
 			try:
@@ -26,13 +29,14 @@ def send_userinfo(request):
 					'alias': user_data.alias,
 					'games_played': user_data.num_games_played,
 					'games_won': user_data.num_games_won,
+					'games_lost': user_data.num_games_played - user_data.num_games_won,
 					'mmr': user_data.mmr,
 					'ranking': user_data.ranking,
+					'game_history': game_history,
 					}
-				return JsonResponse(response_data,
-					status=200)
-			except:
-				return JsonResponse({'error': 'No statistics data found for the user'},
+				return JsonResponse(response_data, status=200)
+			except Exception as e:
+				return JsonResponse({'error': f'No statistics data found for the user. Error: {str(e)}'},
 						status=404)
 		elif request.method == 'POST':
 			try:

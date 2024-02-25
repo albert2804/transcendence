@@ -16,6 +16,7 @@
           </div>
           <div class="col">
             <UserInfo />
+            <UserGameHistory />
           </div>
         </div>
         <div v-else>

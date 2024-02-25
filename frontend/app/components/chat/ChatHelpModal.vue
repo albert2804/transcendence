@@ -10,6 +10,10 @@
         <p><i class="bi bi-star-fill" style="color: #007bff; font-size: 1.2rem;"></i> - You are friends</p>
         <p><i class="bi bi-x-circle" style="color: red; font-size: 1.2rem;"></i> - You blocked this user</p>
         <p><i class="bi bi-x-circle-fill" style="color: red; font-size: 1.2rem;"></i> - This user blocked you</p>
+		<br>
+		<p>- Left click on a user to open the chat</p>
+		<p>- Right click on a user in the list or left click on a user in the chatbox to open the users profile page</p>
+		<br>
         <p style="margin-top: 10px; font-weight: bold;">Helpful chat commands:</p>
         <p><code>/play</code> - Invite/Accept user to play game</p>
         <p><code>/dont_play</code> - Reject game invitation</p>
@@ -30,3 +34,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.modal-body p {
+  font-size: 0.8rem;
+}
+</style>

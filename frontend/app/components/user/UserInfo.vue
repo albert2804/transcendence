@@ -22,7 +22,8 @@ watchEffect(() => {
       <p>Matchmade Ranking: {{ userStats.mmr }}</p>
       <p>Overall Ranking: {{ userStats.ranking }}</p>
       <button v-if="userStats.username != userName && isLoggedIn" type="button" class="btn nes-btn btn-primary block-button" @click="inviteToGame">Invite to Game</button>
-      <button v-if="userStats.username != userName && isLoggedIn" type="button" class="btn nes-btn btn-primary block-button" @click="addFriend">Add Friend</button>
+      <button v-if="userStats.username != userName && isLoggedIn && !userStats.friend" type="button" class="btn nes-btn btn-primary block-button" @click="addFriend">Add Friend</button>
+	  <button v-if="userStats.username != userName && isLoggedIn && userStats.friend" type="button" class="btn nes-btn btn-primary block-button" @click="removeFriend">Remove Friend</button>
     </div>
   </div>
 </template>
@@ -41,6 +42,7 @@ export default {
         games_lost: '0',
         alias: '',
         ranking: '0',
+		friend: false,
       },
       error: '',
     };
@@ -103,7 +105,25 @@ export default {
       catch (error) {
         console.error('Error:', error)
       }
-    }
+    },
+	async removeFriend() {
+	  try {
+		const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+		const response = await fetch('/endpoint/api/remove_friend', {
+		  method: 'POST',
+		  headers: {
+			'Content-Type': 'application/json',
+			'X-CSRFToken': csrfToken
+		  },
+		  body: JSON.stringify({
+			'receiver': this.userStats.username
+		  })
+		});
+	  }
+	  catch (error) {
+		console.error('Error:', error)
+	  }
+	}
   }
 }
 </script>

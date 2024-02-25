@@ -34,9 +34,8 @@ def callback(request):
 
     response = requests.post(url)
 
-
-
-    #TODO: handle error if there is no access_token
+    if 'access_token' not in response.json():
+        return HttpResponseRedirect(f'http://{request.get_host()}/login?error={error}')
     token = response.json()['access_token'] 
 
     headers = {'Authorization': f'Bearer {token}'}
@@ -48,16 +47,14 @@ def callback(request):
         user_details = response.json()
     else:
         login_route = "login"
-        error = "Error authorizing with 42 intra."
+        error = "Error authenticating with 42 intra."
         return HttpResponseRedirect(f'http://{request.get_host()}/login?error={error}')
-        #return HttpResponseRedirect(f'http://{request.get_host()}/redirect?to={login_route}&error={error}')
 
     user = CustomUser.objects.filter(username=user_details['login']).first()
     if user is not None and user.is_42_login == False:
         login_route = "login"
         error = "This account is already registered locally, please log in with username and password."
         return HttpResponseRedirect(f'http://{request.get_host()}/login?error={error}')
-        #return HttpResponseRedirect(f'http://{request.get_host()}/redirect?to={login_route}&error={error}')
 
     user, created = CustomUser.objects.get_or_create( username=user_details['login'],
                         defaults={'email': user_details['email'], 'is_42_login': True, 'alias': user_details['login'] })
@@ -73,10 +70,8 @@ def callback(request):
     if created:
         image_get = requests.get(user_details['image']['versions']['small'])
         if image_get.status_code == 200:
-            print("IMAGE GET OK")
             image_content = ContentFile(image_get.content)
             user.profile_pic.save(f'{user.username}_42avatar.jpeg', image_content)
             user.save()
     message = "Successfully logged in to 42 intra."
     return HttpResponseRedirect(f'http://{request.get_host()}/login?message={message}')
-    #return HttpResponseRedirect(f'http://{request.get_host()}/redirect?to={frontend_route}')

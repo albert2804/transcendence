@@ -23,6 +23,13 @@ def send_userinfo(request):
 			except Exception as e: 
 				return JsonResponse({'error': f'Could not get statistics data for user. Error: {str(e)}'}, status=500)
 			try:
+				is_friend = False
+				if request.user != username:
+					friends = CustomUser.objects.get(username=request.user).friends.all()
+					for friend in friends:
+						if friend.username == username:
+							is_friend = True
+							break
 				response_data = {
 					'username': user_data.username,
 					'date_joined': user_data.date_joined.date(),
@@ -32,6 +39,7 @@ def send_userinfo(request):
 					'games_lost': user_data.num_games_played - user_data.num_games_won,
 					'mmr': user_data.mmr,
 					'ranking': user_data.ranking,
+					'friend': is_friend,
 					'game_history': game_history,
 					}
 				return JsonResponse(response_data, status=200)

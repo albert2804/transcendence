@@ -40,6 +40,3 @@ if settings.DEBUG:
 admin_panel = os.environ.get('ADMIN_PANEL_ENABLED', 'False').lower() == 'true'
 if admin_panel:
     urlpatterns.append(path('endpoint/admin/', admin.site.urls))
-
-
-SOCIAL_AUTH_URL_NAMESPACE = 'social'

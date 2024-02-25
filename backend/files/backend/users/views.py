@@ -5,6 +5,7 @@ from django.shortcuts import redirect
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 import os, json
+import imghdr
 
 RED = "\033[31m"
 RESET = "\033[0m"
@@ -80,10 +81,15 @@ def handle_profilepic(request):
 			try:
 				user = CustomUser.objects.get(username=request.user)
 				if 'newPic' in request.FILES:	
-					user.profile_pic = request.FILES['newPic']
+					new_pic = request.FILES['newPic']
 					validators=[FileExtensionValidator(allowed_extensions=['jpeg','png'])]
 					for validator in validators:
-						validator(request.FILES['newPic'])
+						validator(new_pic)
+					#validate that this is actually a picture
+					file_type = imghdr.what(new_pic)
+					if file_type not in ['jpeg', 'png']:
+						return JsonResponse({'error': 'File is not a picture'}, status=422)
+					user.profile_pic = new_pic
 					user.save()
 					return JsonResponse({'url': user.profile_pic.url}, status=200)
 				else:

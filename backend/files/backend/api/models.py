@@ -8,6 +8,7 @@ from datetime import datetime
 from asgiref.sync import sync_to_async	
 from django.core.validators import FileExtensionValidator
 import asyncio
+import json
 
 class CustomUser(AbstractUser):
 	# Custom fields
@@ -24,8 +25,8 @@ class CustomUser(AbstractUser):
 	mmr = models.IntegerField(default=200)
 	ranking = models.IntegerField(default=0)
 	date_joined = models.DateTimeField(auto_now_add=True)
-	
-	# mobile = models.CharField(max_length=20, blank=True, null=True)
+	game_history = models.ManyToManyField('remote_game.RemoteGame', related_name='game_history')
+
 	def __str__(self):
 		return self.username
 
@@ -154,3 +155,20 @@ class CustomUser(AbstractUser):
 		# send info message to both users
 		await consumer.save_and_send_message(user, self, 'You canceled the game invite.', datetime.now(), 'info')
 		await consumer.save_and_send_message(self, user, 'The game invite got canceled.', datetime.now(), 'info')
+
+	def response_gamehistory(self):
+		games = []
+		for game in self.game_history.all():
+			data = {
+                'id': game.pk,
+                'player1': game.return_all_data()['player1'],
+                'player2': game.return_all_data()['player2'],
+                'time': round((game.finished_at - game.started_at).total_seconds(), 2),
+                'pointsP1': game.pointsP1,
+                'pointsP2': game.pointsP2,
+                'winner': game.return_all_data()['winner'],
+                'loser': game.return_all_data()['loser'],
+            }
+			games.append(data)
+		return games
+			

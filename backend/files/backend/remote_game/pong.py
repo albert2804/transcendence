@@ -105,9 +105,9 @@ class PongGame:
 		if self.pointsP1 < 3 and self.pointsP2 < 3:
 			self.update_game()
 		else:
-			if self.pointsP1 == 3:
+			if self.pointsP1 == 10:
 				self.winner = 1
-			elif self.pointsP2 == 3:
+			elif self.pointsP2 == 10:
 				self.winner = 2
 			self.isGameExited = True
 

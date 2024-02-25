@@ -13,3 +13,21 @@ class RemoteGame(models.Model) :
 	winner = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True, related_name='games_won')
 	loser = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True, related_name='games_lost')
 	finished = models.BooleanField(default=False)
+
+	def __str__(self):
+		return str(self.pk)
+	
+	def return_all_data(self):
+		return{
+			'id': self.pk,
+            'player1': self.player1.alias,
+            'player2': self.player2.alias,
+            'created_at': self.created_at,
+            'started_at': self.started_at,
+            'finished_at': self.finished_at,
+            'pointsP1': self.pointsP1,
+            'pointsP2': self.pointsP2,
+            'winner': self.winner.alias,
+            'loser': self.loser.alias,
+            'finished': self.finished,
+		}

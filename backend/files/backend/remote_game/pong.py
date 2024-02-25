@@ -102,12 +102,12 @@ class PongGame:
 			self.rightPaddle['dy'] = 0
 
 	def game_loop(self):
-		if self.pointsP1 < 10 and self.pointsP2 < 10:
+		if self.pointsP1 < 3 and self.pointsP2 < 3:
 			self.update_game()
 		else:
-			if self.pointsP1 == 10:
+			if self.pointsP1 == 3:
 				self.winner = 1
-			elif self.pointsP2 == 10:
+			elif self.pointsP2 == 3:
 				self.winner = 2
 			self.isGameExited = True
 

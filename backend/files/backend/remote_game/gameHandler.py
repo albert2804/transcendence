@@ -58,6 +58,7 @@ class GameHandler:
 			from .models import RemoteGame
 			if db_entry == None:
 				instance.db_entry = await sync_to_async(RemoteGame.objects.create)(
+					
 					player1=player1.get_user(),
 					player2=player2.get_user(),
 				)
@@ -231,7 +232,6 @@ class GameHandler:
 	
 	# saves the game result to the db entry (only for ranked games)
 	async def save_result_to_db(self):
-		from .models import RemoteGame
 		# fill the db entry with the game result
 		self.db_entry.started_at = self.game_start_time
 		self.db_entry.finished_at = timezone.now()
@@ -254,8 +254,15 @@ class GameHandler:
 			db_p1_user.num_games_won += 1
 		elif self.game.winner == 2:
 			db_p2_user.num_games_won += 1
+
+		await database_sync_to_async(db_p1_user.game_history.add)(self.db_entry)
+		await database_sync_to_async(db_p2_user.game_history.add)(self.db_entry)
 		await database_sync_to_async(db_p1_user.save)()
 		await database_sync_to_async(db_p2_user.save)()
+		
+		
+
+		
 
 	# This function is called when a player gives up or disconnects
 	# The other player wins the game

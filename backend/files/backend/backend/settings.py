@@ -161,12 +161,6 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-# SOCIAL_AUTH_GITHUB_KEY='e989ab105c9b8c40d3f6'
-# SOCIAL_AUTH_GITHUB_SECRET='9a6ca7f1e6106dccf4564dc626fa43c4167e1aeb'
-
-SOCIAL_AUTH_URL_NAMESPACE = 'social'
-
-
 LOGIN_URL = 'auth/login/'
 LOGIN_REDIRECT_URL='/endpoint/auth'
 
@@ -174,29 +168,4 @@ INTERNAL_IPS = [
     '127.0.0.1',
 	'localhost',
 ]
-
-#  LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'formatters': {
-#         'default': {
-#             'format': '[DJANGO] %(levelname)s %(asctime)s %(module)s '
-#                       '%(name)s.%(funcName)s:%(lineno)s: %(message)s'
-#         },
-#     },
-#     'handlers': {
-#         'console': {
-#             'level': 'DEBUG',
-#             'class': 'logging.StreamHandler',
-#             'formatter': 'default',
-#         }
-#     },
-#     'loggers': {
-#         '': {
-#             'handlers': ['console'],
-#             'level': 'DEBUG',
-#             'propagate': True,
-#         }
-#     },
-# }
 

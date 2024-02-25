@@ -163,7 +163,7 @@ class CustomUser(AbstractUser):
                 'id': game.pk,
                 'player1': game.return_all_data()['player1'],
                 'player2': game.return_all_data()['player2'],
-                'time': (game.finished_at - game.started_at).total_seconds(),
+                'time': round((game.finished_at - game.started_at).total_seconds(), 2),
                 'pointsP1': game.pointsP1,
                 'pointsP2': game.pointsP2,
                 'winner': game.return_all_data()['winner'],

@@ -7,22 +7,24 @@
 </script>
 
 <template>
-  <div class="d-flex align-items-center justify-content-center vh-80">
+  <div class="d-flex flex-column align-items-center justify-content-center vh-80">
     <div class="nes-container container-fluid with-title vw-50 automargin" style="text-align: left; min-width: 580px;">
       <p class="title">User profile</p>
-      <div style="display: flex; align-items: center">
-        <div v-if="isLoggedIn === 1" class="user-info-container">
-          <div class="col">
-            <UserProfilePic />
-          </div>
-          <div class="col">
-            <UserInfo />
-            <UserGameHistory />
-          </div>
+      <div class="user-info-container">
+        <div v-if="isLoggedIn === 1" class="col">
+          <UserProfilePic />
+        </div>
+        <div v-if="isLoggedIn === 1" class="col">
+          <UserInfo />
         </div>
         <div v-else>
           <h4>No user statistics available. Please log in to view user profiles.</h4>
         </div>
+      </div>
+    </div>
+    <div class="nes-container container-fluid with-title vw-50 automargin" style="text-align: left; min-width: 580px;">
+      <div v-if="isLoggedIn === 1" class="user-games-history">
+        <UserGameHistory />
       </div>
     </div>
   </div>
@@ -40,4 +42,28 @@
     justify-content: center;
     width: 100%;
   }
+  .user-games-history {
+  max-width: 580px; /* Set the maximum width to 580px */
+  width: 100%;
+}
+
+/* Adjust table width and column width */
+.user-games-history table {
+  width: 100%; /* Make the table fill its container */
+}
+
+.user-games-history th,
+.user-games-history td {
+  padding: 8px; /* Adjust cell padding */
+  max-width: 100px; /* Set maximum width for cells */
+  overflow: hidden; /* Hide overflow content */
+  text-overflow: ellipsis; /* Add ellipsis for overflow text */
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+@media screen and (max-width: 1575px) {
+  .user-games-history {
+    display: none;
+  }
+}
 </style>

@@ -78,9 +78,28 @@ export default {
 </script>
 
 <style>
-  .block-button {
-    display: block;
-    /* width: 100%; */
-    margin-top: 10px;
+  .game-history {
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+
+  th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f2f2f2;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
   }
 </style>

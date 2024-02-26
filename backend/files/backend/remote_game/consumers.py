@@ -1,8 +1,10 @@
+from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 import asyncio
 from .player import Player
 from .gameHandler import GameHandler
+from django.apps import apps
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 
@@ -64,21 +66,23 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	# 	'db_game_id': db_game.id,
 	# })
 	async def start_tournament_game(self, event):
-		user_1_id = event.get('user_1_id')
-		user_2_id = event.get('user_2_id')
+		user_1_id = event.get('user_id_1')
+		user_2_id = event.get('user_id_2')
 		db_game_id = event.get('db_game_id')
 		if user_1_id and user_2_id and db_game_id:
 			user_1 = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(user_1_id)))()
 			user_2 = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(user_2_id)))()
+			RemoteGame = apps.get_model('remote_game', 'RemoteGame')
 			db_game = await database_sync_to_async(lambda: RemoteGame.objects.get(id=int(db_game_id)))()
+			print(db_game)
 			if user_1 and user_2 and db_game:
 				player_1 = Player.get_player_by_user(user_1)
 				player_2 = Player.get_player_by_user(user_2)
 				if player_1 == None or player_2 == None:
 					return
-				game_group = await GameHandler.create(player_1, player_2, ranked=True, db_game=db_game)
-				await self.channel_layer.group_send(
-					f"game_{player1.get_user().id}_{player2.get_user().id}",
+				game_group = await GameHandler.create(player_1, player_2, ranked=True, db_entry=db_game)
+				await game_group.channel_layer.group_send(
+					game_group.game_group,
 					{
 						'type': 'open_game_modal',
 					})

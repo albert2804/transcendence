@@ -34,40 +34,17 @@
         </div>
         <!-- Menu buttons --->
         <div v-if="showMenu">
-          <div class="row">
-            <div class="col">
-              <button type="button" class="btn nes-btn btn-primary" @click="startTrainingGame">Start Training Game</button>
-            </div>
-          </div>
+          <button type="button" class="nes-btn btn-primary" @click="startTrainingGame">Start Training Game</button>
+        </div>
+        <div v-if="showMenu && isLoggedIn == 1">
+          <button type="button" class="nes-btn btn-primary" @click="startRankedGame">Start Ranked Game</button>
         </div>
         <div v-if="showMenu">
-          <div class="row">
-            <div class="col">
-              <button type="button" class="btn nes-btn btn-primary" @click="startLocalGame">Start Local Game</button>
-            </div>
-          </div>
-        </div>
-        <div v-if="showMenu && isLoggedIn == 1">
-          <div class="row">
-            <div class="col">
-              <button type="button" class="btn nes-btn btn-primary" @click="startRankedGame">Start Ranked Game</button>
-            </div>
-          </div>
-        </div>
-        <div v-if="showMenu && isLoggedIn == 1">
-          <div class="row">
-            <div class="col">
-              <button type="button" class="btn nes-btn btn-primary" @click="createTournament">Create Tournament</button>
-            </div>
-          </div>
+          <button type="button" class="nes-btn btn-primary" @click="startLocalGame">Start Local Game</button>
         </div>
         <!-- play on this device - button --->
         <div v-if="!playOnThisDevice">
-          <div class="row">
-            <div class="col">
-              <button type="button" class="btn nes-btn btn-primary" @click="changeDevice">Play on this device</button>
-            </div>
-          </div>
+          <button type="button" class="nes-btn btn-primary" @click="changeDevice">Play on this device</button>
         </div>
         <!-- alias screen -->
         <div class= "nes-field" v-if="showAliasScreen || showAliasScreen2">
@@ -75,25 +52,25 @@
         </div>
         <div v-if="showAliasScreen || showAliasScreen2" style="height: 8px;"></div>
         <div v-if="showAliasScreen">
-          <button type="button" class="btn nes-btn btn-primary" @click="createGuestPlayer">Enter</button>
+          <button type="button" class="nes-btn btn-primary" @click="createGuestPlayer">Enter</button>
         </div>
         <div v-if="showAliasScreen2">
-          <button type="button" class="btn nes-btn btn-primary" @click="createGuestPlayer2">Enter</button>
+          <button type="button" class="nes-btn btn-primary" @click="createGuestPlayer2">Enter</button>
         </div>
         <div v-if="showAliasScreen && !showAliasScreen2">
           <div style="color: #000000; text-align: center;">
             <p><br>Or you can log in instead!</p>
           </div>
-          <router-link to="/login" tag="button" class="btn nes-btn btn-primary" @click.native="$emit('close-modal')">Login</router-link>
+          <router-link to="/login" tag="button" class="nes-btn btn-primary" @click.native="$emit('close-modal')">Login</router-link>
         </div>
         <!-- Back to menu - button --->
         <div v-if="waiting || showAliasScreen2" style="height: 5px;"></div>
         <div v-if="waiting || showAliasScreen2">
-          <button type="button" class="btn nes-btn btn-primary" @click="backToMenu">Back to Menu</button>
+          <button type="button" class="nes-btn btn-primary" @click="backToMenu">Back to Menu</button>
         </div>
         <div v-if="showMenu && isLoggedIn == 1">
-          <button type="button" class="btn nes-btn btn-primary" @click="showControls">Controls</button>
-          <div v-if="showControlsPic" style="position: relative; min-width: 220px; width: 20vw;">
+          <button type="button" class="nes-btn btn-primary" @click="showControls">Controls</button>
+          <div v-if="showControlsPic" style="position: relative; width: 100%;">
             <img v-if="controls" :src="controls" alt="Controls" style="width: 100%;">
             <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #000000; text-align: center;">
               <p>Press the arrow keys or 'w' and 's' to move the paddles!</p>
@@ -165,16 +142,16 @@
       this.socket = new WebSocket(sockurl)
 
       this.socket.onopen = () => {
-        console.log('opened remoteGame websocket')
+        // console.log('opened remoteGame websocket')
         this.$emit('connected')
       }
 
       this.socket.onclose = () => {
-        console.log('closed remoteGame websocket')
+        // console.log('closed remoteGame websocket')
       }
 
       this.socket.onerror = (error) => {
-        console.error(`WebSocket-Error: ${error}`)
+        // console.error(`WebSocket-Error: ${error}`)
       }
 
       this.socket.onmessage = (event) => {
@@ -258,7 +235,7 @@
     closeWebSocket () {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         this.socket.close()
-        console.log('WebSocket connection closed')
+        // console.log('WebSocket connection closed')
       }
     },
     // function to start the game
@@ -287,9 +264,6 @@
         });
         this.socket.send(data);
       }
-    },
-    createTournamen() {
-      console.log("create Tournament (for now does nothing)");
     },
     // function to create a guest player (send alias to server)
     createGuestPlayer () {

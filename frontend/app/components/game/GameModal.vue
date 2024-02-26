@@ -16,7 +16,20 @@
         </div>
       </div>
     </div>
-    <button @click="closeModal" type="button" class="btn-close" aria-label="Close" style="position: absolute; top: 10px; right: 10px;"></button>
+	  <div class="row">
+      <!-- fullscreen button -->
+      <button v-if="!fullscreen" @click="openFullscreen" type="button" class="btn" aria-label="Fullscreen" style="position: absolute; top: 30px; right: 90px; background-color: rgba(255, 255, 255, 0.494); width: 50px; height: 50px;">
+        <i class="bi bi-arrows-fullscreen" style="color: black; font-size: 1.5rem;"></i>
+      </button>
+      <!-- exit fullscreen button -->
+      <button v-if="fullscreen" @click="closeFullscreen" type="button" class="btn" aria-label="Exit Fullscreen" style="position: absolute; top: 30px; right: 90px; background-color: rgba(255, 255, 255, 0.494); width: 50px; height: 50px;">
+        <i class="bi bi-fullscreen-exit" style="color: black; font-size: 1.5rem;"></i>
+      </button>
+      <!-- close modal button -->
+      <button @click="closeModal" type="button" class="btn" aria-label="Close" style="position: absolute; top: 30px; right: 30px; background-color: rgba(255, 255, 255, 0.494); width: 50px; height: 50px;">
+        <i class="bi bi-x-lg" style="color: black; font-size: 1.5rem;"></i>
+      </button>
+	  </div>
   </div>
 </template>
 
@@ -26,6 +39,8 @@ export default {
   setup() {
     const modalRef = ref(null);
     const { toggle } = useFullscreen(modalRef);
+    const fullscreen = ref(false);
+
     // function to open fullscreen
     function openFullscreen() {
       if (document.fullscreenElement !== modalRef.value) {
@@ -39,22 +54,36 @@ export default {
       }
     }
 
+    // function for the fullscreenchange event (to update the fullscreen variable for the button)
+    function updateFullscreen() {
+      fullscreen.value = document.fullscreenElement === modalRef.value;
+    }
+
+    onMounted(() => {
+      document.addEventListener('fullscreenchange', updateFullscreen);
+    });
+
+    onUnmounted(() => {
+      document.removeEventListener('fullscreenchange', updateFullscreen);
+    });
+
     return {
       openFullscreen,
       closeFullscreen,
       modalRef,
+      fullscreen,
     }
   },
   props: {
     modalId: String,
     ariaLabel: String,
   },
-  mounted() {
-    // listen to modal events to open and close fullscreen
-    var mood = document.getElementById(this.modalId);
-    mood.addEventListener('shown.bs.modal', this.openFullscreen);
-    mood.addEventListener('hidden.bs.modal', this.closeFullscreen);
-  },
+  // mounted() {
+  //   // listen to modal events to open and close fullscreen
+  //   var mood = document.getElementById(this.modalId);
+  //   mood.addEventListener('shown.bs.modal', this.openFullscreen);
+  //   mood.addEventListener('hidden.bs.modal', this.closeFullscreen);
+  // },
   methods: {
     openModal() {
       var mood = document.getElementById(this.modalId);

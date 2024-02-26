@@ -10,4 +10,4 @@ class GetAllUsersView(View):
         users_list = [{ attr: getattr(user, attr, None) for attr in attributes } for user in users ]
         users_list_sorted = sorted(users_list, key=lambda x: x['mmr'], reverse=True)
         print (f"\nUsers List: {users_list}")
-        return(JsonResponse({ 'response': users_list_sorted }))
+        return(JsonResponse({ 'response': users_list }))

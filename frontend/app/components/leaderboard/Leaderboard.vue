@@ -20,7 +20,7 @@
             <td>{{ user.num_games_won }}</td>
             <td>{{ user.mmr }}</td>
             <td>{{ user.num_games_played }}</td>
-            <td>{{ (user.num_games_won !== 0) ? (( user.num_games_won / user.num_games_played) * 100).toFixed(0) + '%' : '0%' }}</td>
+            <td>{{ (user.num_games_played !== 0) ? (( user.num_games_won / user.num_games_played) * 100).toFixed(0) + '%' : '0%' }}</td>
             <td>
               <router-link :to="{ name: 'userinfopage', query: { username: user.username } }">
                 <button type="button" class="btn nes-btn btn-primary">View Profile</button>

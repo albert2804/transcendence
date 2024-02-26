@@ -7,18 +7,20 @@
             <th scope = "col">#</th>
             <th scope="col">Username</th>
             <th scope="col">Games Won</th>
+            <th scope="col">MMR</th>
             <th scope="col">Games Played</th>
             <th scope="col">Win Ratio</th>
             <th scope="col">User profile</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(user, index) in sortedUsers" :key="user.username">
+          <tr v-for="(user, index) in sortedUsers" :key="user.mmr">
             <th scope = "row">{{ index + 1}}</th>
             <td>{{ user.username }}</td>
             <td>{{ user.num_games_won }}</td>
+            <td>{{ user.mmr }}</td>
             <td>{{ user.num_games_played }}</td>
-            <td>{{ (user.num_games_won !== 0) ? ((user.num_games_played / user.num_games_won) * 100).toFixed(0) + '%' : '0%' }}</td>
+            <td>{{ (user.num_games_won !== 0) ? (( user.num_games_won / user.num_games_played) * 100).toFixed(0) + '%' : '0%' }}</td>
             <td>
               <router-link :to="{ name: 'userinfopage', query: { username: user.username } }">
                 <button type="button" class="btn nes-btn btn-primary">View Profile</button>
@@ -44,7 +46,7 @@ export default {
   {
     sortedUsers() 
     {
-      return this.users.slice().sort((a, b) => b.num_games_won - a.num_games_won);
+      return this.users.slice().sort((a, b) => b.mmr - a.mmr);
     }
   },
   methods: 
@@ -54,7 +56,7 @@ export default {
       try 
       {
         const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-        const response = await fetch('/endpoint/user/get_all_users?attributes=username,alias,num_games_played,num_games_won', 
+        const response = await fetch('/endpoint/user/get_all_users?attributes=username,alias,num_games_played,num_games_won,mmr', 
           {
             method: 'GET',
             headers: 

@@ -16,6 +16,11 @@
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
+        <!-- ALERTS -->
+        <div class="alert alert-success" style="min-width: 14em" role="alert">{{ message }}</div>
+        <div class="alert alert-danger" style="min-width: 14em" role="alert">{{ error }}</div>
+        <!-- <div v-if="message" class="alert alert-success" style="min-width: 14em" role="alert">{{ message }}</div>
+        <div v-if="error" class="alert alert-danger" style="min-width: 14em" role="alert">{{ error }}</div> -->
         <div v-if="isLoggedIn === 1">
           <button type="button" class="nes-btn is-success"  @click="openPopupName">Change Username</button>
           <button type="button" class="nes-btn is-success" @click="openPopupPw">Change Password</button>

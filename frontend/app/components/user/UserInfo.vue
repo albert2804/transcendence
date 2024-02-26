@@ -17,6 +17,7 @@ watchEffect(() => {
       <p>Alias: {{ userStats.alias }}</p>
       <p>Date Joined: {{ userStats.date_joined }}</p>
       <p>Games Won: {{ userStats.games_won }}</p>
+      <p>Games Lost: {{ userStats.games_lost }}</p>
       <p>Games Played: {{ userStats.games_played }}</p>
       <p>Matchmade Ranking: {{ userStats.mmr }}</p>
       <p>Overall Ranking: {{ userStats.ranking }}</p>
@@ -38,6 +39,7 @@ export default {
         username: '',
         games_played: '0',
         games_won: '0',
+        games_lost: '0',
         alias: '',
         ranking: '0',
 		friend: false,

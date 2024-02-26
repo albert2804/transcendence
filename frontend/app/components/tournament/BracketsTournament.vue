@@ -41,7 +41,7 @@ export default {
       this.playerReady = !this.playerReady;
       const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
       try {
-        const response = await fetch('/endpoint/tournament/readyPlayer/', {
+        const response = await fetch('/endpoint/tournament/iviteOtherPlayer/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

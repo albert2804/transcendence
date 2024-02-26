@@ -27,13 +27,12 @@
     <div v-show="playing" style="position: absolute; bottom: 0; right: 2%; font-size: 2.0em; color: #ffffff;">
       {{ pointsP2 }}
     </div>
-    <div class="container nes-container is-rounded is-centered" v-if="!playing" style="max-width: 25vw; max-height: 60vh; color: #ffffff; background-color: #eeeeee; display: inline-block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    <div class="container nes-container is-rounded is-centered menu_box" v-if="!playing" >
         <!-- Message --->
         <div style="color: #000000; text-align: center;">
           <div>{{ message }}</div>
         </div>
-        <!-- Start game - button --->
-
+        <!-- Menu buttons --->
         <div v-if="showMenu">
           <div class="row">
             <div class="col">
@@ -94,13 +93,10 @@
         </div>
         <div v-if="showMenu && isLoggedIn == 1">
           <button type="button" class="btn nes-btn btn-primary" @click="showControls">Controls</button>
-          <div v-if="showmodal">
-            <div class="modal-dialog fullscreen-modal align-items-center">
-              <div class="modal-content">
-                <div class="modal-body">
-                  <img v-if="controls" :src="controls" alt="Controls">
-                </div>
-              </div>
+          <div v-if="showControlsPic" style="position: relative; min-width: 250px; width: 20vw;">
+            <img v-if="controls" :src="controls" alt="Controls" style="width: 100%;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #000000; text-align: center;">
+              <p>Press the arrow keys or 'w' and 's' to move the paddles!</p>
             </div>
           </div>
         </div>
@@ -137,13 +133,13 @@
         x: 0,
         y: 0,
       },
-	    playOnThisDevice: true,
+		  playOnThisDevice: true,
       // Following only for guest users:
       showAliasScreen: false,
       showAliasScreen2: false,
       alias: '',
       controls: '',
-      showmodal: false,
+      showControlsPic: false,
     }
   },
   mounted () {
@@ -413,15 +409,14 @@
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({ type: 'give_up' });
         this.socket.send(data);
-        // console.log('gave up game');
       }
     },
     // show controls in form of a gif
     async showControls() {
-      this.showmodal=true;
+      this.showControlsPic=true;
       this.controls='https://media.tenor.com/Ycl8mXFNE_8AAAAi/get-real-cat.gif';
       await new Promise(resolve => setTimeout(resolve, 3000));
-      this.showmodal=false;
+      this.showControlsPic=false;
     },
   }
 };
@@ -429,8 +424,8 @@
 
 <!-- Styles -->
 <style scoped>
-  
-  .game-canvas {
+
+.game-canvas {
   width: 100%;
   height: 97vh;
   background-color: #000;
@@ -469,6 +464,30 @@
 
 .btn-primary{
   width: 97%;
+}
+
+.menu_box{
+  min-width: 300px;
+  max-width: 25vw;
+  max-height: 60vh;
+  color: #ffffff;
+  background-color: #eeeeee;
+  display: inline-block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.0em;
+}
+
+.menu_box * {
+  font-size: inherit;
+}
+
+@media screen and (max-width: 600px) {
+  .menu_box {
+    font-size: 0.7em; 
+  }
 }
 
 </style>

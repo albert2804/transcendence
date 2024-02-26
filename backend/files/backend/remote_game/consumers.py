@@ -198,11 +198,17 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 						asyncio.ensure_future(game_group.start_game())
 					else:
 						await player.send_state()
+				elif data.get('type') == "give_up":
+					if player.get_game_handler() != None:
+						player.get_game_handler().give_up(player)
+					if player in RemoteGameConsumer.training_waiting_room:
+						RemoteGameConsumer.training_waiting_room.remove(player)
+					if player in RemoteGameConsumer.ranked_waiting_room:
+						RemoteGameConsumer.ranked_waiting_room.remove(player)
+					await player.send_state()
 				# message handling for players in a game
 				if player.get_game_handler() != None:
-					if (data.get('type') == 'give_up'):
-						player.get_game_handler().give_up(player)
-					elif (data.get('type') == 'key_pressed' or data.get('type') == 'key_released'):
+					if (data.get('type') == 'key_pressed' or data.get('type') == 'key_released'):
 						player.get_game_handler().update_paddle(player, data.get('key'), data.get('type'))
 				# message handling for players in the menu
 				else:

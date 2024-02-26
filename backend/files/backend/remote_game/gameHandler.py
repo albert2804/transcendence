@@ -22,7 +22,7 @@ class GameHandler:
 
 	# Use create() instead of __init__() to create a new instance of this class 
 	# @database_sync_to_async
-	def __init__(self, player1, player2, ranked=False):
+	def __init__(self, player1, player2, ranked=False, tournament=False):
 		self.player1 = player1
 		self.player2 = player2
 		if (player1 == player2):
@@ -37,12 +37,13 @@ class GameHandler:
 		self.pressed_keys_p2 = []
 		# only used for ranked games:
 		self.ranked = ranked
+		self.tournament = tournament
 		self.db_entry = None
 		self.game_start_time = None
 
 	# Use this function to create a new instance of this class
-	@classmethod
-	async def create(cls, player1, player2, ranked=False, db_entry=None):
+	@ma
+	async def create(cls, player1, player2, ranked=False, db_entry=None, tournament=False):
 		instance = cls(player1, player2, ranked)
 		player1.game_handler = instance.game_group
 		await instance.channel_layer.group_add(

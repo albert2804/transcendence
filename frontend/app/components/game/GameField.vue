@@ -8,8 +8,6 @@
 
 <template>
   <div
-    @keydown="handleKeyPress"
-    @keyup="handleKeyRelease"
     class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease">
     <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
     <div v-show="playing" class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
@@ -133,7 +131,7 @@
   beforeDestroy () {
     this.closeWebSocket();
   },
-  expose: ['giveUpGame'], // expose function to parent component
+  expose: ['giveUpGame', 'handleKeyPress', 'handleKeyRelease'],
   methods: {
     // function to create and handle the websocket
 	  createWebSocket () {

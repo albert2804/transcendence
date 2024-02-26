@@ -55,16 +55,27 @@ def send_userinfo(request):
 			try:
 				data = json.loads(request.body.decode('utf-8'))
 				newUsername = data.get('newUsername')
-				user.alias = newUsername
-				user.save()
-				return JsonResponse({'status': 'Changed username'},
-					status=200)
+				update_user_alias(user, newUsername)
 			except:
 				return JsonResponse({'error': 'username could not be updated'},
 						status=405)
 	else:
 		return JsonResponse({'error': 'User not authenticated'},
 			status=401)
+
+def update_user_alias(user, newUsername):
+	existing_users = CustomUser.objects.all()
+
+	for existing_user in existing_users:
+		if existing_user != user and newUsername == existing_user.alias:
+			return JsonResponse({'error': 'alias already in use'},
+					status=405)
+	
+	user.alias = newUsername
+	user.save()
+	return JsonResponse({'status': 'Changed username'},
+		status=200)
+
 
 # sends the profilepic url as a response to the frontend if GET method is active
 #  if POST method is active, change the profilepici nside the database and save the file to MEDIA Root/profilepic

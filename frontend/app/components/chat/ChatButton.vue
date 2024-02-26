@@ -9,7 +9,7 @@
 <template>
   <ChatBox @closeChat="toggleChatBox" @connected="setToConnected" @disconnected="setToDisconnected" @loading="loading = true" @unreadMessages="handleMessageAlert"/>
   <div v-show="isLoggedIn === 1">
-    <div v-if="connected && !loading" class="nes-container is-rounded" style="background-color: #ffea76; position: relative; text-align: center;" type="button" data-bs-toggle="offcanvas" data-bs-target="#chatCanvas" aria-controls="chatCanvas">
+    <div v-if="connected && !loading" class="nes-container is-rounded clickable" style="background-color: #ffea76; position: relative; text-align: center;" type="button" data-bs-toggle="offcanvas" data-bs-target="#chatCanvas" aria-controls="chatCanvas">
       <span class="badge rounded-pill bg-danger" v-if="messageAlert != 0" style="position: absolute; transform: translate(-150%, -140%);">
         {{ messageAlert }}
       </span>

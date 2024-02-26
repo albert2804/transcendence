@@ -18,15 +18,15 @@
     </div>
 	  <div class="row">
       <!-- fullscreen button -->
-      <button v-if="!fullscreen" @click="openFullscreen" type="button" class="btn" aria-label="Fullscreen" style="position: absolute; top: 30px; right: 90px; background-color: rgba(255, 255, 255, 0.494); width: 50px; height: 50px;">
+      <button v-if="!fullscreen" @click="openFullscreen" type="button" class="btn" aria-label="Fullscreen" style="position: absolute; top: 20px; right: 80px; background-color: rgba(255, 255, 255, 0.494); width: 50px; height: 50px;">
         <i class="bi bi-arrows-fullscreen" style="color: black; font-size: 1.5rem;"></i>
       </button>
       <!-- exit fullscreen button -->
-      <button v-if="fullscreen" @click="closeFullscreen" type="button" class="btn" aria-label="Exit Fullscreen" style="position: absolute; top: 30px; right: 90px; background-color: rgba(255, 255, 255, 0.494); width: 50px; height: 50px;">
+      <button v-if="fullscreen" @click="closeFullscreen" type="button" class="btn" aria-label="Exit Fullscreen" style="position: absolute; top: 20px; right: 80px; background-color: rgba(255, 255, 255, 0.494); width: 50px; height: 50px;">
         <i class="bi bi-fullscreen-exit" style="color: black; font-size: 1.5rem;"></i>
       </button>
       <!-- close modal button -->
-      <button @click="closeModal" type="button" class="btn" aria-label="Close" style="position: absolute; top: 30px; right: 30px; background-color: rgba(255, 255, 255, 0.494); width: 50px; height: 50px;">
+      <button @click="closeModal" type="button" class="btn" aria-label="Close" style="position: absolute; top: 20px; right: 20px; background-color: rgba(255, 255, 255, 0.494); width: 50px; height: 50px;">
         <i class="bi bi-x-lg" style="color: black; font-size: 1.5rem;"></i>
       </button>
 	  </div>

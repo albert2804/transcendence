@@ -3,7 +3,7 @@
     <div class="offcanvas offcanvas-end" tabindex="-1" id="chatCanvas" aria-labelledby="chatCanvasLabel">
       <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="chatCanvasLabel">
-          <i type="button" class="bi bi-question-circle" style="font-size: 1.2em; margin-left: 5px;" @click="openHelpModal"></i>
+          <i type="button" class="bi bi-question-circle clickable" style="font-size: 1.2em; margin-left: 5px;" @click="openHelpModal"></i>
           Chat
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -12,7 +12,7 @@
         <!--  BODY -->
           <ul class="contacts-list nes-container">
             <div class="accordion" id="contactListAccordion">
-            <div class="accordion-item">
+            <div class="accordion-item clickable">
               <h2 class="accordion-header">
               <button class="accordion-button nes-container" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
                 <span class="online-dot"/>&nbsp;Online
@@ -29,7 +29,7 @@
               </ul>
               </div>
             </div>
-            <div class="accordion-item">
+            <div class="accordion-item clickable">
               <h2 class="accordion-header">
               <button class="accordion-button nes-container" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffline" aria-expanded="true" aria-controls="collapseOffline">
                 <span class="offline-dot"/>&nbsp;Offline
@@ -50,7 +50,7 @@
           <!-- CHATBOX -->
           <div v-show="chatid !== null" style="margin-top: 5px;">
             <div class="chat-container">
-            <div class="header-bar" @click="openProfile(active_chat_user.username)">
+            <div class="header-bar clickable" @click="openProfile(active_chat_user.username)">
               {{ active_chat_user ? active_chat_user.username : '' }}
               <p class="m-0">
               </p>
@@ -69,7 +69,9 @@
             </ul>
             <div class="chat-input-container">
               <input v-model="newMessage" type="text" placeholder="Type your message..." class="form-control chat-input" @keyup.enter="sendMessage" />
-              <button class="btn btn-primary send-button" @click="sendMessage">
+              <!-- <button class="btn btn-primary send-button" @click="sendMessage"> -->
+			<!-- nes style -->
+			  <button type="button" class="nes-btn is-primary send-button clickable" @click="sendMessage" style="font-size: 0.6em;">
               Send
               </button>
             </div>

@@ -7,7 +7,7 @@
 </script>
 
 <template>
-    <div class="nes-container is-rounded" style="background-color: #ff7c7c; position: relative; text-align: center;" type="button" data-bs-toggle="offcanvas" data-bs-target="#settingsCanvas" aria-controls="settingsCanvas">
+    <div class="nes-container is-rounded clickable" style="background-color: #ff7c7c; position: relative; text-align: center;" type="button" data-bs-toggle="offcanvas" data-bs-target="#settingsCanvas" aria-controls="settingsCanvas">
       <i class="bi bi-gear" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -57%);"></i>
     </div>
     <div class="offcanvas offcanvas-end" tabindex="-1" id="settingsCanvas" aria-labelledby="settingsCanvasLabel">
@@ -17,9 +17,9 @@
       </div>
       <div class="offcanvas-body">
         <div v-if="isLoggedIn === 1">
-          <button type="button" class="nes-btn is-success"  @click="openPopupName">Change Username</button>
-          <button type="button" class="nes-btn is-success" @click="openPopupPw">Change Password</button>
-          <button type="button" class="nes-btn is-success" @click="openPopupPic">Change Pictures</button>
+          <button type="button" class="nes-btn is-success clickable"  @click="openPopupName">Change Username</button>
+          <button type="button" class="nes-btn is-success clickable" @click="openPopupPw">Change Password</button>
+          <button type="button" class="nes-btn is-success clickable" @click="openPopupPic">Change Pictures</button>
       
           <SettingsName :openPopup="PopupName" @close-popup="PopupName = false"/>
           <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false"/>

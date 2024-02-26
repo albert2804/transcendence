@@ -93,7 +93,7 @@
         </div>
         <div v-if="showMenu && isLoggedIn == 1">
           <button type="button" class="btn nes-btn btn-primary" @click="showControls">Controls</button>
-          <div v-if="showControlsPic" style="position: relative; min-width: 250px; width: 20vw;">
+          <div v-if="showControlsPic" style="position: relative; min-width: 220px; width: 20vw;">
             <img v-if="controls" :src="controls" alt="Controls" style="width: 100%;">
             <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #000000; text-align: center;">
               <p>Press the arrow keys or 'w' and 's' to move the paddles!</p>
@@ -467,9 +467,8 @@
 }
 
 .menu_box{
-  min-width: 300px;
+  min-width: 280px;
   max-width: 25vw;
-  max-height: 60vh;
   color: #ffffff;
   background-color: #eeeeee;
   display: inline-block;
@@ -484,11 +483,10 @@
   font-size: inherit;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 800px) {
   .menu_box {
     font-size: 0.7em; 
   }
 }
 
 </style>
-  

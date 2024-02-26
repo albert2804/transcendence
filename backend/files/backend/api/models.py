@@ -8,6 +8,7 @@ from datetime import datetime
 from asgiref.sync import sync_to_async	
 from django.core.validators import FileExtensionValidator
 import asyncio
+import json
 
 class CustomUser(AbstractUser):
 	# Custom fields
@@ -24,9 +25,8 @@ class CustomUser(AbstractUser):
 	mmr = models.IntegerField(default=200)
 	ranking = models.IntegerField(default=0)
 	date_joined = models.DateTimeField(auto_now_add=True)
-    # ... other fields ...
-	
-	# mobile = models.CharField(max_length=20, blank=True, null=True)
+	game_history = models.ManyToManyField('remote_game.RemoteGame', related_name='game_history')
+
 	def __str__(self):
 		return self.username
 
@@ -88,7 +88,7 @@ class CustomUser(AbstractUser):
 
 	# invite someone to a game (ranked)
 	# if the other user already invited this user, the game will be started
-	async def invite_to_game(self, user):
+	async def invite_to_game(self, user, tournament=None, db_game=None):
 		consumer = ChatConsumer()
 		# check if the other user already invited this user
 		if user in await sync_to_async(list)(self.game_invites_received.all()):
@@ -122,7 +122,13 @@ class CustomUser(AbstractUser):
 			await sync_to_async(self.game_invites.remove)(user)
 			await sync_to_async(user.game_invites.remove)(self)
 			# create a new game handler
-			game_handler = await GameHandler.create(player1, player2, ranked=True)
+			print(tournament)
+			print(db_game)
+			if tournament != None and db_game != None:
+				print("youuuu ")
+				game_handler = await GameHandler.create(player1, player2, ranked=True, db_entry=db_game, tournament=tournament)
+			else:
+				game_handler = await GameHandler.create(player1, player2, ranked=True)
 			# open the game modal for both players
 			await game_handler.channel_layer.group_send(
 				game_handler.game_group,
@@ -155,3 +161,20 @@ class CustomUser(AbstractUser):
 		# send info message to both users
 		await consumer.save_and_send_message(user, self, 'You canceled the game invite.', datetime.now(), 'info')
 		await consumer.save_and_send_message(self, user, 'The game invite got canceled.', datetime.now(), 'info')
+
+	def response_gamehistory(self):
+		games = []
+		for game in self.game_history.all():
+			data = {
+                'id': game.pk,
+                'player1': game.return_all_data()['player1'],
+                'player2': game.return_all_data()['player2'],
+                'time': round((game.finished_at - game.started_at).total_seconds(), 2),
+                'pointsP1': game.pointsP1,
+                'pointsP2': game.pointsP2,
+                'winner': game.return_all_data()['winner'],
+                'loser': game.return_all_data()['loser'],
+            }
+			games.append(data)
+		return games
+			

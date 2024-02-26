@@ -7,6 +7,7 @@ from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+# from tournament.logic import updateBracketGames
 from datetime import datetime
 import asyncio
 
@@ -22,7 +23,7 @@ class GameHandler:
 
 	# Use create() instead of __init__() to create a new instance of this class 
 	# @database_sync_to_async
-	def __init__(self, player1, player2, ranked=False, tournament=False):
+	def __init__(self, player1, player2, ranked=False):
 		self.player1 = player1
 		self.player2 = player2
 		if (player1 == player2):
@@ -37,13 +38,13 @@ class GameHandler:
 		self.pressed_keys_p2 = []
 		# only used for ranked games:
 		self.ranked = ranked
-		self.tournament = tournament
+		self.tournament = None
 		self.db_entry = None
 		self.game_start_time = None
 
 	# Use this function to create a new instance of this class
-	@ma
-	async def create(cls, player1, player2, ranked=False, db_entry=None, tournament=False):
+	@classmethod
+	async def create(cls, player1, player2, ranked=False, db_entry=None, tournament=None):
 		instance = cls(player1, player2, ranked)
 		player1.game_handler = instance.game_group
 		await instance.channel_layer.group_add(
@@ -65,6 +66,8 @@ class GameHandler:
 				)
 			else:
 				instance.db_entry = db_entry
+				if tournament != None:
+					instance.tournament = tournament
 		return instance
 	
 	# Returns the game handler instance from the given game group name
@@ -160,6 +163,23 @@ class GameHandler:
 				await chat_consumer.save_and_send_message(self.player2.get_user(), self.player1.get_user(), "You lost the game with " + str(p1_points) + " to " + str(p2_points) + " points.", timezone.now(), "info")
 				
 
+	#if in an tournament this function puts the winner in the next round
+	async def movePlayerToNextRound(self):
+		next_round_games_db = await database_sync_to_async(lambda: list(self.tournament.games.filter(is_round=self.db_entry.is_round + 1)))()
+		if next_round_games_db == None:
+			return
+		for game in next_round_games_db:
+			if game.player1 is None:
+				game.player1 = self.db_entry.winner
+				await sync_to_async(game.save)()
+				return
+			elif game.player2 is None:
+				game.player2= self.db_entry.winner
+				await sync_to_async(game.save)()
+				return
+		#error message for crash 
+		return
+
 	# Starts the game and runs the game loop until the game is finished or stopped
 	async def start_game(self):
 		self.game_start_time = timezone.now()
@@ -188,6 +208,8 @@ class GameHandler:
 		# if ranked game, fill the db entry
 		if self.ranked:
 			await self.save_result_to_db()
+		if self.tournament != None:
+			await self.movePlayerToNextRound()
 		if self.local_game:
 			self.player1.alias_2 = None
 			print(f"Local game {self.game_group} finished.")
@@ -319,6 +341,4 @@ class GameHandler:
 			if game_state is not None:
 				await self.player2.send(game_state)
 			await asyncio.sleep(1 / self.player2.fps)
-
-
 

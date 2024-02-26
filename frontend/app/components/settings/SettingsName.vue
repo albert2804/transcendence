@@ -11,14 +11,15 @@
   <script>
 export default {
   props: {
-    openPopup: Boolean
+    openPopup: Boolean,
+	props: ['message', 'error']
   },
   data(){
 		return {
 			editedName: '',
 			originalName: '',
 			nameResponse: null,
-			error: '',
+			error: "ERROR",
 		};
 	},
 
@@ -54,13 +55,22 @@ export default {
           	    },
 				body: JSON.stringify({ newUsername: this.editedName })
        		 })
-			 if (response.ok){
+			const data = await response.json()
+			 if (response.status === 200){
 				this.closePopup();
 				await this.$router.push('/userinfopage');
-				location.reload();
-				
-			 }
-			 	console.log("Changed username worked");
+				// location.reload();
+				this.error = ''
+				this.message = data.status
+				console.log('message:', this.message);
+			} else {
+				this.closePopup();
+				this.error = data.error;
+				this.message = ''
+				console.log('error:', this.error);
+			}
+			// console.log('message:', data.status);
+			//  	console.log("Changed username worked");
 			} catch (error) {
 				console.error('Error updating user alias:', error);
 			}

@@ -7,6 +7,7 @@
 </script>
 
 <template>
+    <SettingsName :message="message" :error="error" />
     <div class="nes-container is-rounded" style="background-color: #ff7c7c; position: relative; text-align: center;" type="button" data-bs-toggle="offcanvas" data-bs-target="#settingsCanvas" aria-controls="settingsCanvas">
       <i class="bi bi-gear" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -57%);"></i>
     </div>
@@ -17,12 +18,10 @@
       </div>
       <div class="offcanvas-body">
         <!-- ALERTS -->
-        <div class="alert alert-success" style="min-width: 14em" role="alert">{{ message }}</div>
-        <div class="alert alert-danger" style="min-width: 14em" role="alert">{{ error }}</div>
-        <!-- <div v-if="message" class="alert alert-success" style="min-width: 14em" role="alert">{{ message }}</div>
-        <div v-if="error" class="alert alert-danger" style="min-width: 14em" role="alert">{{ error }}</div> -->
+        <div v-if="message" class="alert alert-success" style="min-width: 14em" role="alert">{{ message }}</div>
+        <div v-if="error" class="alert alert-danger" style="min-width: 14em" role="alert">{{ error }}</div>
         <div v-if="isLoggedIn === 1">
-          <button type="button" class="nes-btn is-success"  @click="openPopupName">Change Username</button>
+          <button type="button" class="nes-btn is-success"  @click="openPopupName">Change Nickname</button>
           <button type="button" class="nes-btn is-success" @click="openPopupPw">Change Password</button>
           <button type="button" class="nes-btn is-success" @click="openPopupPic">Change Pictures</button>
       
@@ -61,6 +60,8 @@ export default {
       PopupName,
       PopupPic,
       PopupPw,
+      message: '',
+      error: '',
     };
   },
   methods: {

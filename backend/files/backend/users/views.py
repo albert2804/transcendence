@@ -46,16 +46,18 @@ def send_userinfo(request):
 				return JsonResponse(response_data, status=200)
 			except Exception as e:
 				return JsonResponse({'error': f'No statistics data found for the user. Error: {str(e)}'},
-						status=404)
+						status=500)
 		elif request.method == 'POST':
 			try:
 				user = CustomUser.objects.get(username=request.user)
 			except Exception as e: 
-				return JsonResponse({'error': f'Could not get CustomUser. Error: {str(e)}'}, status=500)
+				return JsonResponse({'error': f'Could not get CustomUser. Error: {str(e)}'}, status=404)
 			try:
 				data = json.loads(request.body.decode('utf-8'))
 				newUsername = data.get('newUsername')
-				update_user_alias(user, newUsername)
+				return update_user_alias(user, newUsername)
+				# return JsonResponse({'status': 'Changed username'},
+				# 	status=200)
 			except:
 				return JsonResponse({'error': 'username could not be updated'},
 						status=405)

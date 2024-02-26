@@ -2,6 +2,8 @@
   <div
     ref="modalRef"
     @keydown.esc="closeModal"
+	@keydown="handleKeyPress"
+	@keyup="handleKeyRelease"
     class="modal fade"
     :id="modalId" tabindex="-1"
     :aria-labelledby="ariaLabel"
@@ -78,12 +80,6 @@ export default {
     modalId: String,
     ariaLabel: String,
   },
-  // mounted() {
-  //   // listen to modal events to open and close fullscreen
-  //   var mood = document.getElementById(this.modalId);
-  //   mood.addEventListener('shown.bs.modal', this.openFullscreen);
-  //   mood.addEventListener('hidden.bs.modal', this.closeFullscreen);
-  // },
   methods: {
     openModal() {
       var mood = document.getElementById(this.modalId);
@@ -105,6 +101,12 @@ export default {
         bsModal.hide();
       }, 0);
     },
+	handleKeyPress(event) {
+	  this.$refs.ponggamefieldRef.handleKeyPress(event);
+	},
+	handleKeyRelease(event) {
+	  this.$refs.ponggamefieldRef.handleKeyRelease(event);
+	}
   },
 };
 </script>

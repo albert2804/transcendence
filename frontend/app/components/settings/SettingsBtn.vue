@@ -20,10 +20,12 @@
           <button type="button" class="nes-btn is-success clickable"  @click="openPopupName" style="width: 100%;">Change Alias</button>
           <button type="button" class="nes-btn is-success clickable" @click="openPopupPw" style="width: 100%;">Change Password</button>
           <button type="button" class="nes-btn is-success clickable" @click="openPopupPic" style="width: 100%;">Change Pictures</button>
+          <button type="button" class="nes-btn is-success clickable" @click="openPopupMap" style="width: 100%;">Choose Map</button>
       
           <SettingsName :openPopup="PopupName" @close-popup="PopupName = false"/>
           <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false"/>
           <SettingsPw :openPopup="PopupPw" @close-popup="PopupPw = false"/>
+          <SettingsMap :openPopup="PopupMap" @close-popup="PopupMap = false"/>
         </div>
         <div v-if="! isLoggedIn">
           <p>Please log in to access settings</p>
@@ -39,6 +41,7 @@ import { ref } from 'vue';
 const PopupName = ref(false);
 const PopupPic = ref(false);
 const PopupPw = ref(false);
+const PopupMap = ref(false);
 
 const openPopupName = () => {
   PopupName.value = true;
@@ -49,6 +52,9 @@ const openPopupPic = () => {
 const openPopupPw = () => {
   PopupPw.value = true;
 };
+const openPopupMap = () => {
+  PopupMap.value = true;
+};
 
 export default {
   setup() {
@@ -56,6 +62,7 @@ export default {
       PopupName,
       PopupPic,
       PopupPw,
+      PopupMap,
     };
   },
   methods: {

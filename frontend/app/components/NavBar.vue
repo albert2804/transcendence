@@ -10,7 +10,7 @@
 
 <template>
   <div class="nes-container vh-5" style="background-color:#f8f9fa; width: 98%; justify-content: center; margin: 0 auto;">
-    <GameModal modalId="pongmodal" ariaLabel="A modal to play our remote Pong Game" />
+    <GameModal />
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#pongNavbar" 
       data-target="#pongNavbar" aria-controls="pongNavbar" aria-expanded="false" aria-label="Toggle navigation"

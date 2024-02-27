@@ -64,10 +64,12 @@
 				this.newPic = fileInput.files[0];
 				if (this.newPic && this.newPic.size > 4000000) {
 					console.log('File size exceeds the maximum allowed size (~4MB)');
+					this.sendMessagetoParent('', 'File size exceeds the maximum allowed size (~4MB)');
 					return ;
 				}
 				if (!this.newPic) {
 					console.error('No file selected.');
+					this.sendMessagetoParent('', 'No file selected.');
 					return ;
 				}
 				} catch(error) {
@@ -88,22 +90,15 @@
           	    	},
 					body: formData
        		 	});
-			const data = await response.json();
-			if (response.status === 200){
-				this.closePopup();
-				await this.$router.push('/userinfopage');
-				this.error = ''
-				this.message = data.status
-				this.sendMessagetoParent(this.message, this.error);
-				console.log('message:', this.message);				
-				location.reload();
-			} else {
+				const data = await response.json();
 				this.closePopup();
 				this.error = data.error;
-				this.message = ''
-				this.sendMessagetoParent(this.message, this.error);
-				console.log('message:', this.error);				
-			}
+				this.message = data.status;
+				this.sendMessagetoParent(this.message, this.error);			
+				if (response.status === 200){
+					await this.$router.push('/userinfopage');
+					location.reload();
+				}
 			} catch (error) {
 				console.log(response.status);
 				if (response.status === 422) {

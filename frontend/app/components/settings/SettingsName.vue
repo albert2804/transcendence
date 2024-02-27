@@ -44,33 +44,24 @@ export default {
 
 		async saveChanges() {
 			try {
-		    const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-			const response = await fetch('/endpoint/user/info/', {
-        		method: 'POST',
-          		headers: {
-            	'Content-Type': 'application/json',
-            	'X-CSRFToken': csrfToken,
-          	    },
-				body: JSON.stringify({ newUsername: this.editedName })
-       		 })
-			const data = await response.json()
-			 if (response.status === 200){
-				this.closePopup();
-				await this.$router.push('/userinfopage');
-				this.error = ''
-				this.message = data.status
-				this.sendMessagetoParent(this.message, this.error);
-				console.log('message:', this.message);
-				location.reload();
-			} else {
-				this.closePopup();
+				const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+				const response = await fetch('/endpoint/user/info/', {
+					method: 'POST',
+					headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': csrfToken,
+					},
+					body: JSON.stringify({ newUsername: this.editedName })
+				})
+				const data = await response.json()
 				this.error = data.error;
-				this.message = ''
+				this.message = data.status;
+				this.closePopup();
 				this.sendMessagetoParent(this.message, this.error);
-				console.log('message:', this.error);
-			}
-			// console.log('message:', data.status);
-			//  	console.log("Changed username worked");
+				if (response.status === 200){
+					await this.$router.push('/userinfopage');
+					location.reload();
+				}
 			} catch (error) {
 				console.error('Error updating user alias:', error);
 			}

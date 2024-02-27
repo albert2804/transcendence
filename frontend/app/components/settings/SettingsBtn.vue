@@ -20,13 +20,13 @@
         <div v-if="recvmessage" class="alert alert-success" style="min-width: 14em" role="alert">{{ recvmessage }}</div>
         <div v-if="recverror" class="alert alert-danger" style="min-width: 14em" role="alert">{{ recverror }}</div>
         <div v-if="isLoggedIn === 1">
-          <button type="button" class="nes-btn is-success"  @click="openPopupName">Change Nickname</button>
+          <button type="button" class="nes-btn is-success"  @click="openPopupName">Change Alias</button>
           <button type="button" class="nes-btn is-success" @click="openPopupPw">Change Password</button>
-          <button type="button" class="nes-btn is-success" @click="openPopupPic">Change Pictures</button>
+          <button type="button" class="nes-btn is-success" @click="openPopupPic">Change Picture</button>
       
           <SettingsName :openPopup="PopupName" @close-popup="PopupName = false" @message-from-child="handleUpdate" />
           <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false" @message-from-child="handleUpdate" />
-          <SettingsPw :openPopup="PopupPw" @close-popup="PopupPw = false"/>
+          <SettingsPw :openPopup="PopupPw" @close-popup="PopupPw = false" @message-from-child="handleUpdate" />
         </div>
         <div v-if="! isLoggedIn">
           <p>Please log in to access settings</p>
@@ -47,9 +47,6 @@ let recverror = ref('');
 
 const openPopupName = () => {
   PopupName.value = true;
-  this.$nextTick(() => {
-    this.$refs.popupInput.focus();
-  });
 };
 const openPopupPic = () => {
   PopupPic.value = true;

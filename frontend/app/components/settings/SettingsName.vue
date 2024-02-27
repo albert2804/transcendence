@@ -1,7 +1,7 @@
 <template>
 	<div v-if="openPopup" class="popup">
 		<div class="username_container">
-			<label for="username">Change Username:</label>
+			<label for="username">Change Alias:</label>
 			<input type="text" id="username" name="username" v-model="editedName" @keydown.enter="saveChanges" @blur="cancelChanges">
 			<button type="button" @click="closePopup" class="btn-close" aria-label="Close"></button>
 		</div>

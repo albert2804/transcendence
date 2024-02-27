@@ -46,7 +46,5 @@ python manage.py collectstatic --noinput
 
 tail -f /dev/null
 
-
-
 # Create an app
 # python manage.py startapp custom_auth

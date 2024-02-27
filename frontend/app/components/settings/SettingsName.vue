@@ -12,14 +12,12 @@
 export default {
   props: {
     openPopup: Boolean,
-	props: ['message', 'error']
   },
   data(){
 		return {
 			editedName: '',
 			originalName: '',
 			nameResponse: null,
-			error: "ERROR",
 		};
 	},
 
@@ -59,15 +57,17 @@ export default {
 			 if (response.status === 200){
 				this.closePopup();
 				await this.$router.push('/userinfopage');
-				// location.reload();
 				this.error = ''
 				this.message = data.status
+				this.sendMessagetoParent(this.message, this.error);
 				console.log('message:', this.message);
+				location.reload();
 			} else {
 				this.closePopup();
 				this.error = data.error;
 				this.message = ''
-				console.log('error:', this.error);
+				this.sendMessagetoParent(this.message, this.error);
+				console.log('message:', this.error);
 			}
 			// console.log('message:', data.status);
 			//  	console.log("Changed username worked");
@@ -83,6 +83,10 @@ export default {
 
 		closePopup() {
 			this.$emit('close-popup');
+		},
+
+		sendMessagetoParent(message, error) {
+			this.$emit('message-from-child', message, error);
 		}
 	},
 }

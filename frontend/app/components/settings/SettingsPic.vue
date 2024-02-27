@@ -107,6 +107,10 @@
 		closePopup() {
 			this.fetch_picture();
 			this.$emit('close-popup');
+		},
+
+		sendMessagetoParent(message, error) {
+			this.$emit('message-from-child', message, error);
 		}
 	},
 }

@@ -88,10 +88,21 @@
           	    	},
 					body: formData
        		 	});
-			if (response.ok){
+			const data = await response.json();
+			if (response.status === 200){
 				this.closePopup();
 				await this.$router.push('/userinfopage');
+				this.error = ''
+				this.message = data.status
+				this.sendMessagetoParent(this.message, this.error);
+				console.log('message:', this.message);				
 				location.reload();
+			} else {
+				this.closePopup();
+				this.error = data.error;
+				this.message = ''
+				this.sendMessagetoParent(this.message, this.error);
+				console.log('message:', this.error);				
 			}
 			} catch (error) {
 				console.log(response.status);

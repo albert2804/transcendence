@@ -43,7 +43,5 @@ daphne -b 0.0.0.0 -p 8000 backend.asgi:application
 
 # tail -f /dev/null
 
-
-
 # Create an app
 # python manage.py startapp custom_auth

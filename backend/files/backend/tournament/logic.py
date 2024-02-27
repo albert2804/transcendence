@@ -1,32 +1,17 @@
 from django.http import JsonResponse
 from remote_game.models import RemoteGame
-from django.contrib.auth import get_user_model
-from remote_game.gameHandler import GameHandler
-from remote_game.consumers import RemoteGameConsumer
-from django.contrib.auth.models import AbstractUser
 from api.models import CustomUser
-from channels.db import database_sync_to_async
 from remote_game.player import Player
-from chat.consumers import ChatConsumer
 from asgiref.sync import async_to_sync
-from asgiref.sync import sync_to_async
 from channels.layers import get_channel_layer
 from django.utils import timezone
-from datetime import datetime
 from .models import Tournament
-import time
-from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-import asyncio
 import json
 import math
-
-import logging
-
-logger = logging.getLogger(__name__)
 
 def signUpTwoDummies(request):
   if request.method == 'POST':
@@ -64,12 +49,24 @@ def get_user_by_username(username):
     except ObjectDoesNotExist:
       return None
 
+def getTourmaentsGames(request):
+  if request.user.is_authenticated:
+    if request.method == 'POST':
+      data = json.loads(request.body);
+      tournament = Tournament.objects.get(tournament_name=data["tournamentName"])
+      json_data = Tournament.to_json(tournament, with_games=True)
+
+      return JsonResponse({'data': json_data})
+  else:
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
 def getTournaments(request):
   if request.user.is_authenticated:
     if request.method == 'POST':
       data = json.loads(request.body);
+      ongoingOrEnded = data['ongoingOrEnded'];
       user = CustomUser.objects.get(username=data["name"])
-      tournament_list = Tournament.objects.filter(Q(games__player1=user) | Q(games__player2=user)).distinct()
+      tournament_list = Tournament.objects.filter((Q(games__player1=user) | Q(games__player2=user)) & (Q(finished=ongoingOrEnded))).distinct()
       json_data = Tournament.queryset_to_json(tournament_list)
 
       return JsonResponse({'data': json_data})
@@ -95,12 +92,16 @@ def inviteOtherPlayer(request):
       if player1_handler.game_handler is not None:
         return JsonResponse({'error': 'You have an active game'}, status=404)
 
-      tour = get_object_or_404(Tournament, tournament_name=data["tour_name"])
+      tour = Tournament.object.get(tournament_name=data["tour_name"])
       if tour is None:
         return JsonResponse({'error': 'Sorry Tournament not Found'}, status=404)
 
       games = tour.games.all()
       game = games.get(is_match_nbr=data["game_nbr"])
+      if int(data["game_nbr"]) == len(games):
+        tour.finished = True
+        tour.save()
+        print("last game")
       if game is None:
         return JsonResponse({'error': 'Sorry Game from Tournament not Found'}, status=404)
       if data["username"] == game.player1.username:

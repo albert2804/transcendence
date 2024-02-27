@@ -24,8 +24,8 @@
           <button type="button" class="nes-btn is-success" @click="openPopupPw">Change Password</button>
           <button type="button" class="nes-btn is-success" @click="openPopupPic">Change Pictures</button>
       
-          <SettingsName :openPopup="PopupName" @close-popup="PopupName = false" @message-from-child="handleUpdate"/>
-          <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false"/>
+          <SettingsName :openPopup="PopupName" @close-popup="PopupName = false" @message-from-child="handleUpdate" />
+          <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false" @message-from-child="handleUpdate" />
           <SettingsPw :openPopup="PopupPw" @close-popup="PopupPw = false"/>
         </div>
         <div v-if="! isLoggedIn">
@@ -47,6 +47,9 @@ let recverror = ref('');
 
 const openPopupName = () => {
   PopupName.value = true;
+  this.$nextTick(() => {
+    this.$refs.popupInput.focus();
+  });
 };
 const openPopupPic = () => {
   PopupPic.value = true;

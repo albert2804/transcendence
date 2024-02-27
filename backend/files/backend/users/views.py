@@ -42,6 +42,7 @@ def send_userinfo(request):
 					'ranking': user_data.ranking,
 					'friend': is_friend,
 					'game_history': game_history,
+					'map': user_data.map, 
 					}
 				return JsonResponse(response_data, status=200)
 			except Exception as e:
@@ -54,10 +55,17 @@ def send_userinfo(request):
 				return JsonResponse({'error': f'Could not get CustomUser. Error: {str(e)}'}, status=500)
 			try:
 				data = json.loads(request.body.decode('utf-8'))
-				newUsername = data.get('newUsername')
-				user.alias = newUsername
-				user.save()
-				return JsonResponse({'status': 'Changed username'},
+				if data.get('newUsername'):
+					newUsername = data.get('newUsername')
+					user.alias = newUsername
+					user.save()
+					return JsonResponse({'status': 'Changed username'},
+						status=200)
+				elif data.get('newMap') or data.get('newMap') == "":
+					newMap = data.get('newMap')
+					user.map = newMap
+					user.save()
+				return JsonResponse({'status': 'Changed Map'},
 					status=200)
 			except:
 				return JsonResponse({'error': 'username could not be updated'},

@@ -11,19 +11,21 @@ Example:
 </script>
 -->
 <template>
-  <ChatHelpModal />
-  <div class="nes-container is-rounded with-title vh-80 is-centered" 
-  style="display: flex; flex-direction: column; justify-content: space-between; height: 95vh; margin: 20px 30px 30px">
-    <div style="position: absolute; display: flex; flex-direction: column; gap: 2px; margin-right: 15px; z-index: 2; right: 0;">
-      <SettingsBtn />
-      <ChatButton />
-      <GameButton />
-    </div>
-    <div class="d-flex align-items-center justify-content-center vh-80" style="overflow: auto;">
-      <slot />
-    </div>
-    <div>
-      <NavBar />
+  <div>
+    <ChatHelpModal />
+    <div class="nes-container is-rounded with-title vh-80 is-centered" 
+    style="display: flex; flex-direction: column; justify-content: space-between; height: 95vh; margin: 20px 30px 30px">
+      <div style="position: absolute; display: flex; flex-direction: column; gap: 2px; margin-right: 15px; z-index: 2; right: 0;">
+        <SettingsBtn />
+        <ChatButton />
+        <GameButton />
+      </div>
+      <div class="d-flex justify-content-center vh-80" style="overflow: auto;">
+        <slot />
+      </div>
+      <div>
+        <NavBar />
+      </div>
     </div>
   </div>
 </template>

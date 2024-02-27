@@ -169,11 +169,13 @@ class GameHandler:
 		if next_round_games_db == None:
 			return
 		for game in next_round_games_db:
-			if game.player1 is None:
+			player1 = await sync_to_async(lambda: game.player1)()
+			player2 = await sync_to_async(lambda: game.player2)()
+			if player1 is None:
 				game.player1 = self.db_entry.winner
 				await sync_to_async(game.save)()
 				return
-			elif game.player2 is None:
+			elif player2 is None:
 				game.player2= self.db_entry.winner
 				await sync_to_async(game.save)()
 				return

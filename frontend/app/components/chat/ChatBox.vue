@@ -50,9 +50,9 @@
           <div v-show="chatid !== null" style="margin-top: 5px;">
           <div class="chat-container">
             <div class="header-bar clickable" @click="openProfile(active_chat_user.username)">
-              <div class="row align-items-center"> <!-- Add align-items-center class here -->
+              <div class="row align-items-center">
                 <div class="col-1">
-                  <i class="bi bi-person-circle" style="font-size: 1.2em;"></i>
+                  <i class="bi bi-person-circle" style="font-size: 1.3em;"></i>
                 </div>
                 <div class="col-2">
                   {{ active_chat_user ? active_chat_user.username : '' }}
@@ -73,9 +73,7 @@
             </ul>
             <div class="chat-input-container">
               <input v-model="newMessage" type="text" placeholder="Type your message..." class="form-control chat-input" @keyup.enter="sendMessage" />
-              <!-- <button class="btn btn-primary send-button" @click="sendMessage"> -->
-			<!-- nes style -->
-			  <button type="button" class="nes-btn is-primary send-button clickable" @click="sendMessage" style="font-size: 0.6em;">
+			        <button type="button" class="nes-btn is-primary send-button clickable" @click="sendMessage" style="font-size: 0.6em;">
               Send
               </button>
             </div>
@@ -141,7 +139,9 @@ export default {
   },
   methods: {
     openProfile(username) {
-      this.$router.push({ path: '/userinfopage', query: { username: username } });
+      this.$router.push({ path: '/userinfopage', query: { username: username } }).then(() => {
+        this.$router.go();
+      });
     },
     handleOffcanvasCollapse() {
       this.chatid = null;

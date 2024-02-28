@@ -22,7 +22,6 @@
               <ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
                 <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" 
                 @click="selectUser(user)"
-                @contextmenu.prevent="openProfile(user.username)"
                 >
                 <ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
                 </li>
@@ -49,11 +48,16 @@
           </ul>
           <!-- CHATBOX -->
           <div v-show="chatid !== null" style="margin-top: 5px;">
-            <div class="chat-container">
+          <div class="chat-container">
             <div class="header-bar clickable" @click="openProfile(active_chat_user.username)">
-              {{ active_chat_user ? active_chat_user.username : '' }}
-              <p class="m-0">
-              </p>
+              <div class="row align-items-center"> <!-- Add align-items-center class here -->
+                <div class="col-1">
+                  <i class="bi bi-person-circle" style="font-size: 1.2em;"></i>
+                </div>
+                <div class="col-2">
+                  {{ active_chat_user ? active_chat_user.username : '' }}
+                </div>
+              </div>
               <button type="button" class="btn-close" @click="this.chatid = null" aria-label="Close"></button>
             </div>
             <ul class="chat-messages">

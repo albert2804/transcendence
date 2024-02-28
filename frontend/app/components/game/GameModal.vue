@@ -1,5 +1,3 @@
-<!-- :id="modalId" tabindex="-1"
-:aria-labelledby="ariaLabel" -->
 <template>
   <div
     :id="modalId" tabindex="-1"
@@ -36,19 +34,12 @@
 <script>
 export default {
   name: 'GameModal',
-// 
-// TODO: make ID useless (use ref instead)
-// (need to change the showGameModal from GameButton)
-// 
   props: {
-    modalId: {
-      type: String,
-      default: 'pongmodal',
-    }
+	modalId: {
+	  type: String,
+	  required: true,
+	},
   },
-// 
-// 
-// 
   setup() {
     const modalRef = ref(null);
     const ponggamefieldRef = ref(null);
@@ -67,12 +58,20 @@ export default {
         toggle();
       }
     }
-
     // function for the fullscreenchange event (to update the fullscreen variable for the button)
     function updateFullscreen() {
       fullscreen.value = document.fullscreenElement === modalRef.value;
     }
-
+    // function to open the modal
+    function openModal() {
+      nextTick(() => {
+        var bsModal = bootstrap.Modal.getInstance(modalRef.value);
+        if (!bsModal) {
+          bsModal = new bootstrap.Modal(modalRef.value);
+        }
+        bsModal.show();
+      });
+    }
     // function to close the modal
     function closeModal() {
       closeFullscreen(); // smoother than closing fullscreen after modal is hidden
@@ -83,13 +82,8 @@ export default {
         var bsModal = bootstrap.Modal.getInstance(modalRef.value);
         bsModal.hide();
       }, 0);
-      // setTimeout(() => {
-      //   var mood = document.getElementById(modalId.value);
-      //   var bsModal = bootstrap.Modal.getInstance(mood);
-      //   bsModal.hide();
-      // }, 0);
     }
-
+    // function to handle keypress events
     function handleKeyPress(event) {
       if (event.key === 'Escape') {
         closeModal();
@@ -97,21 +91,19 @@ export default {
       }
       ponggamefieldRef.value.handleKeyPress(event);
     }
-
+    // function to handle keyrelease events
     function handleKeyRelease(event) {
       ponggamefieldRef.value.handleKeyRelease(event);
     }
-
+    // event listeners
     onMounted(() => {
       document.addEventListener('fullscreenchange', updateFullscreen);
-      // 
       window.addEventListener('keydown', handleKeyPress);
       window.addEventListener('keyup', handleKeyRelease);
     });
-
+    // remove event listeners
     onUnmounted(() => {
       document.removeEventListener('fullscreenchange', updateFullscreen);
-      // 
       window.removeEventListener('keydown', handleKeyPress);
       window.removeEventListener('keyup', handleKeyRelease);
     });
@@ -122,56 +114,11 @@ export default {
       modalRef,
       ponggamefieldRef,
       fullscreen,
+      openModal,
       closeModal,
       handleKeyPress,
       handleKeyRelease,
     }
-  },
-  // props: {
-  //   modalId: String,
-  //   // ariaLabel: String,
-  // },
-  methods: {
-    // openModal() {
-    //   var mood = document.getElementById(this.modalId);
-    //   // check if the modal is already shown
-    //   if (mood.classList.contains('show')) {
-    //     return;
-    //   }
-    //   var bsModal = new bootstrap.Modal(mood);
-    //   bsModal.show();
-    // },
-    // openModal with ref instead of id
-    openModal() {
-      this.$nextTick(() => {
-        var bsModal = bootstrap.Modal.getInstance(this.$refs.modalRef);
-        bsModal.show();
-      });
-    },
-
-
-    
-    // closeModal() {
-    //   this.closeFullscreen(); // smoother than closing fullscreen after modal is hidden
-    //   if (this.$refs.ponggamefieldRef) {
-    //     this.$refs.ponggamefieldRef.giveUpGame();
-    //   }
-    //   setTimeout(() => {
-    //     var mood = document.getElementById(this.modalId);
-    //     var bsModal = bootstrap.Modal.getInstance(mood);
-    //     bsModal.hide();
-    //   }, 0);
-    // },
-	// handleKeyPress(event) {
-    // if (event.key === 'Escape') {
-    //   this.closeModal();
-    //   return;
-    // }
-	//   this.$refs.ponggamefieldRef.handleKeyPress(event);
-	// },
-	// handleKeyRelease(event) {
-	//   this.$refs.ponggamefieldRef.handleKeyRelease(event);
-	// }
   },
 };
 </script>

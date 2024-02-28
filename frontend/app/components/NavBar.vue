@@ -46,13 +46,6 @@ export default {
       }
     }
   },
-  methods: {
-    reloadUserProfile() {
-      this.$router.push(`/userinfopage?username=${this.userName}`).then(() => {
-      this.$router.go();
-      });
-    },
-  }
 }
 </script>
 

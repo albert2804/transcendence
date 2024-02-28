@@ -122,10 +122,7 @@ class CustomUser(AbstractUser):
 			await sync_to_async(self.game_invites.remove)(user)
 			await sync_to_async(user.game_invites.remove)(self)
 			# create a new game handler
-			print(tournament)
-			print(db_game)
 			if tournament != None and db_game != None:
-				print("youuuu ")
 				game_handler = await GameHandler.create(player1, player2, ranked=True, db_entry=db_game, tournament=tournament)
 			else:
 				game_handler = await GameHandler.create(player1, player2, ranked=True)

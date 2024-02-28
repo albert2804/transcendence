@@ -17,7 +17,7 @@ export default {
     }
   },
   watch: {
-    state: {
+    gameButtonState: {
       immediate: true,
       handler(newValue) {
 		this.state = newValue;

@@ -10,6 +10,7 @@
         <div class="offcanvas-body">
           <RunningBanner />
           <div v-if="loginStatus === 1">
+            
             <button type="button" class="nes-btn is-success clickable"  @click="openPopupName" style="width: 100%;">Change Alias</button>
             <button type="button" class="nes-btn is-success clickable" @click="openPopupPw" style="width: 100%;">Change Password</button>
             <button type="button" class="nes-btn is-success clickable" @click="openPopupPic" style="width: 100%;">Change Pictures</button>
@@ -32,23 +33,10 @@
 import { ref } from 'vue';
 import { isLoggedIn } from '~/store';
 
-const PopupName = ref(false);
-const PopupPic = ref(false);
-const PopupPw = ref(false);
-const PopupMap = ref(false);
-
-const openPopupName = () => {
-  PopupName.value = true;
-};
-const openPopupPic = () => {
-  PopupPic.value = true;
-};
-const openPopupPw = () => {
-  PopupPw.value = true;
-};
-const openPopupMap = () => {
-  PopupMap.value = true;
-};
+const PopupName = ref({ value: false });;
+const PopupPic = ref({ value: false });;
+const PopupPw = ref({ value: false });;
+const PopupMap = ref({ value: false });;
 
 export default {
   name: 'SettingsBtn',
@@ -74,12 +62,29 @@ export default {
     };
   },
   methods: {
-	openLogin() {
-	  this.$router.push('/login');
-	}
+    openLogin() {
+      this.$router.push('/login');
+    },
+
+    openPopupName() {
+      this.PopupName.value = true;
+    },
+
+    openPopupPic() {
+      this.PopupPic.value = true;
+    },
+
+    openPopupPw() {
+      this.PopupPw.value = true;
+    },
+
+    openPopupMap() {
+      this.PopupMap.value = true;
+    },
   }
 };
 </script>
+
 
 <style>
 

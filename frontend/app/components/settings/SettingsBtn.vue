@@ -1,11 +1,3 @@
-<script setup>
-  // Listen to changes of the isLoggedIn from store/index.js
-  import { isLoggedIn } from '~/store';
-  watchEffect(() => {
-  isLoggedIn.value = isLoggedIn.value
-})
-</script>
-
 <template>
       <div class="nes-container is-rounded clickable" style="background-color: #ff7c7c; position: relative; text-align: center;" type="button" data-bs-toggle="offcanvas" data-bs-target="#settingsCanvas" aria-controls="settingsCanvas">
         <i class="bi bi-gear" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -57%);"></i>
@@ -17,7 +9,7 @@
         </div>
         <div class="offcanvas-body">
           <RunningBanner />
-          <div v-if="isLoggedIn === 1">
+          <div v-if="loginStatus === 1">
             <button type="button" class="nes-btn is-success clickable"  @click="openPopupName" style="width: 100%;">Change Alias</button>
             <button type="button" class="nes-btn is-success clickable" @click="openPopupPw" style="width: 100%;">Change Password</button>
             <button type="button" class="nes-btn is-success clickable" @click="openPopupPic" style="width: 100%;">Change Pictures</button>
@@ -28,7 +20,7 @@
             <SettingsPw :openPopup="PopupPw" @close-popup="PopupPw = false"/>
             <SettingsMap :openPopup="PopupMap" @close-popup="PopupMap = false"/>
           </div>
-          <div v-if="! isLoggedIn">
+          <div v-if="! loginStatus">
             <p>Please log in to access settings</p>
             <button type="button" class="btn nes-btn btn-primary" data-bs-dismiss="offcanvas" @click="openLogin">Login</button>
           </div>
@@ -38,6 +30,7 @@
 
 <script>
 import { ref } from 'vue';
+import { isLoggedIn } from '~/store';
 
 const PopupName = ref(false);
 const PopupPic = ref(false);
@@ -58,6 +51,20 @@ const openPopupMap = () => {
 };
 
 export default {
+  name: 'SettingsBtn',
+  data() {
+    return {
+      loginStatus: isLoggedIn
+    }
+  },
+  watch: {
+    isLoggedIn: {
+      immediate: true,
+      handler(newValue) {
+        this.loginStatus = newValue;
+      }
+    }
+  },
   setup() {
     return {
       PopupName,

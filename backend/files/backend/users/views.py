@@ -1,12 +1,16 @@
+import os, json
 from django.http import JsonResponse, HttpResponse
-from api.models import CustomUser
 from django.core import serializers
+
+from api.models import CustomUser
 from api.forms import CustomUserCreationForm
 from remote_game.models import RemoteGame
+
 from django.shortcuts import redirect
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
-import os, json
+from django.contrib.auth.password_validation import validate_password
+
 import imghdr
 
 RED = "\033[31m"
@@ -51,9 +55,6 @@ def send_userinfo(request):
 		elif request.method == 'POST':
 			try:
 				user = CustomUser.objects.get(username=request.user)
-			except Exception as e: 
-				return JsonResponse({'error': f'Could not get CustomUser. Error: {str(e)}'}, status=500)
-			try:
 				data = json.loads(request.body.decode('utf-8'))
 				if data.get('newUsername'):
 					newUsername = data.get('newUsername')
@@ -67,8 +68,10 @@ def send_userinfo(request):
 					user.save()
 				return JsonResponse({'status': 'Changed Map'},
 					status=200)
-			except:
-				return JsonResponse({'error': 'username could not be updated'},
+			except CustomUser.DoesNotExist:
+				return JsonResponse({'error': 'User not found'}, status=404)
+			except Exception as e:
+				return JsonResponse({'error': f'username/ map could not be updated. Error: {str(e)}'},
 						status=405)
 	else:
 		return JsonResponse({'error': 'User not authenticated'},
@@ -86,8 +89,8 @@ def handle_profilepic(request):
 				profilepic_url = CustomUser.objects.get(username=username).profile_pic.url
 				return JsonResponse({'url': profilepic_url},
 					status=200)
-			except:
-				return JsonResponse({'error': 'No Profile Picture found for the user'},
+			except Exception as e:
+				return JsonResponse({'error': f'Error getting GET-Request of profilepicture: {str(e)}'},
 						status=404)
 		elif request.method == 'POST':
 			try:
@@ -116,28 +119,27 @@ def handle_profilepic(request):
 		return JsonResponse({'error': 'User not authenticated'},
 			status=401)
 
-# TO-DO Redirect to login page again, so the user has to login woth his new password to update teh session
 def verify(request):
 	if request.user.is_authenticated:
 		if request.method == 'POST':
 			try:
 				user = CustomUser.objects.get(username=request.user)
-			except Exception as e: 
-				return JsonResponse({'error': f'Could not get CustomUser. Error: {str(e)}'}, status=500)
-			except CustomUser.DoesNotExist:
-				return JsonResponse({'error': 'User not found'}, status=404)
-			try:
 				data = json.loads(request.body.decode('utf-8'))
+				validate_password(data.get('password1'))
 				if user.check_password(data.get('old_pw')):
 					user.set_password(data.get('password1'))
 					user.save()
 					return JsonResponse({'message': 'Password changed succesfully'},
 							status=200)
 				else:
-					return JsonResponse({'message': 'New password does not match with the old password'},
+					return JsonResponse({'message': 'Wrong password'},
 							status=500)
-			except:
-				return JsonResponse({'error': 'pw could not be updated'},
+			except ValidationError:
+				return JsonResponse({'error': 'Password not valid'}, status=422)
+			except CustomUser.DoesNotExist:
+				return JsonResponse({'error': 'User not found'}, status=404)
+			except Exception as e:
+				return JsonResponse({'error': f'Password could not be updated Error: {str(e)}'},
 						status=500)
 	else:
 		return JsonResponse({'error': 'User not authenticated'},

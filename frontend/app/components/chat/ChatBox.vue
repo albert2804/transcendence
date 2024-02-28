@@ -20,9 +20,7 @@
               </h2>
               <div id="collapseOnline" class="accordion-collapse collapse show">
               <ul v-for="(user, index) in onlineUsers" :key="index" class="list-group">
-                <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" 
-                @click="selectUser(user)"
-                >
+                <li class="list-group-item" :class="{ 'active': this.chatid === user.id }" style="cursor: pointer;" @click="selectUser(user)">
                 <ChatContact :user="user" :unreadMessageCountMap="unreadMessageCountMap" />
                 </li>
               </ul>
@@ -139,9 +137,7 @@ export default {
   },
   methods: {
     openProfile(username) {
-      this.$router.push({ path: '/userinfopage', query: { username: username } }).then(() => {
-        this.$router.go();
-      });
+      this.$router.push({ path: '/userinfopage', query: { username: username } });
     },
     handleOffcanvasCollapse() {
       this.chatid = null;

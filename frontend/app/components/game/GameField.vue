@@ -1,11 +1,3 @@
-<script setup>
-  // Listen to changes of the isLoggedIn from store/index.js
-  import { isLoggedIn } from '~/store';
-  watchEffect(() => {
-  isLoggedIn.value = isLoggedIn.value
-})
-</script>
-
 <template>
   <div
     class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease" :style="{ 'background-image': 'url(' + map + ')' }">
@@ -34,7 +26,7 @@
         <div v-if="showMenu">
           <button type="button" class="nes-btn btn-primary" @click="startTrainingGame">Start Training Game</button>
         </div>
-        <div v-if="showMenu && isLoggedIn == 1">
+        <div v-if="showMenu && loginStatus == 1">
           <button type="button" class="nes-btn btn-primary" @click="fetch_map().then(startRankedGame)" >Start Ranked Game</button>
         </div>
         <div v-if="showMenu">
@@ -66,7 +58,7 @@
         <div v-if="waiting || showAliasScreen2">
           <button type="button" class="nes-btn btn-primary" @click="backToMenu">Back to Menu</button>
         </div>
-        <div v-if="showMenu && isLoggedIn == 1">
+        <div v-if="showMenu && loginStatus == 1">
           <button type="button" class="nes-btn btn-primary" @click="showControls">Controls</button>
           <div v-if="showControlsPic" style="position: relative; width: 100%;">
             <img v-if="controls" :src="controls" alt="Controls" style="width: 100%;">
@@ -81,10 +73,12 @@
   
 <script>
   import { isLoggedIn } from '~/store';
+  import { gameButtonState } from '~/store';
   export default {
   name: 'GameField',
   data () {
     return {
+      loginStatus: isLoggedIn,
       socket: null,
       message: '',
       pointsP1: 0,
@@ -118,6 +112,14 @@
       map: '',
     }
   },
+  watch: {
+    isLoggedIn: {
+      immediate: true,
+      handler(newValue) {
+		this.loginStatus = newValue;
+      }
+    }
+  },
   mounted () {
     watchEffect(() => {
       if (isLoggedIn.value === 1) {
@@ -141,22 +143,22 @@
       this.socket = new WebSocket(sockurl)
 
       this.socket.onopen = () => {
-        // console.log('opened remoteGame websocket')
-        this.$emit('connected')
+		gameButtonState.value = "loading";
       }
 
       this.socket.onclose = () => {
-        // console.log('closed remoteGame websocket')
+		gameButtonState.value = "disconnected";
       }
 
       this.socket.onerror = (error) => {
-        // console.error(`WebSocket-Error: ${error}`)
+		gameButtonState.value = "disconnected";
       }
 
       this.socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
           if (data.type === "redirect") {
+			gameButtonState.value = "connected";
             this.showAliasScreen = false;
             this.showAliasScreen2 = false;
             if (data.page === "playing") {

@@ -87,7 +87,8 @@ export default {
         }
       }
       else {
-        this.$refs.TourBoxes.stopPollingOfAll();
+        if (this.ongoingTournaments.length != 0)
+          this.$refs.TourBoxes.stopPollingOfAll();
         this.openTournamentView = 0;
         this.tournaments = [];
         this.ongoingTournaments = [];

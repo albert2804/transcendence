@@ -1,15 +1,23 @@
 <template>
   <div class="container mt-5">
     <div class="bracket">
-      <div v-for="(round, index) in rounds" :key="index" class="round list-group">
-        <div v-for="match in getMatches(round)" :key="match.is_match" class="match list-group-item">
-          <p>Round {{ match.is_round }}, Match {{ match.is_match }}</p>
-          <p>Player 1: {{ match.player1 }}</p>
-          <p>Player 2: {{ match.player2 }}</p>
-          <p>Player1 Score: {{ match.pointsP1 }}</p>
-          <p>Player2 Score: {{ match.pointsP2 }}</p>
-          <div v-if="(match.player1 == this.loggedInUser || match.player2 == this.loggedInUser) && this.loggedInUser != undefined && match.finished == false">
-            <button class="nes-btn" :class="{ goGreen: playerReady }" @click="sendReadyPlayer($event, match.is_match)">Play</button>
+      <div v-for="(round, index) in rounds" :key="index" class="round list-group nes-container is-rounded d-flex flex-column">
+        <h3>R O U N D  <span>{{ round }}</span></h3>
+        <div v-for="match in getMatches(round)" :key="match.is_match" class="match list-group-item nes-container is-rounded position-relative">
+        <!-- @mouseover="togglePlayButton(match.is_match, true)" @mouseleave="togglePlayButton(match.is_match, false)"> -->
+          <p>{{ match.is_match }}.</p>
+          <div>
+            <p>{{ match.player1 }}</p>
+            <p>{{ match.pointsP1 }}</p>
+          </div>
+          <div class="user">
+            <p>{{ match.player2 }}</p>
+            <p>{{ match.pointsP2 }}</p>
+          </div>
+          <div v-if="(match.player1 == this.loggedInUser || match.player2 == this.loggedInUser) && this.loggedInUser != undefined && match.finished == false"
+          class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center">
+            <button class="btn" :class="{ goGreen: playerReady }" @click="sendReadyPlayer($event, match.is_match)">
+              <span v-if="playerReady">You are Ready</span><span v-else>Play</span></button>
           </div>
         </div>
       </div>
@@ -25,12 +33,16 @@ export default {
   data() {
     return {
       playerReady: false,
+      showPlayButtons: [],
       matches: [],
       // No need for additional data in this case
     };
   },
   mounted() {
     this.refreshMatcheshData();
+    this.matches.forEach((match) => {
+      this.showPlayButtons.push(false);
+    });
   },
   beforeDestroy() {
     this.stopPolling();
@@ -43,10 +55,13 @@ export default {
     },
   },
   methods: {
+    togglePlayButton(index, bool) {
+      this.showPlayButtons[index] = bool;
+    },
     startPolling() {
       this.pollingTimer = setInterval(() => {
         this.refreshMatcheshData();
-      }, 5000); // Poll every 5 seconds (adjust as needed)
+      }, 10000); // Poll every 5 seconds (adjust as needed)
     },
     stopPolling() {
       clearInterval(this.pollingTimer);
@@ -99,27 +114,59 @@ export default {
 </script>
 
 <style scoped>
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 20px;
+}
+
 .bracket {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
 }
-
+.user {
+  display: flex;
+  flex-direction: column;
+}
 .round {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  width: 100%;
+  background-color: #fff;
+  border-radius: 10px;
+  margin-bottom: 20px;
+
 }
 
 .match {
   display: flex;
+  flex-direction: columns;
   align-items: center;
-  gap: 20px;
+  width: 100%;
+  background-color: #fff;
+  margin-bottom: 10px;
+}
+.btn {  
+  position: absolute;
+  width: 77%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background-color: transparent;
+  box-shadow: none;
+  color: transparent;
 }
 
+.btn:hover { 
+  background-color: #ff7c7c;
+  color: black;
+}
 .goGreen {
-  background-color: greenyellow;
+  background-color: #99e857;
+  color: black;
 }
 </style>

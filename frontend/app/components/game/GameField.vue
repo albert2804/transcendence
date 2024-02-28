@@ -112,7 +112,7 @@
     }
   },
   watch: {
-    loginStatus: {
+    isLoggedIn: {
       immediate: true,
       handler(newValue) {
 		this.loginStatus = newValue;

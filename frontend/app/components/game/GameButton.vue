@@ -1,5 +1,4 @@
 <template>
-  <!-- <GameModal modalId="pongmodal" ariaLabel="A modal to play our remote Pong Game" /> -->
   <div class="nes-container is-rounded clickable" style="background-color: #99e857; position: relative; text-align: center;" @click="showGameModal">
     <i class="bi bi-controller" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -57%);"></i>
   </div>
@@ -11,7 +10,11 @@ export default {
   methods: {
     showGameModal() {
       this.$nextTick(() => {
-          new bootstrap.Modal(document.getElementById('pongmodal')).show();
+        var bsModal = bootstrap.Modal.getInstance(document.getElementById('pongmodal'));
+        if (!bsModal) {
+          bsModal = new bootstrap.Modal(document.getElementById('pongmodal'));
+        }
+        bsModal.show();
       });
     },
   },

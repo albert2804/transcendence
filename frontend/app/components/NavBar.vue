@@ -1,13 +1,3 @@
-<!-- https://getbootstrap.com/docs/5.3/components/navbar/ -->
-<script setup>
-  import { isLoggedIn } from '~/store';
-  import { userName } from '~/store';
-  watchEffect(() => {
-    isLoggedIn.value = isLoggedIn.value
-    userName.value = userName.value
-  })
-</script>
-
 <template>
   <div class="nes-container vh-5" style="background-color:#f8f9fa; width: 98%; justify-content: center; margin: 0 auto;">
     <GameModal modalId="pongmodal" />
@@ -24,24 +14,45 @@
               <NuxtLink class="nes-btn is-success nav-item" to="/">Home</NuxtLink>
               <NuxtLink class="nes-btn is-warning nav-item" to="/tournament">Tournament</NuxtLink>
               <NuxtLink class="nes-btn is-error nav-item" to="/leaderboard">Leaderboard</NuxtLink>
-              <NuxtLink v-if="!isLoggedIn" class="nes-btn is-error nav-item" to="/login">Login</NuxtLink>
-              <button v-if="isLoggedIn" class="nes-btn is-error nav-item" @click="reloadUserProfile">UserProfile</button>
-              <NuxtLink v-if="isLoggedIn" class="nes-btn is-error nav-item" to="/login">Logout</NuxtLink>
+              <NuxtLink v-if="!loginStatus" class="nes-btn is-error nav-item" to="/login">Login</NuxtLink>
+              <button v-if="loginStatus" class="nes-btn is-error nav-item" @click="reloadUserProfile">UserProfile</button>
+              <NuxtLink v-if="loginStatus" class="nes-btn is-error nav-item" to="/login">Logout</NuxtLink>
         </div>
     </nav>
   </div>
 </template>
 
 <script>
+import { isLoggedIn, userName } from '~/store';
 export default {
   name: 'NavBar',
+  data() {
+    return {
+      loginStatus: isLoggedIn,
+      userName: userName,
+    }
+  },
+  watch: {
+    loginStatus: {
+      immediate: true,
+      handler(newValue) {
+        isLoggedIn.value = newValue;
+      }
+    },
+    userName: {
+      immediate: true,
+      handler(newValue) {
+        userName.value = newValue;
+      }
+    }
+  },
   methods: {
     reloadUserProfile() {
       this.$router.push(`/userinfopage?username=${this.userName}`).then(() => {
-        this.$router.go();
+      this.$router.go();
       });
     },
-  },
+  }
 }
 </script>
 

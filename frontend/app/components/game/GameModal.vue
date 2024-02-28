@@ -10,7 +10,7 @@
     <div class="modal-dialog fullscreen-modal align-items-center">
       <div class="modal-content">
         <div class="modal-body">
-          <GameField ref="ponggamefieldRef" @openModal="openModal" @close-modal="closeModal"/>
+          <GameField ref="ponggamefieldRef" @openModal="openModal" @close-modal="closeModal" />
         </div>
       </div>
     </div>

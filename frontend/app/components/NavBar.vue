@@ -33,10 +33,10 @@ export default {
     }
   },
   watch: {
-    loginStatus: {
+    isLoggedIn: {
       immediate: true,
       handler(newValue) {
-        isLoggedIn.value = newValue;
+        this.loginStatus = newValue;
       }
     },
     userName: {

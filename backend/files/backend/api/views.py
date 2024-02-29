@@ -152,6 +152,7 @@ def userregister(request):
 			return JsonResponse({'error': 'invalid credentials'}, status=403)
 	return JsonResponse({'error': 'Something went wrong'}, status=400)
 
+
 ######################
 ### GAME FUNCTIONS ###
 ######################

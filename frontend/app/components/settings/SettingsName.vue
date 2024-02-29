@@ -11,14 +11,13 @@
   <script>
 export default {
   props: {
-    openPopup: Boolean
+    openPopup: Boolean,
   },
   data(){
 		return {
 			editedName: '',
 			originalName: '',
 			nameResponse: null,
-			error: '',
 		};
 	},
 
@@ -45,22 +44,24 @@ export default {
 
 		async saveChanges() {
 			try {
-		    const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-			const response = await fetch('/endpoint/user/info/', {
-        		method: 'POST',
-          		headers: {
-            	'Content-Type': 'application/json',
-            	'X-CSRFToken': csrfToken,
-          	    },
-				body: JSON.stringify({ newUsername: this.editedName })
-       		 })
-			 if (response.ok){
+				const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+				const response = await fetch('/endpoint/user/info/', {
+					method: 'POST',
+					headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': csrfToken,
+					},
+					body: JSON.stringify({ newUsername: this.editedName })
+				})
+				const data = await response.json()
+				this.error = data.error;
+				this.message = data.status;
 				this.closePopup();
-				await this.$router.push('/userinfopage');
-				location.reload();
-				
-			 }
-			 	console.log("Changed username worked");
+				this.sendMessagetoParent(this.message, this.error);
+				if (response.status === 200){
+					await this.$router.push('/userinfopage');
+					location.reload();
+				}
 			} catch (error) {
 				console.error('Error updating user alias:', error);
 			}
@@ -73,6 +74,10 @@ export default {
 
 		closePopup() {
 			this.$emit('close-popup');
+		},
+
+		sendMessagetoParent(message, error) {
+			this.$emit('message-from-child', message, error);
 		}
 	},
 }

@@ -1,5 +1,8 @@
 <template>
   <form style="max-width: 800px; margin: auto; overflow: hidden;">
+    <div>
+      <input type="text" placeholder="Tournament Name" @input="setTournamentName($event)"/>
+    </div>
     <div class="mb-3">
       <label for="nbrPlayerRange" class="form-label">Number of Total Players</label>
       <div class="d-flex align-items-center">
@@ -31,7 +34,7 @@
 
     <button type="submit" @click="startTournament($event)" class="btn btn-primary">Start Tournament</button>
     <div v-if="this.tournamentStarted">
-      <BracketsTournament :numberOfPlayers="nbr_players" :matches="all_matches" :loggedInUser="loggedInUser"/>
+      <BracketsTournament :tournamentName="tournamentName" :numberOfPlayers="nbr_players" :matches="all_matches" :loggedInUser="loggedInUser"/>
     </div>
   </form>
 </template>
@@ -46,6 +49,8 @@ export default {
   props: ['local', 'loggedInUser'],
   mounted() {
     this.all_players = [];
+    this.all_matches = [];
+    this.tournamentName = "Quack";
     this.updatePlayerCount();
   },
   data() {
@@ -71,6 +76,9 @@ export default {
   },
   methods: {
     // ? i dont know why my index begins at 1
+    setTournamentName(event) {
+      this.tournamentName = event.target.value;
+    },
     setActiveRadio(value, index) {
       this.all_players[index - 1].name = value + "-" + index;
       if (value == 'Bot') {
@@ -115,46 +123,59 @@ export default {
       }
     },
 
-    createMatches() {
-      const total_games = this.nbr_players - 1; 
-      for (let match = 0; match < total_games; match++) {
-          console.log(Math.log2(total_games) - Math.floor(Math.log2(match + 1)))
-          this.all_matches.push({
-            is_round: Math.floor(Math.log2(total_games + 1)) - Math.floor(Math.log2(total_games - match)),
-            game_nbr: match + 1, 
-            l_player: -1,
-            r_player: -1,
-            l_score: 0,
-            r_score: 0,
-          });
-          if (this.all_matches[match].is_round == 1) {
-            this.all_matches[match].l_player = this.all_players[match * 2];
-            this.all_matches[match].r_player = this.all_players[match * 2 + 1];
-          }
-        }
-    },
+    // createMatches() {
+    //   this.all_matches = [];
+    //   const total_games = this.nbr_players - 1; 
+    //   for (let match = 0; match < total_games; match++) {
+    //       console.log(Math.log2(total_games) - Math.floor(Math.log2(match + 1)))
+    //       this.all_matches.push({
+    //         is_round: Math.floor(Math.log2(total_games + 1)) - Math.floor(Math.log2(total_games - match)),
+    //         game_nbr: match + 1, 
+    //         l_player: -1,
+    //         r_player: -1,
+    //         l_score: 0,
+    //         r_score: 0,
+    //       });
+    //       if (this.all_matches[match].is_round == 1) {
+    //         this.all_matches[match].l_player = this.all_players[match * 2];
+    //         this.all_matches[match].r_player = this.all_players[match * 2 + 1];
+    //       }
+    //     }
+    // },
 
     async startTournament(event) {
       event.preventDefault();
-      this.createMatches()
+      if (this.tournamentName == "") {
+        console.log("Error Tournament Name isnt allowed to be empty")
+        return
+      }
+      // this.createMatches()
       // TODO: needs to call backend for tournament handling which is not yet implementet
       console.log(this.all_players);
       console.log("Tournament handling not yet implemented in backend");
-      this.tournamentStarted = true;
       const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-      const response = await fetch('/endpoint/tournament/logic/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken,
-        },
-        body: JSON.stringify(this.all_players),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status ${response.status}`);
+      try {
+        const response = await fetch('/endpoint/tournament/logic/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          },
+          body: JSON.stringify({'name': this.tournamentName, 'player': this.all_players, }),
+        });
+        
+        const responseData = await response.json()
+        console.log('Backend Response:', responseData.data)
+        this.all_matches = responseData.data.games
+        this.tournamentName = responseData.data.tour_name
+        console.log("TourName: ", this.tournamentName)
+        console.log("All Matches:", this.all_matches)
+        this.tournamentStarted = true;
+
+      } catch (error) {
+        console.log('Error sending signal to backend:', error);
       }
-    }
+    },
   },  
-}
+};
 </script>

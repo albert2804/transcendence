@@ -1,45 +1,112 @@
 <template>
-  <div class="container mt-5">
-    <div class="row">
-      <div class="col-md-6">
-        <h2>Ongoing Tournaments</h2>
-        <select class="form-select" v-model="selectedOngoing">
-          <option value="select">Select a tournament</option>
-          <!-- Use v-for to dynamically generate ongoing tournament options -->
-          <option v-for="tournament in ongoingTournaments" :key="tournament.id" :value="tournament.id">{{ tournament.name }}</option>
-        </select>
+  <div class="container justify-content-center" style="width:100%">
+    <div class="row" style="width: 100%;">
+      <h2>Ongoing Tournaments</h2>
+      <div class="nes-container is-rounded" style="height:100%">
+        <button @click="getTournamets(false)" style="width: 100%; height: 100%; background-color: transparent; border-color: transparent;">
+          <progress class="nes-progress is-pattern" value="100" max="100"></progress>
+        </button>
+        <!-- insert here -->
+        <div v-if="openTournamentView == 1">
+          <div v-if="ongoingTournaments.length == 0">
+            <div class="nes-container is-rounded">
+              <strong>There is no ongoing tournament</strong>
+            </div>
+          </div>
+          <div v-else>
+            <TournamentBoxes ref="TourBoxes" :loggedInUser="loggedInUser" :tournaments="ongoingTournaments" :openTournamentView="openTournamentView"/>
+          </div>
+        </div>
       </div>
-      
-      <div class="col-md-6">
-        <h2>Ended Tournaments</h2>
-        <select class="form-select" v-model="selectedEnded">
-          <option value="select">Select a tournament</option>
-          <!-- Use v-for to dynamically generate ended tournament options -->
-          <option v-for="tournament in endedTournaments" :key="tournament.id" :value="tournament.id">{{ tournament.name }}</option>
-        </select>
+    </div>
+    
+    <h2>Ended Tournaments</h2>
+    <div class="nes-container is-rounded" style="height:1000%">
+      <button @click="getTournamets(true)" style="width: 100%; height: 100%; background-color: transparent; border-color: transparent;">
+          <progress class="nes-progress is-pattern" value="100" max="100"></progress>
+      </button>
+        <!-- insert here -->
+      <div v-if="openTournamentView == 2">
+        <div v-if="endedTournaments.length == 0">
+          <div class="nes-container is-rounded">
+            <strong>There is no ended tournament</strong>
+          </div>
+        </div>
+        <div v-else>
+          <TournamentBoxes ref="TourBoxes" :loggedInUser="loggedInUser" :tournaments="endedTournaments" :openTournamentView="openTournamentView"/>
+        </div>
       </div>
     </div>
   </div>
 </template>
   
 <script>
+import TournamentBoxes from './TournamentBoxes.vue';
+
 export default {
+  components: { TournamentBoxes },
   name: 'ListTournament',
+  props: ['loggedInUser'],
   data() {
-    return {
-      selectedOngoing: 'select',
-      selectedEnded: 'select',
-      ongoingTournaments: [
-          { id: 'tournament1', name: 'Tournament 1' },
-          { id: 'tournament2', name: 'Tournament 2' },
-          { id: 'tournament3', name: 'Tournament 3' }
-      ],
-      endedTournaments: [
-          { id: 'tournament4', name: 'Tournament 4' },
-          { id: 'tournament5', name: 'Tournament 5' },
-          { id: 'tournament6', name: 'Tournament 6' }
-      ]
-    };
+      return {
+          openTournamentView: 0,
+          tournaments: [],
+          ongoingTournaments: [],
+          endedTournaments: [],
+      };
+  },
+  methods: {
+    
+    async getTournamets(ongoingOrEnded) {
+      if (this.openTournamentView == 0) {
+        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value;
+        try {
+          const response = await fetch('/endpoint/tournament/getTournaments/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({ name: this.loggedInUser, ongoingOrEnded: ongoingOrEnded}),
+          });
+          const responseData = await response.json();
+          this.tournaments = JSON.parse(responseData.data);
+          this.tournaments.forEach((tournament) => {
+            tournament.showTournament = false;
+            if (ongoingOrEnded)
+              this.endedTournaments.push(tournament);
+            else
+              this.ongoingTournaments.push(tournament);
+            });
+          if (ongoingOrEnded)
+            this.openTournamentView = 2;
+          else
+            this.openTournamentView = 1;
+        } catch (error) {
+          console.log('Error sending signal to backend:', error);
+        }
+      }
+      else {
+        if (this.ongoingTournaments.length != 0)
+          this.$refs.TourBoxes.stopPollingOfAll();
+        this.openTournamentView = 0;
+        this.tournaments = [];
+        this.ongoingTournaments = [];
+        this.endedTournaments = [];
+      }
+    },
   },
 };
 </script>
+
+<style>
+  .nes-progress{
+    position: relative;
+    top: 0;
+    transition: linear 0.1s;
+  }
+  .nes-progress:hover{
+    top: -3px;
+  }
+
+</style>

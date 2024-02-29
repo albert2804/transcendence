@@ -156,6 +156,7 @@
 
       this.socket.onmessage = (event) => {
         try {
+          console.log('Received WebSocket message:', event.data);
           const data = JSON.parse(event.data);
           if (data.type === "redirect") {
 			gameButtonState.value = "connected";

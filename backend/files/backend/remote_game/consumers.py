@@ -1,8 +1,10 @@
+from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 import asyncio
 from .player import Player
 from .gameHandler import GameHandler
+from django.apps import apps
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 
@@ -62,27 +64,32 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	# 	'user_1_id': user_1.id,
 	# 	'user_2_id': user_2.id,
 	# 	'db_game_id': db_game.id,
+	#		'tour_id
 	# })
 	async def start_tournament_game(self, event):
-		user_1_id = event.get('user_1_id')
-		user_2_id = event.get('user_2_id')
+		user_1_id = event.get('user_id_1')
+		user_2_id = event.get('user_id_2')
 		db_game_id = event.get('db_game_id')
-		if user_1_id and user_2_id and db_game_id:
+		tour_id = event.get('tour_id')
+		if user_1_id and user_2_id and db_game_id and tour_id:
 			user_1 = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(user_1_id)))()
 			user_2 = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(user_2_id)))()
+			RemoteGame = apps.get_model('remote_game', 'RemoteGame')
 			db_game = await database_sync_to_async(lambda: RemoteGame.objects.get(id=int(db_game_id)))()
-			if user_1 and user_2 and db_game:
+			Tournament = apps.get_model('tournament', 'Tournament')
+			db_tour = await database_sync_to_async(lambda: Tournament.objects.get(id=int(tour_id)))()
+			if user_1 and user_2 and db_game and db_tour:
 				player_1 = Player.get_player_by_user(user_1)
 				player_2 = Player.get_player_by_user(user_2)
 				if player_1 == None or player_2 == None:
 					return
-				game_group = await GameHandler.create(player_1, player_2, ranked=True, db_game=db_game)
-				await self.channel_layer.group_send(
-					f"game_{player1.get_user().id}_{player2.get_user().id}",
+				game_group = await GameHandler.create(player_1, player_2, ranked=True, db_entry=db_game, tournament=db_tour)
+				await game_group.channel_layer.group_send(
+					game_group.game_group,
 					{
 						'type': 'open_game_modal',
 					})
-				asyncio.ensure_future(game_group.start_game())
+				asyncio.create_task(game_group.start_game())
 
 	# Tries to create a guest player with the given alias
 	# If the alias is already taken or empty, the player gets an "alias_exists" message
@@ -117,7 +124,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 			player1 = RemoteGameConsumer.training_waiting_room[0]
 			RemoteGameConsumer.training_waiting_room.pop(0)
 			game_group = await GameHandler.create(player1, player)
-			asyncio.ensure_future(game_group.start_game())
+			asyncio.create_task(game_group.start_game())
 		else:
 			RemoteGameConsumer.training_waiting_room.append(player)
 		await player.send_state()
@@ -129,7 +136,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 				player1 = RemoteGameConsumer.ranked_waiting_room[0]
 				RemoteGameConsumer.ranked_waiting_room.pop(0)
 				game_group = await GameHandler.create(player1, player, ranked=True)
-				asyncio.ensure_future(game_group.start_game())
+				asyncio.create_task(game_group.start_game())
 			else:
 				RemoteGameConsumer.ranked_waiting_room.append(player)
 			await player.send_state()
@@ -195,7 +202,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 					# start local game after both players have chosen an alias
 					if player.get_game_handler() == None and player.alias_2 != None:
 						game_group = await GameHandler.create(player, player)
-						asyncio.ensure_future(game_group.start_game())
+						asyncio.create_task(game_group.start_game())
 					else:
 						await player.send_state()
 				elif data.get('type') == "give_up":
@@ -210,6 +217,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 				if player.get_game_handler() != None:
 					if (data.get('type') == 'key_pressed' or data.get('type') == 'key_released'):
 						player.get_game_handler().update_paddle(player, data.get('key'), data.get('type'))
+
 				# message handling for players in the menu
 				else:
 					if data.get('type') == 'start_training_game':
@@ -219,7 +227,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 					elif data.get('type') == 'start_local_game':
 						if (player.alias_2 != None):
 							game_group = await GameHandler.create(player, player)
-							asyncio.ensure_future(game_group.start_game())
+							asyncio.create_task(game_group.start_game())
 						else:
 							await self.send(text_data=json.dumps({
 								'type': 'redirect',

@@ -65,7 +65,7 @@
 <script>
   import { ref, onMounted } from 'vue';
   import { useRoute } from 'vue-router';
-  import { isLoggedIn, userName, userId, django_sessionid} from '~/store';
+  import { isLoggedIn, userName, userId} from '~/store';
 
   export default {
     name: 'LoginCard',
@@ -124,8 +124,6 @@
             password.value = '';
             error.value = '';
             message.value = data.message;
-			console.log('got sessionid:', data.sessionid);
-			django_sessionid.value = data.sessionid; // Store
           } else if (response.status === 403 || response.status === 400) {
             isLoggedIn.value = 0; // Store
             userName.value = ''; // Store

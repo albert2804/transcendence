@@ -2,7 +2,7 @@
 	<div v-if="openPopup" class="popup">
 		<div class="profilepic_container">
 			<div v-if="userProfilePic">
-				<img :src=userProfilePic.url alt="Profile Picture">
+				<img :src=userProfilePic.url alt="Profile Picture" style="max-width: 600px; max-height: auto;">
 			</div>
 			<div v-else>
 				<p>Loading failure for Profile Pic</p>

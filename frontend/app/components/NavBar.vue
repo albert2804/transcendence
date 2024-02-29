@@ -15,7 +15,7 @@
               <NuxtLink class="nes-btn is-warning nav-item" to="/tournament">Tournament</NuxtLink>
               <NuxtLink class="nes-btn is-error nav-item" to="/leaderboard">Leaderboard</NuxtLink>
               <NuxtLink v-if="!loginStatus" class="nes-btn is-error nav-item" to="/login">Login</NuxtLink>
-              <button v-if="loginStatus" class="nes-btn is-error nav-item" @click="reloadUserProfile">UserProfile</button>
+              <NuxtLink v-if="loginStatus" class="nes-btn is-error nav-item" to="/userinfopage">UserProfile</NuxtLink>
               <NuxtLink v-if="loginStatus" class="nes-btn is-error nav-item" to="/login">Logout</NuxtLink>
         </div>
     </nav>
@@ -46,13 +46,6 @@ export default {
       }
     }
   },
-  methods: {
-    reloadUserProfile() {
-      this.$router.push(`/userinfopage?username=${this.userName}`).then(() => {
-      this.$router.go();
-      });
-    },
-  }
 }
 </script>
 

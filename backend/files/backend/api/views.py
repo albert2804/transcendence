@@ -41,10 +41,20 @@ def get_auth_status(request):
     else:
         return JsonResponse({'authenticated': False}, status=200)
 
+
 # login user
 # 400: invalid json data or request
 # 200: user is authenticated
 # 403: user is not authenticated
+# 
+# As API request call:
+# curl -k -X POST 'https://localhost/endpoint/api/userlogin' \
+# -H 'Content-Type: application/json' \
+# -d '{
+#   "username": "<YOUR USERNAME>",
+#   "password": "<YOUR PASSWORD>"
+# }'
+# 
 def userlogin(request):
     if request.method == 'POST':
         # validate json data
@@ -68,12 +78,20 @@ def userlogin(request):
                 'message': 'Successfully logged in as ' + request.user.username,
 				'username': request.user.username,
                 'userid': user_id,
+                'sessionid': request.session.session_key,
                 }, status=200)
         return JsonResponse({'error': 'Invalid credentials'}, status=403)
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
+
 # logout user
 # 200: user logged out
+# 
+# As API request call:
+# curl -k -X POST 'https://localhost/endpoint/api/userlogout' \
+# -H 'Authorization: Bearer <YOUR SESSION-ID>' \
+# -H 'Content-Type: application/json'
+# 
 def userlogout(request):
     if request.user.is_authenticated:
         logout(request)
@@ -84,12 +102,25 @@ def userlogout(request):
 # 200: user registered
 # 400: an error occured
 # 403: invalid credentials
+# 
+# As API request call:
+# curl -k -X POST 'https://localhost/endpoint/api/userregister' \
+# -H 'Content-Type: application/json' \
+# -d '{
+#   "username": "<YOUR USERNAME>",
+#   "password1": "<YOUR PASSWORD>",
+#   "password2": "<YOUR PASSWORD>"
+# }'
+# 
 def userregister(request):
     if request.user.is_authenticated:
         logout(request)
     if request.method == 'POST':
         # check input with CustomUserCreationForm
-        form = CustomUserCreationForm(request.POST)
+        # form = CustomUserCreationForm(request.POST)
+        data = json.loads(request.body.decode('utf-8'))
+        print(data)
+        form = CustomUserCreationForm(data)
         if form.is_valid():
             # save user to database and login
             user_stats = form.save()

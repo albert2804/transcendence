@@ -90,7 +90,7 @@ class CustomUser(AbstractUser):
 
 	# invite someone to a game (ranked)
 	# if the other user already invited this user, the game will be started
-	async def invite_to_game(self, user):
+	async def invite_to_game(self, user, tournament=None, db_game=None):
 		consumer = ChatConsumer()
 		# check if the other user already invited this user
 		if user in await sync_to_async(list)(self.game_invites_received.all()):
@@ -124,7 +124,10 @@ class CustomUser(AbstractUser):
 			await sync_to_async(self.game_invites.remove)(user)
 			await sync_to_async(user.game_invites.remove)(self)
 			# create a new game handler
-			game_handler = await GameHandler.create(player1, player2, ranked=True)
+			if tournament != None and db_game != None:
+				game_handler = await GameHandler.create(player1, player2, ranked=True, db_entry=db_game, tournament=tournament)
+			else:
+				game_handler = await GameHandler.create(player1, player2, ranked=True)
 			# open the game modal for both players
 			await game_handler.channel_layer.group_send(
 				game_handler.game_group,
@@ -132,7 +135,7 @@ class CustomUser(AbstractUser):
 					'type': 'open_game_modal',
 				})
 			# start the game in another thread
-			asyncio.ensure_future(game_handler.start_game())
+			asyncio.create_task(game_handler.start_game())
 			return
 		# check if already invited
 		if user in await sync_to_async(list)(self.game_invites.all()):

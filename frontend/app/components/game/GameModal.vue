@@ -1,12 +1,8 @@
 <template>
   <div
-    ref="modalRef"
-    @keydown.esc="closeModal"
-	@keydown="handleKeyPress"
-	@keyup="handleKeyRelease"
-    class="modal fade"
     :id="modalId" tabindex="-1"
-    :aria-labelledby="ariaLabel"
+    ref="modalRef"
+    class="modal fade"
     aria-hidden="true"
     data-bs-backdrop="static"
     data-bs-keyboard="false"
@@ -14,7 +10,7 @@
     <div class="modal-dialog fullscreen-modal align-items-center">
       <div class="modal-content">
         <div class="modal-body">
-          <GameField ref="ponggamefieldRef" @openModal="openModal" @close-modal="closeModal"/>
+          <GameField ref="ponggamefieldRef" @openModal="openModal" @close-modal="closeModal" />
         </div>
       </div>
     </div>
@@ -38,8 +34,15 @@
 <script>
 export default {
   name: 'GameModal',
+  props: {
+	modalId: {
+	  type: String,
+	  required: true,
+	},
+  },
   setup() {
     const modalRef = ref(null);
+    const ponggamefieldRef = ref(null);
     const { toggle } = useFullscreen(modalRef);
     const fullscreen = ref(false);
 
@@ -55,64 +58,67 @@ export default {
         toggle();
       }
     }
-
     // function for the fullscreenchange event (to update the fullscreen variable for the button)
     function updateFullscreen() {
       fullscreen.value = document.fullscreenElement === modalRef.value;
     }
-
+    // function to open the modal
+    function openModal() {
+      nextTick(() => {
+        var bsModal = bootstrap.Modal.getInstance(modalRef.value);
+        if (!bsModal) {
+          bsModal = new bootstrap.Modal(modalRef.value);
+        }
+        bsModal.show();
+      });
+    }
+    // function to close the modal
+    function closeModal() {
+      closeFullscreen(); // smoother than closing fullscreen after modal is hidden
+      if (ponggamefieldRef.value) {
+        ponggamefieldRef.value.giveUpGame();
+      }
+      setTimeout(() => {
+        var bsModal = bootstrap.Modal.getInstance(modalRef.value);
+        bsModal.hide();
+      }, 0);
+    }
+    // function to handle keypress events
+    function handleKeyPress(event) {
+      if (event.key === 'Escape') {
+        closeModal();
+        return;
+      }
+      ponggamefieldRef.value.handleKeyPress(event);
+    }
+    // function to handle keyrelease events
+    function handleKeyRelease(event) {
+      ponggamefieldRef.value.handleKeyRelease(event);
+    }
+    // event listeners
     onMounted(() => {
       document.addEventListener('fullscreenchange', updateFullscreen);
+      window.addEventListener('keydown', handleKeyPress);
+      window.addEventListener('keyup', handleKeyRelease);
     });
-
+    // remove event listeners
     onUnmounted(() => {
       document.removeEventListener('fullscreenchange', updateFullscreen);
+      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('keyup', handleKeyRelease);
     });
 
     return {
       openFullscreen,
       closeFullscreen,
       modalRef,
+      ponggamefieldRef,
       fullscreen,
+      openModal,
+      closeModal,
+      handleKeyPress,
+      handleKeyRelease,
     }
-  },
-  props: {
-    modalId: String,
-    ariaLabel: String,
-  },
-  mounted() {
-    // listen to modal events to open and close fullscreen
-    var mood = document.getElementById(this.modalId);
-    // mood.addEventListener('shown.bs.modal', this.openFullscreen);
-    // mood.addEventListener('hidden.bs.modal', this.closeFullscreen);
-  },
-  methods: {
-    openModal() {
-      var mood = document.getElementById(this.modalId);
-      // check if the modal is already shown
-      if (mood.classList.contains('show')) {
-        return;
-      }
-      var bsModal = new bootstrap.Modal(mood);
-      bsModal.show();
-    },
-    closeModal() {
-      this.closeFullscreen(); // smoother than closing fullscreen after modal is hidden
-      if (this.$refs.ponggamefieldRef) {
-        this.$refs.ponggamefieldRef.giveUpGame();
-      }
-      setTimeout(() => {
-        var mood = document.getElementById(this.modalId);
-        var bsModal = bootstrap.Modal.getInstance(mood);
-        bsModal.hide();
-      }, 0);
-    },
-	handleKeyPress(event) {
-	  this.$refs.ponggamefieldRef.handleKeyPress(event);
-	},
-	handleKeyRelease(event) {
-	  this.$refs.ponggamefieldRef.handleKeyRelease(event);
-	}
   },
 };
 </script>

@@ -1,14 +1,6 @@
-<script setup>
-  // Listen to changes of the isLoggedIn from store/index.js
-  import { isLoggedIn } from '~/store';
-  watchEffect(() => {
-  isLoggedIn.value = isLoggedIn.value
-})
-</script>
-
 <template>
   <div
-    class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease">
+    class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease" :style="{ 'background-image': 'url(' + map + ')' }">
     <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
     <div v-show="playing" class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
     <div v-show="playing" class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%' }"></div>
@@ -34,8 +26,8 @@
         <div v-if="showMenu">
           <button type="button" class="nes-btn btn-primary" @click="startTrainingGame">Start Training Game</button>
         </div>
-        <div v-if="showMenu && isLoggedIn == 1">
-          <button type="button" class="nes-btn btn-primary" @click="startRankedGame">Start Ranked Game</button>
+        <div v-if="showMenu && loginStatus == 1">
+          <button type="button" class="nes-btn btn-primary" @click="fetch_map().then(startRankedGame)" >Start Ranked Game</button>
         </div>
         <div v-if="showMenu">
           <button type="button" class="nes-btn btn-primary" @click="startLocalGame">Start Local Game</button>
@@ -66,7 +58,7 @@
         <div v-if="waiting || showAliasScreen2">
           <button type="button" class="nes-btn btn-primary" @click="backToMenu">Back to Menu</button>
         </div>
-        <div v-if="showMenu && isLoggedIn == 1">
+        <div v-if="showMenu && loginStatus == 1">
           <button type="button" class="nes-btn btn-primary" @click="showControls">Controls</button>
           <div v-if="showControlsPic" style="position: relative; width: 100%;">
             <img v-if="controls" :src="controls" alt="Controls" style="width: 100%;">
@@ -81,10 +73,12 @@
   
 <script>
   import { isLoggedIn } from '~/store';
+  import { gameButtonState } from '~/store';
   export default {
   name: 'GameField',
   data () {
     return {
+      loginStatus: isLoggedIn,
       socket: null,
       message: '',
       pointsP1: 0,
@@ -115,6 +109,15 @@
       alias: '',
       controls: '',
       showControlsPic: false,
+      map: '',
+    }
+  },
+  watch: {
+    isLoggedIn: {
+      immediate: true,
+      handler(newValue) {
+		this.loginStatus = newValue;
+      }
     }
   },
   mounted () {
@@ -140,16 +143,15 @@
       this.socket = new WebSocket(sockurl)
 
       this.socket.onopen = () => {
-        // console.log('opened remoteGame websocket')
-        this.$emit('connected')
+		gameButtonState.value = "loading";
       }
 
       this.socket.onclose = () => {
-        // console.log('closed remoteGame websocket')
+		gameButtonState.value = "disconnected";
       }
 
       this.socket.onerror = (error) => {
-        // console.error(`WebSocket-Error: ${error}`)
+		gameButtonState.value = "disconnected";
       }
 
       this.socket.onmessage = (event) => {
@@ -157,6 +159,7 @@
           console.log('Received WebSocket message:', event.data);
           const data = JSON.parse(event.data);
           if (data.type === "redirect") {
+			gameButtonState.value = "connected";
             this.showAliasScreen = false;
             this.showAliasScreen2 = false;
             if (data.page === "playing") {
@@ -233,6 +236,7 @@
     // function to close the websocket
     closeWebSocket () {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        this.map='';
         this.socket.close()
         // console.log('WebSocket connection closed')
       }
@@ -256,6 +260,27 @@
         this.socket.send(data);
       }
     },
+
+    async fetch_map(){
+      try {
+        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+        const response = await fetch('/endpoint/user/info/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          }
+        })
+        if (response.ok) {
+          const data = await response.json();
+          this.map = data.map;
+          console.log(this.map)
+        }
+      } catch (error) {
+          this.map = '';
+      }
+    },
+
     startRankedGame () {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
@@ -419,7 +444,8 @@
 }
 
 .midline {
-    position: absolute;
+    /* position: absolute; */
+    position: relative; z-index: 1;
     width: 1px;
     top: 0;
     left: 50%;
@@ -428,7 +454,8 @@
 }
 
 .ball {
-  position: absolute;
+  /* position: absolute; */
+  position: absolute; z-index: 1;
   width: 1.5%;
   height: 3%;
   background-color: pink;

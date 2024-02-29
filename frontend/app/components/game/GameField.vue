@@ -72,7 +72,7 @@
 </template>
   
 <script>
-  import { isLoggedIn } from '~/store';
+  import { isLoggedIn, sound } from '~/store';
   import { gameButtonState } from '~/store';
   export default {
   name: 'GameField',
@@ -393,6 +393,13 @@
       this.p2pos.y = gameState.rightPaddle.y;
       this.ballPos.x = gameState.ball.x - (1.5/2); // 1.5% is the width of the ball
       this.ballPos.y = gameState.ball.y - (3/2);   // 3% is the height of the ball
+      
+      
+      if (sound.value) {
+
+        const audio = new Audio("endpoint/media/sounds/test.mp3");
+        // audio.play();
+      }
     },
     // function to send information to server that the user wants to play on this device
     changeDevice() {

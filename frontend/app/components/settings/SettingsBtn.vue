@@ -8,15 +8,19 @@
           <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
+          <!-- <RunningBanner /> -->
+        <!-- ALERTS -->
+        <div v-if="recvmessage" class="alert alert-success" style="min-width: 14em" timeout="30s" role="alert">{{ recvmessage }}</div>
+        <div v-if="recverror" class="alert alert-danger" style="min-width: 14em" role="alert">{{ recverror }}</div>
           <div v-if="loginStatus === 1">
             <button type="button" class="nes-btn is-success clickable"  @click="openPopupName" style="width: 100%;">Change Alias</button>
             <button type="button" class="nes-btn is-success clickable" @click="openPopupPw" style="width: 100%;">Change Password</button>
-            <button type="button" class="nes-btn is-success clickable" @click="openPopupPic" style="width: 100%;">Change Pictures</button>
+            <button type="button" class="nes-btn is-success clickable" @click="openPopupPic" style="width: 100%;">Change Picture</button>
             <button type="button" class="nes-btn is-success clickable" @click="openPopupMap" style="width: 100%;">Choose Map</button>
             
-            <SettingsName :openPopup="PopupName" @close-popup="PopupName = false"/>
-            <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false"/>
-            <SettingsPw :openPopup="PopupPw" @close-popup="PopupPw = false"/>
+            <SettingsName :openPopup="PopupName" @close-popup="PopupName = false" @message-from-child="handleUpdate" />
+            <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false" @message-from-child="handleUpdate" />
+            <SettingsPw :openPopup="PopupPw" @close-popup="PopupPw = false" @message-from-child="handleUpdate" />
             <SettingsMap :openPopup="PopupMap" @close-popup="PopupMap = false"/>
           </div>
           <div v-if="! loginStatus">
@@ -24,59 +28,86 @@
             <button type="button" class="btn nes-btn btn-primary" data-bs-dismiss="offcanvas" @click="openLogin">Login</button>
           </div>
         </div>
-      </div> 
+      </div>
   </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, watchEffect, watch } from 'vue';
 import { isLoggedIn } from '~/store';
-
-const PopupName = ref(false);
-const PopupPic = ref(false);
-const PopupPw = ref(false);
-const PopupMap = ref(false);
-
-const openPopupName = () => {
-  PopupName.value = true;
-};
-const openPopupPic = () => {
-  PopupPic.value = true;
-};
-const openPopupPw = () => {
-  PopupPw.value = true;
-};
-const openPopupMap = () => {
-  PopupMap.value = true;
-};
 
 export default {
   name: 'SettingsBtn',
   data() {
     return {
-      loginStatus: isLoggedIn
-    }
-  },
-  watch: {
-    isLoggedIn: {
-      immediate: true,
-      handler(newValue) {
-        this.loginStatus = newValue;
-      }
+      loginStatus: isLoggedIn,
+      recvmessage:'',
+      recverror:'',
     }
   },
   setup() {
+    const handleUpdate = ref(false);
+    const handleError = ref(false);
+    const message = ref('');
+    const error = ref('');
+    const PopupName = ref(false);
+    const PopupPic = ref(false);
+    const PopupPw = ref(false);
+    let recvmessage = ref('');
+    let recverror = ref('');
+    const PopupMap = ref(false);
+    const loginStatus = ref(isLoggedIn.value);
+
+    const openPopupName = () => {
+      PopupName.value = true;
+    };
+    const openPopupPic = () => {
+      PopupPic.value = true;
+    };
+    const openPopupPw = () => {
+      PopupPw.value = true;
+    };
+    const openPopupMap = () => {
+      PopupMap.value = true;
+    };
+
+    watchEffect(() => {
+        loginStatus.value = isLoggedIn.value;
+      });
+
     return {
+      handleUpdate,
+      error,
+      message,
+      loginStatus,
       PopupName,
       PopupPic,
       PopupPw,
       PopupMap,
+      openPopupName,
+      openPopupPic,
+      openPopupPw,
+      openPopupMap
     };
   },
+ 
   methods: {
-	openLogin() {
-	  this.$router.push('/login');
-	}
-  }
+    openLogin() {
+      this.$router.push('/login');
+    },
+    async handleUpdate(message, error) {
+      this.recverror = error;
+      this.recvmessage = message;
+      console.log('print from parent', this.recverror);
+      this.$forceUpdate();
+      this.resetMessages();
+    },
+    async resetMessages() {
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      this.recverror = '';
+      this.recvmessage = '';
+      this.$forceUpdate();
+    }
+  },
 };
 </script>
 

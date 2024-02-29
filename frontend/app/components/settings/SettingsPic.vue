@@ -65,11 +65,13 @@
 				if (this.newPic && this.newPic.size > 4000000) {
 					console.log('File size exceeds the maximum allowed size (~4MB)');
 					this.sendMessagetoParent('', 'File size exceeds the maximum allowed size (~4MB)');
+					this.closePopup();
 					return ;
 				}
 				if (!this.newPic) {
 					console.error('No file selected.');
 					this.sendMessagetoParent('', 'No file selected.');
+					this.closePopup();
 					return ;
 				}
 				} catch(error) {

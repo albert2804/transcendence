@@ -50,7 +50,7 @@ def userlogin(request):
         # validate json data
         try:
             data = json.loads(request.body.decode('utf-8'))
-            username = data.get('username')
+            username = data.get('username').lower()
             password = data.get('password')
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Something went wrong'}, status=400)
@@ -66,7 +66,7 @@ def userlogin(request):
             user_id = user.id
             return JsonResponse({
                 'message': 'Successfully logged in as ' + request.user.username,
-				'username': request.user.username,
+                'username': username,
                 'userid': user_id,
                 }, status=200)
         return JsonResponse({'error': 'Invalid credentials'}, status=403)
@@ -88,12 +88,16 @@ def userregister(request):
     if request.user.is_authenticated:
         logout(request)
     if request.method == 'POST':
+        # get lowercase username
+        username = request.POST['username'].lower()
+        # get copy of request.POST
+        post_data = request.POST.copy()
+        post_data['username'] = username
         # check input with CustomUserCreationForm
-        form = CustomUserCreationForm(request.POST)
+        form = CustomUserCreationForm(post_data)
         if form.is_valid():
             # save user to database and login
             user_stats = form.save()
-            username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=password)
             if user is not None:
@@ -107,9 +111,8 @@ def userregister(request):
             else:
                 return JsonResponse({'error': 'Something went wrong'}, status=400)
         else:
-            # print(form.errors)
             # check if username already exists
-            if CustomUser.objects.filter(username=request.POST['username']).exists():
+            if CustomUser.objects.filter(username=username).exists():
                 return JsonResponse({'error': 'Username already exists'}, status=403)
             # check form.errors for other username errors
             if 'username' in form.errors:

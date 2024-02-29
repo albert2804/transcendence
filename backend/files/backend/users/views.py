@@ -51,7 +51,7 @@ def send_userinfo(request):
 				return JsonResponse(response_data, status=200)
 			except Exception as e:
 				return JsonResponse({'error': f'No statistics data found for the user. Error: {str(e)}'},
-						status=404)
+						status=500)
 		elif request.method == 'POST':
 			try:
 				user = CustomUser.objects.get(username=request.user)
@@ -59,9 +59,10 @@ def send_userinfo(request):
 				if data.get('newUsername'):
 					newUsername = data.get('newUsername')
 					user.alias = newUsername
+					return update_user_alias(user, user.alias)
 					user.save()
-					return JsonResponse({'status': 'Changed username'},
-						status=200)
+					# return JsonResponse({'status': 'Changed username'},
+					# 	status=200)
 				elif data.get('newMap') or data.get('newMap') == "":
 					newMap = data.get('newMap')
 					user.map = newMap
@@ -76,6 +77,20 @@ def send_userinfo(request):
 	else:
 		return JsonResponse({'error': 'User not authenticated'},
 			status=401)
+
+def update_user_alias(user, newUsername):
+	existing_users = CustomUser.objects.all()
+
+	for existing_user in existing_users:
+		if existing_user != user and newUsername == existing_user.alias:
+			return JsonResponse({'error': 'alias already in use'},
+					status=405)
+	
+	user.alias = newUsername
+	user.save()
+	return JsonResponse({'status': 'Changed username'},
+		status=200)
+
 
 # sends the profilepic url as a response to the frontend if GET method is active
 #  if POST method is active, change the profilepici nside the database and save the file to MEDIA Root/profilepic
@@ -114,7 +129,7 @@ def handle_profilepic(request):
 			except ValidationError:
 				return JsonResponse({'error': 'File Extension not allowed'}, status=422)
 			except Exception as e:
-				return JsonResponse({'error': 'Changing profilePic failed'}, status=400) 
+				return JsonResponse({'error': ' '}, status=400) 
 	else:
 		return JsonResponse({'error': 'User not authenticated'},
 			status=401)
@@ -129,10 +144,10 @@ def verify(request):
 				if user.check_password(data.get('old_pw')):
 					user.set_password(data.get('password1'))
 					user.save()
-					return JsonResponse({'message': 'Password changed succesfully'},
+					return JsonResponse({'status': 'Password changed succesfully'},
 							status=200)
 				else:
-					return JsonResponse({'message': 'Wrong password'},
+					return JsonResponse({'error': 'Wrong password'},
 							status=500)
 			except ValidationError:
 				return JsonResponse({'error': 'Password not valid'}, status=422)

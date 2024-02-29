@@ -60,9 +60,6 @@ def send_userinfo(request):
 					newUsername = data.get('newUsername')
 					user.alias = newUsername
 					return update_user_alias(user, user.alias)
-					user.save()
-					# return JsonResponse({'status': 'Changed username'},
-					# 	status=200)
 				elif data.get('newMap') or data.get('newMap') == "":
 					newMap = data.get('newMap')
 					user.map = newMap

@@ -14,9 +14,8 @@
             <p>{{ match.player2 }}</p>
             <p>{{ match.pointsP2 }}</p>
           </div>
-          <div v-if="(match.player1 == this.loggedInUser || match.player2 == this.loggedInUser) && this.loggedInUser != undefined && match.finished == false"
-          class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center">
-            <button class="btn" :class="{ goGreen: playerReady }" @click="sendReadyPlayer($event, match.is_match)">
+          <div v-if="(match.player1 == this.loggedInUser || match.player2 == this.loggedInUser) && this.loggedInUser != undefined && match.finished == false">
+            <button class="nes-btn" :class="{ goGreen: playerReady }" @click="sendReadyPlayer($event, match.is_match)">
               <span v-if="playerReady">You are Ready</span><span v-else>Play</span></button>
           </div>
         </div>
@@ -113,60 +112,6 @@ export default {
 };
 </script>
 
-<style scoped>
-.container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 0 20px;
-}
+<style>
 
-.bracket {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.user {
-  display: flex;
-  flex-direction: column;
-}
-.round {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  background-color: #fff;
-  border-radius: 10px;
-  margin-bottom: 20px;
-
-}
-
-.match {
-  display: flex;
-  flex-direction: columns;
-  align-items: center;
-  width: 100%;
-  background-color: #fff;
-  margin-bottom: 10px;
-}
-.btn {  
-  position: absolute;
-  width: 77%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  background-color: transparent;
-  box-shadow: none;
-  color: transparent;
-}
-
-.btn:hover { 
-  background-color: #ff7c7c;
-  color: black;
-}
-.goGreen {
-  background-color: #99e857;
-  color: black;
-}
 </style>

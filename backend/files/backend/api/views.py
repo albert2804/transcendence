@@ -54,7 +54,7 @@ def userlogin(request):
             password = data.get('password')
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Something went wrong'}, status=400)
-        # check if user is already logged in
+        # check if user is already logged in and if form valid
         if request.user.is_authenticated:
             return JsonResponse({
                 'message': 'You are already logged in',

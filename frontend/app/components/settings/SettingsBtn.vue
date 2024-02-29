@@ -30,13 +30,30 @@
   </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, watchEffect } from 'vue';
 import { isLoggedIn } from '~/store';
 
-const PopupName = ref({ value: false });;
-const PopupPic = ref({ value: false });;
-const PopupPw = ref({ value: false });;
-const PopupMap = ref({ value: false });;
+const PopupName = ref({ value: false });
+const PopupPic = ref({ value: false });
+const PopupPw = ref({ value: false });
+const PopupMap = ref({ value: false });
+const loginStatus = ref({ value: isLoggedIn });
+
+const openPopupName = () => {
+  PopupName.value = true;
+};
+
+const openPopupPic = () => {
+  PopupPic.value = true;
+};
+
+const openPopupPw = () => {
+  PopupPw.value = true;
+};
+
+const openPopupMap = () => {
+  PopupMap.value = true;
+};
 
 export default {
   name: 'SettingsBtn',
@@ -45,41 +62,23 @@ export default {
       loginStatus: isLoggedIn
     }
   },
-  watch: {
-    isLoggedIn: {
-      immediate: true,
-      handler(newValue) {
-        this.loginStatus = newValue;
-      }
-    }
-  },
+  
   setup() {
+    watchEffect(() => {
+      loginStatus.value = isLoggedIn;
+    });
+  
     return {
-      PopupName,
-      PopupPic,
-      PopupPw,
-      PopupMap,
+      PopupPw: false,
+      PopupMap: false,
+      PopupName: false,
+      PopupPic: false,
+      
     };
   },
   methods: {
     openLogin() {
       this.$router.push('/login');
-    },
-
-    openPopupName() {
-      this.PopupName.value = true;
-    },
-
-    openPopupPic() {
-      this.PopupPic.value = true;
-    },
-
-    openPopupPw() {
-      this.PopupPw.value = true;
-    },
-
-    openPopupMap() {
-      this.PopupMap.value = true;
     },
   }
 };

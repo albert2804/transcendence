@@ -20,7 +20,7 @@ Example:
       <GameButton />
     </div>
     <div class="d-flex align-items-center justify-content-center vh-80" style="overflow: auto;">
-      <slot />
+      <router-view :key="$route.fullPath"></router-view>
     </div>
     <div>
       <NavBar />

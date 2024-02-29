@@ -1,34 +1,38 @@
 <template>
-  <div class="nes-container is-rounded" style="background-color: #99e857; position: relative; text-align: center;" @click="showGameModal">
+  <div v-if="state === 'connected'" class="nes-container is-rounded clickable" style="background-color: #99e857; position: relative; text-align: center;" @click="showGameModal">
     <i class="bi bi-controller" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -57%);"></i>
+  </div>
+  <div v-if="state === 'loading'" class="nes-container is-rounded" style="background-color: #99e857; position: relative; text-align: center;">
+	<i class="bi bi-hourglass" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -57%);"></i>
   </div>
   </template>
 
 <script>
+import { gameButtonState } from '~/store';
 export default {
   name: 'GameButton',
-  // setup() {
-  //   const fullscreen = ref(false);
-  //   const { toggle } = useFullscreen();
-
-  //   function openFullscreen() {
-  //     // console.log('openFullscreen');
-  //     fullscreen.value = !fullscreen.value;
-  //     toggle();
-  //   }
-
-  //   return {
-  //     fullscreen,
-  //     openFullscreen,
-  //   }
-  // },
+  data() {
+    return {
+      state: gameButtonState,
+    }
+  },
+  watch: {
+    gameButtonState: {
+      immediate: true,
+      handler(newValue) {
+		this.state = newValue;
+      }
+    }
+  },
   methods: {
     showGameModal() {
       this.$nextTick(() => {
-          new bootstrap.Modal(document.getElementById('pongmodal')).show();
+        var bsModal = bootstrap.Modal.getInstance(document.getElementById('pongmodal'));
+        if (!bsModal) {
+          bsModal = new bootstrap.Modal(document.getElementById('pongmodal'));
+        }
+        bsModal.show();
       });
-      // useFullscreen
-      // this.openFullscreen();
     },
   },
 }

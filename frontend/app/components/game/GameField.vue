@@ -1,16 +1,6 @@
-<script setup>
-  // Listen to changes of the isLoggedIn from store/index.js
-  import { isLoggedIn } from '~/store';
-  watchEffect(() => {
-  isLoggedIn.value = isLoggedIn.value
-})
-</script>
-
 <template>
   <div
-    @keydown="handleKeyPress"
-    @keyup="handleKeyRelease"
-    class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease">
+    class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease" :style="{ 'background-image': 'url(' + map + ')' }">
     <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
     <div v-show="playing" class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
     <div v-show="playing" class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%' }"></div>
@@ -27,48 +17,24 @@
     <div v-show="playing" style="position: absolute; bottom: 0; right: 2%; font-size: 2.0em; color: #ffffff;">
       {{ pointsP2 }}
     </div>
-    <div class="container nes-container is-rounded is-centered" v-if="!playing" style="max-width: 25vw; max-height: 60vh; color: #ffffff; background-color: #eeeeee; display: inline-block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    <div class="container nes-container is-rounded is-centered menu_box" v-if="!playing" >
         <!-- Message --->
         <div style="color: #000000; text-align: center;">
           <div>{{ message }}</div>
         </div>
-        <!-- Start game - button --->
-
+        <!-- Menu buttons --->
         <div v-if="showMenu">
-          <div class="row">
-            <div class="col">
-              <button type="button" class="btn nes-btn btn-primary" @click="startTrainingGame">Start Training Game</button>
-            </div>
-          </div>
+          <button type="button" class="nes-btn btn-primary" @click="startTrainingGame">Start Training Game</button>
+        </div>
+        <div v-if="showMenu && loginStatus == 1">
+          <button type="button" class="nes-btn btn-primary" @click="fetch_map().then(startRankedGame)" >Start Ranked Game</button>
         </div>
         <div v-if="showMenu">
-          <div class="row">
-            <div class="col">
-              <button type="button" class="btn nes-btn btn-primary" @click="startLocalGame">Start Local Game</button>
-            </div>
-          </div>
-        </div>
-        <div v-if="showMenu && isLoggedIn == 1">
-          <div class="row">
-            <div class="col">
-              <button type="button" class="btn nes-btn btn-primary" @click="startRankedGame">Start Ranked Game</button>
-            </div>
-          </div>
-        </div>
-        <div v-if="showMenu && isLoggedIn == 1">
-          <div class="row">
-            <div class="col">
-              <button type="button" class="btn nes-btn btn-primary" @click="createTournament">Create Tournament</button>
-            </div>
-          </div>
+          <button type="button" class="nes-btn btn-primary" @click="startLocalGame">Start Local Game</button>
         </div>
         <!-- play on this device - button --->
         <div v-if="!playOnThisDevice">
-          <div class="row">
-            <div class="col">
-              <button type="button" class="btn nes-btn btn-primary" @click="changeDevice">Play on this device</button>
-            </div>
-          </div>
+          <button type="button" class="nes-btn btn-primary" @click="changeDevice">Play on this device</button>
         </div>
         <!-- alias screen -->
         <div class= "nes-field" v-if="showAliasScreen || showAliasScreen2">
@@ -76,31 +42,28 @@
         </div>
         <div v-if="showAliasScreen || showAliasScreen2" style="height: 8px;"></div>
         <div v-if="showAliasScreen">
-          <button type="button" class="btn nes-btn btn-primary" @click="createGuestPlayer">Enter</button>
+          <button type="button" class="nes-btn btn-primary" @click="createGuestPlayer">Enter</button>
         </div>
         <div v-if="showAliasScreen2">
-          <button type="button" class="btn nes-btn btn-primary" @click="createGuestPlayer2">Enter</button>
+          <button type="button" class="nes-btn btn-primary" @click="createGuestPlayer2">Enter</button>
         </div>
         <div v-if="showAliasScreen && !showAliasScreen2">
           <div style="color: #000000; text-align: center;">
             <p><br>Or you can log in instead!</p>
           </div>
-          <router-link to="/login" tag="button" class="btn nes-btn btn-primary" @click.native="$emit('close-modal')">Login</router-link>
+          <router-link to="/login" tag="button" class="nes-btn btn-primary" @click.native="$emit('close-modal')">Login</router-link>
         </div>
         <!-- Back to menu - button --->
         <div v-if="waiting || showAliasScreen2" style="height: 5px;"></div>
         <div v-if="waiting || showAliasScreen2">
-          <button type="button" class="btn nes-btn btn-primary" @click="backToMenu">Back to Menu</button>
+          <button type="button" class="nes-btn btn-primary" @click="backToMenu">Back to Menu</button>
         </div>
-        <div v-if="showMenu && isLoggedIn == 1">
-          <button type="button" class="btn nes-btn btn-primary" @click="showControls">Controls</button>
-          <div v-if="showmodal">
-            <div class="modal-dialog fullscreen-modal align-items-center">
-              <div class="modal-content">
-                <div class="modal-body">
-                  <img v-if="controls" :src="controls" alt="Controls">
-                </div>
-              </div>
+        <div v-if="showMenu && loginStatus == 1">
+          <button type="button" class="nes-btn btn-primary" @click="showControls">Controls</button>
+          <div v-if="showControlsPic" style="position: relative; width: 100%;">
+            <img v-if="controls" :src="controls" alt="Controls" style="width: 100%;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #000000; text-align: center;">
+              <p>Press the arrow keys or 'w' and 's' to move the paddles!</p>
             </div>
           </div>
         </div>
@@ -110,10 +73,12 @@
   
 <script>
   import { isLoggedIn } from '~/store';
+  import { gameButtonState } from '~/store';
   export default {
   name: 'GameField',
   data () {
     return {
+      loginStatus: isLoggedIn,
       socket: null,
       message: '',
       pointsP1: 0,
@@ -137,13 +102,22 @@
         x: 0,
         y: 0,
       },
-	    playOnThisDevice: true,
+		  playOnThisDevice: true,
       // Following only for guest users:
       showAliasScreen: false,
       showAliasScreen2: false,
       alias: '',
       controls: '',
-      showmodal: false,
+      showControlsPic: false,
+      map: '',
+    }
+  },
+  watch: {
+    isLoggedIn: {
+      immediate: true,
+      handler(newValue) {
+		this.loginStatus = newValue;
+      }
     }
   },
   mounted () {
@@ -160,7 +134,7 @@
   beforeDestroy () {
     this.closeWebSocket();
   },
-  expose: ['giveUpGame'], // expose function to parent component
+  expose: ['giveUpGame', 'handleKeyPress', 'handleKeyRelease'],
   methods: {
     // function to create and handle the websocket
 	  createWebSocket () {
@@ -169,22 +143,22 @@
       this.socket = new WebSocket(sockurl)
 
       this.socket.onopen = () => {
-        console.log('opened remoteGame websocket')
-        this.$emit('connected')
+		gameButtonState.value = "loading";
       }
 
       this.socket.onclose = () => {
-        console.log('closed remoteGame websocket')
+		gameButtonState.value = "disconnected";
       }
 
       this.socket.onerror = (error) => {
-        console.error(`WebSocket-Error: ${error}`)
+		gameButtonState.value = "disconnected";
       }
 
       this.socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
           if (data.type === "redirect") {
+			gameButtonState.value = "connected";
             this.showAliasScreen = false;
             this.showAliasScreen2 = false;
             if (data.page === "playing") {
@@ -261,8 +235,9 @@
     // function to close the websocket
     closeWebSocket () {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        this.map='';
         this.socket.close()
-        console.log('WebSocket connection closed')
+        // console.log('WebSocket connection closed')
       }
     },
     // function to start the game
@@ -284,6 +259,27 @@
         this.socket.send(data);
       }
     },
+
+    async fetch_map(){
+      try {
+        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+        const response = await fetch('/endpoint/user/info/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          }
+        })
+        if (response.ok) {
+          const data = await response.json();
+          this.map = data.map;
+          console.log(this.map)
+        }
+      } catch (error) {
+          this.map = '';
+      }
+    },
+
     startRankedGame () {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
@@ -291,9 +287,6 @@
         });
         this.socket.send(data);
       }
-    },
-    createTournamen() {
-      console.log("create Tournament (for now does nothing)");
     },
     // function to create a guest player (send alias to server)
     createGuestPlayer () {
@@ -413,15 +406,14 @@
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({ type: 'give_up' });
         this.socket.send(data);
-        // console.log('gave up game');
       }
     },
     // show controls in form of a gif
     async showControls() {
-      this.showmodal=true;
+      this.showControlsPic=true;
       this.controls='https://media.tenor.com/Ycl8mXFNE_8AAAAi/get-real-cat.gif';
       await new Promise(resolve => setTimeout(resolve, 3000));
-      this.showmodal=false;
+      this.showControlsPic=false;
     },
   }
 };
@@ -429,8 +421,8 @@
 
 <!-- Styles -->
 <style scoped>
-  
-  .game-canvas {
+
+.game-canvas {
   width: 100%;
   height: 97vh;
   background-color: #000;
@@ -451,7 +443,8 @@
 }
 
 .midline {
-    position: absolute;
+    /* position: absolute; */
+    position: relative; z-index: 1;
     width: 1px;
     top: 0;
     left: 50%;
@@ -460,7 +453,8 @@
 }
 
 .ball {
-  position: absolute;
+  /* position: absolute; */
+  position: absolute; z-index: 1;
   width: 1.5%;
   height: 3%;
   background-color: pink;
@@ -471,5 +465,27 @@
   width: 97%;
 }
 
+.menu_box{
+  min-width: 280px;
+  max-width: 25vw;
+  color: #ffffff;
+  background-color: #eeeeee;
+  display: inline-block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.0em;
+}
+
+.menu_box * {
+  font-size: inherit;
+}
+
+@media screen and (max-width: 800px) {
+  .menu_box {
+    font-size: 0.7em; 
+  }
+}
+
 </style>
-  

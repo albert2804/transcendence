@@ -124,7 +124,6 @@
             password.value = '';
             error.value = '';
             message.value = data.message;
-            sessionStorage.setItem('userid', data.userid);
           } else if (response.status === 403 || response.status === 400) {
             isLoggedIn.value = 0; // Store
             userName.value = ''; // Store
@@ -158,7 +157,6 @@
             username.value = '';
             password.value = '';
             message.value = data.message;
-            sessionStorage.removeItem('userid');
           }
         } catch (error) {
           console.error('Error:', error);
@@ -174,10 +172,14 @@
           const response = await fetch('/endpoint/api/userregister', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
+              'Content-Type': 'application/json',
               'X-CSRFToken': csrfToken,
             },
-            body: `username=${encodeURIComponent(username.value)}&password1=${encodeURIComponent(password.value)}&password2=${encodeURIComponent(password2.value)}&alias=${encodeURIComponent(username.value)}`,
+            body: JSON.stringify({
+              'username': username.value,
+              'password1': password.value,
+              'password2': password2.value,
+            })
           });
           if (response.status === 200) {
             const data = await response.json();
@@ -188,7 +190,6 @@
             password2.value = '';
             error.value = '';
             message.value = data.message;
-            sessionStorage.setItem('userid', data.userid);
           } else if (response.status === 403 || response.status === 400) {
             isLoggedIn.value = 0; // Store
             userName.value = ''; // Store

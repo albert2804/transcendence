@@ -159,4 +159,6 @@ class PongGame:
 			self.ball['dx'] = self.currentSpeed
 		else:
 			self.ball['dx'] = -self.currentSpeed
+		
+		
 

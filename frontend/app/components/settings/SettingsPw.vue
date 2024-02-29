@@ -51,26 +51,32 @@
 						password1: encodeURIComponent(this.password1),
 						password2: encodeURIComponent(this.password2)})
 					})
-					if (response.ok){
-						
-						this.closePopup();
+					const data = await response.json();
+					this.closePopup();
+					this.error = data.error;
+					this.message = data.status;
+					this.sendMessagetoParent(this.message, this.error);
+					if (response.status === 200){
 						await this.$router.push('/login');
 						location.reload();
-						console.log("Changed pw worked");
 					}
-					else
-						console.log("Changed pw didnt work:", response.status);
-
 				} catch (error) {
 					console.error('Error sending data to /endpoint/user/verify/:', error);
 				}
 			}
-			else
+			else {
 				console.log("Passwords dont match");
+				this.sendMessagetoParent('', 'Passwords dont match');
+				this.closePopup();
+			}
 		},
 
 		closePopup() {
 			this.$emit('close-popup');
+		},
+
+		sendMessagetoParent(message, error) {
+			this.$emit('message-from-child', message, error);
 		}
 	},
 }

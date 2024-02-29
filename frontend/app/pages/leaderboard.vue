@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex align-items-center justify-content-center vh-80">
+    <div>
           <Leaderboard />
     </div>
   </template>

@@ -1,16 +1,16 @@
 <template>
-  <div class="container-fluid">
+  <div class="container">
     <h1 class="text-center">Leaderboard</h1>
-      <table class="table nes-table is-bordered is-centered table-hover">
+      <table class="nes-table is-bordered table-hover">
         <thead class="thread-dark">
           <tr>
             <th scope = "col">#</th>
             <th scope="col">Username</th>
-            <th scope="col">Games Won</th>
+            <th scope="col">Games<br> Won</th>
             <th scope="col">MMR</th>
-            <th scope="col">Games Played</th>
-            <th scope="col">Win Ratio</th>
-            <th scope="col">User profile</th>
+            <th scope="col">Games<br> Played</th>
+            <th scope="col">Win<br> Ratio</th>
+            <th scope="col">User <br> profile</th>
           </tr>
         </thead>
         <tbody>
@@ -23,7 +23,7 @@
             <td>{{ (user.num_games_played !== 0) ? (( user.num_games_won / user.num_games_played) * 100).toFixed(0) + '%' : '0%' }}</td>
             <td>
               <router-link :to="{ name: 'userinfopage', query: { username: user.username } }">
-                <button type="button" class="btn nes-btn btn-primary">View Profile</button>
+                <button type="button" class="btn nes-btn btn-primary"><span>View Profile</span></button>
               </router-link>
             </td>
           </tr>
@@ -77,3 +77,16 @@ export default {
   }
 }
 </script>
+
+<style>
+.nes-table.is-bordered{
+  width: 1000px;
+  overflow-x: scroll;
+}
+
+@media screen and (max-width: 575px) {
+  .nes-table.is-bordered {
+    margin-left: 700px;
+  }
+}
+</style>

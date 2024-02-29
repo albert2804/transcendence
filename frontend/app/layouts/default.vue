@@ -11,7 +11,7 @@ Example:
 </script>
 -->
 <template>
-  <div>
+  <div class="justify-content-center">
     <ChatHelpModal />
     <div class="nes-container is-rounded with-title vh-80 is-centered" 
     style="display: flex; flex-direction: column; justify-content: space-between; height: 95vh; margin: 20px 30px 30px">
@@ -21,7 +21,7 @@ Example:
         <GameButton />
       </div>
       <div class="d-flex justify-content-center vh-80" style="overflow: auto;">
-        <slot />
+        <router-view :key="$route.fullPath"></router-view>
       </div>
       <div>
         <NavBar />

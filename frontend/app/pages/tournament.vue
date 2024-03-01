@@ -9,10 +9,10 @@ import { isLoggedIn } from '~/store';
 <template>
   <div>
     <div>
-      <h1>Youre on the tournament site</h1>
+      <h1 style="margin-top: 20px;">Youre on the tournament site</h1>
       <button @click="callSignUp" class="btn btn-primary"></button>
       <div v-if="isLoggedIn">
-        <button @click="toggleForm" class="btn btn-primary">
+        <button type="button" @click="toggleForm" class="nes-btn is-primary">
         {{ formVisible ? 'No Tournament' : 'Create Tournament' }} </button>
       </div>
     </div>

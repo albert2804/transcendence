@@ -1,7 +1,7 @@
 <template>
   <div class="container justify-content-center" style="width:100%">
     <div class="row" style="width: 100%;">
-      <h2>Ongoing Tournaments</h2>
+      <h2 style="margin-top: 20px;">Ongoing Tournaments</h2>
       <div class="nes-container is-rounded" style="height:100%">
         <button @click="getTournamets(false)" style="width: 100%; height: 100%; background-color: transparent; border-color: transparent;">
           <progress class="nes-progress is-pattern" value="100" max="100"></progress>
@@ -20,7 +20,7 @@
       </div>
     </div>
     
-    <h2>Ended Tournaments</h2>
+    <h2 style="margin-top: 20px;">Ended Tournaments</h2>
     <div class="nes-container is-rounded" style="height:1000%">
       <button @click="getTournamets(true)" style="width: 100%; height: 100%; background-color: transparent; border-color: transparent;">
           <progress class="nes-progress is-pattern" value="100" max="100"></progress>

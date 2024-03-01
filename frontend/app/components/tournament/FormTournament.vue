@@ -33,9 +33,6 @@
     </div>
 
     <button type="submit" @click="startTournament($event)" class="btn btn-primary">Start Tournament</button>
-    <div v-if="this.tournamentStarted">
-      <BracketsTournament :tournamentName="tournamentName" :numberOfPlayers="nbr_players" :matches="all_matches" :loggedInUser="loggedInUser"/>
-    </div>
   </form>
 </template>
 
@@ -98,8 +95,6 @@ export default {
     },
 
     handleUserSelected(userName, index) {
-      console.log(userName);
-      console.log(index);
       this.all_players[index - 1].name = userName;
     },
 

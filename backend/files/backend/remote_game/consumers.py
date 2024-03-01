@@ -9,6 +9,8 @@ from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 
 class RemoteGameConsumer(AsyncWebsocketConsumer):
+	# all instances of RemoteGameConsumer
+	all_consumer_groups = []
 
 	# list of players in the waiting group for unranked games (mixed room for guests and registered users)
 	training_waiting_room = []
@@ -47,6 +49,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	# 	'user_id_2': receiver.id,
 	# })
 	async def invite_to_game(self, event):
+		print("invite_to_game called")
 		user_id_1 = event['user_id_1']
 		user_id_2 = event['user_id_2']
 		user_1 = await sync_to_async(get_user_model().objects.get)(id=user_id_1)
@@ -148,6 +151,8 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 		await self.accept()
 		if self.scope["user"].is_authenticated:
 			await self.channel_layer.group_add(f"gameconsumer_{self.scope['user'].id}", self.channel_name)
+			if "gameconsumer_" + str(self.scope['user'].id) not in RemoteGameConsumer.all_consumer_groups:
+				RemoteGameConsumer.all_consumer_groups.append("gameconsumer_" + str(self.scope['user'].id))
 			if Player.get_channel_by_user(self.scope["user"]) != None:
 				await self.send(text_data=json.dumps({
 					'type': 'redirect',
@@ -241,6 +246,8 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	async def disconnect(self, close_code):
 		if self.scope["user"].is_authenticated:
 			await self.channel_layer.group_discard(f"gameconsumer_{self.scope['user'].id}", self.channel_name)
+			if "gameconsumer_" + str(self.scope['user'].id) in RemoteGameConsumer.all_consumer_groups:
+				RemoteGameConsumer.all_consumer_groups.remove("gameconsumer_" + str(self.scope['user'].id))
 		player = Player.get_player_by_channel(self.channel_name)
 		if player != None:
 			# give up if the user is in a game
@@ -253,6 +260,22 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 			Player.all_players.remove(Player.get_player_by_channel(self.channel_name))
 			print(f"{self.scope['user'].alias} disconnected from game-websocket.")
 
+	# API-Function for paddle movement (only used for the api)
+	async def move_paddle(self, event):
+		direction = event.get('direction')
+		player = Player.get_player_by_channel(self.channel_name)
+		if player.game_handler != None:
+			game_handler = GameHandler.get_game_handler_by_name(player.game_handler)
+			if game_handler == None:
+				return
+			if direction == "up" or direction == "UP":
+				game_handler.update_paddle(player, "ArrowUp", "key_pressed")
+			elif direction == "down" or direction == "DOWN":
+				game_handler.update_paddle(player, "ArrowDown", "key_pressed")
+			else:
+				game_handler.update_paddle(player, "ArrowUp", "key_released")
+				game_handler.update_paddle(player, "ArrowDown", "key_released")
+		
 
 	#####################
 	## MESSAGE HANDLER ##

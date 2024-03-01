@@ -17,18 +17,14 @@
 import { ref, onMounted, watch } from 'vue';
 
 export default {
-	props: ['openPopup', 'username'],
+	props: ['openPopup'],
 	setup(props) {
 		const code = ref('');
 		const qrCodeUrl = ref('');
 
-		watch(() => props.username, (newVal, oldVal) => {
-			console.log('SettingsDo2FA.vue: username prop changed from', oldVal, 'to', newVal);
-		});
-
 		const generateQRCode = async () => {
 			try {
-				const response = await fetch(`/endpoint/api/qr_code?username=${encodeURIComponent(props.username)}`, {
+				const response = await fetch('/endpoint/api/qr_code', {
 					method: 'GET',
 					headers: {
 						'Content-Type': 'application/json'
@@ -56,7 +52,6 @@ export default {
 							'Content-Type': 'application/json',
 						},
 						body: JSON.stringify({
-							username: props.username,
 							code: code.value,
 							}),
 					});

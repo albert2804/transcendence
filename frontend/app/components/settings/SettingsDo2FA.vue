@@ -46,10 +46,12 @@ export default {
 
 		const enable2FA = async() => {
 			try {
-				const response = await fetch('/api/enable-2fa', {
+				const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value;
+				const response = await fetch('endpoint/api/enable_2fa', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
+							'X-CSRFToken': csrfToken,
 						},
 						body: JSON.stringify({
 							code: code.value,

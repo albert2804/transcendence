@@ -209,7 +209,7 @@ def qr_code(request):
     # Create a new TOTP device for the user
     totp_device = TOTPDevice.objects.create(user=user, confirmed=False, key=secret_key_hex)
 
-    totp = pyotp.TOTP(secret_key_hex)
+    totp = pyotp.TOTP(secret_key_base32)
 
     # Generate a provisioning URI for the TOTP device
     provisioning_uri = totp.provisioning_uri(name=user.username, issuer_name='YourApp')

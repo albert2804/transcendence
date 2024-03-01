@@ -1,10 +1,10 @@
 <template>
-	<div v-if="Popup2FA">
+	<div v-if="openPopup">
 		<div class="overlay">
 			<div class="dialog">
 			<h2>Enable 2FA</h2>
-			<p>Please scan the QR code with your authenticator app and enter the code it generates.</p>
-			<img :src="qrCodeUrl" alt="QR Code">
+			<p>Hi {{username}}. Please scan the QR code with your authenticator app and enter the code it generates.</p>
+			<img :src="qrCodeUrl" :alt="'QR Code for ' + username ">
 			<input v-model="code" type="text" placeholder="Enter code">
 			<button @click="enable2FA">Enable</button>
 			<button @click="$emit('close-popup')">Close</button>
@@ -17,27 +17,22 @@
 import { ref, onMounted, watch } from 'vue';
 
 export default {
-	props: ['Popup2FA'],
+	props: ['openPopup', 'username'],
 	setup(props) {
 		const code = ref('');
-		const username = ref(''); 
 		const qrCodeUrl = ref('');
 
-		watch(() => props.Popup2FA, (newVal, oldVal) => {
-			console.log('Popup2FA changed from', oldVal, 'to', newVal);
+		watch(() => props.username, (newVal, oldVal) => {
+			console.log('SettingsDo2FA.vue: username prop changed from', oldVal, 'to', newVal);
 		});
 
 		const generateQRCode = async () => {
 			try {
-				const response = await fetch('/api/qr-code', {
+				const response = await fetch(`/api/qr-code?username=${encodeURIComponent(props.username)}`, {
 					method: 'GET',
 					headers: {
 						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-							username: username.value,
-							code: code.value,
-					}),
+					}
 				});
 
 				if (!response.ok) {
@@ -61,7 +56,7 @@ export default {
 							'Content-Type': 'application/json',
 						},
 						body: JSON.stringify({
-							username: username.value,
+							username: props.username,
 							code: code.value,
 							}),
 					});
@@ -83,7 +78,6 @@ export default {
 
 		return {
 			code,
-			username,
 			qrCodeUrl,
 			enable2FA,
 		};

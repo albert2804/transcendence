@@ -31,7 +31,7 @@ export default {
 				const response = await fetch(`/endpoint/api/qr_code?username=${encodeURIComponent(props.username)}`, {
 					method: 'GET',
 					headers: {
-						'Content-Type': 'application/json',
+						'Content-Type': 'application/json'
 					}
 				});
 

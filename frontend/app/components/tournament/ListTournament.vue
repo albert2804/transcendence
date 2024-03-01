@@ -1,6 +1,31 @@
 <template>
   <div class="container justify-content-center" style="width:100%">
     <div class="row" style="width: 100%;">
+      <div>
+        <h2>Current Tournament Games</h2>
+        <div class="nes-container is-rounded" style="height:100%">
+          <div v-if="quickSelect.length == 0">
+            <strong>There is no playable tournament Game for you</strong> 
+          </div>
+          <div v-else class="carousel slide" id="gameCarousel" data-bs-ride="carousel">
+            <div class="carousel-inner">
+              <div v-for="(match, index) in quickSelect" :key="match.is_match" class="carousel-item" :class="{ 'active': index === 0 }">
+                <h3>{{ match.tournament_name }}</h3>
+                <GameBox :match="match" :loggedInUser="loggedInUser"></GameBox>
+              </div>
+            </div>
+            <button style="color: black" class="carousel-control-prev" type="button" data-bs-target="#gameCarousel" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="">Previous</span>
+            </button>
+            <button style="color: black" class="carousel-control-next" type="button" data-bs-target="#gameCarousel" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="">Next</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      
       <h2>Ongoing Tournaments</h2>
       <div class="nes-container is-rounded" style="height:100%">
         <button @click="getTournamets(false)" style="width: 100%; height: 100%; background-color: transparent; border-color: transparent;">
@@ -42,9 +67,10 @@
   
 <script>
 import TournamentBoxes from './TournamentBoxes.vue';
+import GameBox from './GameBox.vue';
 
 export default {
-  components: { TournamentBoxes },
+  components: { TournamentBoxes, GameBox },
   name: 'ListTournament',
   props: ['loggedInUser'],
   data() {
@@ -53,7 +79,25 @@ export default {
           tournaments: [],
           ongoingTournaments: [],
           endedTournaments: [],
+          quickSelect: [],
       };
+  },
+  async mounted() {
+    const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value;
+    try {
+      const response = await fetch('/endpoint/tournament/getPlayableGames/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+        },
+      });
+      const responseData = await response.json();
+      this.quickSelect = JSON.parse(responseData.data);
+      console.log(this.quickSelect)
+    } catch (error) {
+      console.log('Error sending signal to backend:', error);
+    }
   },
   methods: {
     

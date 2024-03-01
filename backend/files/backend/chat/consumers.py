@@ -153,12 +153,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
 	
 	async def handle_play_command(self, event):
 		receiver_id = event.get('receiver_id')
+		print(event)
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:
 				# call the invite_to_game method of the CustomUser model
 				await self.scope['user'].invite_to_game(receiver)
 	
+	async def handle_play_tournament_command(self, event):
+		receiver_id = event.get('receiver_id')
+		print(event)
+		if receiver_id:
+			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
+			if receiver:
+				# call the invite_to_game method of the CustomUser model
+				await self.scope['user'].invite_to_game(receiver)
+	
+
 	async def handle_dont_play_command(self, event):
 		receiver_id = event.get('receiver_id')
 		if receiver_id:
@@ -167,6 +178,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				# call the remove_game_invite method of the CustomUser model
 				await self.scope['user'].remove_game_invite(receiver)
     
+	async def handle_dont_play_tournament_command(self, event):
+		receiver_id = event.get('receiver_id')
+		if receiver_id:
+			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
+			if receiver:
+				# call the remove_game_invite method of the CustomUser model
+				await self.scope['user'].remove_tournament_invite(receiver)
+
 	async def handle_help_command(self, event):
 		receiver_id = event.get('receiver_id')
 		if receiver_id:
@@ -228,6 +247,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 					await self.handle_play_command(text_data_json)
 				elif command == '/dont_play':
 					await self.handle_dont_play_command(text_data_json)
+				elif command == '/dont_play_tournament':
+					await self.handle_dont_play_tournament_command(text_data_json)
 				elif command == '/help':
 					await self.handle_help_command(text_data_json)
 				else:

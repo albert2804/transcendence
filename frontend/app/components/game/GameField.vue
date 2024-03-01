@@ -54,7 +54,7 @@
           <div style="color: #000000; text-align: center;">
             <p><br>Or you can log in instead!</p>
           </div>
-          <router-link to="/login" tag="button" class="nes-btn btn-primary" @click.native="$emit('close-modal')">Login</router-link>
+          <router-link to="/login" tag="button" class="nes-btn btn-primary" @click.native="$emit('closeModal')">Login</router-link>
         </div>
         <!-- Back to menu - button --->
         <div v-if="waiting || showAliasScreen2" style="height: 5px;"></div>
@@ -152,10 +152,12 @@
 
       this.socket.onclose = () => {
 		gameButtonState.value = "disconnected";
+		this.$emit('closeModal');
       }
 
       this.socket.onerror = (error) => {
 		gameButtonState.value = "disconnected";
+		this.$emit('closeModal');
       }
 
       this.socket.onmessage = (event) => {
@@ -229,7 +231,9 @@
             this.message = "Alias already taken!";
           } else if (data.type === "open_game_modal") {
             this.$emit('openModal');
-          } else {
+          } else if (data.type === "close_game_modal") {
+			this.$emit('closeModal');
+		  } else {
             console.error('Received message of unknown type:', data);
           }
         } catch (error) {

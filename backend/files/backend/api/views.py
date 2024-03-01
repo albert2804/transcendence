@@ -154,7 +154,7 @@ def userregister(request):
 				return JsonResponse({'error': 'invalid password'}, status=403)
 			# any other errors
 			return JsonResponse({'error': 'invalid credentials'}, status=403)
-	return JsonResponse({'error': 'Something went wrong'}, status=400)
+	return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
 ######################
@@ -249,6 +249,7 @@ def move_paddle(request):
 				return JsonResponse({'error': 'Direction not specified'}, status=400)
 		except:
 			return JsonResponse({'error': 'Something went wrong'}, status=400)
+	return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
 #####################
@@ -341,3 +342,4 @@ def remove_friend(request):
 				return JsonResponse({'error': 'Friend not specified'}, status=400)
 		except json.JSONDecodeError:
 			return JsonResponse({'error': 'Something went wrong'}, status=400)
+	return JsonResponse({'error': 'Invalid request'}, status=400)

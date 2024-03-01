@@ -8,6 +8,7 @@ urlpatterns = [
     path('userlogout', views.userlogout),
     path('userregister', views.userregister),
     path('invite_to_game', views.invite_to_game),
+	path('move_paddle', views.move_paddle),
     path('add_friend', views.add_friend),
 	path('remove_friend', views.remove_friend),
 ]

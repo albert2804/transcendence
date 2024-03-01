@@ -16,8 +16,12 @@ import { isLoggedIn } from '~/store';
         {{ formVisible ? 'No Tournament' : 'Create Tournament' }} </button>
       </div>
     </div>
+    <div class="ErrorHandling">
+      <div v-if="recvmessage" class="alert alert-success" style="min-width: 14em" role="alert">{{ recvmessage }}</div>
+      <div v-if="recverror" class="alert alert-danger" style="min-width: 14em" role="alert">{{ recverror }}</div>
+    </div>
     <div v-if="formVisible">
-      <FormTournament v-bind:local="false" :loggedInUser="loggedInUser"/>
+      <FormTournament v-bind:local="false" :loggedInUser="loggedInUser" @message-from-child="handleUpdate"/>
     </div>
     <div v-if="isLoggedIn">
       <ListTournament :loggedInUser="loggedInUser"/>
@@ -35,7 +39,19 @@ export default {
     return {
       formVisible: false,
       loggedInUser: "",
+      recverror: '',
+      recvmessage: '',
     };
+  },
+  setup() {
+    const handleUpdate = ref(false);
+    let recvmessage = ref('');
+    let recverror = ref('');
+
+    return {
+      error,
+      message,
+    }
   },
   async mounted() {
     try {
@@ -76,6 +92,19 @@ export default {
         throw new Error(`HTTP error! status ${response.status}`);
       }
     },
+    async handleUpdate(message, error) {
+      this.recverror = error;
+      this.recvmessage = message;
+      console.log('print from parent', this.recverror);
+      this.$forceUpdate();
+      this.resetMessages();
+    },
+    async resetMessages() {
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      this.recverror = '';
+      this.recvmessage = '';
+      this.$forceUpdate();
+    }
   }
 }
 </script>

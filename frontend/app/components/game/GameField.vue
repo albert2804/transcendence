@@ -138,6 +138,8 @@
   methods: {
     // function to create and handle the websocket
 	  createWebSocket () {
+      
+      const audio = new Audio("endpoint/media/sounds/ball.mp3");
       const currentDomain = window.location.hostname;
       const sockurl = 'wss://' + currentDomain + '/endpoint/remoteGame/';
       this.socket = new WebSocket(sockurl)
@@ -219,7 +221,7 @@
             const highScore = data.high_score;
             this.pointsP1 = highScore.pointsP1;
             this.pointsP2 = highScore.pointsP2;
-            this.updateGameUI(gameState);
+            this.updateGameUI(gameState,audio);
           } else if (data.type === "alias_exists") {
             this.message = "Alias already taken!";
           } else if (data.type === "open_game_modal") {
@@ -281,6 +283,7 @@
     },
 
     startRankedGame () {
+
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
           type: 'start_ranked_game'
@@ -387,19 +390,24 @@
       this.handleKeyRelease({ key: keyDown });
     },
     // function to update the game UI (called when receiving game state from server)
-    updateGameUI(gameState) {
-      this.p1pos.y = gameState.leftPaddle.y;
-      this.p2pos.y = gameState.rightPaddle.y;
-      this.ballPos.x = gameState.ball.x - (1.5/2); // 1.5% is the width of the ball
-      this.ballPos.y = gameState.ball.y - (3/2);   // 3% is the height of the ball
-      
-      
-      if (sound.value) {
+updateGameUI(gameState, audio) {
 
-        const audio = new Audio("endpoint/media/sounds/test.mp3");
-        // audio.play();
-      }
-    },
+  const old_ballPos = this.ballPos.x;
+
+  // Update paddle positions and current ball position
+  this.p1pos.y = gameState.leftPaddle.y;
+  this.p2pos.y = gameState.rightPaddle.y;
+  this.ballPos.x = gameState.ball.x - (1.5/2); // 1.5% is the width of the ball
+  this.ballPos.y = gameState.ball.y - (3/2);   // 3% is the height of the ball
+  
+  const direction = old_ballPos - this.ballPos.x;
+  if ((direction < 0 && this.old_direction > 0) || (direction > 0 && this.old_direction < 0)) {
+    if (sound.value) {
+      audio.play();
+    }
+  }
+  this.old_direction = direction; 
+},
     // function to send information to server that the user wants to play on this device
     changeDevice() {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {

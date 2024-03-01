@@ -1,6 +1,6 @@
 <template>
   <div class="nes-container is-rounded clickable" style="background-color: #f2cf08; position: relative; text-align: center;" type="button" @click="toggleMusic">
-    <i v-if="sound" class="bi bi-file-earmark-music" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -57%);"></i>
+    <i v-if="icon" class="bi bi-file-earmark-music" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -57%);"></i>
     <i v-else class="bi bi-file-earmark-music-fill" style="font-size: 2.0rem; position: absolute; transform: translate(-50%, -57%);"></i>
   </div>
 </template>
@@ -11,6 +11,7 @@ export default {
   name: 'SoundButton',
   data(){
     return {
+      icon: sound,
     }
   },
   methods: {

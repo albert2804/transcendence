@@ -31,6 +31,7 @@ import datetime
 import pyotp
 import qrcode
 import base64
+import binascii
 import jwt
 from io import BytesIO
 
@@ -201,12 +202,15 @@ def userregister(request):
 def qr_code(request):
     user = request.user
 
+    # Generate a random secret key
+    secret_key_base32 = pyotp.random_base32()
+    secret_key_hex = binascii.hexlify(base64.b32decode(secret_key_base32)).decode()
+
     # Create a new TOTP device for the user
-    totp_device = TOTPDevice.objects.create(user=user, confirmed=False)
+    totp_device = TOTPDevice.objects.create(user=user, confirmed=False, key=secret_key_hex)
 
+    totp = pyotp.TOTP(secret_key_hex)
 
-    secret_key = pyotp.random_base32()
-    totp = pyotp.TOTP(secret_key)
     # Generate a provisioning URI for the TOTP device
     provisioning_uri = totp.provisioning_uri(name=user.username, issuer_name='YourApp')
 
@@ -233,7 +237,8 @@ def qr_code(request):
 # enable 2FA for user
 def enable_2fa(request, *args, **kwargs):
     user = request.user
-    code = request.POST.get('code')
+    data = json.loads(request.body)
+    code = data.get('code')
 
     # Get the unconfirmed TOTP device for the user
     totp_device = TOTPDevice.objects.filter(user=user, confirmed=False).first()
@@ -241,8 +246,12 @@ def enable_2fa(request, *args, **kwargs):
     if not totp_device:
         return JsonResponse({'error': 'No TOTP device found for this user'}, status=400)
 
+    # Convert the binary key to a base32-encoded string
+    #print(f"bin_key: {totp_device.bin_key}")
+    bin_key_base32 = base64.b32encode(binascii.unhexlify(totp_device.key)).decode()
+
     # Verify the code
-    totp = pyotp.TOTP(totp_device.bin_key)
+    totp = pyotp.TOTP(bin_key_base32)
     if totp.verify(code):
         # If the code is valid, confirm the TOTP device
         totp_device.confirmed = True

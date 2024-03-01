@@ -1,14 +1,17 @@
 <template>
   <form style="max-width: 800px; margin: auto; overflow: hidden;">
-    <div>
-      <input type="text" placeholder="Tournament Name" @input="setTournamentName($event)"/>
+    <!-- ALERTS -->
+    <div v-if="message" class="alert alert-success" style="min-width: 14em margin-top: 20px;" role="alert">{{ message }}</div>
+    <div v-if="error" class="alert alert-danger" style="min-width: 14em, margin-top: 20px;" role="alert">{{ error }}</div>
+    <div class="nes-field is-rounded">
+      <input type="text" placeholder="Tournament Name" @input="setTournamentName($event)" class="nes-input"/>
     </div>
     <div class="mb-3">
       <label for="nbrPlayerRange" class="form-label">Number of Total Players</label>
       <div class="d-flex align-items-center">
         <input style="width: 80%; " type="range" class="form-range" min="0" max="3" step="1" id="nbrPlayerRange" 
           v-model.number="selectPos" @input="updatePlayerCount">
-        <h6 style="rotate:90deg;" class="ms-3">{{ selectedData }}</h6>
+        <h6 style="rotate:0deg;" class="ms-3">{{ selectedData }}</h6>
       </div>
     </div>
 
@@ -32,7 +35,7 @@
       </div>
     </div>
 
-    <button type="submit" @click="startTournament($event)" class="btn btn-primary">Start Tournament</button>
+    <button type="button" @click="startTournament($event)" class="nes-btn is-primary">Start Tournament</button>
     <div v-if="this.tournamentStarted">
       <BracketsTournament :tournamentName="tournamentName" :numberOfPlayers="nbr_players" :matches="all_matches" :loggedInUser="loggedInUser"/>
     </div>
@@ -61,6 +64,8 @@ export default {
       selectPos: 0,
       nbr_players: '4',
       tournamentStarted: false,
+      error: '',
+      message: '',
     };
   },
   computed: {
@@ -146,13 +151,17 @@ export default {
     async startTournament(event) {
       event.preventDefault();
       if (this.tournamentName == "") {
+        this.message == "Error Tournament Name isnt allowed to be empty"
         console.log("Error Tournament Name isnt allowed to be empty")
+        this.resetMessages();
         return
       }
       // this.createMatches()
       // TODO: needs to call backend for tournament handling which is not yet implementet
       console.log(this.all_players);
-      console.log("Tournament handling not yet implemented in backend");
+      // console.log("Tournament handling not yet implemented in backend");
+      // this.message = "NEW:Tournament handling not yet implemented in backend";
+      console.log(this.message);
       const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
       try {
         const response = await fetch('/endpoint/tournament/logic/', {
@@ -165,7 +174,10 @@ export default {
         });
         
         const responseData = await response.json()
-        console.log('Backend Response:', responseData.data)
+        this.error = responseData.error;
+				this.message = responseData.message;
+        handleResponse(this.error, this.message);
+        console.log('Backend Response:', this.error)
         this.all_matches = responseData.data.games
         this.tournamentName = responseData.data.tour_name
         console.log("TourName: ", this.tournamentName)
@@ -176,6 +188,12 @@ export default {
         console.log('Error sending signal to backend:', error);
       }
     },
+      async handleResponse() {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        this.error = '';
+        this.message = '';
+        return { error, message };
+    }
   },  
 };
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-for="(tournament, index) in tournaments" :key="index"
-    class="nes-container is-rounded">
+    class="nes-container is-rounded" style="width: 100%">
     <div>
       <strong>Tournament Name:</strong> {{ tournament.tournament_name }}<br>
       <strong>Created At:</strong> {{ tournament.created_at }}
@@ -10,7 +10,7 @@
       </button>
     </div>
     <div v-if="tournaments[index].showTournament">
-      <h1>{{tournament.tournament_name}}</h1>
+      <h2>{{tournament.tournament_name}}</h2>
       <BracketsTournament :ref="`BracketsTournament-${index}`" :loggedInUser="loggedInUser" :tournamentName="tournament.tournament_name"/>
     </div>
   </div>

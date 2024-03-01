@@ -5,14 +5,10 @@
         <h3>R O U N D  <span>{{ round }}</span></h3>
         <div v-for="match in getMatches(round)" :key="match.is_match" class="match list-group-item nes-container is-rounded position-relative">
         <!-- @mouseover="togglePlayButton(match.is_match, true)" @mouseleave="togglePlayButton(match.is_match, false)"> -->
-          <p>{{ match.is_match }}.</p>
+          <!-- <p>{{ match.is_match }}.</p> -->
           <div>
-            <p>{{ match.player1 }}</p>
-            <p>{{ match.pointsP1 }}</p>
-          </div>
-          <div class="user">
-            <p>{{ match.player2 }}</p>
-            <p>{{ match.pointsP2 }}</p>
+            <p>{{ match.player1 }}  vs. {{ match.player2 }}</p>
+            <p>{{ match.pointsP1 }}  : {{ match.pointsP2 }}</p>
           </div>
           <div v-if="(match.player1 == this.loggedInUser || match.player2 == this.loggedInUser) && this.loggedInUser != undefined && match.finished == false">
             <button class="nes-btn" :class="{ goGreen: playerReady }" @click="sendReadyPlayer($event, match.is_match)">

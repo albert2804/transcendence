@@ -10,7 +10,7 @@
         <div class="offcanvas-body">
           <!-- <RunningBanner /> -->
         <!-- ALERTS -->
-        <div v-if="recvmessage" class="alert alert-success" style="min-width: 14em" timeout="30s" role="alert">{{ recvmessage }}</div>
+        <div v-if="recvmessage" class="alert alert-success" style="min-width: 14em" role="alert">{{ recvmessage }}</div>
         <div v-if="recverror" class="alert alert-danger" style="min-width: 14em" role="alert">{{ recverror }}</div>
           <div v-if="loginStatus === 1">
             <button type="button" class="nes-btn is-success clickable"  @click="openPopupName" style="width: 100%;">Change Alias</button>

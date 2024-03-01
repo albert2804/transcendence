@@ -21,6 +21,7 @@
                 <button type="button" class="nes-btn is-success clickable" @click="openPopupPw" style="width: 100%;">Change Password</button>
                 <button type="button" class="nes-btn is-success clickable" @click="openPopupPic" style="width: 100%;">Change Picture</button>
                 <button type="button" class="nes-btn is-success clickable" @click="openPopupMap" style="width: 100%;">Choose Map</button>
+                <button type="button" class="nes-btn is-success clickable" @click="openPopup2FA">Enable 2FA authentication</button>
                 
                 <SettingsName :openPopup="PopupName" @close-popup="PopupName = false" @message-from-child="handleUpdate" />
                 <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false" @message-from-child="handleUpdate" />
@@ -84,6 +85,7 @@ export default {
     };
     const openPopup2FA = () => {
       Popup2FA.value = true;
+      console.log('openPopup2FA', Popup2FA.value);
 };
 
     watchEffect(() => {
@@ -99,11 +101,12 @@ export default {
       PopupPic,
       PopupPw,
       PopupMap,
+      Popup2FA,
       openPopupName,
       openPopupPic,
       openPopupPw,
       openPopupMap,
-      Popup2FA,
+      openPopup2FA,
     };
   },
  

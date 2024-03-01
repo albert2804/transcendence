@@ -2,6 +2,9 @@
   <div
     class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease" :style="{ 'background-image': 'url(' + map + ')' }">
     <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
+	<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffffff; font-size: 20vh; z-index: 2;" v-if="countdown > 0">
+		{{ countdown }}
+	</div>
     <div v-show="playing" class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
     <div v-show="playing" class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%' }"></div>
     <div v-show="playing" class="midline"></div>
@@ -88,6 +91,7 @@
       showMenu: false,
       p1_name: '',
       p2_name: '',
+	  countdown: 0,
       pressedKeys: [],
       paddleSize: 20,
       p1pos: {
@@ -393,7 +397,7 @@
       this.p2pos.y = gameState.rightPaddle.y;
       this.ballPos.x = gameState.ball.x - (1.5/2); // 1.5% is the width of the ball
       this.ballPos.y = gameState.ball.y - (3/2);   // 3% is the height of the ball
-      
+      this.countdown = gameState.countdown;
       
       if (sound.value) {
 

@@ -27,8 +27,7 @@
                 <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false" @message-from-child="handleUpdate" />
                 <SettingsPw :openPopup="PopupPw" @close-popup="PopupPw = false" @message-from-child="handleUpdate" />
                 <SettingsMap :openPopup="PopupMap" @close-popup="PopupMap = false"/>
-                {{ username }}
-                <SettingsDo2FA :openPopup="Popup2FA" :username="username" @close-popup="Popup2FA = false"/>
+                <SettingsDo2FA :openPopup="Popup2FA" @close-popup="Popup2FA = false"/>
           </div>
           <div v-if="!loginStatus">
               <p>Please log in to access settings</p>
@@ -47,7 +46,7 @@
 
 <script>
 import { ref, watchEffect, watch } from 'vue';
-import { isLoggedIn, userName } from '~/store';
+import { isLoggedIn } from '~/store';
 
 export default {
   name: 'SettingsBtn',
@@ -71,13 +70,6 @@ export default {
     const PopupMap = ref(false);
     const loginStatus = ref(isLoggedIn.value);
     const Popup2FA = ref(false);
-    const username = ref(userName.value);
-
-    watch(userName, (newVal) => {
-      username.value = newVal;
-    });
-
-    console.log('SETUP: username', username.value);
 
     const openPopupName = () => {
       PopupName.value = true;
@@ -115,7 +107,6 @@ export default {
       openPopupPw,
       openPopupMap,
       openPopup2FA,
-      username,
     };
   },
  

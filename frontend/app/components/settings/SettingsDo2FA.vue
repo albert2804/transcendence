@@ -1,5 +1,5 @@
 <template>
-	<div v-if="openPopup">
+	<div v-if="Popup2FA">
 		<div class="overlay">
 			<div class="dialog">
 			<h2>Enable 2FA</h2>
@@ -14,14 +14,18 @@
 </template>
   
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 
 export default {
-	props: ['openPopup'],
-	setup() {
+	props: ['Popup2FA'],
+	setup(props) {
 		const code = ref('');
-		const username = ref('');
+		const username = ref(''); 
 		const qrCodeUrl = ref('');
+
+		watch(() => props.Popup2FA, (newVal, oldVal) => {
+			console.log('Popup2FA changed from', oldVal, 'to', newVal);
+		});
 
 		const generateQRCode = async () => {
 			try {

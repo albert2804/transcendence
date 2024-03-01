@@ -198,8 +198,7 @@ def userregister(request):
 
 # get qr code for 2FA
 
-@method_decorator(login_required, name='dispatch')
-def qr_code(request, *args, **kwargs):
+def qr_code(request):
     user = request.user
 
     # Create a new TOTP device for the user
@@ -221,7 +220,7 @@ def qr_code(request, *args, **kwargs):
 
     img = qr.make_image(fill='black', back_color='white')
     buffered = BytesIO()
-    img.save(buffered, format="JPEG")
+    img.save(buffered)
 
     # Encode the QR code image in base64 and return it in the response
     qr_code_base64 = base64.b64encode(buffered.getvalue()).decode()
@@ -230,7 +229,6 @@ def qr_code(request, *args, **kwargs):
 
 
 # enable 2FA for user
-@method_decorator(login_required, name='dispatch')
 def enable_2fa(request, *args, **kwargs):
     user = request.user
     code = request.POST.get('code')

@@ -13,6 +13,6 @@ urlpatterns = [
 	path('get_friends', views.get_friends),
     path('add_friend', views.add_friend),
     path('remove_friend', views.remove_friend),
-    path('qr_code', views.qr_code),
+    path('qr_code', views.qr_code, name='qr_code'),
 	path('enable_2fa', views.enable_2fa),
 ]

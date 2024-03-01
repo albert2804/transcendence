@@ -1,8 +1,5 @@
 <template>
   <form style="max-width: 800px; margin: auto; overflow: hidden;">
-    <!-- ALERTS -->
-    <div v-if="message" class="alert alert-success" style="min-width: 14em margin-top: 20px;" role="alert">{{ message }}</div>
-    <div v-if="error" class="alert alert-danger" style="min-width: 14em, margin-top: 20px;" role="alert">{{ error }}</div>
     <div class="nes-field is-rounded">
       <input type="text" placeholder="Tournament Name" @input="setTournamentName($event)" class="nes-input"/>
     </div>
@@ -176,7 +173,7 @@ export default {
         const responseData = await response.json()
         this.error = responseData.error;
 				this.message = responseData.message;
-        handleResponse(this.error, this.message);
+        this.sendMessagetoParent(this.error, this.message);
         console.log('Backend Response:', this.error)
         this.all_matches = responseData.data.games
         this.tournamentName = responseData.data.tour_name
@@ -188,12 +185,9 @@ export default {
         console.log('Error sending signal to backend:', error);
       }
     },
-      async handleResponse() {
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        this.error = '';
-        this.message = '';
-        return { error, message };
-    }
+    sendMessagetoParent(message, error) {
+			this.$emit('message-from-child', message, error);
+		}
   },  
 };
 </script>

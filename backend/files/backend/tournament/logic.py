@@ -92,7 +92,7 @@ def inviteOtherPlayer(request):
       if player1_handler.game_handler is not None:
         return JsonResponse({'error': 'You have an active game'}, status=404)
 
-      tour = Tournament.object.get(tournament_name=data["tour_name"])
+      tour = Tournament.objects.get(tournament_name=data["tour_name"])
       if tour is None:
         return JsonResponse({'error': 'Sorry Tournament not Found'}, status=404)
 

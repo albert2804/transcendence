@@ -28,7 +28,7 @@ export default {
 
 		const generateQRCode = async () => {
 			try {
-				const response = await fetch(`/api/qr-code?username=${encodeURIComponent(props.username)}`, {
+				const response = await fetch(`/endpoint/api/qr_code?username=${encodeURIComponent(props.username)}`, {
 					method: 'GET',
 					headers: {
 						'Content-Type': 'application/json',

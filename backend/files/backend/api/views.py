@@ -252,9 +252,47 @@ def move_paddle(request):
 	return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
+# get the leaderboard
+# 200: success
+# 400: invalid request
+#
+# As API request call:
+# curl -k -X GET 'https://localhost/endpoint/api/get_leaderboard' \
+# -H 'Content-Type: application/json'
+#
+def get_leaderboard(request):
+	if request.method == 'GET':
+		# get all users and sort them by mmr in descending order
+		users = CustomUser.objects.all()
+		users_list = [{ 'username': user.username, 'mmr': user.mmr } for user in users ]
+		users_list_sorted = sorted(users_list, key=lambda x: x['mmr'], reverse=True)
+		return JsonResponse({ 'leaderboard': users_list_sorted }, status=200)
+	return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
 #####################
 ### FRIEND SYSTEM ###
 #####################
+
+# get friends
+# 200: success
+# 400: invalid request
+# 403: something went wrong (e.g. user not found)
+#
+# As API request call:
+# curl -k -X GET 'https://localhost/endpoint/api/get_friends' \
+# -H 'Content-Type: application/json' \
+# -H 'Authorization: Bearer <YOUR SESSION-ID>'
+#
+def get_friends(request):
+	if request.method == 'GET':
+		if not request.user.is_authenticated:
+			return JsonResponse({'error': 'You are not logged in'}, status=403)
+		friends = request.user.friends.all()
+		friends_list = [{ 'username': friend.username } for friend in friends ]
+		return JsonResponse({ 'friends': friends_list }, status=200)
+	return JsonResponse({'error': 'Invalid request'}, status=400)
+
 
 # add friend
 # 200: success

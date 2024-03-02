@@ -29,7 +29,6 @@ class Player:
 	# Returns the player object of the given user
 	@classmethod
 	def get_player_by_user(cls, user):
-		print(Player.all_players)
 		for player in Player.all_players:
 			if player.get_user() == user:
 				return player
@@ -43,7 +42,7 @@ class Player:
 		self.channel = channel
 		self.channel_layer = get_channel_layer()
 		self.game_handler = None
-		self.fps = 40 # default fps
+		self.fps = 30 # default fps
 		Player.all_players.append(self)
 	
 	# Getter for the user object (CustomUser) of the player

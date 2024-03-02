@@ -7,14 +7,14 @@
 </script>
 
 <template>
-  <div class="d-flex flex-column align-items-center justify-content-center vh-80">
-    <div class="nes-container container-fluid with-title vw-50 automargin" style="text-align: left; min-width: 580px;">
+  <div class="d-flex flex-column">
+    <div class="nes-container container-fluid with-title automargin" style="text-align: left;">
       <p class="title">User profile</p>
       <div class="user-info-container">
-        <div v-if="isLoggedIn === 1" class="col">
+        <div v-if="isLoggedIn === 1" class="col user-info-container">
           <UserProfilePic />
         </div>
-        <div v-if="isLoggedIn === 1" class="col">
+        <div v-if="isLoggedIn === 1" class="col user-info-container">
           <UserInfo />
         </div>
         <div v-else>
@@ -22,7 +22,7 @@
         </div>
       </div>
     </div>
-    <div class="nes-container container-fluid with-title vw-50 automargin" style="text-align: left; min-width: 580px;">
+    <div class="nes-container container-fluid with-title vw-50 automargin" style="text-align: left;">
       <div v-if="isLoggedIn === 1" class="user-games-history">
         <UserGameHistory />
       </div>
@@ -36,13 +36,13 @@
 </script>
 
 <style scoped>
-  .user-info-container {
-    display: flex;
-    align-items: center; 
-    justify-content: center;
-    width: 100%;
-  }
-  .user-games-history {
+.user-info-container {
+  display: flex;
+  align-items: center; 
+  justify-content: center;
+  width: 100%;
+}
+.user-games-history {
   max-width: 580px; /* Set the maximum width to 580px */
   width: 100%;
 }
@@ -64,6 +64,13 @@
 @media screen and (max-width: 1575px) {
   .user-games-history {
     display: none;
+  }
+}
+
+@media screen and (max-width: 700px) {
+  .user-info-container {
+    flex-direction: column;
+    align-items: center;
   }
 }
 </style>

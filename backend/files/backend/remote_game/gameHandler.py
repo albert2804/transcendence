@@ -7,10 +7,13 @@ from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+# from tournament.logic import updateBracketGames
+from datetime import datetime
+import asyncio
 
 # This class is used to handle the PongGame between the two Player objects (player1 and player2)
 # Create a new instance of this class with GAME_XXX = GameHandler.create(player1, player2)
-# Start this created instance with asyncio.ensure_future(GAME_XXX.start_game())
+# Start this created instance with asyncio.create_task(GAME_XXX.start_game())
 # After the game is finished, the instance gets deleted automatically
 
 # TODO: implement a bool to decide if the game is a training game or a ranked game
@@ -20,14 +23,13 @@ class GameHandler:
 
 	# Use create() instead of __init__() to create a new instance of this class 
 	# @database_sync_to_async
-	def __init__(self, player1, player2, ranked=False):		
+	def __init__(self, player1, player2, ranked=False):
 		self.player1 = player1
 		self.player2 = player2
 		if (player1 == player2):
 			self.local_game = True
 		else:
 			self.local_game = False
-		# ? Why random.randint?
 		self.game_group = f"game_{random.randint(0, 1000000)}"
 		self.game = PongGame()
 		self.channel_layer = get_channel_layer()
@@ -36,12 +38,13 @@ class GameHandler:
 		self.pressed_keys_p2 = []
 		# only used for ranked games:
 		self.ranked = ranked
+		self.tournament = None
 		self.db_entry = None
 		self.game_start_time = None
 
 	# Use this function to create a new instance of this class
 	@classmethod
-	async def create(cls, player1, player2, ranked=False, db_entry=None):
+	async def create(cls, player1, player2, ranked=False, db_entry=None, tournament=None):
 		instance = cls(player1, player2, ranked)
 		player1.game_handler = instance.game_group
 		await instance.channel_layer.group_add(
@@ -58,23 +61,15 @@ class GameHandler:
 			from .models import RemoteGame
 			if db_entry == None:
 				instance.db_entry = await sync_to_async(RemoteGame.objects.create)(
-					
 					player1=player1.get_user(),
 					player2=player2.get_user(),
 				)
 			else:
 				instance.db_entry = db_entry
+				if tournament != None:
+					instance.tournament = tournament
 		return instance
 	
-	@classmethod
-	def create_tournament_game(cls, player1, player2, ranked=False):
-		return 
-
-	@classmethod
-	def create_placeholder(cls):
-		instance = cls()
-		return instance
-
 	# Returns the game handler instance from the given game group name
 	@classmethod
 	def get_game_handler_by_name(cls, game_group_name):
@@ -168,6 +163,25 @@ class GameHandler:
 				await chat_consumer.save_and_send_message(self.player2.get_user(), self.player1.get_user(), "You lost the game with " + str(p1_points) + " to " + str(p2_points) + " points.", timezone.now(), "info")
 				
 
+	#if in an tournament this function puts the winner in the next round
+	async def movePlayerToNextRound(self):
+		next_round_games_db = await database_sync_to_async(lambda: list(self.tournament.games.filter(is_round=self.db_entry.is_round + 1)))()
+		if next_round_games_db == None:
+			return
+		for game in next_round_games_db:
+			player1 = await sync_to_async(lambda: game.player1)()
+			player2 = await sync_to_async(lambda: game.player2)()
+			if player1 is None:
+				game.player1 = self.db_entry.winner
+				await sync_to_async(game.save)()
+				return
+			elif player2 is None:
+				game.player2= self.db_entry.winner
+				await sync_to_async(game.save)()
+				return
+		#error message for crash 
+		return
+
 	# Starts the game and runs the game loop until the game is finished or stopped
 	async def start_game(self):
 		self.game_start_time = timezone.now()
@@ -188,13 +202,16 @@ class GameHandler:
 			})
 		# start two separate threads for sending the game state to player 1 and player 2
 		# I used separate threads because so we can handle different fps for each player
-		asyncio.ensure_future(self.send_game_state_to_player_1())
-		asyncio.ensure_future(self.send_game_state_to_player_2())
-		# run the game loop until the game is finished
+		asyncio.create_task(self.send_game_state_to_player_1())
+		asyncio.create_task(self.send_game_state_to_player_2())
+
 		await self.game.run_game()
+		# run the game loop until the game is finished
 		# if ranked game, fill the db entry
 		if self.ranked:
 			await self.save_result_to_db()
+		if self.tournament != None:
+			await self.movePlayerToNextRound()
 		if self.local_game:
 			self.player1.alias_2 = None
 			print(f"Local game {self.game_group} finished.")
@@ -232,6 +249,7 @@ class GameHandler:
 	
 	# saves the game result to the db entry (only for ranked games)
 	async def save_result_to_db(self):
+		from .models import RemoteGame
 		# fill the db entry with the game result
 		self.db_entry.started_at = self.game_start_time
 		self.db_entry.finished_at = timezone.now()
@@ -252,32 +270,10 @@ class GameHandler:
 		db_p2_user.num_games_played += 1
 		if self.game.winner == 1:
 			db_p1_user.num_games_won += 1
-			db_p1_user.mmr,db_p2_user.mmr = self.calculate_mmr(db_p1_user, db_p2_user)
 		elif self.game.winner == 2:
 			db_p2_user.num_games_won += 1
-			db_p2_user.mmr,db_p1_user.mmr = self.calculate_mmr(db_p2_user, db_p1_user)
-
-		await database_sync_to_async(db_p1_user.game_history.add)(self.db_entry)
-		await database_sync_to_async(db_p2_user.game_history.add)(self.db_entry)
 		await database_sync_to_async(db_p1_user.save)()
 		await database_sync_to_async(db_p2_user.save)()
-		
-	def calculate_mmr(self, winner, loser):
-
-		if winner.mmr >= loser.mmr:
-			mmr1 = winner.mmr + 10 + 10 * (loser.mmr / (winner.mmr + 1))
-			mmr2 = loser.mmr - 10 - 10 * (loser.mmr / (winner.mmr + 1))
-		else:
-			mmr1 = winner.mmr + 10 + 10 * (loser.mmr / (winner.mmr + 1))
-			mmr2 = loser.mmr - 10 - 10 * (loser.mmr / (winner.mmr + 1))
-		
-		if mmr1 < 0:
-			mmr1 = 0;
-		if mmr2 < 0:
-			mmr2 = 0;
-		return mmr1, mmr2
-
-		
 
 	# This function is called when a player gives up or disconnects
 	# The other player wins the game
@@ -339,6 +335,7 @@ class GameHandler:
 	
 	# sends the latest game state to player 2
 	# gets called in a separate thread
+
 	async def send_game_state_to_player_2(self):
 		while not self.game.isGameExited:
 			async with self.game.game_state_lock:
@@ -346,3 +343,4 @@ class GameHandler:
 			if game_state is not None:
 				await self.player2.send(game_state)
 			await asyncio.sleep(1 / self.player2.fps)
+

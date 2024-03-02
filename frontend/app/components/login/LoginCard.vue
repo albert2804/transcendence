@@ -1,11 +1,11 @@
 <template>
-	<section class="nes-container container-fluid with-title vw-50 automargin" style="max-width: 30vw; min-width: 23em">
-		<p class="title" v-if="loginStatus!=1 && !reg_form">Login</p>
-		<p class="title" v-if="loginStatus == 0 && reg_form">Register</p>
-		<div class="card-body">
+	<section class="nes-container container-fluid with-title automargin main">
+		<p class="title" style="z-index: 100;" v-if="loginStatus!=1 && !reg_form">Login</p>
+		<p class="title" style="z-index: 100;" v-if="loginStatus == 0 && reg_form">Register</p>
+		<div class="card-body" style="font-size: 1rem;">
 		<!-- ALERTS -->
-		<div v-if="message" class="alert alert-success" style="min-width: 14em" role="alert">{{ message }}</div>
-		<div v-if="error" class="alert alert-danger" style="min-width: 14em" role="alert">{{ error }}</div>
+		<div v-if="message" class="alert alert-success" role="alert">{{ message }}</div>
+		<div v-if="error" class="alert alert-danger" role="alert">{{ error }}</div>
 		<!-- LOGIN FORM -->
 		<form v-if="loginStatus != 1 && !reg_form">
 			<div class="nes-field mb-3">
@@ -22,7 +22,7 @@
 			</div>
 		</form>
 		<form v-if="loginStatus != 1 && !reg_form">
-			<p> Alternatively, 42 students can log in with their 42 intra accounts.<br> Just click on the magic button below.</p>
+			<p style="overflow:hidden"> Alternatively, 42 students can log in with their 42 intra accounts.<br> Just click on the magic button below.</p>
 		<div class="button-list">
 			<button type="button" ref="loginbutton_42intra" class="btn nes-btn" @click="redirectToIntraLogin">CLICK ME TO 42!</button>
 		</div>
@@ -124,7 +124,6 @@
             password.value = '';
             error.value = '';
             message.value = data.message;
-            sessionStorage.setItem('userid', data.userid);
           } else if (response.status === 403 || response.status === 400) {
             isLoggedIn.value = 0; // Store
             userName.value = ''; // Store
@@ -158,7 +157,6 @@
             username.value = '';
             password.value = '';
             message.value = data.message;
-            sessionStorage.removeItem('userid');
           }
         } catch (error) {
           console.error('Error:', error);
@@ -174,10 +172,14 @@
           const response = await fetch('/endpoint/api/userregister', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
+              'Content-Type': 'application/json',
               'X-CSRFToken': csrfToken,
             },
-            body: `username=${encodeURIComponent(username.value)}&password1=${encodeURIComponent(password.value)}&password2=${encodeURIComponent(password2.value)}&alias=${encodeURIComponent(username.value)}`,
+            body: JSON.stringify({
+              'username': username.value,
+              'password1': password.value,
+              'password2': password2.value,
+            })
           });
           if (response.status === 200) {
             const data = await response.json();
@@ -188,7 +190,6 @@
             password2.value = '';
             error.value = '';
             message.value = data.message;
-            sessionStorage.setItem('userid', data.userid);
           } else if (response.status === 403 || response.status === 400) {
             isLoggedIn.value = 0; // Store
             userName.value = ''; // Store
@@ -238,3 +239,18 @@
     }
   }
 </script>
+
+<style>
+
+.main {
+  max-width: 500px; 
+  word-wrap: break-word;
+}
+
+@media screen and (max-width: 850px) {
+  .main {
+    max-width: 80vw;
+  }
+}
+
+</style>

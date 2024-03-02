@@ -38,7 +38,7 @@ export default {
   {
     return { users: []	};
   },
-	created() 
+	mounted() 
   {
     this.fetchUsers();
 	},
@@ -56,8 +56,8 @@ export default {
       try 
       {
         const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-        const response = await fetch('/endpoint/user/get_all_users?attributes=username,alias,num_games_played,num_games_won,mmr', 
-          {
+        let url = '/endpoint/user/get_all_users?attributes=username,alias,num_games_played,num_games_won,mmr';
+        const response = await fetch(url, {
             method: 'GET',
             headers: 
             {

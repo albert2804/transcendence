@@ -1,23 +1,23 @@
 <template>
 	<section class="nes-container container-fluid with-title automargin main resp-font-size">
-		<p class="title" style="z-index: 100;" v-if="loginStatus!=1 && !reg_form">Login</p>
-		<p class="title" style="z-index: 100;" v-if="loginStatus == 0 && reg_form">Register</p>
-		<div class="card-body" style="font-size: 1rem;">
-		<!-- ALERTS -->
-		<div v-if="message" class="alert alert-success" role="alert">{{ message }}</div>
-		<div v-if="error" class="alert alert-danger" role="alert">{{ error }}</div>
-		<!-- LOGIN FORM -->
-		<form v-if="loginStatus != 1 && !reg_form">
-			<div class="nes-field mb-3">
-			<label for="InputUsername" class="form-label">Username</label>
-			<input v-model="username" @keyup.enter="$refs.loginpwfield.focus()" ref="loginnamefield" type="text" class="form-control nes-input" id="InputUsername" aria-describedby="usernameHelp">
-			</div>
-			<div class="nes-field mb-3">
-			<label for="InputPassword" class="form-label">Password</label>
-			<input v-model="password" @keyup.enter="$refs.loginbutton.focus()" ref="loginpwfield" type="password" class="form-control nes-input" id="InputPassword">
-			</div>
-			<div class="button-list">
-			<button type="button" @keyup.enter="$refs.loginnamefield.focus()" ref="loginbutton" class="btn nes-btn btn-primary" @click="login">Login</button>
+    <p class="title" style="z-index: 100;" v-if="loginStatus!=1 && !reg_form">Login</p>
+    <p class="title" style="z-index: 100;" v-if="loginStatus == 0 && reg_form">Register</p>
+    <div class="card-body" style="font-size: 1rem;">
+    <!-- ALERTS -->
+    <div v-if="message" class="alert alert-success" role="alert">{{ message }}</div>
+    <div v-if="error" class="alert alert-danger" role="alert">{{ error }}</div>
+    <!-- LOGIN FORM -->
+    <form v-if="loginStatus != 1 && !reg_form">
+      <div class="nes-field mb-3">
+      <label for="InputUsername" class="form-label">Username</label>
+      <input v-model="username" @keyup.enter="$refs.loginpwfield.focus()" ref="loginnamefield" type="text" class="form-control nes-input" id="InputUsername" aria-describedby="usernameHelp">
+      </div>
+      <div class="nes-field mb-3">
+      <label for="InputPassword" class="form-label">Password</label>
+      <input v-model="password" @keyup.enter="$refs.loginbutton.focus()" ref="loginpwfield" type="password" class="form-control nes-input" id="InputPassword">
+      </div>
+      <div class="button-list">
+      <button type="button" @keyup.enter="$refs.loginnamefield.focus()" ref="loginbutton" class="btn nes-btn btn-primary" @click="login">Login</button>
       <div style="height: 10px;"></div>
 			<a class="nes-btn btn-primary btn-sm" @click="reg_form = true; error = ''; message = ''">create account</a>
 			</div>
@@ -60,8 +60,8 @@
         <span class="visually-hidden">Loading...</span>
       </div>
     </div>
-		</div>
-	</section>
+    </div>
+  </section>
 </template>
 
 <script>
@@ -83,6 +83,8 @@
       const password2 = ref('');
       const reg_form = ref(false);
       const loginStatus = ref(isLoggedIn.value);
+      const enabled_2fa = ref(false);
+      const token = ref('');
 
       // watch effect
       watchEffect(() => {
@@ -90,6 +92,7 @@
       });
       // 
       onMounted(() => {
+
         redirect_uri.value = encodeURIComponent(window.location.origin + "/endpoint/auth/callback");
         if (route.query.error) {
           error.value = route.query.error;
@@ -100,11 +103,36 @@
 
         router.replace({ path: route.path });
       });
+
+      async function get2FAStatus() {
+        alert(username.value);
+        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value;
+        const response = await fetch(`/endpoint/api/get_2fa_status?username=${username.value}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+        }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}, error: ${response.error}`);
+        }
+        const data = await response.json();
+        alert(data);
+        enabled_2fa.value = data.enabled_2fa;
+      }
+
       // login
       async function login() {
+        await get2FAStatus();
+        alert(enabled_2fa.value);
         isLoggedIn.value = 2; // Store
         message.value = '';
         error.value = '';
+        if (enabled_2fa.value) {
+          token.value = window.prompt('Please enter your 2FA token:');
+        }
         try {
           const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value;
           const response = await fetch('/endpoint/api/userlogin', {
@@ -116,9 +144,11 @@
             body: JSON.stringify({
               'username': username.value,
               'password': password.value,
+              'token': token.value,
             })
           });
           const data = await response.json();
+
           if (response.status === 200) {
             isLoggedIn.value = 1; // Store
             userName.value = data.username; // Store

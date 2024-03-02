@@ -122,7 +122,7 @@ def userlogin(request):
                 'message': 'Successfully logged in as ' + request.user.username,
                 'username': request.user.username,
                 'userid': user_id,
-                'token': jwt_token,
+                'jwt_token': jwt_token,
                 }, status=200)
         return JsonResponse({'error': 'Invalid credentials'}, status=403)
     return JsonResponse({'error': 'Invalid request'}, status=400)
@@ -238,6 +238,8 @@ def qr_code(request):
 # enable 2FA for user
 def enable_2fa(request, *args, **kwargs):
     user = request.user
+    if user.enabled_2fa:
+        return JsonResponse({'error': '2FA is already enabled for this user'}, status=400)
     data = json.loads(request.body)
     code = data.get('code')
 
@@ -266,11 +268,25 @@ def enable_2fa(request, *args, **kwargs):
 
 
 def get_2fa_status(request):
-    user = request.user
-    if user.is_authenticated:
-        return JsonResponse({'enabled_2fa': user.enabled_2fa})
-    else:
-        return JsonResponse({'error': 'User is not authenticated'}, status=401)
+    if request.method == 'GET':
+        username = request.GET.get('username')
+        print("username: ", username)
+        if username:
+            try:
+                user = CustomUser.objects.get(username=username)
+                print("Returning user! 2fa status: ",  user.enabled_2fa )
+                return JsonResponse({'enabled_2fa': user.enabled_2fa})
+            except CustomUser.DoesNotExist:
+                print("user not found")
+                return JsonResponse({'error': 'User not found'}, status=404)
+        else:
+            try:
+                user = request.user
+                return JsonResponse({'enabled_2fa': user.enabled_2fa})
+            except:
+                print("no username provided and not logged in")
+                return JsonResponse({'error': 'No username provided and not logged in'}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
 ######################

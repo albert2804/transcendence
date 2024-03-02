@@ -138,19 +138,19 @@ export default {
     },
 
     async get2FAStatus() {
-    const response = await fetch('/endpoint/api/get_2fa_status', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+      const response = await fetch('/endpoint/api/get_2fa_status', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    this.enabled_2fa = data.enabled_2fa;
-  },
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      this.enabled_2fa = data.enabled_2fa;
+    },
 },
 mounted() {
   this.get2FAStatus();

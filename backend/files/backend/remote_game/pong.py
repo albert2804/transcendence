@@ -7,7 +7,7 @@ class PongGame:
 		self.pointsP1 = 0
 		self.pointsP2 = 0
 		self.isGameExited = False
-		self.isGamePaused = False
+		self.countdownSec = 5
 		self.initialSpeed = 4
 		self.currentSpeed = self.initialSpeed
 		self.canvasWidth = 800
@@ -27,10 +27,6 @@ class PongGame:
 
 
 	def update_game(self):
-		# If the game is paused, the game will not be updated
-		if self.isGamePaused:
-			return
-
 		# Update paddle positions
 		self.leftPaddle['y'] += self.leftPaddle['dy']
 		self.rightPaddle['y'] += self.rightPaddle['dy']
@@ -39,6 +35,9 @@ class PongGame:
 		self.leftPaddle['y'] = max(0, min(self.canvasHeight - self.leftPaddle['height'], self.leftPaddle['y']))
 		self.rightPaddle['y'] = max(0, min(self.canvasHeight - self.rightPaddle['height'], self.rightPaddle['y']))
 
+		if self.countdownSec > 0:
+			return
+	
 		# Move the ball
 		self.ball['x'] += self.ball['dx']
 		self.ball['y'] += self.ball['dy']
@@ -123,6 +122,7 @@ class PongGame:
 			'rightPaddle': {
 				'y': (self.rightPaddle['y'] / self.canvasHeight) * 100,
 			},
+			'countdown': self.countdownSec,
 		}
 		high_score = {
 			'pointsP1': self.pointsP1,
@@ -136,10 +136,18 @@ class PongGame:
 			}
 	
 	async def run_game(self):
+		# start countdown
+		asyncio.create_task(self.countdown())
+		# game loop
 		while not self.isGameExited:
 			self.game_loop()
 			await self.save_game_state()
 			await asyncio.sleep(0.01)
+	
+	async def countdown(self):
+		while self.countdownSec > 0:
+			await asyncio.sleep(1)
+			self.countdownSec -= 1
 
 	# make game more interesting by adding different angles
 	def adjust_ball_angle(self, paddle):
@@ -147,7 +155,6 @@ class PongGame:
 		max_angle = math.pi / 3  # Maximum angle change (adjust as needed)
 
 		# Increase ball speed
-		# if self.currentSpeed < 20:
 		self.currentSpeed = min(self.currentSpeed + 1, 9)
 		
 		# Change the ball's angle based on the position on the paddle

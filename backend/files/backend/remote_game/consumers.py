@@ -240,6 +240,8 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	# Removes the player from game and waiting room and deletes the player object
 	async def disconnect(self, close_code):
 		if self.scope["user"].is_authenticated:
+			# send close modal message to client
+			await self.channel_layer.group_send(f"gameconsumer_{self.scope['user'].id}",{'type': 'close_game_modal',})
 			await self.channel_layer.group_discard(f"gameconsumer_{self.scope['user'].id}", self.channel_name)
 		player = Player.get_player_by_channel(self.channel_name)
 		if player != None:
@@ -308,4 +310,10 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	async def open_game_modal(self, event):
 		await self.send(text_data=json.dumps({
 			'type': 'open_game_modal',
+		}))
+
+	# This message is used to close the modal in the clients browser
+	async def close_game_modal(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'close_game_modal',
 		}))

@@ -30,6 +30,7 @@ class CustomUser(AbstractUser):
 	game_history = models.ManyToManyField('remote_game.RemoteGame', related_name='game_history')
 	map = models.TextField(blank=True, null=True)
 	sound = models.BooleanField(default=False)
+	enabled_2fa = models.BooleanField(default=False)
 	
 	def __str__(self):
 		return self.username

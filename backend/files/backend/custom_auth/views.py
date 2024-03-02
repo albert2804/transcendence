@@ -20,10 +20,10 @@ tabs = [
 
 
 def callback(request):
-    code = request.GET.get('code')
-    state = request.GET.get('state')
-    client_id = os.environ.get('42INTRA_CLIENT_ID')
-    client_secret = os.environ.get('42INTRA_CLIENT_SECRET')
+    code = request.GET.get('code', "")
+    state = request.GET.get('state', "")
+    client_id = os.environ.get('42INTRA_CLIENT_ID', "")
+    client_secret = os.environ.get('42INTRA_CLIENT_SECRET', "")
     url = "https://api.intra.42.fr/oauth/token"
     url += "?grant_type=authorization_code"
     url += "&client_id=" + client_id

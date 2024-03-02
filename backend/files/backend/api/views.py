@@ -202,6 +202,8 @@ def userregister(request):
 
 def qr_code(request):
     user = request.user
+    if user.enabled_2fa:
+        return JsonResponse({'error': '2FA is already enabled for this user'}, status=400)
 
     # Generate a random secret key
     secret_key_base32 = pyotp.random_base32()
@@ -238,7 +240,7 @@ def qr_code(request):
 # enable 2FA for user
 def enable_2fa(request, *args, **kwargs):
     user = request.user
-    if user.enabled_2fa:
+    if user.enabled_2fa or TOTPDevice.objects.filter(user=user, confirmed=True).exists():
         return JsonResponse({'error': '2FA is already enabled for this user'}, status=400)
     data = json.loads(request.body)
     code = data.get('code')

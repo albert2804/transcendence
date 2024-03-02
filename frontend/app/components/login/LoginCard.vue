@@ -105,7 +105,6 @@
       });
 
       async function get2FAStatus() {
-        alert(username.value);
         const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value;
         const response = await fetch(`/endpoint/api/get_2fa_status?username=${username.value}`, {
           method: 'GET',
@@ -126,7 +125,6 @@
       // login
       async function login() {
         await get2FAStatus();
-        alert(enabled_2fa.value);
         isLoggedIn.value = 2; // Store
         message.value = '';
         error.value = '';
@@ -157,12 +155,12 @@
             error.value = '';
             message.value = data.message;
           } else if (response.status === 403 || response.status === 400) {
+            error.value = data.error;
             isLoggedIn.value = 0; // Store
             userName.value = ''; // Store
             userId.value = ''; // Store
             password.value = '';
             message.value = '';
-            error.value = data.error;
           }
         } catch (error) {
           console.error('Error:', error);

@@ -121,17 +121,24 @@
       });
 
       async function get2FAStatus() {
+        console.log('get2FAStatus')
         const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value;
-        const response = await fetch(`/endpoint/api/get_2fa_status?username=${username.value}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-          },
+        let response;
+        try {
+            response = await fetch(`/endpoint/api/get_2fa_status?username=${username.value}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken
+            },
+          });
+          if (!response.ok) {
+            console.error('Error:', response.error);
+            //throw new Error(`HTTP error! status: ${response.status}, error: ${response.error}`);
+         }
         }
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}, error: ${response.error}`);
+        catch (error) {
+          console.error('Error:', error);
         }
         const data = await response.json();
         enabled_2fa.value = data.enabled_2fa;

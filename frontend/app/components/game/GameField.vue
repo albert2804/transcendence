@@ -106,6 +106,7 @@
         x: 0,
         y: 0,
       },
+      intersection: false,
 		  playOnThisDevice: true,
       // Following only for guest users:
       showAliasScreen: false,
@@ -143,10 +144,15 @@
     // function to create and handle the websocket
 	  createWebSocket () {
       
-      const audio = new Audio("endpoint/media/sounds/ball.mp3");
       const currentDomain = window.location.hostname;
       const sockurl = 'wss://' + currentDomain + '/endpoint/remoteGame/';
       this.socket = new WebSocket(sockurl)
+      
+      // create sound effects
+      const intersection = new Audio("endpoint/media/sounds/ball.mp3");
+      const background = new Audio("endpoint/media/sounds/background.mp3");
+      const effects = [intersection, background];
+
 
       this.socket.onopen = () => {
 		gameButtonState.value = "loading";
@@ -220,6 +226,8 @@
             } else if (data.result === "left") {
               this.message = "The left player won the game!";
             }
+            effects[1].pause();
+            
           } else if (data.type === "player_names") {
             this.p1_name = data.p1_name;
             this.p2_name = data.p2_name;
@@ -228,7 +236,7 @@
             const highScore = data.high_score;
             this.pointsP1 = highScore.pointsP1;
             this.pointsP2 = highScore.pointsP2;
-            this.updateGameUI(gameState,audio);
+            this.updateGameUI(gameState,effects);
           } else if (data.type === "alias_exists") {
             this.message = "Alias already taken!";
           } else if (data.type === "open_game_modal") {
@@ -253,6 +261,7 @@
     },
     // function to start the game
     startTrainingGame () {
+
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
           type: 'start_training_game',
@@ -263,6 +272,7 @@
     },
     // function to start a local game
     startLocalGame () {
+
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
           type: 'start_local_game'
@@ -399,17 +409,17 @@
       this.handleKeyRelease({ key: keyDown });
     },
     // function to update the game UI (called when receiving game state from server)
-    updateGameUI(gameState) {
+    updateGameUI(gameState, effects) {
+      if (sound.value)
+        effects[1].play();
       this.p1pos.y = gameState.leftPaddle.y;
       this.p2pos.y = gameState.rightPaddle.y;
       this.ballPos.x = gameState.ball.x - (1.5/2); // 1.5% is the width of the ball
       this.ballPos.y = gameState.ball.y - (3/2);   // 3% is the height of the ball
       this.countdown = gameState.countdown;
       
-      if (sound.value) {
-
-        const audio = new Audio("endpoint/media/sounds/test.mp3");
-        // audio.play();
+      if (sound.value && gameState.intersection) {
+        effects[0].play();
       }
     },
     // function to send information to server that the user wants to play on this device

@@ -270,10 +270,30 @@ class GameHandler:
 		db_p2_user.num_games_played += 1
 		if self.game.winner == 1:
 			db_p1_user.num_games_won += 1
+			db_p1_user.mmr,db_p2_user.mmr = self.calculate_mmr(db_p1_user, db_p2_user)
 		elif self.game.winner == 2:
 			db_p2_user.num_games_won += 1
+			db_p2_user.mmr,db_p1_user.mmr = self.calculate_mmr(db_p2_user, db_p1_user)
+
+		await database_sync_to_async(db_p1_user.game_history.add)(self.db_entry)
+		await database_sync_to_async(db_p2_user.game_history.add)(self.db_entry)
 		await database_sync_to_async(db_p1_user.save)()
 		await database_sync_to_async(db_p2_user.save)()
+		
+	def calculate_mmr(self, winner, loser):
+
+		if winner.mmr >= loser.mmr:
+			mmr1 = winner.mmr + 10 + 10 * (loser.mmr / (winner.mmr + 1))
+			mmr2 = loser.mmr - 10 - 10 * (loser.mmr / (winner.mmr + 1))
+		else:
+			mmr1 = winner.mmr + 10 + 10 * (loser.mmr / (winner.mmr + 1))
+			mmr2 = loser.mmr - 10 - 10 * (loser.mmr / (winner.mmr + 1))
+		
+		if mmr1 < 0:
+			mmr1 = 0;
+		if mmr2 < 0:
+			mmr2 = 0;
+		return mmr1, mmr2
 
 	# This function is called when a player gives up or disconnects
 	# The other player wins the game
@@ -328,7 +348,7 @@ class GameHandler:
 	async def send_game_state_to_player_1(self): 
 		while not self.game.isGameExited:
 			async with self.game.game_state_lock:
-				game_state = self.game.latest_game_state
+				game_state = self.game.latest_game_state			
 			if game_state is not None:
 				await self.player1.send(game_state)
 			await asyncio.sleep(1 / self.player1.fps)

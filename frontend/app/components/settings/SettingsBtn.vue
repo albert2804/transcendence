@@ -17,18 +17,20 @@
           <div v-if="recvmessage" class="alert alert-success" style="min-width: 14em" timeout="30s" role="alert">{{ recvmessage }}</div>
           <div v-if="recverror" class="alert alert-danger" style="min-width: 14em" role="alert">{{ recverror }}</div>
           <div v-if="loginStatus === 1">
+            <div class="button-container">
                 <button type="button" class="nes-btn is-success clickable"  @click="openPopupName" style="width: 100%;">Change Alias</button>
                 <button type="button" class="nes-btn is-success clickable" @click="openPopupPw" style="width: 100%;">Change Password</button>
                 <button type="button" class="nes-btn is-success clickable" @click="openPopupPic" style="width: 100%;">Change Picture</button>
                 <button type="button" class="nes-btn is-success clickable" @click="openPopupMap" style="width: 100%;">Choose Map</button>
                 
                 <button v-if="!enabled_2fa" type="button" class="nes-btn is-success clickable" @click="openPopup2FA">Enable 2FA authentication</button>
-                <button v-if="enabled_2fa" type="button" class="nes-btn is-success clickable" @click="openPopup2FA">Disable 2FA authentication</button>
+                <button v-if="enabled_2fa" type="button" class="nes-btn is-success clickable" @click="disable2FA">Disable 2FA authentication</button>
                 <SettingsName :openPopup="PopupName" @close-popup="PopupName = false" @message-from-child="handleUpdate" />
                 <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false" @message-from-child="handleUpdate" />
                 <SettingsPw :openPopup="PopupPw" @close-popup="PopupPw = false" @message-from-child="handleUpdate" />
                 <SettingsMap :openPopup="PopupMap" @close-popup="PopupMap = false"/>
                 <SettingsDo2FA :openPopup="Popup2FA" @close-popup="Popup2FA = false"/>
+            </div>
           </div>
           <div v-if="!loginStatus">
               <p>Please log in to access settings</p>
@@ -151,6 +153,31 @@ export default {
       const data = await response.json();
       this.enabled_2fa = data.enabled_2fa;
     },
+
+    async disable2FA() {
+      const csrfToken = useRequestHeader('csrftoken');
+      const response = await fetch('/endpoint/api/disable_2fa', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+        },
+      });
+
+      if (!response.ok) {
+        this.recverror='Failed to disable 2FA';
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.success) {
+        this.recvmessage = '2FA disabled successfully';
+        this.recverror = '';
+      } else {
+        this.recvmessage = '';
+        this.recverror = 'Failed to disable 2FA';
+      }
+      this.get2FAStatus();
+    },
 },
 mounted() {
   this.get2FAStatus();
@@ -165,9 +192,15 @@ mounted() {
   flex-direction: column; 
 }
 
-.nes-btn {
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.button-container .nes-btn {
   margin-bottom: 10px;
-  width: 95%;
+  width: 100%;
 }
 
 </style>

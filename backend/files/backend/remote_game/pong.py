@@ -7,12 +7,14 @@ class PongGame:
 		self.pointsP1 = 0
 		self.pointsP2 = 0
 		self.isGameExited = False
-		self.countdownSec = 5
-		self.initialSpeed = 4
+		self.countdownSec = 2
+		self.factor = 3 # by raising the factor the games is faster paced
+		self.initialSpeed = 4 / self.factor
 		self.currentSpeed = self.initialSpeed
 		self.canvasWidth = 800
 		self.canvasHeight = 400
 		self.winner = 0
+		self.mode = 0
 
 		# Game state saved as json (ready to be sent to the client)
 		self.latest_game_state = None
@@ -25,8 +27,12 @@ class PongGame:
 		# Ball initialization
 		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.initialSpeed, 'dy': self.initialSpeed, 'radius': 6}
 
+		# Sounds
+		# if there is an intersection of the ball and the paddle, intersection = true(needed for sound)
+		self.intersection = False
 
 	def update_game(self):
+
 		# Update paddle positions
 		self.leftPaddle['y'] += self.leftPaddle['dy']
 		self.rightPaddle['y'] += self.rightPaddle['dy']
@@ -49,19 +55,20 @@ class PongGame:
 			# Ensure the ball stays within the canvas after bouncing off the bottom
 			self.ball['y'] = max(self.ball['radius'], min(self.canvasHeight - self.ball['radius'], self.ball['y']))
 
-
 		# Bounce off paddles and increase ball speed
 		if (
 			self.ball['x'] - self.ball['radius'] < self.leftPaddle['x'] + self.leftPaddle['width'] and
 			self.leftPaddle['y'] < self.ball['y'] < self.leftPaddle['y'] + self.leftPaddle['height']
 		):
 			self.adjust_ball_angle(self.leftPaddle)
+			self.intersection = True
 
 		if (
 			self.ball['x'] + self.ball['radius'] > self.rightPaddle['x'] and
 			self.rightPaddle['y'] < self.ball['y'] < self.rightPaddle['y'] + self.rightPaddle['height']
 		):
 			self.adjust_ball_angle(self.rightPaddle)
+			self.intersection = True
 
 		# Check for scoring
 		if self.ball['x'] - self.ball['radius'] < 0 or self.ball['x'] + self.ball['radius'] > self.canvasWidth:
@@ -79,20 +86,21 @@ class PongGame:
 
 			# Reset ball position to center
 			self.ball['x'] = self.canvasWidth/2
+
 		# Ensure the ball stays within the canvas after scoring
 		self.ball['x'] = max(self.ball['radius'], min(self.canvasWidth - self.ball['radius'], self.ball['x']))
 	
 	def paddle_up(self, player):
 		if player == 1:
-			self.leftPaddle['dy'] = -6
+			self.leftPaddle['dy'] = -6 / self.factor
 		elif player == 2:
-			self.rightPaddle['dy'] = -6
+			self.rightPaddle['dy'] = -6 / self.factor
 	
 	def paddle_down(self, player):
 		if player == 1:
-			self.leftPaddle['dy'] = 6
+			self.leftPaddle['dy'] = 6 / self.factor
 		elif player == 2:
-			self.rightPaddle['dy'] = 6
+			self.rightPaddle['dy'] = 6 / self.factor
 	
 	def paddle_stop(self, player):
 		if player == 1:
@@ -123,6 +131,7 @@ class PongGame:
 				'y': (self.rightPaddle['y'] / self.canvasHeight) * 100,
 			},
 			'countdown': self.countdownSec,
+			'intersection': self.intersection,
 		}
 		high_score = {
 			'pointsP1': self.pointsP1,
@@ -136,13 +145,16 @@ class PongGame:
 			}
 	
 	async def run_game(self):
+
 		# start countdown
 		asyncio.create_task(self.countdown())
 		# game loop
+		import time
 		while not self.isGameExited:
 			self.game_loop()
 			await self.save_game_state()
-			await asyncio.sleep(0.01)
+			await asyncio.sleep(0.02 / self.factor)
+			self.intersection = False
 	
 	async def countdown(self):
 		while self.countdownSec > 0:
@@ -155,7 +167,7 @@ class PongGame:
 		max_angle = math.pi / 3  # Maximum angle change (adjust as needed)
 
 		# Increase ball speed
-		self.currentSpeed = min(self.currentSpeed + 1, 9)
+		self.currentSpeed = min(self.currentSpeed + 1, 10)
 		
 		# Change the ball's angle based on the position on the paddle
 		self.ball['dy'] = self.currentSpeed * angle_factor

@@ -37,7 +37,6 @@ export default {
       }
     },
     showTournamentDetails(index) {
-      console.log("INDEX IS " + this.tournaments[index].showTournament + index)
       if (this.tournaments[index].showTournament) {
         if (this.openTournamentView == 1){
           this.$nextTick(() => {
@@ -56,7 +55,6 @@ export default {
           });
         }
         this.tournaments.forEach((tournament, i) => {
-          console.log(i)
           if (i != index && tournament.showTournament == true) {
             if (this.openTournamentView == 1){
               this.$nextTick(() => {

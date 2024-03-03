@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from remote_game.gameHandler import GameHandler
 from remote_game.consumers import RemoteGameConsumer
+from channels.db import database_sync_to_async
 from remote_game.player import Player
 from django.db import models
 from chat.consumers import ChatConsumer
@@ -19,6 +20,7 @@ class CustomUser(AbstractUser):
 	friends_requests = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='friend_requests_received')
 	blocked_users = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='blocked_by_users')
 	game_invites = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='game_invites_received')
+	tournament_invites = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='tournament_invites_received')
 	is_42_login = models.BooleanField(default=False)
 	num_games_played = models.IntegerField(default=0)
 	num_games_won = models.IntegerField(default=0)
@@ -88,9 +90,62 @@ class CustomUser(AbstractUser):
 		await consumer.save_and_send_message(user, self, "You are not friends and have no friend requests.", datetime.now(), 'info')
 		return 0
 
+	async def invite_tournament_game(self, user, tournament, db_game):
+		consumer = ChatConsumer()
+		# check if the other user already invited this user
+		if user in await sync_to_async(list)(self.tournament_invites_received.all()):
+	 			# check if both player object exist
+	    		# (player object is created when the user connects and deleted when the user disconnects)
+			player1 = Player.get_player_by_user(await database_sync_to_async(lambda: db_game.player1)())
+			player2 = Player.get_player_by_user(await database_sync_to_async(lambda: db_game.player2)())
+			if player1 == None or player2 == None:
+				await consumer.save_and_send_message(user, self, 'Player seems to be offline. Try again later.', datetime.now(), 'info')
+				return
+			# check if already playing
+			# (a playing player has a game_handler attribute which is not None)
+			if player1.game_handler != None or player2.game_handler != None:
+				await consumer.save_and_send_message(user, self, 'Player is already playing. Try again later.', datetime.now(), 'info')
+				return
+			# remove players from the waiting rooms
+	 			# (to avoid multiple games running for the same players)
+			game_consumer = RemoteGameConsumer()
+			if player1 in game_consumer.training_waiting_room:
+				game_consumer.training_waiting_room.remove(player1)
+			if player1 in game_consumer.ranked_waiting_room:
+				game_consumer.ranked_waiting_room.remove(player1)
+			if player2 in game_consumer.training_waiting_room:
+				game_consumer.training_waiting_room.remove(player2)
+			if player2 in game_consumer.ranked_waiting_room:
+				game_consumer.ranked_waiting_room.remove(player2)
+			# send info message to both users
+			await consumer.save_and_send_message(user, self, 'You accepted the tournament game invite.', datetime.now(), 'info')
+			await consumer.save_and_send_message(self, user, 'Tournament game invite got accepted.', datetime.now(), 'info')
+			# remove invites from both users
+			await sync_to_async(self.tournament_invites.remove)(user)
+			await sync_to_async(user.tournament_invites.remove)(self)
+			# create a new game handler
+			game_handler = await GameHandler.create(player1, player2, ranked=True, db_entry=db_game, tournament=tournament)
+			# open the game modal for both players
+			await game_handler.channel_layer.group_send(
+				game_handler.game_group,
+				{
+					'type': 'open_game_modal',
+				})
+			# start the game in another thread
+			asyncio.create_task(game_handler.start_game())
+			return
+		# check if already invited
+		if user in await sync_to_async(list)(self.tournament_invites.all()):
+			await consumer.save_and_send_message(user, self, 'You already invited this user.', datetime.now(), 'info')
+		else:
+			# invite the other user
+			await sync_to_async(self.tournament_invites.add)(user)
+			await consumer.save_and_send_message(user, self, 'You sent a game invite for ' + tournament.tournament_name + ' Round: ' + str(db_game.is_round) + ' Match: ' +  str(db_game.is_match_nbr), datetime.now(), 'info')
+			await consumer.save_and_send_message(self, user, 'You got a game invite for ' + tournament.tournament_name + ' Round: ' +  str(db_game.is_round) + ' Match: ' +  str(db_game.is_match_nbr), datetime.now(), 'info')
+
 	# invite someone to a game (ranked)
 	# if the other user already invited this user, the game will be started
-	async def invite_to_game(self, user, tournament=None, db_game=None):
+	async def invite_to_game(self, user):
 		consumer = ChatConsumer()
 		# check if the other user already invited this user
 		if user in await sync_to_async(list)(self.game_invites_received.all()):
@@ -124,10 +179,7 @@ class CustomUser(AbstractUser):
 			await sync_to_async(self.game_invites.remove)(user)
 			await sync_to_async(user.game_invites.remove)(self)
 			# create a new game handler
-			if tournament != None and db_game != None:
-				game_handler = await GameHandler.create(player1, player2, ranked=True, db_entry=db_game, tournament=tournament)
-			else:
-				game_handler = await GameHandler.create(player1, player2, ranked=True)
+			game_handler = await GameHandler.create(player1, player2, ranked=True)
 			# open the game modal for both players
 			await game_handler.channel_layer.group_send(
 				game_handler.game_group,
@@ -160,6 +212,21 @@ class CustomUser(AbstractUser):
 		# send info message to both users
 		await consumer.save_and_send_message(user, self, 'You canceled the game invite.', datetime.now(), 'info')
 		await consumer.save_and_send_message(self, user, 'The game invite got canceled.', datetime.now(), 'info')
+
+	async def remove_tournament_invite(self, user):
+		consumer = ChatConsumer()
+		# check if there are game invites between the users
+		if self not in await sync_to_async(list)(user.tournament_invites.all()) and user not in await sync_to_async(list)(self.tournament_invites.all()):
+			await consumer.save_and_send_message(user, self, 'There are no tournament game invites between you and this user.', datetime.now(), 'info')
+			return
+		# remove the invites
+		await sync_to_async(self.tournament_invites.remove)(user)
+		await sync_to_async(user.tournament_invites.remove)(self)
+		# send info message to both users
+		await consumer.save_and_send_message(user, self, 'You canceled the tournment game invite.', datetime.now(), 'info')
+		await consumer.save_and_send_message(self, user, 'The tournament game invite got canceled.', datetime.now(), 'info')
+
+
 
 	def response_gamehistory(self):
 		games = []

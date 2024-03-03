@@ -33,9 +33,6 @@
     </div>
 
     <button type="submit" @click="startTournament($event)" class="btn btn-primary">Start Tournament</button>
-    <div v-if="this.tournamentStarted">
-      <BracketsTournament :tournamentName="tournamentName" :numberOfPlayers="nbr_players" :matches="all_matches" :loggedInUser="loggedInUser"/>
-    </div>
   </form>
 </template>
 
@@ -98,8 +95,6 @@ export default {
     },
 
     handleUserSelected(userName, index) {
-      console.log(userName);
-      console.log(index);
       this.all_players[index - 1].name = userName;
     },
 
@@ -107,12 +102,12 @@ export default {
     // of players is adjusted 
     updatePlayerCount () {
       const currentCount = this.all_players.length;
-      const list_player = ["phipno", "dummy1", "pnolte", "dummy2"]
+      // const list_player = ["phipno", "dummy1", "pnolte", "dummy2"]
 
       if (this.nbr_players > currentCount) {
         for (let i = currentCount + 1; i <= this.nbr_players; i++) {
           this.all_players.push({
-            name: list_player[i - 1],
+            name: "",
             player_or_bot: 'Player',
             index: i - 1,
           });
@@ -123,26 +118,6 @@ export default {
       }
     },
 
-    // createMatches() {
-    //   this.all_matches = [];
-    //   const total_games = this.nbr_players - 1; 
-    //   for (let match = 0; match < total_games; match++) {
-    //       console.log(Math.log2(total_games) - Math.floor(Math.log2(match + 1)))
-    //       this.all_matches.push({
-    //         is_round: Math.floor(Math.log2(total_games + 1)) - Math.floor(Math.log2(total_games - match)),
-    //         game_nbr: match + 1, 
-    //         l_player: -1,
-    //         r_player: -1,
-    //         l_score: 0,
-    //         r_score: 0,
-    //       });
-    //       if (this.all_matches[match].is_round == 1) {
-    //         this.all_matches[match].l_player = this.all_players[match * 2];
-    //         this.all_matches[match].r_player = this.all_players[match * 2 + 1];
-    //       }
-    //     }
-    // },
-
     async startTournament(event) {
       event.preventDefault();
       if (this.tournamentName == "") {
@@ -151,8 +126,6 @@ export default {
       }
       // this.createMatches()
       // TODO: needs to call backend for tournament handling which is not yet implementet
-      console.log(this.all_players);
-      console.log("Tournament handling not yet implemented in backend");
       const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
       try {
         const response = await fetch('/endpoint/tournament/logic/', {

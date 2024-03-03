@@ -8,19 +8,17 @@
     <div v-if="error" class="alert alert-danger" role="alert">{{ error }}</div>
 
     <!-- 2FA Token Dialog -->
-    <div v-if="showTokenDialog" class="popup">
-      <div class="nes-container overlay">
-        <h5 id="tokenDialogLabel">Enter 2FA Token</h5>
-        <div>
-          <input type="text" class="form-control nes-input" v-model="token" placeholder="Enter your 2FA token here">
-        </div>
-        <div>
-          <button type="button" class="btn nes-btn btn-primary" @click="loginWithToken">Submit</button>
-          <button type="button" class="btn nes-btn btn-secondary" @click="cancelLogin">Cancel</button>
-        </div>
+    <div v-if="showTokenDialog" class="container-fluid automargin" style="width: 100%; height:100%">
+      <h5 id="tokenDialogLabel">Enter 2FA Token</h5>
+      <div>
+        <input type="text" class="form-control nes-input" v-model="token" placeholder="Enter your 2FA token here">
+      </div>
+      <div>
+        <button type="button" class="btn nes-btn btn-primary" @click="loginWithToken">Submit</button>
+        <button type="button" class="btn nes-btn btn-secondary" @click="cancelLogin">Cancel</button>
       </div>
     </div>
-
+    <div v-else>
     <!-- LOGIN FORM -->
     <form v-if="loginStatus != 1 && !reg_form">
       <div class="nes-field mb-3">
@@ -355,10 +353,6 @@
 .main {
   max-width: 500px; 
   word-wrap: break-word;
-}
-
-.popup {
-  z-index: 1000; /* or any high number */
 }
 
 @media screen and (max-width: 850px) {

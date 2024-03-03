@@ -2,17 +2,20 @@
 	<div v-if="openPopup" class="popup">
 		<div class="overlay">
 			<div class="dialog">
-			<h2>Enable 2FA</h2>
-			<p>Please scan the QR code with your authenticator app and enter the code it generates.</p>
+			<div v-if="message" class="alert alert-success" role="alert">{{ message }}</div>
+			<div v-if="error" class="alert alert-danger" role="alert">{{ error }}</div>
+			<div class ="header">
+				<h2>Enable 2FA authentication</h2>
+				<button type="button" class="btn-close" @click="$emit('close-popup')" aria-label="Close"></button>
+			</div>
+			<p>Please scan the QR code with your google authenticator app and enter the code it generates.</p>
 			<div style="display: flex; align-items: center; gap: 20px; justify-content: center">
 				<img :src="qrCodeUrl" alt="QR Code to activate 2 factor authentication">
 				<div class="nes-field">
-					<!-- <label for="code">Code</label> -->
 					<input v-model="code" type="text" id="code" class="nes-input" placeholder="Enter code">
 				</div>
 			</div>
-			<button class="btn nes-btn" @click="enable2FA">Enable</button>
-			<button class="btn nes-btn" @click="$emit('close-popup')">Close</button>
+			<button type="button" class="btn nes-btn" @click="enable2FA">Enable</button>
 			</div>
 		</div>
 	</div>
@@ -26,6 +29,8 @@ export default {
 	setup(props) {
 		const code = ref('');
 		const qrCodeUrl = ref('');
+		const message = ref('');
+		const error = ref('');
 
 		const generateQRCode = async () => {
 			try {
@@ -37,13 +42,21 @@ export default {
 				});
 
 				if (!response.ok) {
-					throw new Error('Failed to generate QR code');
+					const errorData = await response.json();
+					error.value = errorData.error;
+					message.value= '';
 				}
 
 				const data = await response.json();
 				qrCodeUrl.value = `data:image/png;base64,${data.qr_code}`;
+				message.value = '';
+				if (data.error)
+					error.value = data.error;
+				else
+					error.value = '';
 			} catch (error) {
-				console.error('Error:', error);
+				message.value = '';
+				error.value=error;
 			}
 		};
 
@@ -64,17 +77,21 @@ export default {
 					});
 
 				if (!response.ok) {
+					error.value = 'Failed to enable 2FA, maybe the token is invalid or expired';
 					throw new Error('Failed to enable 2FA');
 				}
 
 				const data = await response.json();
 				if (data.success) {
-					alert('2FA enabled successfully');
+					message.value = '2FA enabled successfully';
+					error.value='';
 				} else {
-					alert('Failed to enable 2FA');
+					message.value='';
+					error.value = 'Failed to enable 2FA';
 				}
 			} catch (error) {
-				console.error('Error:', error);
+				error.value = error;
+				message.value = '';
 			}
 		};
 
@@ -82,7 +99,30 @@ export default {
 			code,
 			qrCodeUrl,
 			enable2FA,
+			error,
+			message
 		};
 	},
 };
 </script>
+
+<style>
+
+.dialog {
+	position: relative;
+}
+
+.header {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+	top: 5px;
+}
+</style>

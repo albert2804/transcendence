@@ -205,17 +205,25 @@ def qr_code(request):
     if user.enabled_2fa:
         return JsonResponse({'error': '2FA is already enabled for this user'}, status=400)
 
-    # Generate a random secret key
-    secret_key_base32 = pyotp.random_base32()
-    secret_key_hex = binascii.hexlify(base64.b32decode(secret_key_base32)).decode()
+    # Check if an unconfirmed TOTP device already exists for the user
+    totp_device = TOTPDevice.objects.filter(user=user, confirmed=False).first()
 
-    # Create a new TOTP device for the user
-    totp_device = TOTPDevice.objects.create(user=user, confirmed=False, key=secret_key_hex)
+    if not totp_device:
+        # Generate a random secret key
+        secret_key_base32 = pyotp.random_base32()
+        secret_key_hex = binascii.hexlify(base64.b32decode(secret_key_base32)).decode()
 
+        # Create a new TOTP device for the user
+        totp_device = TOTPDevice.objects.create(user=user, confirmed=False, key=secret_key_hex)
+    else:
+        # If a TOTP device already exists, use its key to instantiate a TOTP object
+        secret_key_base32 = base64.b32encode(binascii.unhexlify(totp_device.key)).decode()
+
+    # Instantiate a TOTP object
     totp = pyotp.TOTP(secret_key_base32)
 
     # Generate a provisioning URI for the TOTP device
-    provisioning_uri = totp.provisioning_uri(name=user.username, issuer_name='YourApp')
+    provisioning_uri = totp.provisioning_uri(name=user.username, issuer_name='42 Pong')
 
     # Generate a QR code from the provisioning URI
     qr = qrcode.QRCode(

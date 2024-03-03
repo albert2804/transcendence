@@ -1,13 +1,18 @@
 <template>
-	<div v-if="openPopup">
+	<div v-if="openPopup" class="popup">
 		<div class="overlay">
 			<div class="dialog">
 			<h2>Enable 2FA</h2>
-			<p>Hi {{username}}. Please scan the QR code with your authenticator app and enter the code it generates.</p>
-			<img :src="qrCodeUrl" :alt="'QR Code for ' + username ">
-			<input v-model="code" type="text" placeholder="Enter code">
-			<button @click="enable2FA">Enable</button>
-			<button @click="$emit('close-popup')">Close</button>
+			<p>Please scan the QR code with your authenticator app and enter the code it generates.</p>
+			<div style="display: flex; align-items: center; gap: 20px; justify-content: center">
+				<img :src="qrCodeUrl" alt="QR Code to activate 2 factor authentication">
+				<div class="nes-field">
+					<!-- <label for="code">Code</label> -->
+					<input v-model="code" type="text" id="code" class="nes-input" placeholder="Enter code">
+				</div>
+			</div>
+			<button class="btn nes-btn" @click="enable2FA">Enable</button>
+			<button class="btn nes-btn" @click="$emit('close-popup')">Close</button>
 			</div>
 		</div>
 	</div>

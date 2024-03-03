@@ -101,14 +101,15 @@ def userlogin(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             # check if the user has 2FA enabled
-            try:
-                device = TOTPDevice.objects.get(user=user)
-                # If they do, verify the token
-                if token is None or not device.verify_token(token):
-                    return JsonResponse({'error': 'Invalid 2FA token'}, status=403)
-            except TOTPDevice.DoesNotExist:
-                # If they don't have 2FA enabled, we don't need to check the token
-                pass
+            if user.enabled_2fa:
+                try:
+                    device = TOTPDevice.objects.get(user=user)
+                    # If they do, verify the token
+                    if token is None or not device.verify_token(token):
+                        return JsonResponse({'error': 'Invalid 2FA token'}, status=403)
+                except TOTPDevice.DoesNotExist:
+                    # If they don't have 2FA enabled, we don't need to check the token
+                    pass
             login(request, user)
             user_id = user.id
              # Create JWT token

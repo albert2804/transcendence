@@ -18,7 +18,7 @@ class PongGame:
 		self.mode = 0
 		self.gravity_x = 3 #velocity in x direction
 		self.max_velocity = 10
-		self.repel = -1.1 # the smaller the value the stronger the ball will be accelerated to the top after hitting a paddle
+		self.repel = 1.1 # the bigger the value the stronger the ball will be accelerated to the top after hitting a paddle
 
 		# Game state saved as json (ready to be sent to the client)
 		self.latest_game_state = None
@@ -52,13 +52,13 @@ class PongGame:
 		# self.ball['x'] += (self.ball['dx'])
 		self.ball['x'] += self.ball['dx']
 		
-		acceleration = 0.0075
+		acceleration = 0.05
 		self.ball['dy'] += acceleration
 		self.ball['y'] += self.ball['dy']
 
 		# Bounce off the top or bottom of the canvas
 		if self.ball['y'] - self.ball['radius'] < 0 or self.ball['y'] + self.ball['radius'] > self.canvasHeight:
-			self.ball['dy'] = (-self.ball['dy'] * 0.99)
+			self.ball['dy'] = (-self.ball['dy'] * 1.05)
 		
 			# Ensure the ball stays within the canvas after bouncing off the bottom
 			self.ball['y'] = max(self.ball['radius'], min(self.canvasHeight - self.ball['radius'], self.ball['y']))
@@ -178,8 +178,8 @@ class PongGame:
 		if angle < 0.1:
 			self.repel *= 1.4
 		else:
-			self.repel = -1.1
-		self.ball['dy'] = -angle * self.repel * self.ball['dx'] 
+			self.repel = 1.1
+		self.ball['dy'] = -angle * self.repel * abs(self.ball['dx'])
 		self.ball['dx'] = -self.ball['dx']  # Reverse the horizontal direction
 		
 		

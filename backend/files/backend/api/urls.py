@@ -15,6 +15,6 @@ urlpatterns = [
     path('remove_friend', views.remove_friend),
     path('qr_code', views.qr_code, name='qr_code'),
     path('enable_2fa', views.enable_2fa),
-    # path('disable_2fa', views.disable_2fa),
+    path('disable_2fa', views.disable_2fa),
     path('get_2fa_status', views.get_2fa_status),
 ]

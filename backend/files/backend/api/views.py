@@ -263,7 +263,6 @@ def enable_2fa(request, *args, **kwargs):
         totp_device.save()
         user.enabled_2fa = True
         user.save()
-
         return JsonResponse({'success': '2FA enabled successfully'})
     else:
         return JsonResponse({'error': 'Invalid code'}, status=400)
@@ -290,6 +289,26 @@ def get_2fa_status(request):
                 return JsonResponse({'error': 'No username provided and not logged in'}, status=400)
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
+
+def disable_2fa(request, *args, **kwargs):
+    user = request.user
+    if not user.enabled_2fa or not TOTPDevice.objects.filter(user=user, confirmed=True).exists():
+        return JsonResponse({'error': '2FA is not enabled for this user'}, status=400)
+
+    # Get the confirmed TOTP device for the user
+    totp_device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
+
+    if not totp_device:
+        return JsonResponse({'error': 'No TOTP device found for this user'}, status=400)
+
+    # Delete the TOTP device
+    totp_device.delete()
+
+    # Disable 2FA for the user
+    user.enabled_2fa = False
+    user.save()
+
+    return JsonResponse({'success': '2FA disabled successfully'})
 
 ######################
 ### GAME FUNCTIONS ###

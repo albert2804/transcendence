@@ -151,7 +151,7 @@ class CustomUser(AbstractUser):
 		# check if the other user already invited this user
 		if user in await sync_to_async(list)(self.game_invites_received.all()):
    			# check if both player object exist
-      		# (player object is created when the user connects and deleted when the user disconnects)
+	  		# (player object is created when the user connects and deleted when the user disconnects)
 			player1 = Player.get_player_by_user(self)
 			player2 = Player.get_player_by_user(user)
 			if player1 == None or player2 == None:
@@ -233,15 +233,15 @@ class CustomUser(AbstractUser):
 		games = []
 		for game in self.game_history.all():
 			data = {
-                'id': game.pk,
-                'player1': game.return_all_data()['player1'],
-                'player2': game.return_all_data()['player2'],
-                'time': round((game.finished_at - game.started_at).total_seconds(), 2),
-                'pointsP1': game.pointsP1,
-                'pointsP2': game.pointsP2,
-                'winner': game.return_all_data()['winner'],
-                'loser': game.return_all_data()['loser'],
-            }
+				'id': game.pk,
+				'player1': game.return_all_data()['player1'],
+				'player2': game.return_all_data()['player2'],
+				'time': round((game.finished_at - game.started_at).total_seconds(), 2),
+				'pointsP1': game.pointsP1,
+				'pointsP2': game.pointsP2,
+				'winner': game.return_all_data()['winner'],
+				'loser': game.return_all_data()['loser'],
+			}
 			games.append(data)
 		return games
 			

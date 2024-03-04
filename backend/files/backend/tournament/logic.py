@@ -5,11 +5,14 @@ from remote_game.player import Player
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.utils import timezone
+from datetime import datetime
 from .models import Tournament
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
+from django.db.models import F
+from chat.consumers import ChatConsumer
+from django.core import serializers
 import json
 import math
 
@@ -22,8 +25,6 @@ def signUpTwoDummies(request):
      defaults={'email': "random@ass.de",
      'is_42_login': False,
      'chat_online': True, })
-    # user.set_password("Hallo9595");
-    # user.save()
     user = CustomUser.objects.get_or_create(
       username="dummy2",
       password=make_password('Hallo9595'),
@@ -48,6 +49,24 @@ def get_user_by_username(username):
         return user
     except ObjectDoesNotExist:
       return None
+
+def getPlayableGames(request):
+  if request.user.is_authenticated:
+    if request.method == 'POST':
+      tournament_list = Tournament.objects.filter(Q(games__player1=request.user) | Q(games__player2=request.user))
+      games_list = []
+
+      for tournament in tournament_list:
+        games = tournament.games.exclude(Q(player1=None) | Q(player2=None) | Q(finished=True)).filter(Q(player1=request.user) | Q(player2=request.user)).annotate(tournament_name=F('tournament__tournament_name'))
+        for game in games:
+          game.tournament_name = tournament.tournament_name
+        games_list.extend(games)
+
+      json_data = RemoteGame.queryset_to_json(games_list)
+      # json_data = serializers.serialize('json', games_list, fields=('tournament_name',))
+      return JsonResponse({'data': json_data})
+  else:
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def getTourmaentsGames(request):
   if request.user.is_authenticated:
@@ -91,8 +110,7 @@ def inviteOtherPlayer(request):
       player1_handler = Player.get_player_by_user(user1)
       if player1_handler.game_handler is not None:
         return JsonResponse({'error': 'You have an active game'}, status=404)
-
-      tour = Tournament.object.get(tournament_name=data["tour_name"])
+      tour = Tournament.objects.get(tournament_name=data["tour_name"])
       if tour is None:
         return JsonResponse({'error': 'Sorry Tournament not Found'}, status=404)
 
@@ -108,67 +126,28 @@ def inviteOtherPlayer(request):
         user2 = get_user_by_username(game.player2)
       else:
         user2 = get_user_by_username(game.player1)
-        #return shit if not existing
+      if user2 is None:
+        return JsonResponse({'error': 'User is missing in database'}, status=404)
+      
       async_to_sync(initiateGame)(user1, user2, game, tour)
         
       
       return JsonResponse({'message': 'Player is Ready'})
   return JsonResponse({'error': 'Invalid request'}, status=400)
 
-# async def readyPlayer(request):
-#   if request.method == 'POST':
-#     data = json.loads(request.body)
-#     print(data)
-#     user1 = await sync_to_async(get_user_by_username)(data["username"])
-#     print(user1.username)
-#     player1_handler = await sync_to_async(Player.get_player_by_user)(user1)
-#     if player1_handler.game_handler is not None:
-#       return JsonResponse({'error': 'You have an active game'}, status=404)
-    
-#     game_consumer = RemoteGameConsumer()
-#     if player1_handler in game_consumer.training_waiting_room:
-#       game_consumer.training_waiting_room.remove(player1_handler)
-#     if player1_handler in game_consumer.ranked_waiting_room:
-#       game_consumer.ranked_waiting_room.remove(player1_handler)
-#     tour = await sync_to_async(get_object_or_404)(Tournament, tournament_name=data["tour_name"])
-#     if tour is None:
-#       return JsonResponse({'error': 'Sorry Tournament not Found'}, status=404)
-#     games = tour.games.all()
-#     game = await sync_to_async(games.get)(is_match_nbr=data["game_nbr"])
-#     print("FOURRIOUS")
-#     player1 = await sync_to_async(getattr)(game, 'player1')
-#     print(player1)
-#     if data["username"] == player1.username:
-#       game.player1_ready = True
-#     else:
-#       game.player2_ready = True
-#     await sync_to_async(game.save)()
-#     if game.player1_ready and game.player2_ready:
-#       if data["username"] == player1.username:
-#         player2 = await sync_to_async(getattr)(game, 'player2')
-#         user2 = await sync_to_async(get_user_by_username)(player2.username)
-#       else:
-#         user2 = await sync_to_async(get_user_by_username)(player1.username)
-#       player2_handler = await sync_to_async(Player.get_player_by_user)(user2)
-
-
-
-
-#     return JsonResponse({'message': 'Player is Ready'})
-#   return JsonResponse({'error': 'Invalid request'}, status=400)
-
 def initTournament(request):
   if request.user.is_authenticated:
     if request.method == 'POST':
       data = json.loads(request.body)
+      consumer = ChatConsumer()
 
       print(data)
       tournament_count = Tournament.objects.filter(tournament_name__startswith=data["name"]).count()
       print(tournament_count)
       if tournament_count == 0:
-        curr_tour = Tournament.objects.create(tournament_name=data["name"], start_date=timezone.now())
+        curr_tour = Tournament.objects.create(tournament_name=data["name"], start_date=timezone.now(), creator=request.user)
       else:
-        curr_tour = Tournament.objects.create(tournament_name=data["name"] + str(tournament_count), start_date=timezone.now())
+        curr_tour = Tournament.objects.create(tournament_name=data["name"] + str(tournament_count), start_date=timezone.now(), creator=request.user)
 
       total_games = len(data["player"]) - 1
       game_list = []
@@ -181,6 +160,7 @@ def initTournament(request):
             return JsonResponse({'error': f'Username {data["player"][match * 2]["name"]} does not exist'}, status=400)
           if user2 is None:
             return JsonResponse({'error': f'Username {data["player"][match * 2 + 1]["name"]} does not exit'}, status=400)
+          
           game = RemoteGame.objects.create(
                     player1=user1,
                     player2=user2,
@@ -191,7 +171,11 @@ def initTournament(request):
           game_list.append({'game_nbr': match, 'is_round': 1, 
                             'l_player': game.player1.username, 'r_player': game.player2.username, 
                             'l_score': game.pointsP1, 'r_score': game.pointsP2,})
-          # await invite_to_tournament(user1, player1, user2, player2)
+          if curr_tour.creator != user1:
+            async_to_sync(consumer.save_and_send_message)(curr_tour.creator, user1, curr_tour.creator.username + 'Created the tournament ' + curr_tour.tournament_name + ' and challengeses you.', datetime.now(), 'info')
+          if curr_tour.creator != user2:
+            async_to_sync(consumer.save_and_send_message)(curr_tour.creator, user2, curr_tour.creator.username + ' created the tournament ' + curr_tour.tournament_name + ' and challengeses you.', datetime.now(), 'info')
+
         else:
           game = RemoteGame.objects.create(
             is_round = math.floor(math.log2(total_games + 1)) - math.floor(math.log2(total_games - match)),
@@ -201,10 +185,6 @@ def initTournament(request):
                             'l_player': "", 'r_player': "",
                             'l_score': game.pointsP1, 'r_score': game.pointsP2,}) 
           curr_tour.games.add(game);
-        # player1 = Player.get_player_by_user(user1);
-        # player2 = Player.get_player_by_user(user2);
-      # TODO: implement tournament logic
-      # TODO: finished
       data_curr_tour = {
         'tour_name': curr_tour.tournament_name,
         'games': game_list,

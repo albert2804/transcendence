@@ -4,11 +4,14 @@ import json
 import asyncio
 from .player import Player
 from .gameHandler import GameHandler
+from chat.consumers import ChatConsumer
 from django.apps import apps
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 
 class RemoteGameConsumer(AsyncWebsocketConsumer):
+	# all instances of RemoteGameConsumer
+	all_consumer_groups = []
 
 	# list of players in the waiting group for unranked games (mixed room for guests and registered users)
 	training_waiting_room = []
@@ -47,6 +50,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	# 	'user_id_2': receiver.id,
 	# })
 	async def invite_to_game(self, event):
+		print("invite_to_game called")
 		user_id_1 = event['user_id_1']
 		user_id_2 = event['user_id_2']
 		user_1 = await sync_to_async(get_user_model().objects.get)(id=user_id_1)
@@ -66,6 +70,8 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	# 	'db_game_id': db_game.id,
 	#		'tour_id
 	# })
+  		
+		
 	async def start_tournament_game(self, event):
 		user_1_id = event.get('user_id_1')
 		user_2_id = event.get('user_id_2')
@@ -79,17 +85,7 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 			Tournament = apps.get_model('tournament', 'Tournament')
 			db_tour = await database_sync_to_async(lambda: Tournament.objects.get(id=int(tour_id)))()
 			if user_1 and user_2 and db_game and db_tour:
-				player_1 = Player.get_player_by_user(user_1)
-				player_2 = Player.get_player_by_user(user_2)
-				if player_1 == None or player_2 == None:
-					return
-				game_group = await GameHandler.create(player_1, player_2, ranked=True, db_entry=db_game, tournament=db_tour)
-				await game_group.channel_layer.group_send(
-					game_group.game_group,
-					{
-						'type': 'open_game_modal',
-					})
-				asyncio.create_task(game_group.start_game())
+				await user_1.invite_tournament_game(user_2, db_tour, db_game);
 
 	# Tries to create a guest player with the given alias
 	# If the alias is already taken or empty, the player gets an "alias_exists" message
@@ -148,6 +144,8 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 		await self.accept()
 		if self.scope["user"].is_authenticated:
 			await self.channel_layer.group_add(f"gameconsumer_{self.scope['user'].id}", self.channel_name)
+			if "gameconsumer_" + str(self.scope['user'].id) not in RemoteGameConsumer.all_consumer_groups:
+				RemoteGameConsumer.all_consumer_groups.append("gameconsumer_" + str(self.scope['user'].id))
 			if Player.get_channel_by_user(self.scope["user"]) != None:
 				await self.send(text_data=json.dumps({
 					'type': 'redirect',
@@ -240,7 +238,11 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	# Removes the player from game and waiting room and deletes the player object
 	async def disconnect(self, close_code):
 		if self.scope["user"].is_authenticated:
+			# send close modal message to client
+			await self.channel_layer.group_send(f"gameconsumer_{self.scope['user'].id}",{'type': 'close_game_modal',})
 			await self.channel_layer.group_discard(f"gameconsumer_{self.scope['user'].id}", self.channel_name)
+			if "gameconsumer_" + str(self.scope['user'].id) in RemoteGameConsumer.all_consumer_groups:
+				RemoteGameConsumer.all_consumer_groups.remove("gameconsumer_" + str(self.scope['user'].id))
 		player = Player.get_player_by_channel(self.channel_name)
 		if player != None:
 			# give up if the user is in a game
@@ -253,6 +255,22 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 			Player.all_players.remove(Player.get_player_by_channel(self.channel_name))
 			print(f"{self.scope['user'].alias} disconnected from game-websocket.")
 
+	# API-Function for paddle movement (only used for the api)
+	async def move_paddle(self, event):
+		direction = event.get('direction')
+		player = Player.get_player_by_channel(self.channel_name)
+		if player.game_handler != None:
+			game_handler = GameHandler.get_game_handler_by_name(player.game_handler)
+			if game_handler == None:
+				return
+			if direction == "up" or direction == "UP":
+				game_handler.update_paddle(player, "ArrowUp", "key_pressed")
+			elif direction == "down" or direction == "DOWN":
+				game_handler.update_paddle(player, "ArrowDown", "key_pressed")
+			else:
+				game_handler.update_paddle(player, "ArrowUp", "key_released")
+				game_handler.update_paddle(player, "ArrowDown", "key_released")
+		
 
 	#####################
 	## MESSAGE HANDLER ##
@@ -308,4 +326,10 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	async def open_game_modal(self, event):
 		await self.send(text_data=json.dumps({
 			'type': 'open_game_modal',
+		}))
+
+	# This message is used to close the modal in the clients browser
+	async def close_game_modal(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'close_game_modal',
 		}))

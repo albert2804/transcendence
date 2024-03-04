@@ -15,11 +15,6 @@ class PongGame:
 		self.canvasHeight = 400
 		self.winner = 0
 		
-		self.mode = 0
-		self.gravity_x = 3 #velocity in x direction
-		self.max_velocity = 10
-		self.repel = 1.1 # the bigger the value the stronger the ball will be accelerated to the top after hitting a paddle
-
 		# Game state saved as json (ready to be sent to the client)
 		self.latest_game_state = None
 		self.game_state_lock = asyncio.Lock() # Lock to prevent race conditions
@@ -29,12 +24,18 @@ class PongGame:
 		self.rightPaddle = {'x': self.canvasWidth - 10, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
 
 		# Ball initialization
-		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.gravity_x, 'dy': self.initialSpeed, 'radius': 6}
+		self.acceleration = 0.05
+		self.tolerance = 2
+		self.velocity = 3
+		self.max_velocity = 10
+		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.velocity, 'dy': self.initialSpeed, 'radius': 6}
 
-		# Sounds
 		# if there is an intersection of the ball and the paddle, intersection = true(needed for sound)
+		self.mode = False # gravity mode on
 		self.intersection = False
-
+		self.repel = 1 # the bigger the value the stronger the ball will be accelerated to the top after hitting a paddle
+		
+		# Game state saved as json (ready to be sent to the client)
 	def update_game(self):
 
 		# Update paddle positions
@@ -52,44 +53,48 @@ class PongGame:
 		# self.ball['x'] += (self.ball['dx'])
 		self.ball['x'] += self.ball['dx']
 		
-		acceleration = 0.05
+		acceleration = self.acceleration
 		self.ball['dy'] += acceleration
 		self.ball['y'] += self.ball['dy']
 
 		# Bounce off the top or bottom of the canvas
 		if self.ball['y'] - self.ball['radius'] < 0 or self.ball['y'] + self.ball['radius'] > self.canvasHeight:
-			self.ball['dy'] = (-self.ball['dy'] * 1.05)
+			self.ball['dy'] = (-self.ball['dy'])
 		
 			# Ensure the ball stays within the canvas after bouncing off the bottom
 			self.ball['y'] = max(self.ball['radius'], min(self.canvasHeight - self.ball['radius'], self.ball['y']))
 
-		# Bounce off paddles and increase ball speed
-		if (
-			self.ball['x'] - self.ball['radius'] < self.leftPaddle['x'] + self.leftPaddle['width'] and
-			self.leftPaddle['y'] < self.ball['y'] < self.leftPaddle['y'] + self.leftPaddle['height']
+		# Bounce off paddles with some tolerance and increased ball speed
+		tolerance = self.tolerance
+		if ((self.ball['x'] - self.ball['radius']) - (self.leftPaddle['x'] + self.leftPaddle['width']) <  tolerance 
+				# and ((self.leftPaddle['y'] - self.leftPaddle['height'] / 2) - (self.ball['x'] + self.ball['radius']) < tolerance or 
+				# 		(self.ball['x'] - self.ball['radius']) - (self.leftPaddle['y'] + self.leftPaddle['height'] / 2) < tolerance)
+			and self.leftPaddle['y'] < self.ball['y'] < self.leftPaddle['y'] + self.leftPaddle['height']
 		):
-			self.adjust_ball_angle(self.leftPaddle)
 			self.intersection = True
+			self.adjust_ball_angle(self.leftPaddle)
+			print("inter")
 
+		# if ((self.rightPaddle['x'] - self.rightPaddle['width']) - (self.ball['x'] + self.ball['radius']) < tolerance
 		if (
 			self.ball['x'] + self.ball['radius'] > self.rightPaddle['x'] and
 			self.rightPaddle['y'] < self.ball['y'] < self.rightPaddle['y'] + self.rightPaddle['height']
 		):
-			self.adjust_ball_angle(self.rightPaddle)
 			self.intersection = True
+			self.adjust_ball_angle(self.rightPaddle)
 
 		# Check for scoring
-		if (self.ball['x'] - self.ball['radius'] < 0 and not self.intersection) or (self.ball['x'] + self.ball['radius'] > self.canvasWidth and not self.intersection):
+		if (self.ball['x'] - self.ball['radius'] < 0 ) and not self.intersection or (self.ball['x'] + self.ball['radius'] > self.canvasWidth) and not self.intersection :
 			# Reset speed
 			self.ball['dy'] = self.initialSpeed
 
 			# Reset speed and ball direction depending on the person scoring
 			if self.ball['x'] + self.ball['radius'] > self.canvasWidth:
 				self.pointsP1 += 1
-				self.ball['dx'] = -self.gravity_x
+				self.ball['dx'] = -self.velocity
 			elif self.ball['x'] - self.ball['radius'] < 0:
 				self.pointsP2 += 1
-				self.ball['dx'] = self.gravity_x
+				self.ball['dx'] = self.velocity
 
 			# Reset ball position to center
 			self.ball['x'] = self.canvasWidth/2
@@ -172,14 +177,25 @@ class PongGame:
 
 	def adjust_ball_angle(self, paddle):
 		
-		angle = abs(self.ball['dy']) / abs(self.ball['dx'])
+		repel = self.repel
+		angle = (self.ball['dy']) / abs(self.ball['dx'])
+
+		# calculates the relative position of the ball to paddles on intersection -> value between 0 and 1
+		if self.intersection:
+			pos = abs(self.ball['y'] - (paddle['y'] + paddle['height']/2)) / (paddle['height'] / 2)
+			print(f"\n({self.ball['y']} - ({paddle['y']} + {paddle['height']/2})) / {paddle['height'] / 2}  = {pos}")
+			print(f"Angle: {angle}")
+			
+			# calculates the repel, depending on the intersection point and angle
+			repel = (1.5 - pos)
+		# very small angle ,less then 6 degrees = 0.1
+		if angle <= 0.1 and angle >= -0.1:
+			repel *= 1.5
 		
-		# very small angle ,less then 6 degrees = 0.01
-		if angle < 0.1:
-			self.repel *= 1.4
-		else:
-			self.repel = 1.1
-		self.ball['dy'] = -angle * self.repel * abs(self.ball['dx'])
+
+		print(f"\n OLD [DY]{self.ball['dy']}")
+		self.ball['dy'] = angle * repel * abs(self.ball['dx'])
+		print(f"\n NEW [DY]{self.ball['dy']}")
 		self.ball['dx'] = -self.ball['dx']  # Reverse the horizontal direction
 		
 		

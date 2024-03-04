@@ -4,12 +4,13 @@ from .logic import signUpTwoDummies
 from .logic import inviteOtherPlayer
 from .logic import getTournaments
 from .logic import getTourmaentsGames
+from .logic import getPlayableGames
 
 urlpatterns = [
     path('logic/', initTournament),
     path('sign_up/', signUpTwoDummies),
-    path('iviteOtherPlayer/', inviteOtherPlayer),
+    path('inviteOtherPlayer/', inviteOtherPlayer),
     path('getTournaments/', getTournaments),
-    path('getTourmaentsGames/', getTourmaentsGames)
-
+    path('getTourmaentsGames/', getTourmaentsGames),
+    path('getPlayableGames/', getPlayableGames)
 ]

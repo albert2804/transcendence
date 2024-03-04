@@ -38,7 +38,7 @@ class RemoteGame(models.Model) :
             'finished': self.finished,
 		}	# for the tournament
 
-	def to_dict(self):
+	def to_dict(self, tournament_name=None):
 		return {
       'id': self.id,
       'player1': self.player1.username if self.player1 else None,
@@ -53,8 +53,13 @@ class RemoteGame(models.Model) :
       'finished': self.finished,
 			'is_round': self.is_round,
 			'is_match': self.is_match_nbr,
+			'tournament_name': tournament_name,
     }
 	
 	def to_json(self):
-		return json.dumps(self.to_dict(), cls=DjangoJSONEncoder)
+		return json.loads(json.dumps(self.to_dict(), cls=DjangoJSONEncoder))
+
 	
+	def queryset_to_json(queryset, tournament_name=None):
+		game_data = [game.to_dict(game.tournament_name) for game in queryset]
+		return json.dumps(game_data, cls=DjangoJSONEncoder)

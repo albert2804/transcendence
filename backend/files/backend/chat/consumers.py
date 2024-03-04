@@ -8,6 +8,8 @@ import json
 from channels.layers import get_channel_layer
 
 class ChatConsumer(AsyncWebsocketConsumer):
+	# all instances of chat consumer
+	all_consumer_groups = []
     
 	@database_sync_to_async
 	def update_user_status(self, user, status):
@@ -153,12 +155,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
 	
 	async def handle_play_command(self, event):
 		receiver_id = event.get('receiver_id')
+		print(event)
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:
 				# call the invite_to_game method of the CustomUser model
 				await self.scope['user'].invite_to_game(receiver)
 	
+	async def handle_play_tournament_command(self, event):
+		receiver_id = event.get('receiver_id')
+		print(event)
+		if receiver_id:
+			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
+			if receiver:
+				# call the invite_to_game method of the CustomUser model
+				await self.scope['user'].invite_to_game(receiver)
+	
+
 	async def handle_dont_play_command(self, event):
 		receiver_id = event.get('receiver_id')
 		if receiver_id:
@@ -167,6 +180,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				# call the remove_game_invite method of the CustomUser model
 				await self.scope['user'].remove_game_invite(receiver)
     
+	async def handle_dont_play_tournament_command(self, event):
+		receiver_id = event.get('receiver_id')
+		if receiver_id:
+			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
+			if receiver:
+				# call the remove_game_invite method of the CustomUser model
+				await self.scope['user'].remove_tournament_invite(receiver)
+
 	async def handle_help_command(self, event):
 		receiver_id = event.get('receiver_id')
 		if receiver_id:
@@ -189,6 +210,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				f"chat_{self.scope['user'].id}",
 				self.channel_name
 			)
+			if f"chat_{self.scope['user'].id}" not in self.all_consumer_groups:
+				self.all_consumer_groups.append(f"chat_{self.scope['user'].id}")
 			# add user to chat group (general group to update user list etc.)
 			await self.channel_layer.group_add(
 				"chat",
@@ -205,6 +228,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		if self.scope["user"].is_authenticated:
 			await self.channel_layer.group_discard(
 				f"chat_{self.scope['user'].id}",
+				self.channel_name
+			)
+			if f"chat_{self.scope['user'].id}" in self.all_consumer_groups:
+				self.all_consumer_groups.remove(f"chat_{self.scope['user'].id}")
+			await self.channel_layer.group_discard(
+				"chat",
 				self.channel_name
 			)
 		await self.update_user_status(self.scope["user"], False)
@@ -228,6 +257,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 					await self.handle_play_command(text_data_json)
 				elif command == '/dont_play':
 					await self.handle_dont_play_command(text_data_json)
+				elif command == '/dont_play_tournament':
+					await self.handle_dont_play_tournament_command(text_data_json)
 				elif command == '/help':
 					await self.handle_help_command(text_data_json)
 				else:

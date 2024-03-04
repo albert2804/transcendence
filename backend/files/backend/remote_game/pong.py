@@ -183,8 +183,8 @@ class PongGame:
 			pos = (abs(self.ball['dy'] - paddle['y'])) / (paddle['height']/2)
 			# calculates the repel, depending on the intersection point and angle
 			repel = (1 - pos)
-		# very small angle ,less then 6 degrees = 0.01
-		if angle < 0.1:
+		# very small angle ,less then 6 degrees = 0.1
+		if angle <= 0.1 && angle >= -0.1:
 			repel *= 1.5
 		self.ball['dy'] = angle * repel * abs(self.ball['dx'])
 		self.ball['dx'] = -self.ball['dx']  # Reverse the horizontal direction

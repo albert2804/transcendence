@@ -10,15 +10,15 @@ import { isLoggedIn } from '~/store';
   <div>
     <div>
       <h1 style="margin-top: 20px;">Youre on the tournament site</h1>
-      <button @click="callSignUp" class="btn btn-primary"></button>
+      <button @click="callSignUp" class="nes-btn is-primary"></button>
       <div v-if="isLoggedIn">
-        <button type="button" @click="toggleForm" class="nes-btn is-primary">
+        <button type="button" @click="toggleForm" class="nes-btn is-primary" style="margin-top: 20px;">
         {{ formVisible ? 'No Tournament' : 'Create Tournament' }} </button>
       </div>
     </div>
     <div class="ErrorHandling">
-      <div v-if="recvmessage" class="alert alert-success" style="min-width: 14em" role="alert">{{ recvmessage }}</div>
-      <div v-if="recverror" class="alert alert-danger" style="min-width: 14em" role="alert">{{ recverror }}</div>
+      <div v-if="recvmessage" class="alert alert-success" style="min-width: 14em; margin-bottom: 20px; margin-top: 20px;" role="alert">{{ recvmessage }}</div>
+      <div v-if="recverror" class="alert alert-danger" style="min-width: 14em; margin-bottom: 20px; margin-top: 20px;" role="alert">{{ recverror }}</div>
     </div>
     <div v-if="formVisible">
       <FormTournament v-bind:local="false" :loggedInUser="loggedInUser" @message-from-child="handleUpdate"/>
@@ -26,6 +26,7 @@ import { isLoggedIn } from '~/store';
     <div v-if="isLoggedIn">
       <ListTournament :loggedInUser="loggedInUser" @message-from-child="handleUpdate"/>
     </div>
+    <ErrorModal v-show="modalContent" :content="modalContent" :modalTitle="'Response:'" modalId="exampleModal" ariaLabel="Modal for errors and messages" />
   </div>
 </template>
 
@@ -33,15 +34,17 @@ import { isLoggedIn } from '~/store';
 import FormTournament from '~/components/tournament/FormTournament.vue';
 import ListTournament from '~/components/tournament/ListTournament.vue';
 import BracketsTournament from '~/components/tournament/BracketsTournament.vue';
+import ErrorModal from '~/components/popup/ErrorMessages.vue';
 
 export default {
-  components: {FormTournament, ListTournament}, 
+  components: {FormTournament, ListTournament, ErrorModal}, 
   data() {
     return {
       formVisible: false,
       loggedInUser: "",
       recverror: '',
       recvmessage: '',
+      modalContent: null,
     };
   },
   setup() {
@@ -96,7 +99,14 @@ export default {
     async handleUpdate(message, error) {
       this.recverror = error;
       this.recvmessage = message;
-      console.log('print from parent', this.recverror);
+      if (error) {
+        console.log('print from parent', error);
+        this.openModal(error);
+      }
+      else if (message) {
+        console.log('print from parent', message);
+        this.openModal(message);
+      }
       this.$forceUpdate();
       this.resetMessages();
     },
@@ -104,7 +114,19 @@ export default {
       await new Promise(resolve => setTimeout(resolve, 5000));
       this.recverror = '';
       this.recvmessage = '';
-      this.$forceUpdate();
+      // this.$forceUpdate();
+    },
+    async openModal(data) {
+      const myModal = document.getElementById('ErrorModal').show();
+    // const myInput = document.getElementById('myInput')
+
+      myModal.addEventListener('shown.bs.modal', () => {
+      //  myInput.focus()
+      })
+      this.modalContent = data;
+    },
+    resetModal() {
+      this.modalContent = null;    
     }
   }
 }

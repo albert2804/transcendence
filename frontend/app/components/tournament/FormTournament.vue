@@ -1,6 +1,6 @@
 <template>
   <form style="max-width: 800px; margin: auto; overflow: hidden;">
-    <div class="nes-field is-rounded">
+    <div class="nes-field is-rounded" style="margin-bottom: 20px; margin-top: 20px;">
       <input type="text" placeholder="Tournament Name" @input="setTournamentName($event)" class="nes-input"/>
     </div>
     <div class="mb-3">
@@ -32,7 +32,7 @@
       </div>
     </div>
 
-    <button type="submit" @click="startTournament($event)" class="btn btn-primary">Start Tournament</button>
+    <button type="submit" @click="startTournament($event)" class="nes-btn is-primary" style="margin-bottom: 20px;" >Start Tournament</button>
   </form>
 </template>
 
@@ -125,11 +125,13 @@ export default {
       if (this.tournamentName == "") {
         this.message == "Error Tournament Name isnt allowed to be empty"
         console.log("Error Tournament Name isnt allowed to be empty")
+        //add error message;
         this.resetMessages();
         return
       }
       // this.createMatches()
       // TODO: needs to call backend for tournament handling which is not yet implementet
+      console.log(this.all_players);
       const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
       try {
         const response = await fetch('/endpoint/tournament/logic/', {
@@ -144,7 +146,7 @@ export default {
         const responseData = await response.json()
         this.error = responseData.error;
 				this.message = responseData.message;
-        this.sendMessagetoParent(this.error, this.message);
+        await this.sendMessagetoParent(this.error, this.message);
         console.log('Backend Response:', this.error)
         this.all_matches = responseData.data.games
         this.tournamentName = responseData.data.tour_name

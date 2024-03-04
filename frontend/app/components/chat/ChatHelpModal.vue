@@ -12,11 +12,12 @@
         <p><i class="bi bi-x-circle-fill" style="color: red; font-size: 1.2rem;"></i> - This user blocked you</p>
 		<br>
 		<p>- Left click on a user to open the chat</p>
-		<p>- Right click on a user in the list or left click on a user in the chatbox to open the users profile page</p>
+		<p>- Click on a username in the chatbox header to view their profile</p>
 		<br>
         <p style="margin-top: 10px; font-weight: bold;">Helpful chat commands:</p>
         <p><code>/play</code> - Invite/Accept user to play game</p>
         <p><code>/dont_play</code> - Reject game invitation</p>
+        <p><code>/dont_play_tournament</code> - Reject tournament game invitation</p>
         <p><code>/block</code> - Block user</p>
         <p><code>/unblock</code> - Unblock user</p>
         <p><code>/friend</code> - Invite/Accept friend request</p>

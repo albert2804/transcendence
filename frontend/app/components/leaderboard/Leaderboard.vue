@@ -23,7 +23,7 @@
             <td>{{ (user.num_games_played !== 0) ? (( user.num_games_won / user.num_games_played) * 100).toFixed(0) + '%' : '0%' }}</td>
             <td>
               <router-link :to="{ name: 'userinfopage', query: { username: user.username } }">
-                <button type="button" class="btn nes-btn btn-primary"><span>View Profile</span></button>
+                <button type="button" class="btn nes-btn btn-primary profile-button"><span>View Profile</span></button>
               </router-link>
             </td>
           </tr>
@@ -80,13 +80,33 @@ export default {
 
 <style>
 .nes-table.is-bordered{
-  width: 1000px;
-  overflow-x: scroll;
+  max-width: 90%;
+  font-size: 1.0em;
+}
+
+.nes-table.is-bordered * {
+  font-size: inherit;
+}
+
+@media screen and (max-width: 1200px) {
+  .nes-table.is-bordered {
+	font-size: 0.8em; 
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .nes-table.is-bordered {
+	font-size: 0.7em; 
+  }
 }
 
 @media screen and (max-width: 575px) {
   .nes-table.is-bordered {
-    margin-left: 700px;
+	font-size: 0.5em;
   }
+}
+
+.profile-button {
+  max-width: 100%;
 }
 </style>

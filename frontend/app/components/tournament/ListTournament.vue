@@ -53,6 +53,8 @@ export default {
           tournaments: [],
           ongoingTournaments: [],
           endedTournaments: [],
+          error: '',
+          message: '',
       };
   },
   methods: {
@@ -70,6 +72,9 @@ export default {
             body: JSON.stringify({ name: this.loggedInUser, ongoingOrEnded: ongoingOrEnded}),
           });
           const responseData = await response.json();
+          this.error = responseData.error;
+				  this.message = responseData.message;
+          this.sendMessagetoParent(this.error, this.message);
           this.tournaments = JSON.parse(responseData.data);
           this.tournaments.forEach((tournament) => {
             tournament.showTournament = false;
@@ -95,6 +100,9 @@ export default {
         this.endedTournaments = [];
       }
     },
+    async sendMessagetoParent(message, error) {
+			await this.$emit('message-from-child', message, error);
+		}
   },
 };
 </script>

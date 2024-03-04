@@ -185,8 +185,8 @@ export default {
         console.log('Error sending signal to backend:', error);
       }
     },
-    sendMessagetoParent(message, error) {
-			this.$emit('message-from-child', message, error);
+    async sendMessagetoParent(message, error) {
+			await this.$emit('message-from-child', message, error);
 		}
   },  
 };

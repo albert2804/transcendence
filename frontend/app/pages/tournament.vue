@@ -24,14 +24,15 @@ import { isLoggedIn } from '~/store';
       <FormTournament v-bind:local="false" :loggedInUser="loggedInUser" @message-from-child="handleUpdate"/>
     </div>
     <div v-if="isLoggedIn">
-      <ListTournament :loggedInUser="loggedInUser"/>
+      <ListTournament :loggedInUser="loggedInUser" @message-from-child="handleUpdate"/>
     </div>
   </div>
 </template>
 
 <script>
 import FormTournament from '~/components/tournament/FormTournament.vue';
-import ListTournament from '~/components/tournament/ListTournament.vue'
+import ListTournament from '~/components/tournament/ListTournament.vue';
+import BracketsTournament from '~/components/tournament/BracketsTournament.vue';
 
 export default {
   components: {FormTournament, ListTournament}, 
@@ -100,7 +101,7 @@ export default {
       this.resetMessages();
     },
     async resetMessages() {
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 5000));
       this.recverror = '';
       this.recvmessage = '';
       this.$forceUpdate();

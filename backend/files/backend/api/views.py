@@ -221,7 +221,7 @@ def invite_to_game(request):
 # -H 'Authorization: Bearer <YOUR SESSION-ID>' \
 # -d '{
 #   "direction": "<up or down>"
-# }'
+# }'sw
 #
 def move_paddle(request):
 	if request.method == 'POST':

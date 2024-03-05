@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" v-if="fetched">
     <h1 class="text-center">Leaderboard</h1>
       <table class="nes-table is-bordered table-hover">
         <thead class="thread-dark">
@@ -36,7 +36,10 @@
 export default {
 	data()
   {
-    return { users: []	};
+    return { 
+      users: [],
+      fetched: false
+    };
   },
 	mounted() 
   {
@@ -68,6 +71,7 @@ export default {
         )
         const jsonResponse = await response.json();
         this.users = jsonResponse.response;
+        this.fetched = true;
       } 
       catch (error) 
       {

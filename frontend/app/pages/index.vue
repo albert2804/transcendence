@@ -29,7 +29,7 @@ export default {
   font-size: 4vw;
   color: black;
   overflow: hidden;
-  z-index: 100;
+  z-index: 2;
   text-shadow: 4px 4px 0px white, 
                4px -4px 0px white, 
                -4px 4px 0px white, 

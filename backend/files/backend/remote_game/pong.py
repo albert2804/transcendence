@@ -20,21 +20,18 @@ class PongGame:
 		self.game_state_lock = asyncio.Lock() # Lock to prevent race conditions
 
 		# Paddle initialization
-		# self.leftPaddle = {'x': 0, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
-		self.leftPaddle = {'x': 0, 'y': 198, 'dy': 0, 'width': 10, 'height': 80}
+		self.leftPaddle = {'x': 0, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
 		self.rightPaddle = {'x': self.canvasWidth - 10, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
 
 		# Ball initialization
-		self.acceleration = 0.05
+		self.acceleration = 1.4
 		self.tolerance = 3
-		self.velocity = 3
 		self.max_velocity = 10
-		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.velocity, 'dy': self.initialSpeed, 'radius': 6}
+		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.initialSpeed, 'dy': self.initialSpeed, 'radius': 6}
 
 		# if there is an intersection of the ball and the paddle, intersection = true(needed for sound)
 		self.intersection = False
-		self.repel = 2 # the bigger the value the stronger the ball will be accelerated to the top after hitting a paddle
-		
+
 		# Game state saved as json (ready to be sent to the client)
 	def update_game(self):
 
@@ -52,9 +49,6 @@ class PongGame:
 		# Move the ball
 		# self.ball['x'] += (self.ball['dx'])
 		self.ball['x'] += self.ball['dx']
-		
-		acceleration = self.acceleration
-		self.ball['dy'] += acceleration
 		self.ball['y'] += self.ball['dy']
 
 		# Bounce off the top or bottom of the canvas
@@ -70,14 +64,14 @@ class PongGame:
 				and (self.ball['y'] > self.leftPaddle['y'] and self.ball['y'] < (self.leftPaddle['y'] + self.leftPaddle['height']))
 		):
 			self.intersection = True
-			self.gravity(self.leftPaddle)
+			self.repel(self.leftPaddle)
 
 		if (
 			self.rightPaddle['x'] - self.rightPaddle['width'] - self.ball['x'] < tolerance
 			and (self.ball['y'] > self.rightPaddle['y'] and self.ball['y'] < (self.rightPaddle['y'] + self.rightPaddle['height']))
 		):
 			self.intersection = True
-			self.gravity(self.rightPaddle)
+			self.repel(self.rightPaddle)
 
 		# Check for scoring
 		if (self.ball['x'] - self.ball['radius'] < 0 ) and not self.intersection or (self.ball['x'] + self.ball['radius'] > self.canvasWidth) and not self.intersection :
@@ -87,10 +81,10 @@ class PongGame:
 			# Reset speed and ball direction depending on the person scoring
 			if self.ball['x'] + self.ball['radius'] > self.canvasWidth:
 				self.pointsP1 += 1
-				self.ball['dx'] = -self.velocity
+				self.ball['dx'] = self.ball['dy'] = -self.initialSpeed
 			elif self.ball['x'] - self.ball['radius'] < 0:
 				self.pointsP2 += 1
-				self.ball['dx'] = self.velocity
+				self.ball['dx'] = self.ball['dy'] = -self.initialSpeed
 
 			# Reset ball position to center
 			self.ball['x'] = self.canvasWidth/2
@@ -100,7 +94,7 @@ class PongGame:
 		self.ball['x'] = max(self.ball['radius'], min(self.canvasWidth - self.ball['radius'], self.ball['x']))
 
 
-	def gravity(self, paddle):
+	def repel(self, paddle):
 		
 		angle = (self.ball['dy']) / abs(self.ball['dx'])
 		if (math.degrees(angle)) > 60:
@@ -109,25 +103,12 @@ class PongGame:
 			angle = -math.pi / 3 
 		print(f"{math.degrees(angle)=}")
 
-		# calculates the relative position of the ball to paddles on intersection -> value between 0 and 1
-		if self.intersection:
-			pos = abs(self.ball['y'] - (paddle['y'] + paddle['height']/2)) / (paddle['height'] / 2)
-			print(f"\n({self.ball['y']} - ({paddle['y']} + {paddle['height']/2})) / {paddle['height'] / 2}  = {pos}")
-			print(f"Angle: {angle}")
-			
-			# calculates the repel, depending on the intersection point and angle
-			repel = (self.repel - pos)
-			print(f"Repel: {repel}")
-		# very small angle ,less then 6 degrees = 0.1
-			if angle <= 0.1 and angle >= -0.1:
-				repel *= 1.5
-			
-
-			print(f"\n OLD [DY]{self.ball['dy']}")
-			self.ball['dy'] = angle * repel * abs(self.ball['dx'])
-			print(f"\n NEW [DY]{self.ball['dy']}")
-			self.ball['dx'] = -self.ball['dx']  # Reverse the horizontal direction
-			self.intersection = False
+		self.ball['dy'] = angle * abs(self.ball['dx'])
+		self.ball['dx'] =-self.ball['dx']  # Reverse the horizontal direction
+		self.ball['dx'] *= self.acceleration # raise the velocity by a factor
+		if self.ball['dx'] > self.max_velocity:
+			self.ball['dx'] = self.max_velocity
+		self.intersection = False
 		
 	
 	def paddle_up(self, player):

@@ -25,6 +25,12 @@
         <div style="color: #000000; text-align: center;">
           <div>{{ message }}</div>
         </div>
+        <!-- Checkbox --->
+        <div>
+          <label for="checkbox">
+          <input type="checkbox" id="checkbox" v-model="isChecked" @change="changeMode"> Gravity Mode
+          </label>
+        </div>  
         <!-- Menu buttons --->
         <div v-if="showMenu">
           <button type="button" class="nes-btn btn-primary" @click="startTrainingGame">Start Training Game</button>
@@ -115,6 +121,8 @@
       controls: '',
       showControlsPic: false,
       map: '',
+      isChecked: false,
+      mode: 'default'
     }
   },
   watch: {
@@ -266,6 +274,7 @@
         const data = JSON.stringify({
           type: 'start_training_game',
           alias: this.alias,
+          mode: this.mode,
         });
         this.socket.send(data);
       }
@@ -275,7 +284,8 @@
 
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
-          type: 'start_local_game'
+          type: 'start_local_game',
+          mode: this.mode,
         });
         this.socket.send(data);
       }
@@ -300,12 +310,14 @@
           this.map = '';
       }
     },
+    
 
     startRankedGame () {
 
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
-          type: 'start_ranked_game'
+          type: 'start_ranked_game',
+          mode: this.mode,
         });
         this.socket.send(data);
       }
@@ -443,6 +455,13 @@
       this.controls='https://media.tenor.com/Ycl8mXFNE_8AAAAi/get-real-cat.gif';
       await new Promise(resolve => setTimeout(resolve, 3000));
       this.showControlsPic=false;
+    },
+    
+    changeMode () {
+      if (!this.isChecked)
+        this.mode = 'default';
+      else
+        this.mode = 'gravity';
     },
   }
 };

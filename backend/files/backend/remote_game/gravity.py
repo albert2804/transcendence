@@ -110,24 +110,21 @@ class GPongGame:
 		print(f"{math.degrees(angle)=}")
 
 		# calculates the relative position of the ball to paddles on intersection -> value between 0 and 1
-		if self.intersection:
-			pos = abs(self.ball['y'] - (paddle['y'] + paddle['height']/2)) / (paddle['height'] / 2)
-			print(f"\n({self.ball['y']} - ({paddle['y']} + {paddle['height']/2})) / {paddle['height'] / 2}  = {pos}")
-			print(f"Angle: {angle}")
-			
-			# calculates the repel, depending on the intersection point and angle
-			repel = (self.repel - pos)
-			print(f"Repel: {repel}")
-		# very small angle ,less then 6 degrees = 0.1
-			if angle <= 0.1 and angle >= -0.1:
-				repel *= 1.5
-			
-
-			print(f"\n OLD [DY]{self.ball['dy']}")
-			self.ball['dy'] = angle * repel * abs(self.ball['dx'])
-			print(f"\n NEW [DY]{self.ball['dy']}")
-			self.ball['dx'] = -self.ball['dx']  # Reverse the horizontal direction
-			self.intersection = False
+		pos = abs(self.ball['y'] - (paddle['y'] + paddle['height']/2)) / (paddle['height'] / 2)
+		print(f"\n({self.ball['y']} - ({paddle['y']} + {paddle['height']/2})) / {paddle['height'] / 2}  = {pos}")
+		print(f"Angle: {angle}")
+		
+		# calculates the repel, depending on the intersection point
+		repel = (self.repel - pos)
+		print(f"Repel: {repel}")
+	# very small angle ,less then 6 degrees = 0.1
+		if angle <= 0.1 and angle >= -0.1:
+			repel *= 1.5
+		print(f"\n OLD [DY]{self.ball['dy']}")
+		self.ball['dy'] = angle * repel * abs(self.ball['dx'])
+		print(f"\n NEW [DY]{self.ball['dy']}")
+		self.ball['dx'] = -self.ball['dx']  # Reverse the horizontal direction
+		self.intersection = False
 		
 	
 	def paddle_up(self, player):

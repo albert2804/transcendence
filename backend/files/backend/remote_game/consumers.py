@@ -9,14 +9,43 @@ from django.apps import apps
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 
+def mode(gametype: str, gamemode: str):
+    def decorator(func):
+        async def wrapper(self, player):
+            room = RemoteGameConsumer.rooms[gametype][gamemode]
+            if len(room) >= 1:
+                player1 = room[0]
+                room.pop(0)
+                game_group = await GameHandler.create(player1, player, mode=gamemode)
+                asyncio.create_task(game_group.start_game())
+            else:
+                room.append(player)
+            await player.send_state()
+        return wrapper
+    return decorator
+
+
 class RemoteGameConsumer(AsyncWebsocketConsumer):
 	# all instances of RemoteGameConsumer
 	all_consumer_groups = []
 
 	# list of players in the waiting group for unranked games (mixed room for guests and registered users)
 	training_waiting_room = []
+	training_waiting_room_g = []
 	# list of players in the waiting group for ranked games (only registered users)
 	ranked_waiting_room = []
+	ranked_waiting_room_g = []
+
+	rooms = {
+		'training': {
+			'default': training_waiting_room,
+			'gravity': training_waiting_room_g
+		},
+		'ranked': {
+			'default': ranked_waiting_room,
+			'gravity': ranked_waiting_room_g
+		}
+	}
 
 	# async def fast_game(self, event): # NOT USED BUT INTERESTING (UNRANKED GAME)
 	# 	print("fast_game called")
@@ -114,28 +143,54 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 		await player.send_state()
 		print(f"Anonymous user upgraded to guest player with alias {alias}.")
 
-	# Adds the player to the waiting room list (for unranked games)
+	@mode('training','default')
 	async def add_to_training_waiting_room(self, player):
-		if len(RemoteGameConsumer.training_waiting_room) >= 1:
-			player1 = RemoteGameConsumer.training_waiting_room[0]
-			RemoteGameConsumer.training_waiting_room.pop(0)
-			game_group = await GameHandler.create(player1, player)
-			asyncio.create_task(game_group.start_game())
-		else:
-			RemoteGameConsumer.training_waiting_room.append(player)
-		await player.send_state()
+		pass
+
+	@mode('training','gravity')
+	async def add_to_training_waiting_room_g(self, player):
+		pass
+
+	@mode('ranked','default')
+	async def add_to_ranked_waiting_room(self, player):
+		pass
+
+	@mode('ranked','gravity')
+	async def add_to_ranked_waiting_room_g(self, player):
+		pass
+
+
+		# room = RemoteGameConsumer.rooms['training'][mode]
+		# if len(room) >= 1:
+		# 	player1 = room[0]
+		# 	room.pop(0)
+		# 	game_group = await GameHandler.create(player1, player, mode='default')
+		# 	asyncio.create_task(game_group.start_game())
+		# else:
+		# 	room.append(player)
+		# await player.send_state()
+
+	# async def add_to_training_waiting_room(self, player):
+	# 	if len(RemoteGameConsumer.training_waiting_room) >= 1:
+	# 		player1 = RemoteGameConsumer.training_waiting_room[0]
+	# 		RemoteGameConsumer.training_waiting_room.pop(0)
+	# 		game_group = await GameHandler.create(player1, player, mode)
+	# 		asyncio.create_task(game_group.start_game())
+	# 	else:
+	# 		RemoteGameConsumer.training_waiting_room.append(player)
+	# 	await player.send_state()
 	
 	# Adds the player to the waiting room list (for ranked games)
-	async def add_to_ranked_waiting_room(self, player):
-		if player.get_user().is_authenticated:
-			if len(RemoteGameConsumer.ranked_waiting_room) >= 1:
-				player1 = RemoteGameConsumer.ranked_waiting_room[0]
-				RemoteGameConsumer.ranked_waiting_room.pop(0)
-				game_group = await GameHandler.create(player1, player, ranked=True)
-				asyncio.create_task(game_group.start_game())
-			else:
-				RemoteGameConsumer.ranked_waiting_room.append(player)
-			await player.send_state()
+	# async def add_to_ranked_waiting_room(self, player):
+	# 	if player.get_user().is_authenticated:
+	# 		if len(RemoteGameConsumer.ranked_waiting_room) >= 1:
+	# 			player1 = RemoteGameConsumer.ranked_waiting_room[0]
+	# 			RemoteGameConsumer.ranked_waiting_room.pop(0)
+	# 			game_group = await GameHandler.create(player1, player, ranked=True)
+	# 			asyncio.create_task(game_group.start_game())
+	# 		else:
+	# 			RemoteGameConsumer.ranked_waiting_room.append(player)
+	# 		await player.send_state()
 	
 	# This function is called when a new connection is established
 	# Checks if user is authenticated or not
@@ -189,6 +244,10 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 						RemoteGameConsumer.training_waiting_room.remove(player)
 					if player in RemoteGameConsumer.ranked_waiting_room:
 						RemoteGameConsumer.ranked_waiting_room.remove(player)
+					if player in RemoteGameConsumer.training_waiting_room_g:
+						RemoteGameConsumer.training_waiting_room_g.remove(player)
+					if player in RemoteGameConsumer.ranked_waiting_room_g:
+						RemoteGameConsumer.ranked_waiting_room_g.remove(player)
 					await player.send_state()
 				elif data.get('type') == 'create_guest_player_2':
 					if data.get('alias') == "":
@@ -210,6 +269,10 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 						RemoteGameConsumer.training_waiting_room.remove(player)
 					if player in RemoteGameConsumer.ranked_waiting_room:
 						RemoteGameConsumer.ranked_waiting_room.remove(player)
+					if player in RemoteGameConsumer.training_waiting_room_g:
+						RemoteGameConsumer.training_waiting_room_g.remove(player)
+					if player in RemoteGameConsumer.ranked_waiting_room_g:
+						RemoteGameConsumer.ranked_waiting_room_g.remove(player)
 					await player.send_state()
 				# message handling for players in a game
 				if player.get_game_handler() != None:
@@ -218,13 +281,26 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 
 				# message handling for players in the menu
 				else:
-					if data.get('type') == 'start_training_game':
+					if data.get('type') == 'start_training_game' and data.get('mode') == 'default':
 						await self.add_to_training_waiting_room(player)
-					elif data.get('type') == 'start_ranked_game':
+					elif data.get('type') == 'start_training_game' and data.get('mode') == 'gravity':
+						await self.add_to_training_waiting_room_g(player)
+					elif data.get('type') == 'start_ranked_game' and data.get('mode') == 'default':
 						await self.add_to_ranked_waiting_room(player)
-					elif data.get('type') == 'start_local_game':
+					elif data.get('type') == 'start_ranked_game' and data.get('mode') == 'gravity':
+						await self.add_to_ranked_waiting_room_g(player)
+					elif data.get('type') == 'start_local_game' and data.get('mode') == 'default':
 						if (player.alias_2 != None):
-							game_group = await GameHandler.create(player, player)
+							game_group = await GameHandler.create(player, player, mode='default')
+							asyncio.create_task(game_group.start_game())
+						else:
+							await self.send(text_data=json.dumps({
+								'type': 'redirect',
+								'page': "alias_screen_2",
+							}))
+					elif data.get('type') == 'start_local_game' and data.get('mode') == 'gravity':
+						if (player.alias_2 != None):
+							game_group = await GameHandler.create(player, player, mode='gravity')
 							asyncio.create_task(game_group.start_game())
 						else:
 							await self.send(text_data=json.dumps({
@@ -252,6 +328,10 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 				RemoteGameConsumer.training_waiting_room.remove(player)
 			if player in RemoteGameConsumer.ranked_waiting_room:
 				RemoteGameConsumer.ranked_waiting_room.remove(player)
+			if player in RemoteGameConsumer.training_waiting_room_g:
+				RemoteGameConsumer.training_waiting_room_g.remove(player)
+			if player in RemoteGameConsumer.ranked_waiting_room_g:
+				RemoteGameConsumer.ranked_waiting_room_g.remove(player)				
 			Player.all_players.remove(Player.get_player_by_channel(self.channel_name))
 			print(f"{self.scope['user'].alias} disconnected from game-websocket.")
 

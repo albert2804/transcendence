@@ -79,8 +79,15 @@ export default {
 </script>
 
 <style>
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
 .nes-table.is-bordered{
-  max-width: 90%;
+  max-width: 100%;
   font-size: 1.0em;
 }
 

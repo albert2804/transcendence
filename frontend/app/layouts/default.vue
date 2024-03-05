@@ -93,9 +93,9 @@ Example:
 
 @media screen and (max-width: 800px) {
   .nes-container.is-rounded.with-title.vh-80.is-centered {
-    height: 98vh;
     margin: 10px 5px 5px;
-    padding: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
   }
 }
 

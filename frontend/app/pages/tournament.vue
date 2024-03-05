@@ -26,7 +26,13 @@ import { isLoggedIn } from '~/store';
     <div v-if="isLoggedIn">
       <ListTournament :loggedInUser="loggedInUser" @message-from-child="handleUpdate"/>
     </div>
-    <ErrorModal v-show="modalContent" :content="modalContent" :modalTitle="'Response:'" modalId="exampleModal" ariaLabel="Modal for errors and messages" />
+    <ErrorModal
+      :isVisible="modalVisible"
+      :content="modalContent"
+      :modalTitle="'Response:'"
+      modalId="ErrorModal"
+      @hidden="resetModal"
+    />
   </div>
 </template>
 
@@ -35,6 +41,7 @@ import FormTournament from '~/components/tournament/FormTournament.vue';
 import ListTournament from '~/components/tournament/ListTournament.vue';
 import BracketsTournament from '~/components/tournament/BracketsTournament.vue';
 import ErrorModal from '~/components/popup/ErrorMessages.vue';
+import { ref } from 'vue';
 
 export default {
   components: {FormTournament, ListTournament, ErrorModal}, 
@@ -45,6 +52,9 @@ export default {
       recverror: '',
       recvmessage: '',
       modalContent: null,
+      modalVisible: false,
+      modalTitle: '',
+      modalID: '',
     };
   },
   setup() {
@@ -102,10 +112,12 @@ export default {
       if (error) {
         console.log('print from parent', error);
         this.openModal(error);
+        this.modalTitle = "Error";
       }
       else if (message) {
         console.log('print from parent', message);
         this.openModal(message);
+        this.modalTitle = "Message";
       }
       this.$forceUpdate();
       this.resetMessages();
@@ -117,15 +129,33 @@ export default {
       // this.$forceUpdate();
     },
     async openModal(data) {
-      const myModal = document.getElementById('ErrorModal').show();
-    // const myInput = document.getElementById('myInput')
+      try {
+        // Ensure Bootstrap is available globally
+        this.modalContent = data;
+        this.modalVisible = true;
+        // this.$nextTick(() => {
+        //   new bootstrap.Modal(document.getElementById('ErrorModal')).show();
+        // });
+        // if (typeof bootstrap !== 'undefined') {
+        //   const myModalElement = document.getElementById('ErrorModal');
+        //   const myModal = new bootstrap.Modal(myModalElement);
 
-      myModal.addEventListener('shown.bs.modal', () => {
-      //  myInput.focus()
-      })
-      this.modalContent = data;
+          // myModal.show();
+
+          // myModal.addEventListener('shown.bs.modal', () => {
+          //   // Your additional logic when the modal is shown
+          // });
+
+        // } else {
+        //   console.error('Bootstrap is not available. Make sure it is properly included.');
+        // }
+      } catch (error) {
+        console.error('Error opening modal:', error);
+      }
     },
+
     resetModal() {
+      this.modalVisible = false;
       this.modalContent = null;    
     }
   }

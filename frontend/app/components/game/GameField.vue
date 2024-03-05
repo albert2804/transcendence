@@ -26,7 +26,7 @@
           <div>{{ message }}</div>
         </div>
         <!-- Checkbox --->
-        <div>
+        <div v-if="showMenu">
           <label for="checkbox">
           <input type="checkbox" id="checkbox" v-model="isChecked" @change="changeMode"> Gravity Mode
           </label>
@@ -276,6 +276,7 @@
           alias: this.alias,
           mode: this.mode,
         });
+        console.log(this.mode);
         this.socket.send(data);
       }
     },
@@ -287,6 +288,7 @@
           type: 'start_local_game',
           mode: this.mode,
         });
+        console.log(this.mode);
         this.socket.send(data);
       }
     },
@@ -319,6 +321,7 @@
           type: 'start_ranked_game',
           mode: this.mode,
         });
+        console.log(this.mode);
         this.socket.send(data);
       }
     },
@@ -462,6 +465,7 @@
         this.mode = 'default';
       else
         this.mode = 'gravity';
+      console.log(this.mode);
     },
   }
 };

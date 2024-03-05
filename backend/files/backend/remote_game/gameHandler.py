@@ -295,9 +295,9 @@ class GameHandler:
 			mmr2 = loser.mmr - 10 - 10 * (loser.mmr / (winner.mmr + 1))
 		
 		if mmr1 < 0:
-			mmr1 = 0;
+			mmr1 = 0
 		if mmr2 < 0:
-			mmr2 = 0;
+			mmr2 = 0
 		return mmr1, mmr2
 
 	# This function is called when a player gives up or disconnects

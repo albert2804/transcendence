@@ -109,7 +109,7 @@ Example:
   flex-direction: column;
   gap: 2px;
   margin-right: 15px;
-  z-index: 2;
+  z-index: 3;
   right: 0;
 }
 </style>

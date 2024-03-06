@@ -52,6 +52,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				'date': date.strftime("%H:%M"),
 			})
 
+	# show message in users alert banner
+	async def show_alert(self, user, message):
+		channel_layer = get_channel_layer()
+		await channel_layer.group_send(f"chat_{user.id}",{'type': 'alert_message', 'message': message})
+
+	# show message in alert banner of all connected users (only logged in users are connected)
+	async def show_alert_all(self, message):
+		channel_layer = get_channel_layer()
+		for group in self.all_consumer_groups:
+			await channel_layer.group_send(group, {'type': 'alert_message', 'message': message})
+
 	# get all saved messages for the user (sent and received) from the database
 	@database_sync_to_async
 	def get_saved_messages(self, user):
@@ -268,6 +279,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 						else:
 							# save and send message
 							receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
+							# trigger the banner of the receiver
+							# await self.channel_layer.group_send(f"chat_{receiver.id}",{'type': 'alert_message', 'message': 'New message'})
 							if receiver:
 								await self.save_and_send_message(self.scope["user"], receiver, message, date)
 			elif (text_data_json.get('type') == 'read_info'):
@@ -306,4 +319,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			'type': 'user_list',
 			'users': users,
 			'own_id': self.scope["user"].id.__str__(),
+		}))
+
+	# send this message to trigger the alert banner in the frontend
+	async def alert_message(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'alert_message',
+			'message': event['message'],
 		}))

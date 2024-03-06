@@ -1,6 +1,7 @@
 import random
 import asyncio
 from .pong import PongGame
+from .gravity import GPongGame
 from chat.consumers import ChatConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async
@@ -23,7 +24,7 @@ class GameHandler:
 
 	# Use create() instead of __init__() to create a new instance of this class 
 	# @database_sync_to_async
-	def __init__(self, player1, player2, ranked=False):
+	def __init__(self, player1, player2, ranked=False, mode='default'):
 		self.player1 = player1
 		self.player2 = player2
 		if (player1 == player2):
@@ -31,7 +32,11 @@ class GameHandler:
 		else:
 			self.local_game = False
 		self.game_group = f"game_{random.randint(0, 1000000)}"
-		self.game = PongGame()
+		
+		if mode == 'default':
+			self.game = PongGame()
+		elif mode == 'gravity':
+			self.game = GPongGame()
 		self.channel_layer = get_channel_layer()
 		GameHandler.all_game_groups[self.game_group] = self
 		self.pressed_keys_p1 = []
@@ -44,8 +49,8 @@ class GameHandler:
 
 	# Use this function to create a new instance of this class
 	@classmethod
-	async def create(cls, player1, player2, ranked=False, db_entry=None, tournament=None):
-		instance = cls(player1, player2, ranked)
+	async def create(cls, player1, player2, ranked=False, db_entry=None, tournament=None, mode='default'):
+		instance = cls(player1, player2, ranked, mode)
 		player1.game_handler = instance.game_group
 		await instance.channel_layer.group_add(
 			instance.game_group,
@@ -270,10 +275,30 @@ class GameHandler:
 		db_p2_user.num_games_played += 1
 		if self.game.winner == 1:
 			db_p1_user.num_games_won += 1
+			db_p1_user.mmr,db_p2_user.mmr = self.calculate_mmr(db_p1_user, db_p2_user)
 		elif self.game.winner == 2:
 			db_p2_user.num_games_won += 1
+			db_p2_user.mmr,db_p1_user.mmr = self.calculate_mmr(db_p2_user, db_p1_user)
+
+		await database_sync_to_async(db_p1_user.game_history.add)(self.db_entry)
+		await database_sync_to_async(db_p2_user.game_history.add)(self.db_entry)
 		await database_sync_to_async(db_p1_user.save)()
 		await database_sync_to_async(db_p2_user.save)()
+		
+	def calculate_mmr(self, winner, loser):
+
+		if winner.mmr >= loser.mmr:
+			mmr1 = winner.mmr + 10 + 10 * (loser.mmr / (winner.mmr + 1))
+			mmr2 = loser.mmr - 10 - 10 * (loser.mmr / (winner.mmr + 1))
+		else:
+			mmr1 = winner.mmr + 10 + 10 * (loser.mmr / (winner.mmr + 1))
+			mmr2 = loser.mmr - 10 - 10 * (loser.mmr / (winner.mmr + 1))
+		
+		if mmr1 < 0:
+			mmr1 = 0
+		if mmr2 < 0:
+			mmr2 = 0
+		return mmr1, mmr2
 
 	# This function is called when a player gives up or disconnects
 	# The other player wins the game
@@ -328,7 +353,7 @@ class GameHandler:
 	async def send_game_state_to_player_1(self): 
 		while not self.game.isGameExited:
 			async with self.game.game_state_lock:
-				game_state = self.game.latest_game_state
+				game_state = self.game.latest_game_state			
 			if game_state is not None:
 				await self.player1.send(game_state)
 			await asyncio.sleep(1 / self.player1.fps)

@@ -1,6 +1,7 @@
 <template>
   <div
-    class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease" :style="{ 'background-image': 'url(' + map + ')' }">
+    class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease" 
+            :style="{ 'background-image': 'url(' + map + ')' ,'background-repeat': 'no-repeat',  'background-position': 'center' }">
     <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
 	<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffffff; font-size: 20vh; z-index: 2;" v-if="countdown > 0">
 		{{ countdown }}
@@ -25,6 +26,12 @@
         <div style="color: #000000; text-align: center;">
           <div>{{ message }}</div>
         </div>
+        <!-- Checkbox --->
+        <div v-if="showMenu">
+          <label for="checkbox">
+          <input type="checkbox" id="checkbox" v-model="isChecked" @change="changeMode"> Gravity Mode
+          </label>
+        </div>  
         <!-- Menu buttons --->
         <div v-if="showMenu">
           <button type="button" class="nes-btn btn-primary" @click="startTrainingGame">Start Training Game</button>
@@ -106,6 +113,7 @@
         x: 0,
         y: 0,
       },
+      intersection: false,
 		  playOnThisDevice: true,
       // Following only for guest users:
       showAliasScreen: false,
@@ -114,6 +122,17 @@
       controls: '',
       showControlsPic: false,
       map: '',
+      isChecked: false,
+      mode: 'default',
+      playlist: [
+        "endpoint/media/sounds/background.mp3",
+        "endpoint/media/sounds/background2.mp3",
+        "endpoint/media/sounds/background3.mp3",
+        "endpoint/media/sounds/background4.mp3",
+        "endpoint/media/sounds/background5.mp3",
+        "endpoint/media/sounds/background6.mp3",
+      ]
+
     }
   },
   watch: {
@@ -142,9 +161,20 @@
   methods: {
     // function to create and handle the websocket
 	  createWebSocket () {
+      
       const currentDomain = window.location.hostname;
       const sockurl = 'wss://' + currentDomain + '/endpoint/remoteGame/';
       this.socket = new WebSocket(sockurl)
+      
+      // create sound effects
+
+      const intersection = new Audio("endpoint/media/sounds/ball.mp3");
+      const randomNumber = Math.floor(Math.random() * 6); 
+      console.log(randomNumber);
+      const background = new Audio(this.playlist[randomNumber]);
+      // const background = new Audio("endpoint/media/sounds/background.mp3");
+      const effects = [intersection, background];
+
 
       this.socket.onopen = () => {
 		gameButtonState.value = "loading";
@@ -218,6 +248,8 @@
             } else if (data.result === "left") {
               this.message = "The left player won the game!";
             }
+            effects[1].pause();
+            
           } else if (data.type === "player_names") {
             this.p1_name = data.p1_name;
             this.p2_name = data.p2_name;
@@ -226,7 +258,7 @@
             const highScore = data.high_score;
             this.pointsP1 = highScore.pointsP1;
             this.pointsP2 = highScore.pointsP2;
-            this.updateGameUI(gameState);
+            this.updateGameUI(gameState,effects);
           } else if (data.type === "alias_exists") {
             this.message = "Alias already taken!";
           } else if (data.type === "open_game_modal") {
@@ -251,20 +283,26 @@
     },
     // function to start the game
     startTrainingGame () {
+
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
           type: 'start_training_game',
           alias: this.alias,
+          mode: this.mode,
         });
+        console.log(this.mode);
         this.socket.send(data);
       }
     },
     // function to start a local game
     startLocalGame () {
+
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
-          type: 'start_local_game'
+          type: 'start_local_game',
+          mode: this.mode,
         });
+        console.log(this.mode);
         this.socket.send(data);
       }
     },
@@ -288,12 +326,16 @@
           this.map = '';
       }
     },
+    
 
     startRankedGame () {
+
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
-          type: 'start_ranked_game'
+          type: 'start_ranked_game',
+          mode: this.mode,
         });
+        console.log(this.mode);
         this.socket.send(data);
       }
     },
@@ -396,17 +438,17 @@
       this.handleKeyRelease({ key: keyDown });
     },
     // function to update the game UI (called when receiving game state from server)
-    updateGameUI(gameState) {
+    updateGameUI(gameState, effects) {
+      if (sound.value)
+        effects[1].play();
       this.p1pos.y = gameState.leftPaddle.y;
       this.p2pos.y = gameState.rightPaddle.y;
       this.ballPos.x = gameState.ball.x - (1.5/2); // 1.5% is the width of the ball
       this.ballPos.y = gameState.ball.y - (3/2);   // 3% is the height of the ball
       this.countdown = gameState.countdown;
       
-      if (sound.value) {
-
-        const audio = new Audio("endpoint/media/sounds/test.mp3");
-        // audio.play();
+      if (sound.value && gameState.intersection) {
+        effects[0].play();
       }
     },
     // function to send information to server that the user wants to play on this device
@@ -430,6 +472,14 @@
       this.controls='https://media.tenor.com/Ycl8mXFNE_8AAAAi/get-real-cat.gif';
       await new Promise(resolve => setTimeout(resolve, 3000));
       this.showControlsPic=false;
+    },
+    
+    changeMode () {
+      if (!this.isChecked)
+        this.mode = 'default';
+      else
+        this.mode = 'gravity';
+      console.log(this.mode);
     },
   }
 };

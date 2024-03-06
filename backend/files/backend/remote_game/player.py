@@ -42,7 +42,7 @@ class Player:
 		self.channel = channel
 		self.channel_layer = get_channel_layer()
 		self.game_handler = None
-		self.fps = 30 # default fps
+		self.fps = 120 # default fps is (60), the higher the more often data is transmitted to the frontend
 		Player.all_players.append(self)
 	
 	# Getter for the user object (CustomUser) of the player
@@ -69,7 +69,8 @@ class Player:
 				'page': "playing",
 			})
 		# check if in waiting room or ranked waiting room
-		elif self in RemoteGameConsumer.training_waiting_room or self in RemoteGameConsumer.ranked_waiting_room:
+		elif (self in RemoteGameConsumer.training_waiting_room or self in RemoteGameConsumer.ranked_waiting_room
+			or self in RemoteGameConsumer.training_waiting_room_g or self in RemoteGameConsumer.ranked_waiting_room_g):
 			await self.send({
 				'type': 'redirect',
 				'page': "waiting",

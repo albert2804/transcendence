@@ -6,7 +6,7 @@
         <span style="color: black; font-size: 1rem;">MENU</span>
         <progress class="nes-progress is-pattern" value="100" max="100"></progress>
       </button>
-      <div class="collapse navbar-collapse" id="pongNavbar" style="width:100%; padding: 2vh 2vw 1vh 2vw;">
+      <div class="collapse navbar-collapse" id="pongNavbar" style="width:100%; padding: 2vh 2vw 1vh 2vw; font-size: 1rem;">
         <NuxtLink class="nes-btn nes-btn-style is-success nav-item" to="/">Home</NuxtLink>
         <NuxtLink v-if="loginStatus" class="nes-btn nes-btn-style is-success nav-item" to="/tournament">Tournament</NuxtLink>
         <NuxtLink class="nes-btn nes-btn-style is-warning nav-item" to="/leaderboard">Leaderboard</NuxtLink>

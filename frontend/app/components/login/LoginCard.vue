@@ -67,7 +67,7 @@
 <script>
   import { ref, onMounted } from 'vue';
   import { useRoute } from 'vue-router';
-  import { isLoggedIn, userName, userId} from '~/store';
+  import { isLoggedIn, userName, userId, alertMessage } from '~/store';
 
   export default {
     name: 'LoginCard',
@@ -126,6 +126,7 @@
             password.value = '';
             error.value = '';
             message.value = data.message;
+            alertMessage.value = "Welcome back " + data.username + "!";
           } else if (response.status === 403 || response.status === 400) {
             isLoggedIn.value = 0; // Store
             userName.value = ''; // Store
@@ -159,6 +160,7 @@
             username.value = '';
             password.value = '';
             message.value = data.message;
+            alertMessage.value = "Bye bye!";
           }
         } catch (error) {
           console.error('Error:', error);

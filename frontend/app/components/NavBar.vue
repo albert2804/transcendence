@@ -8,11 +8,11 @@
       </button>
       <div class="collapse navbar-collapse" id="pongNavbar" style="width:100%; padding: 2vh 2vw 1vh 2vw; font-size: 1rem;">
         <NuxtLink class="nes-btn nes-btn-style is-success nav-item" to="/">Home</NuxtLink>
-        <NuxtLink v-if="loginStatus" class="nes-btn nes-btn-style is-success nav-item" to="/tournament">Tournament</NuxtLink>
-        <NuxtLink class="nes-btn nes-btn-style is-warning nav-item" to="/leaderboard">Leaderboard</NuxtLink>
-        <NuxtLink v-if="loginStatus" class="nes-btn nes-btn-style is-error nav-item" to="/userinfopage">UserProfile</NuxtLink>
-        <NuxtLink v-if="!loginStatus" class="nes-btn nes-btn-style is-error nav-item" to="/login">Login</NuxtLink>
-        <NuxtLink v-if="loginStatus" class="nes-btn nes-btn-style is-error nav-item" to="/login">Logout</NuxtLink>
+        <NuxtLink v-if="loginStatus" class="nes-btn nes-btn-style is-success nav-item" to="/tournament"><span style="overflow: hidden;">Tournament</span></NuxtLink>
+        <NuxtLink class="nes-btn nes-btn-style is-warning nav-item" to="/leaderboard"><span style="overflow: hidden;">Leaderboard</span></NuxtLink>
+        <NuxtLink v-if="loginStatus" class="nes-btn nes-btn-style is-error nav-item" to="/userinfopage"><span style="overflow: hidden;">UserProfile</span></NuxtLink>
+        <NuxtLink v-if="!loginStatus" class="nes-btn nes-btn-style is-error nav-item" to="/login"><span style="overflow: hidden;">Login</span></NuxtLink>
+        <NuxtLink v-if="loginStatus" class="nes-btn nes-btn-style is-error nav-item" to="/login"><span style="overflow: hidden;">Logout</span></NuxtLink>
       </div>
     </nav>
   </div>
@@ -59,6 +59,7 @@ export default {
     margin-bottom: 1vh;
     margin-right: 0.3vw;
     margin-left: 0.3vw;
+    /* overflow: hidden; */
   }
   .nes-btn-style:hover{
     color: #ffffff;

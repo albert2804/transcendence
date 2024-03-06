@@ -29,8 +29,8 @@
         <div v-else>
           <UserSearchDropdown :index="index" @user-selected="handleUserSelected"/>
         </div>
-        <ErrorMessages :openPopup="PopupMessage" @close-popup="PopupMessage=false" :error="contentError" :message="contentMessage"/>
       </div>
+      <ErrorMessages :openPopup="PopupMessage" @close-popup="PopupMessage=false" :error="contentError" :message="contentMessage"/>
     </div>
 
     <button type="submit" @click="startTournament($event)" class="btn btn-primary">Start Tournament</button>
@@ -130,6 +130,8 @@ export default {
       event.preventDefault();
       if (this.tournamentName == "") {
         console.log("Error Tournament Name isnt allowed to be empty")
+        this.contentError = "Error Tournament Name isnt allowed to be empty";
+        this.openPopupMessage();
         return
       }
       // this.createMatches()
@@ -170,7 +172,6 @@ export default {
     openPopupMessage() {
       this.PopupMessage = true
       console.log('Value of PopupMessage: ', this.PopupMessage);
-      // contentMessage = ('message-from-component', label, content);
     },
   },  
 };

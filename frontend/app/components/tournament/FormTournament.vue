@@ -33,7 +33,7 @@
       <ErrorMessages :openPopup="PopupMessage" @close-popup="PopupMessage=false" :error="contentError" :message="contentMessage"/>
     </div>
 
-    <button type="submit" @click="startTournament($event)" class="btn btn-primary">Start Tournament</button>
+    <button type="submit" @click="startTournament($event)" class="nes-btn is-primary">Start Tournament</button>
   </form>
 </template>
 

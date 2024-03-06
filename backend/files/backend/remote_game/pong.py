@@ -67,7 +67,7 @@ class PongGame:
 			self.repel(self.leftPaddle)
 
 		if (
-			self.rightPaddle['x'] - self.rightPaddle['width'] - self.ball['x'] < tolerance
+			self.rightPaddle['x'] - self.ball['x'] < tolerance
 			and (self.ball['y'] > self.rightPaddle['y'] and self.ball['y'] < (self.rightPaddle['y'] + self.rightPaddle['height']))
 		):
 			self.intersection = True

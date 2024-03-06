@@ -179,6 +179,7 @@
             },
             body: JSON.stringify({
               'username': username.value,
+			  'alias': username.value,
               'password1': password.value,
               'password2': password2.value,
             })

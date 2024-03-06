@@ -13,7 +13,7 @@
 				<label for="password2">Confirm Password:</label>
 				<input type="password" id="password2" name="password2" v-model="password2">
 			</div>
-			<div class="nes-btn is-success nav-item" @click="confirm">Confirm new password
+			<div class="nes-btn nes-btn-pw is-success nav-item" @click="confirm">Confirm new password
 				
 			</div>
 		</div>
@@ -95,13 +95,12 @@
     margin-bottom: 10px;
 }
 
-.nes-btn{
+.nes-btn-pw{
     min-width: 15%;
     color: #000000;
     margin-right: 1%;
-    overflow: hidden;
   }
-  .nes-btn:hover{
+  .nes-btn-pw:hover{
     color: #ffffff;
   }
 

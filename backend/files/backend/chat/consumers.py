@@ -161,16 +161,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			if receiver:
 				# call the invite_to_game method of the CustomUser model
 				await self.scope['user'].invite_to_game(receiver)
-	
-	async def handle_play_tournament_command(self, event):
-		receiver_id = event.get('receiver_id')
-		print(event)
-		if receiver_id:
-			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
-			if receiver:
-				# call the invite_to_game method of the CustomUser model
-				await self.scope['user'].invite_to_game(receiver)
-	
 
 	async def handle_dont_play_command(self, event):
 		receiver_id = event.get('receiver_id')

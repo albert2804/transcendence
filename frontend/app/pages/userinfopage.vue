@@ -17,7 +17,7 @@
         <div v-if="isLoggedIn === 1" class="col user-info-container">
           <UserInfo />
         </div>
-        <div v-else>
+        <div v-if="isLoggedIn === 0">
           <h4>No user statistics available. Please log in to view user profiles.</h4>
         </div>
       </div>

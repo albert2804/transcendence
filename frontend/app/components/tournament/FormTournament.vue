@@ -29,6 +29,7 @@
         <div v-else>
           <UserSearchDropdown :index="index" @user-selected="handleUserSelected"/>
         </div>
+        <ErrorMessages :openPopup="PopupMessage" @close-popup="PopupMessage=false" :error="contentError" :message="contentMessage"/>
       </div>
     </div>
 
@@ -39,9 +40,13 @@
 
 <script>
 import BracketsTournament from './BracketsTournament.vue';
+import ErrorMessages from '../popup/ErrorMessages.vue';
 
 export default {
-  components: { BracketsTournament },
+  components: {
+    BracketsTournament,
+    ErrorMessages,
+  },
   name: 'FormTournament',
   props: ['local', 'loggedInUser'],
   mounted() {
@@ -58,6 +63,9 @@ export default {
       selectPos: 0,
       nbr_players: '4',
       tournamentStarted: false,
+      PopupMessage: false,
+      contentError: null,
+      contentMessage: null,
     };
   },
   computed: {
@@ -139,6 +147,15 @@ export default {
         
         const responseData = await response.json()
         console.log('Backend Response:', responseData.data)
+        if (responseData.error) {
+          console.log('Error from Backend:' ,responseData.error);
+          this.contentError = responseData.error;
+        }
+        if (responseData.message) {
+          console.log('Message from Backend: ', responseData.message);
+          this.contentMessage = responseData.message;
+        }
+        this.openPopupMessage();
         this.all_matches = responseData.data.games
         this.tournamentName = responseData.data.tour_name
         console.log("TourName: ", this.tournamentName)
@@ -146,8 +163,13 @@ export default {
         this.tournamentStarted = true;
 
       } catch (error) {
-        console.log('Error sending signal to backend:', error);
+        // console.log('Error sending signal to backend:', error);
       }
+    },
+    openPopupMessage() {
+      this.PopupMessage = true
+      console.log('Value of PopupMessage: ', this.PopupMessage);
+      // contentMessage = ('message-from-component', label, content);
     },
   },  
 };

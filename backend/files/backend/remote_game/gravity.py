@@ -7,10 +7,9 @@ class GPongGame:
 		self.pointsP1 = 0
 		self.pointsP2 = 0
 		self.isGameExited = False
-		self.countdownSec = 2
+		self.countdownSec = 3
 		self.factor = 3 # by raising the factor the game is faster paced
-		self.initialSpeed = 2 / self.factor
-		self.currentSpeed = self.initialSpeed
+		self.ver_velocity = 2 / self.factor
 		self.canvasWidth = 800
 		self.canvasHeight = 400
 		self.winner = 0
@@ -27,9 +26,9 @@ class GPongGame:
 		# Ball initialization
 		self.acceleration = 0.05
 		self.tolerance = 3
-		self.velocity = 3
+		self.hor_velocity = 3
 		self.max_velocity = 10
-		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.velocity, 'dy': self.initialSpeed, 'radius': 6}
+		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.hor_velocity, 'dy': self.ver_velocity, 'radius': 6}
 
 		# if there is an intersection of the ball and the paddle, intersection = true(needed for sound)
 		self.intersection = False
@@ -82,15 +81,15 @@ class GPongGame:
 		# Check for scoring
 		if (self.ball['x'] - self.ball['radius'] < 0 ) and not self.intersection or (self.ball['x'] + self.ball['radius'] > self.canvasWidth) and not self.intersection :
 			# Reset speed
-			self.ball['dy'] = self.initialSpeed
+			self.ball['dy'] = self.ver_velocity
 
 			# Reset speed and ball direction depending on the person scoring
 			if self.ball['x'] + self.ball['radius'] > self.canvasWidth:
 				self.pointsP1 += 1
-				self.ball['dx'] = -self.velocity
+				self.ball['dx'] = -self.hor_velocity
 			elif self.ball['x'] - self.ball['radius'] < 0:
 				self.pointsP2 += 1
-				self.ball['dx'] = self.velocity
+				self.ball['dx'] = self.hor_velocity
 
 			# Reset ball position to center
 			self.ball['x'] = self.canvasWidth/2
@@ -147,12 +146,12 @@ class GPongGame:
 			self.rightPaddle['dy'] = 0
 
 	def game_loop(self):
-		if self.pointsP1 < 3 and self.pointsP2 < 3:
+		if self.pointsP1 < 10 and self.pointsP2 < 10:
 			self.update_game()
 		else:
-			if self.pointsP1 == 3:
+			if self.pointsP1 == 10:
 				self.winner = 1
-			elif self.pointsP2 == 3:
+			elif self.pointsP2 == 10:
 				self.winner = 2
 			self.isGameExited = True
 
@@ -187,7 +186,6 @@ class GPongGame:
 		# start countdown
 		asyncio.create_task(self.countdown())
 		# game loop
-		import time
 		while not self.isGameExited:
 			self.game_loop()
 			await self.save_game_state()

@@ -1,6 +1,7 @@
 <template>
   <div
-    class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease" :style="{ 'background-image': 'url(' + map + ')' }">
+    class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease" 
+            :style="{ 'background-image': 'url(' + map + ')' ,'background-repeat': 'no-repeat',  'background-position': 'center' }">
     <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
 	<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffffff; font-size: 20vh; z-index: 2;" v-if="countdown > 0">
 		{{ countdown }}
@@ -122,7 +123,16 @@
       showControlsPic: false,
       map: '',
       isChecked: false,
-      mode: 'default'
+      mode: 'default',
+      playlist: [
+        "endpoint/media/sounds/background.mp3",
+        "endpoint/media/sounds/background2.mp3",
+        "endpoint/media/sounds/background3.mp3",
+        "endpoint/media/sounds/background4.mp3",
+        "endpoint/media/sounds/background5.mp3",
+        "endpoint/media/sounds/background6.mp3",
+      ]
+
     }
   },
   watch: {
@@ -157,8 +167,12 @@
       this.socket = new WebSocket(sockurl)
       
       // create sound effects
+
       const intersection = new Audio("endpoint/media/sounds/ball.mp3");
-      const background = new Audio("endpoint/media/sounds/background.mp3");
+      const randomNumber = Math.floor(Math.random() * 6); 
+      console.log(randomNumber);
+      const background = new Audio(this.playlist[randomNumber]);
+      // const background = new Audio("endpoint/media/sounds/background.mp3");
       const effects = [intersection, background];
 
 

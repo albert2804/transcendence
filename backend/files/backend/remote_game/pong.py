@@ -7,10 +7,9 @@ class PongGame:
 		self.pointsP1 = 0
 		self.pointsP2 = 0
 		self.isGameExited = False
-		self.countdownSec = 2
+		self.countdownSec = 3
 		self.factor = 3 # by raising the factor the game is faster paced
-		self.initialSpeed = 2 / self.factor
-		self.currentSpeed = self.initialSpeed
+		self.initialSpeed = 3 / self.factor
 		self.canvasWidth = 800
 		self.canvasHeight = 400
 		self.winner = 0
@@ -64,14 +63,14 @@ class PongGame:
 				and (self.ball['y'] > self.leftPaddle['y'] and self.ball['y'] < (self.leftPaddle['y'] + self.leftPaddle['height']))
 		):
 			self.intersection = True
-			self.repel(self.leftPaddle)
+			self.repel()
 
 		if (
 			self.rightPaddle['x'] - self.ball['x'] < tolerance
 			and (self.ball['y'] > self.rightPaddle['y'] and self.ball['y'] < (self.rightPaddle['y'] + self.rightPaddle['height']))
 		):
 			self.intersection = True
-			self.repel(self.rightPaddle)
+			self.repel()
 
 		# Check for scoring
 		if (self.ball['x'] - self.ball['radius'] < 0 ) and not self.intersection or (self.ball['x'] + self.ball['radius'] > self.canvasWidth) and not self.intersection :
@@ -94,7 +93,7 @@ class PongGame:
 		self.ball['x'] = max(self.ball['radius'], min(self.canvasWidth - self.ball['radius'], self.ball['x']))
 
 
-	def repel(self, paddle):
+	def repel(self):
 		
 		angle = (self.ball['dy']) / abs(self.ball['dx'])
 		if (math.degrees(angle)) > 60:
@@ -130,12 +129,12 @@ class PongGame:
 			self.rightPaddle['dy'] = 0
 
 	def game_loop(self):
-		if self.pointsP1 < 3 and self.pointsP2 < 3:
+		if self.pointsP1 < 10 and self.pointsP2 < 10:
 			self.update_game()
 		else:
-			if self.pointsP1 == 3:
+			if self.pointsP1 == 10:
 				self.winner = 1
-			elif self.pointsP2 == 3:
+			elif self.pointsP2 == 10:
 				self.winner = 2
 			self.isGameExited = True
 

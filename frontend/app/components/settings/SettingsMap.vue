@@ -17,7 +17,11 @@ export default {
   data(){
 		return {
 			mapUrls: ['https://as1.ftcdn.net/v2/jpg/05/62/67/14/1000_F_562671472_15eURCB3BIsBsDRTe208yj81EdEJ3pfZ.jpg',
-			'https://www.solidbackgrounds.com/images/1600x1200/1600x1200-bluebonnet-solid-color-background.jpg'
+			'https://www.solidbackgrounds.com/images/1600x1200/1600x1200-bluebonnet-solid-color-background.jpg',
+			'https://media1.giphy.com/media/yv1mFZ8I5jC0dXzqeU/giphy.webp?cid=790b7611vo8mc9ckck6iq56y25bwf8sy2trm5q54enxjph7t&ep=v1_gifs_search&rid=giphy.webp&ct=g',
+			'https://media0.giphy.com/media/cgsGV2tVyvrhK/giphy.webp?cid=ecf05e47y5el91ponepupd5dx9pp5mziks5xfgpeaq8zxasa&ep=v1_gifs_search&rid=giphy.webp&ct=g',
+			'https://c4.wallpaperflare.com/wallpaper/508/722/499/the-answer-to-life-the-universe-everything-42-everything-wallpaper-preview.jpg',
+			'https://media0.giphy.com/media/RhHLT56wG7daNuwKsa/giphy.webp?cid=ecf05e47hxenonxv19e69la5npjtg292t723mqym43znos3t&ep=v1_gifs_search&rid=giphy.webp&ct=g',
 		],
 			map: '',
 			error: '',

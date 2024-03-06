@@ -1,6 +1,6 @@
 <template>
     <div>
-          <Leaderboard />
+      <Leaderboard style="max-width: 100%;" />
     </div>
   </template>
 

@@ -29,7 +29,7 @@ export default {
   font-size: 4vw;
   color: black;
   overflow: hidden;
-  z-index: 100;
+  z-index: 2;
   text-shadow: 4px 4px 0px white, 
                4px -4px 0px white, 
                -4px 4px 0px white, 
@@ -38,8 +38,8 @@ export default {
                0px 4px 0px white, 
                -4px 0px 0px white, 
                0px -4px 0px white;
-  padding-top: 25vh; /* Add padding for better visibility */
-  border-radius: 10px; /* Optional: Add border-radius for rounded corners */
+  padding-top: 25vh;
+  border-radius: 10px;
 }
 
 html, body {

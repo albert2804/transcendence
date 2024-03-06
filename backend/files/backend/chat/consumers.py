@@ -279,8 +279,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 						else:
 							# save and send message
 							receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
-							# trigger the banner of the receiver
-							# await self.channel_layer.group_send(f"chat_{receiver.id}",{'type': 'alert_message', 'message': 'New message'})
 							if receiver:
 								await self.save_and_send_message(self.scope["user"], receiver, message, date)
 			elif (text_data_json.get('type') == 'read_info'):

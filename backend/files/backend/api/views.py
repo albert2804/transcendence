@@ -112,6 +112,7 @@ def userlogout(request):
 # -H 'Content-Type: application/json' \
 # -d '{
 #   "username": "<YOUR USERNAME>",
+#	"alias": "<YOUR ALIAS>,
 #   "password1": "<YOUR PASSWORD>",
 #   "password2": "<YOUR PASSWORD>"
 # }'
@@ -121,7 +122,6 @@ def userregister(request):
 		logout(request)
 	if request.method == 'POST':
 		# check input with CustomUserCreationForm
-		# form = CustomUserCreationForm(request.POST)
 		data = json.loads(request.body.decode('utf-8'))
 		# print(data)
 		form = CustomUserCreationForm(data)

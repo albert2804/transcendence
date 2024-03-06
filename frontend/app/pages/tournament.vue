@@ -10,9 +10,9 @@ import { isLoggedIn } from '~/store';
   <div>
     <div>
       <h1>Youre on the tournament site</h1>
-      <button @click="callSignUp" class="btn btn-primary"></button>
+      <button @click="callSignUp" class="nes-btn is-primary"></button>
       <div v-if="isLoggedIn">
-        <button @click="toggleForm" class="btn btn-primary">
+        <button @click="toggleForm" class="nes-btn is-primary">
         {{ formVisible ? 'No Tournament' : 'Create Tournament' }} </button>
       </div>
     </div>
@@ -22,19 +22,24 @@ import { isLoggedIn } from '~/store';
     <div v-if="isLoggedIn">
       <ListTournament :loggedInUser="loggedInUser"/>
     </div>
+      <ErrorMessages :openPopup="PopupMessage" @close-popup="PopupMessage=false" :error="contentError" :message="contentMessage"/>
   </div>
 </template>
 
 <script>
 import FormTournament from '~/components/tournament/FormTournament.vue';
-import ListTournament from '~/components/tournament/ListTournament.vue'
+import ListTournament from '~/components/tournament/ListTournament.vue';
+import ErrorMessages from '../components/popup/ErrorMessages.vue';
 
 export default {
-  components: {FormTournament, ListTournament}, 
+  components: {FormTournament, ListTournament, ErrorMessages}, 
   data() {
     return {
       formVisible: false,
       loggedInUser: "",
+      PopupMessage: false,
+      contentError: null,
+      contentMessage: null,
     };
   },
   async mounted() {
@@ -72,9 +77,25 @@ export default {
         },
         body: null,
       });
+      const responseData = await response.json()
+      console.log('Backend Response:', responseData.data)
+      if (responseData.error) {
+        console.log('Error from Backend:' ,responseData.error);          
+        this.contentError = responseData.error;
+        this.openPopupMessage();
+      }
+      if (responseData.message) {
+        console.log('Message from Backend: ', responseData.message);
+        this.contentMessage = responseData.message;
+        this.openPopupMessage();
+      }
       if (!response.ok) {
         throw new Error(`HTTP error! status ${response.status}`);
       }
+    },
+    openPopupMessage() {
+      this.PopupMessage = true
+      console.log('Value of PopupMessage: ', this.PopupMessage);
     },
   }
 }

@@ -6,9 +6,9 @@
         <span style="color: black; font-size: 1rem;">MENU</span>
         <progress class="nes-progress is-pattern" value="100" max="100"></progress>
       </button>
-      <div class="collapse navbar-collapse" id="pongNavbar" style="width:100%; padding: 2vh 2vw 1vh 2vw">
+      <div class="collapse navbar-collapse" id="pongNavbar" style="width:100%; padding: 2vh 2vw 1vh 2vw;">
         <NuxtLink class="nes-btn is-success nav-item" to="/">Home</NuxtLink>
-        <NuxtLink class="nes-btn is-success nav-item" to="/tournament">Tournament</NuxtLink>
+        <NuxtLink v-if="loginStatus" class="nes-btn is-success nav-item" to="/tournament">Tournament</NuxtLink>
         <NuxtLink class="nes-btn is-warning nav-item" to="/leaderboard">Leaderboard</NuxtLink>
         <NuxtLink v-if="loginStatus" class="nes-btn is-error nav-item" to="/userinfopage">UserProfile</NuxtLink>
         <NuxtLink v-if="!loginStatus" class="nes-btn is-error nav-item" to="/login">Login</NuxtLink>
@@ -46,6 +46,10 @@ export default {
 </script>
 
 <style scoped>
+  .nav-item{
+	width: 100%;
+	height: 3.5vh;
+  }
   .nes-btn{
     width: 100%;
     display: flex;

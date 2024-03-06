@@ -18,7 +18,7 @@ export default {
   margin: auto;
   overflow: hidden;
   align-self: center;
-  background-image: url('background_home_big.png');
+  background-image: url('/background_home_big.png');
   background-size: cover;
   height: 150%;
   width: 98%;

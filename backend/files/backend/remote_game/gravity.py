@@ -21,7 +21,7 @@ class GPongGame:
 
 		# Paddle initialization
 		# self.leftPaddle = {'x': 0, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
-		self.leftPaddle = {'x': 0, 'y': 198, 'dy': 0, 'width': 10, 'height': 80}
+		self.leftPaddle = {'x': 0, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
 		self.rightPaddle = {'x': self.canvasWidth - 10, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
 
 		# Ball initialization
@@ -73,7 +73,7 @@ class GPongGame:
 			self.gravity(self.leftPaddle)
 
 		if (
-			self.rightPaddle['x'] - self.rightPaddle['width'] - self.ball['x'] < tolerance
+			self.rightPaddle['x'] + self.rightPaddle['width'] - self.ball['x'] < tolerance
 			and (self.ball['y'] > self.rightPaddle['y'] and self.ball['y'] < (self.rightPaddle['y'] + self.rightPaddle['height']))
 		):
 			self.intersection = True
@@ -111,19 +111,20 @@ class GPongGame:
 
 		# calculates the relative position of the ball to paddles on intersection -> value between 0 and 1
 		pos = abs(self.ball['y'] - (paddle['y'] + paddle['height']/2)) / (paddle['height'] / 2)
-		print(f"\n({self.ball['y']} - ({paddle['y']} + {paddle['height']/2})) / {paddle['height'] / 2}  = {pos}")
-		print(f"Angle: {angle}")
 		
 		# calculates the repel, depending on the intersection point
 		repel = (self.repel - pos)
-		print(f"Repel: {repel}")
 	# very small angle ,less then 6 degrees = 0.1
 		if angle <= 0.1 and angle >= -0.1:
 			repel *= 1.5
-		print(f"\n OLD [DY]{self.ball['dy']}")
 		self.ball['dy'] = angle * repel * abs(self.ball['dx'])
-		print(f"\n NEW [DY]{self.ball['dy']}")
 		self.ball['dx'] = -self.ball['dx']  # Reverse the horizontal direction
+		print(f"\n({self.ball['y']} - ({paddle['y']} + {paddle['height']/2})) / {paddle['height'] / 2}  = {pos}")
+		print(f"Angle: {angle}")
+		print(f"Repel: {repel}")
+		print(f"\n OLD [DY]{self.ball['dy']}")
+		print(f"\n NEW [DY]{self.ball['dy']}")
+		print(f"\n{self.intersection=}")
 		self.intersection = False
 		
 	

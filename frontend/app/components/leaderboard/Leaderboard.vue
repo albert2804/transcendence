@@ -10,7 +10,7 @@
             <th scope="col">MMR</th>
             <th scope="col">Games<br> Played</th>
             <th scope="col">Win<br> Ratio</th>
-            <th scope="col">User <br> profile</th>
+            <th v-if="loginStatus" scope="col">User <br> profile</th>
           </tr>
         </thead>
         <tbody>
@@ -21,7 +21,7 @@
             <td>{{ user.mmr }}</td>
             <td>{{ user.num_games_played }}</td>
             <td>{{ (user.num_games_played !== 0) ? (( user.num_games_won / user.num_games_played) * 100).toFixed(0) + '%' : '0%' }}</td>
-            <td>
+            <td v-if="loginStatus">
               <router-link :to="{ name: 'userinfopage', query: { username: user.username } }">
                 <button type="button" class="btn nes-btn btn-primary profile-button"><span>View Profile</span></button>
               </router-link>
@@ -33,18 +33,28 @@
 </template>
 
 <script>
+import { isLoggedIn } from '~/store';
 export default {
 	data()
   {
     return { 
       users: [],
-      fetched: false
+      fetched: false,
+      loginStatus: false
     };
   },
 	mounted() 
   {
     this.fetchUsers();
-	},
+
+    watchEffect(() => {
+      if (isLoggedIn.value === 1) {
+        this.loginStatus = true;
+      } else {
+        this.loginStatus = false;
+      }
+    });
+  },
   computed: 
   {
     sortedUsers() 

@@ -2,7 +2,7 @@ import random
 import math
 import asyncio
 
-class PongGame:
+class GPongGame:
 	def __init__(self):
 		self.pointsP1 = 0
 		self.pointsP2 = 0
@@ -32,7 +32,6 @@ class PongGame:
 		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.velocity, 'dy': self.initialSpeed, 'radius': 6}
 
 		# if there is an intersection of the ball and the paddle, intersection = true(needed for sound)
-		self.mode = False # gravity mode on
 		self.intersection = False
 		self.repel = 2 # the bigger the value the stronger the ball will be accelerated to the top after hitting a paddle
 		
@@ -73,7 +72,6 @@ class PongGame:
 			self.intersection = True
 			self.gravity(self.leftPaddle)
 
-		# if ((self.rightPaddle['x'] - self.rightPaddle['width']) - (self.ball['x'] + self.ball['radius']) < tolerance
 		if (
 			self.rightPaddle['x'] - self.rightPaddle['width'] - self.ball['x'] < tolerance
 			and (self.ball['y'] > self.rightPaddle['y'] and self.ball['y'] < (self.rightPaddle['y'] + self.rightPaddle['height']))

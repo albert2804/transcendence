@@ -13,8 +13,10 @@ Example:
 
 <template>
   <div class="justify-content-center">
-    <div class="alert alert-light" role="alert" v-show="message !== ''">
-      {{ message }}
+    <div class="alert alert-light ticker-alert" role="alert" v-show="message !== ''">
+      <div class="nes-container is-rounded">
+        <p>{{ message }}</p>
+      </div>
     </div>
     <ChatHelpModal />
     <div class="nes-container is-rounded with-title vh-80 is-centered">
@@ -104,11 +106,12 @@ Example:
 <style>
 
 /* alert uses z-index 1056 because the default bootstrap modal (our gameModal) uses 1055 */
-.alert {
+.ticker-alert {
   position: absolute;
   top: 0;
   width: 100%;
-  z-index: 1056; 
+  z-index: 1056;
+  padding: 0;
 }
 
 .justify-content-center {

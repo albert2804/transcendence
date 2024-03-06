@@ -19,6 +19,7 @@ Example:
         <SettingsBtn />
         <ChatButton />
         <GameButton />
+        <SoundButton />
       </div>
       <div class="d-flex justify-content-center vh-80">
         <NuxtPage :page-key="pageKey.toString()" />

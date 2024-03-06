@@ -20,7 +20,6 @@ watchEffect(() => {
       <p>Games Lost: {{ userStats.games_lost }}</p>
       <p>Games Played: {{ userStats.games_played }}</p>
       <p>Matchmade Ranking: {{ userStats.mmr }}</p>
-      <p>Overall Ranking: {{ userStats.ranking }}</p>
       <button v-if="userStats.username != userName && isLoggedIn" type="button" class="btn nes-btn btn-primary block-button" @click="inviteToGame">Invite to Game</button>
       <button v-if="userStats.username != userName && isLoggedIn && !userStats.friend" type="button" class="btn nes-btn btn-primary block-button" @click="addFriend">Add Friend</button>
 	  <button v-if="userStats.username != userName && isLoggedIn && userStats.friend" type="button" class="btn nes-btn btn-primary block-button" @click="removeFriend">Remove Friend</button>

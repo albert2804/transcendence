@@ -150,12 +150,13 @@ export default {
         if (responseData.error) {
           console.log('Error from Backend:' ,responseData.error);
           this.contentError = responseData.error;
+          this.openPopupMessage();
         }
         if (responseData.message) {
           console.log('Message from Backend: ', responseData.message);
           this.contentMessage = responseData.message;
+          this.openPopupMessage();
         }
-        this.openPopupMessage();
         this.all_matches = responseData.data.games
         this.tournamentName = responseData.data.tour_name
         console.log("TourName: ", this.tournamentName)

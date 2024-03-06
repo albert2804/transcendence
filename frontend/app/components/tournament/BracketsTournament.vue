@@ -7,6 +7,7 @@
         <!-- @mouseover="togglePlayButton(match.is_match, true)" @mouseleave="togglePlayButton(match.is_match, false)"> -->
           <GameBox :match="match" :loggedInUser="loggedInUser" :tournament_name="tournamentName"></GameBox>
         </div>
+         <ErrorMessages :openPopup="PopupMessage" @close-popup="PopupMessage = false" :error="contentError" :message="contentMessage"/>
       </div>
     </div>
   </div>
@@ -14,16 +15,23 @@
 
 <script>
 import GameBox from './GameBox.vue';
+import ErrorMessages from '../popup/ErrorMessages.vue';
 
 export default {
+  components: {
+    GameBox,
+    ErrorMessages,
+  },
   name: 'BracketsTournament',
-  components: { GameBox },
   props: ['loggedInUser', 'tournamentName'],
   data() {
     return {
       playerReady: false,
       showPlayButtons: [],
       matches: [],
+      PopupMessage: false,
+      contentError: null,
+      contentMessage: null,
       // No need for additional data in this case
     };
   },
@@ -68,6 +76,16 @@ export default {
         });
 
         const responseData = await response.json();
+        if (responseData.error) {
+          console.log('Error from Backend:', responseData.error);
+          this.contentError = responseData.error;
+          this.openPopupMessage();
+        }
+        if (responseData.message) {
+          console.log('Message from Backend: ', responseData.message);
+          this.contentMessage = responseData.message;
+          this.openPopupMessage();
+        }
         this.matches = JSON.parse(responseData.data);
         this.matches = this.matches.games
       } catch (error) {
@@ -78,10 +96,11 @@ export default {
       // console.log(round)
       return this.matches.filter(match => match.is_round === round);
     },
+    openPopupMessage() {
+      this.PopupMessage = true
+      console.log('Value of PopupMessage: ', this.PopupMessage);
+      // contentMessage = ('message-from-component', label, content);
+    },
   },
 };
 </script>
-
-<style>
-
-</style>

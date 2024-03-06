@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" v-if="fetched">
     <h1 class="text-center">Leaderboard</h1>
       <table class="nes-table is-bordered table-hover">
         <thead class="thread-dark">
@@ -23,7 +23,7 @@
             <td>{{ (user.num_games_played !== 0) ? (( user.num_games_won / user.num_games_played) * 100).toFixed(0) + '%' : '0%' }}</td>
             <td>
               <router-link :to="{ name: 'userinfopage', query: { username: user.username } }">
-                <button type="button" class="btn nes-btn btn-primary"><span>View Profile</span></button>
+                <button type="button" class="btn nes-btn btn-primary profile-button"><span>View Profile</span></button>
               </router-link>
             </td>
           </tr>
@@ -36,7 +36,10 @@
 export default {
 	data()
   {
-    return { users: []	};
+    return { 
+      users: [],
+      fetched: false
+    };
   },
 	mounted() 
   {
@@ -68,6 +71,7 @@ export default {
         )
         const jsonResponse = await response.json();
         this.users = jsonResponse.response;
+        this.fetched = true;
       } 
       catch (error) 
       {
@@ -79,14 +83,41 @@ export default {
 </script>
 
 <style>
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
 .nes-table.is-bordered{
-  width: 1000px;
-  overflow-x: scroll;
+  max-width: 100%;
+  font-size: 1.0em;
+}
+
+.nes-table.is-bordered * {
+  font-size: inherit;
+}
+
+@media screen and (max-width: 1200px) {
+  .nes-table.is-bordered {
+	font-size: 0.8em; 
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .nes-table.is-bordered {
+	font-size: 0.7em; 
+  }
 }
 
 @media screen and (max-width: 575px) {
   .nes-table.is-bordered {
-    margin-left: 700px;
+	font-size: 0.5em;
   }
+}
+
+.profile-button {
+  max-width: 100%;
 }
 </style>

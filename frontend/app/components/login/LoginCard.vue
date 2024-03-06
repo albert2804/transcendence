@@ -1,5 +1,5 @@
 <template>
-	<section class="nes-container container-fluid with-title automargin main">
+	<section class="nes-container container-fluid with-title automargin main resp-font-size">
 		<p class="title" style="z-index: 100;" v-if="loginStatus!=1 && !reg_form">Login</p>
 		<p class="title" style="z-index: 100;" v-if="loginStatus == 0 && reg_form">Register</p>
 		<div class="card-body" style="font-size: 1rem;">
@@ -18,11 +18,13 @@
 			</div>
 			<div class="button-list">
 			<button type="button" @keyup.enter="$refs.loginnamefield.focus()" ref="loginbutton" class="btn nes-btn btn-primary" @click="login">Login</button>
+      <div style="height: 10px;"></div>
 			<a class="nes-btn btn-primary btn-sm" @click="reg_form = true; error = ''; message = ''">create account</a>
 			</div>
 		</form>
 		<form v-if="loginStatus != 1 && !reg_form">
-			<p style="overflow:hidden"> Alternatively, 42 students can log in with their 42 intra accounts.<br> Just click on the magic button below.</p>
+      <div style="height: 10px;"></div>
+      <p style="overflow:hidden"> Alternatively, 42 students can log in with their 42 intra accounts.<br> Just click on the magic button below.</p>
 		<div class="button-list">
 			<button type="button" ref="loginbutton_42intra" class="btn nes-btn" @click="redirectToIntraLogin">CLICK ME TO 42!</button>
 		</div>
@@ -250,6 +252,12 @@
 @media screen and (max-width: 850px) {
   .main {
     max-width: 80vw;
+  }
+}
+
+@media screen and (max-width: 850px) {
+  .main * {
+    font-size: 0.8rem;
   }
 }
 

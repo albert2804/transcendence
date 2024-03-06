@@ -149,6 +149,18 @@ class GameHandler:
 				'result': 'winner',
 			})
 
+	# show game result as alert to all players
+	# like a live ticker for ranked games
+	async def show_game_result_as_alert(self):
+		if self.ranked:
+			chat_consumer = ChatConsumer()
+			p1_points = int(self.game.pointsP1)
+			p2_points = int(self.game.pointsP2)
+			if self.game.winner == 1:
+				await chat_consumer.show_alert_all(self.player1.get_user().alias + " won against " + self.player2.get_user().alias + " with " + str(p1_points) + " to " + str(p2_points) + " points.")
+			elif self.game.winner == 2:
+				await chat_consumer.show_alert_all(self.player2.get_user().alias + " won against " + self.player1.get_user().alias + " with " + str(p2_points) + " to " + str(p1_points) + " points.")
+
 	# send the game rusult to the players chat
 	async def send_game_result_to_chat(self):
 		chat_consumer = ChatConsumer()
@@ -166,7 +178,6 @@ class GameHandler:
 			elif self.game.winner == 2:
 				await chat_consumer.save_and_send_message(self.player1.get_user(), self.player2.get_user(), "You won a ranked game with " + str(p2_points) + " to " + str(p1_points) + " points.", timezone.now(), "info")
 				await chat_consumer.save_and_send_message(self.player2.get_user(), self.player1.get_user(), "You lost the game with " + str(p1_points) + " to " + str(p2_points) + " points.", timezone.now(), "info")
-				
 
 	#if in an tournament this function puts the winner in the next round
 	async def movePlayerToNextRound(self):
@@ -228,6 +239,8 @@ class GameHandler:
 		await self.send_game_result()
 		# send game result to the chat (only for ranked games)
 		await self.send_game_result_to_chat()
+		# show game result as alert to all players (only for ranked games)
+		await self.show_game_result_as_alert()
 		# wait 2 seconds
 		await asyncio.sleep(2)
 		# redirect players to menu
@@ -360,7 +373,6 @@ class GameHandler:
 	
 	# sends the latest game state to player 2
 	# gets called in a separate thread
-
 	async def send_game_state_to_player_2(self):
 		while not self.game.isGameExited:
 			async with self.game.game_state_lock:

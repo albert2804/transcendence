@@ -22,8 +22,8 @@
         </div>
       </div>
     </div>
-    <div class="nes-container container-fluid with-title vw-50 automargin" style="text-align: left;">
-      <div v-if="isLoggedIn === 1" class="user-games-history">
+    <div v-if="isLoggedIn === 1" class="user-games-history">
+        <div class="nes-container container-fluid with-title vw-50 automargin" style="text-align: left;">
         <UserGameHistory />
       </div>
     </div>

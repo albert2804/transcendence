@@ -9,3 +9,6 @@ export let sound = ref(false);
 
 // gameButtonState stores the state of the game button ("disconnected", "connected", "loading")
 export const gameButtonState = ref("disconnected");
+
+// our alert banner watches this and shows changes for 5 seconds
+export const alertMessage = ref("");

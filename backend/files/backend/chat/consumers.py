@@ -52,6 +52,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				'date': date.strftime("%H:%M"),
 			})
 
+	# show message in users alert banner
+	async def show_alert(self, user, message):
+		channel_layer = get_channel_layer()
+		await channel_layer.group_send(f"chat_{user.id}",{'type': 'alert_message', 'message': message})
+
+	# show message in alert banner of all connected users (only logged in users are connected)
+	async def show_alert_all(self, message):
+		channel_layer = get_channel_layer()
+		for group in self.all_consumer_groups:
+			await channel_layer.group_send(group, {'type': 'alert_message', 'message': message})
+
 	# get all saved messages for the user (sent and received) from the database
 	@database_sync_to_async
 	def get_saved_messages(self, user):
@@ -183,7 +194,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:
-				await self.save_and_send_message(receiver, self.scope["user"], "Commands:\n/play - Invite/Accept user to play game\n/dont_play - Reject game invitation\n/block - Block user\n/unblock - Unblock user\n/friend - Invite/Accept friend request\n/unfriend - Unfriend user", datetime.now(), 'info')
+				await self.save_and_send_message(receiver, self.scope["user"], "Commands:\n/play - Invite/Accept user to play game\n/dont_play - Reject game invitation\n/dont_play_tournament - Reject tournament game invitation\n/block - Block user\n/unblock - Unblock user\n/friend - Invite/Accept friend request\n/unfriend - Unfriend user", datetime.now(), 'info')
 
 	async def handle_unknown_command(self, event):
 		receiver_id = event.get('receiver_id')
@@ -306,4 +317,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			'type': 'user_list',
 			'users': users,
 			'own_id': self.scope["user"].id.__str__(),
+		}))
+
+	# send this message to trigger the alert banner in the frontend
+	async def alert_message(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'alert_message',
+			'message': event['message'],
 		}))

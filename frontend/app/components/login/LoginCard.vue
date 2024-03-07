@@ -67,7 +67,7 @@
 <script>
   import { ref, onMounted } from 'vue';
   import { useRoute } from 'vue-router';
-  import { isLoggedIn, userName, userId} from '~/store';
+  import { isLoggedIn, userName, userId, alertMessage } from '~/store';
 
   export default {
     name: 'LoginCard',

@@ -13,6 +13,11 @@ Example:
 
 <template>
   <div class="justify-content-center">
+    <div class="alert alert-light ticker-alert" role="alert" v-show="message !== ''">
+      <div class="nes-container is-rounded">
+        <p>{{ message }}</p>
+      </div>
+    </div>
     <ChatHelpModal />
     <div class="nes-container is-rounded with-title vh-80 is-centered">
       <div class="buttonlist">
@@ -32,10 +37,12 @@ Example:
 </template>
 
 <script>
-  import { isLoggedIn, userName, userId } from '~/store';
+  import { isLoggedIn, userName, userId, alertMessage } from '~/store';
   export default {
     setup() {
       const pageKey = ref(Date.now())
+      const message = ref('')
+      const preventKeyRefresh = ref(false)
 
       onMounted(async () => {
         // initate the csrf token!
@@ -72,14 +79,41 @@ Example:
 
       // Following is to force rerendering of the pages
       onBeforeUpdate(() => {
+        if (preventKeyRefresh.value) {
+          preventKeyRefresh.value = false
+          return
+        }
         pageKey.value = Date.now()
       })
-      return { pageKey }
+
+      // listen to alertMessage and show it
+      watch(alertMessage, (newValue) => {
+        if (newValue !== '') {
+          message.value = newValue
+          setTimeout(() => {
+            // prevent pageKey from refreshing when alert closes after 5 seconds
+            preventKeyRefresh.value = true
+            alertMessage.value = ''
+            message.value = ''
+          }, 5000)
+        }
+      })
+      return { pageKey,  message }
     },
   }
 </script>
 
 <style>
+
+/* alert uses z-index 1056 because the default bootstrap modal (our gameModal) uses 1055 */
+.ticker-alert {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 1056;
+  padding: 0;
+}
+
 .justify-content-center {
   justify-content: center;
 }

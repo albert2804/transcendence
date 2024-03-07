@@ -6,7 +6,7 @@
 				<button type="button" @click="closePopup" class="btn-close" aria-label="Close"></button>
 			</div>
 			<div v-if="message" class="message_container">
-				<span class="nes-text is-success">{{message}}</span>
+				<p style="text-align: center; color: white;">{{message}}</p>
 				<button type="button" @click="closePopup" class="btn-close" aria-label="Close"></button>
 			</div>
 		</div>
@@ -79,6 +79,7 @@ export default {
 	width: 50vw;
 	height: 10vw;
 	white-space: normal;
+	/* text-align: justify; */
 	z-index: 1000;
 }
 

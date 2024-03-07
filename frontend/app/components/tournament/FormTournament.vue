@@ -14,14 +14,14 @@
 
     <div style="margin-bottom: 3%;" class="name-box row flex-wrap">
       <div v-for="index in nbr_players" style="min-width: 50%; margin-bottom: 1%" :key="index" class="name-input d-flex col-12 col-lg-1">
-        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+        <!-- <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
           <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio1' + index"
             autocomplete="off" checked @change="setActiveRadio('Player', index)"/>
           <label class="btn btn-outline-primary" :for="'btnradio1' + index">Player</label>
           <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio2' + index"
             autocomplete="off" @change="setActiveRadio('Bot', index)"/>
           <label class="btn btn-outline-primary" :for="'btnradio2' + index">Bot</label>
-        </div>
+        </div> -->
         <div v-if="local">
           <input :id="'name' + index" type="text" class="form-control" :value="getPlayerValue(index)" 
           @input="updatePlayerName(index, $event)">
@@ -52,7 +52,7 @@ export default {
   mounted() {
     this.all_players = [];
     this.all_matches = [];
-    this.tournamentName = "Quack";
+    this.tournamentName = '';
     this.updatePlayerCount();
   },
   data() {
@@ -92,8 +92,9 @@ export default {
         this.all_players[index - 1].player_or_bot = 'Player';
       }
     },
-    updatePlayerName(index, event) {
-      if (index >= 0 && index <= this.all_players.length)
+
+    async updatePlayerName(index, event) {
+       if (index >= 0 && index <= this.all_players.length)
       this.all_players[index - 1].name = event.target.value;
     },
 
@@ -128,9 +129,11 @@ export default {
 
     async startTournament(event) {
       event.preventDefault();
+      // console.log(this.tournamentName);
       if (this.tournamentName == "") {
-        console.log("Error Tournament Name isnt allowed to be empty")
-        this.contentError = "Error Tournament Name isnt allowed to be empty";
+        // console.log("Error: Tournament Name isn't allowed to be empty")
+        this.contentError = "Error: Tournament Name isn't allowed to be empty";
+        this.contentMessage = '';
         this.openPopupMessage();
         return
       }
@@ -164,6 +167,8 @@ export default {
         console.log("TourName: ", this.tournamentName)
         console.log("All Matches:", this.all_matches)
         this.tournamentStarted = true;
+        this.contentMessage = "Successfully created tournament";
+        this.openPopupMessage();
 
       } catch (error) {
         // console.log('Error sending signal to backend:', error);

@@ -56,7 +56,7 @@ export default {
   left: 50%; /* Position it in the horizontal center of the viewport */
   transform: translate(-50%, -50%); /* Center the popup exactly */
   padding: 20px; /* Padding around the content */
-  width: 50vw;
+  width: 40vw;
   height: 10vw;
   white-space: normal;
   z-index: 1000;

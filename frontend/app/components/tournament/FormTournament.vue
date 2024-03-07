@@ -1,42 +1,44 @@
 <template>
-  <form style="max-width: 800px; margin: auto; overflow: hidden;">
-    <div class="nes-field">
-      <label for="name_field" class="float-start" style="margin-top: 3vh;">Tournament Name</label>
-      <input type="text" id="name_field" class="nes-input" placeholder="Your Tournament Name" @input="setTournamentName($event)">
-    </div>
-    <div class="mb-3" style="margin-top: 4vh;">
-      <label for="nbrPlayerRange" class="form-label float-start" style="margin-right: 50px;">Total Players: </label>
-      <div class="d-flex align-items-center">
-        <input style="width: 80%; " type="range" class="form-range" min="0" max="3" step="1" id="nbrPlayerRange" 
-          v-model.number="selectPos" @input="updatePlayerCount">
-        <h6 style="rotate:90deg;" class="ms-3">{{ selectedData }}</h6>
+  <div class="nes-container is-rounded">
+    <form style="max-width: 1000px; margin: auto; overflow: hidden;">
+      <div class="nes-field">
+        <label for="name_field" class="float-start" style="margin-top: 3vh;">Tournament Name</label>
+        <input type="text" id="name_field" class="nes-input" placeholder="Your Tournament Name" @input="setTournamentName($event)">
       </div>
-    </div>
-
-    <div style="margin-bottom: 3%;" class="name-box row flex-wrap">
-      <div v-for="index in nbr_players" style="min-width: 50%; margin-bottom: 1%" :key="index" class="d-flex col-12 col-lg-1">
-        <!-- this is for bots -->
-        <!-- <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-          <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio1' + index"
-            autocomplete="off" checked @change="setActiveRadio('Player', index)"/>
-          <label class="btn btn-outline-primary" :for="'btnradio1' + index">Player</label>
-          <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio2' + index"
-            autocomplete="off" @change="setActiveRadio('Bot', index)"/>
-          <label class="btn btn-outline-primary" :for="'btnradio2' + index">Bot</label>
-        </div> -->
-        <p class="nes-text is-primary" :for="'btnradio1' + index">Player  {{ index }}:</p>
-        <div v-if="local">
-          <input :id="'name' + index" type="text" class="form-control" :value="getPlayerValue(index)" 
-          @input="updatePlayerName(index, $event)">
-        </div>
-        <div v-else>
-          <UserSearchDropdown :index="index" @user-selected="handleUserSelected"/>
+      <div class="mb-3" style="margin-top: 4vh;">
+        <label for="nbrPlayerRange" class="form-label float-start" style="margin-right: 50px;">Total Players: </label>
+        <div class="d-flex align-items-center">
+          <input style="width: 80%; " type="range" class="form-range" min="0" max="3" step="1" id="nbrPlayerRange" 
+            v-model.number="selectPos" @input="updatePlayerCount">
+          <h6 style="rotate:90deg;" class="ms-3">{{ selectedData }}</h6>
         </div>
       </div>
-    </div>
 
-    <button type="submit" @click="startTournament($event)" class="nes-btn is-primary" style="margin-bottom: 3vh;">Start Tournament</button>
-  </form>
+      <div style="margin-bottom: 3%;" class="name-box row flex-wrap">
+        <div v-for="index in nbr_players" style="min-width: 50%; margin-bottom: 1%" :key="index" class="d-flex col-12 col-lg-1">
+          <!-- this is for bots -->
+          <!-- <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+            <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio1' + index"
+              autocomplete="off" checked @change="setActiveRadio('Player', index)"/>
+            <label class="btn btn-outline-primary" :for="'btnradio1' + index">Player</label>
+            <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio2' + index"
+              autocomplete="off" @change="setActiveRadio('Bot', index)"/>
+            <label class="btn btn-outline-primary" :for="'btnradio2' + index">Bot</label>
+          </div> -->
+          <p style="font-size: 1rem;" class="nes-text is-primary" :for="'btnradio1' + index">P {{ index }}:</p>
+          <div v-if="local">
+            <input :id="'name' + index" type="text" class="form-control" :value="getPlayerValue(index)" 
+            @input="updatePlayerName(index, $event)">
+          </div>
+          <div v-else>
+            <UserSearchDropdown :index="index" @user-selected="handleUserSelected"/>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" @click="startTournament($event)" class="nes-btn is-primary" style="margin-bottom: 3vh;">Start Tournament</button>
+    </form>
+  </div>
 </template>
 
 

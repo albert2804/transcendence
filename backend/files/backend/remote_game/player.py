@@ -42,7 +42,7 @@ class Player:
 		self.channel = channel
 		self.channel_layer = get_channel_layer()
 		self.game_handler = None
-		self.fps = 120 # default fps is (60), the higher the more often data is transmitted to the frontend
+		self.fps = 40 # default fps is (60), the higher the more often data is transmitted to the frontend
 		Player.all_players.append(self)
 	
 	# Getter for the user object (CustomUser) of the player

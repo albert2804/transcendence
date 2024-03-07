@@ -152,6 +152,8 @@ class GameHandler:
 	# show game result as alert to all players
 	# like a live ticker for ranked games
 	async def show_game_result_as_alert(self):
+		if self.player1.get_user().alias == None or self.player2.get_user().alias == None:
+			return
 		if self.ranked:
 			chat_consumer = ChatConsumer()
 			p1_points = int(self.game.pointsP1)

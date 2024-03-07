@@ -98,7 +98,7 @@
       showMenu: false,
       p1_name: '',
       p2_name: '',
-	  countdown: 0,
+	    countdown: 0,
       pressedKeys: [],
       paddleSize: 20,
       p1pos: {
@@ -195,7 +195,8 @@
           console.log('Received WebSocket message:', event.data);
           const data = JSON.parse(event.data);
           if (data.type === "redirect") {
-			gameButtonState.value = "connected";
+            this.countdown = 0;
+			      gameButtonState.value = "connected";
             this.showAliasScreen = false;
             this.showAliasScreen2 = false;
             if (data.page === "playing") {

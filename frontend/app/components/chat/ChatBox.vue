@@ -83,7 +83,7 @@
 </template>
   
 <script>
-import { isLoggedIn } from '~/store';
+import { isLoggedIn , alertMessage } from '~/store';
 export default {
   name: 'ChatBox',
   data () {
@@ -218,6 +218,8 @@ export default {
               this.unreadMessageCountMap.set(chatId, 1);
             }
           }
+        } else if (data.type === 'alert_message') {
+          alertMessage.value = data.message
         } else {
           console.log('unknown message type received')
         }

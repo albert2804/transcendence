@@ -12,7 +12,7 @@ services:
       - ${CERT_PATH}:/etc/nginx/ssl/inception.crt
       - ${CERT_KEY_PATH}:/etc/nginx/ssl/inception.key
       - static_django_files:/static
-      - ${PWD}/media:/media
+      - ./media:/media
     ports:
       - "80:80"
       - "443:443"

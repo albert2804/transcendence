@@ -25,7 +25,7 @@
 	  async submitData() {
 		try {
 		  const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-		  console.log('CSRF Token:', token); 
+		//   console.log('CSRF Token:', token); 
 		  const formData = new FormData();
 		  formData.append('username', this.username);
 		  formData.append('password', this.password);
@@ -38,7 +38,7 @@
 			}
 		  });
   
-		  console.log("Sent", response); // Handle the response as needed
+		//   console.log("Sent", response); // Handle the response as needed
 		} catch (error) {
 		  console.error('Not Sent', error); // Handle errors
 		}

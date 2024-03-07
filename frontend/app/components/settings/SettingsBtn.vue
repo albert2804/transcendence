@@ -100,7 +100,7 @@ export default {
     async handleUpdate(message, error) {
       this.recverror = error;
       this.recvmessage = message;
-      console.log('print from parent', this.recverror);
+      // console.log('print from parent', this.recverror);
       this.$forceUpdate();
       this.resetMessages();
     },

@@ -170,7 +170,7 @@
 
       const intersection = new Audio("endpoint/media/sounds/ball.mp3");
       const randomNumber = Math.floor(Math.random() * 6); 
-      console.log(randomNumber);
+      // console.log(randomNumber);
       const background = new Audio(this.playlist[randomNumber]);
       // const background = new Audio("endpoint/media/sounds/background.mp3");
       const effects = [intersection, background];
@@ -192,7 +192,7 @@
 
       this.socket.onmessage = (event) => {
         try {
-          console.log('Received WebSocket message:', event.data);
+          // console.log('Received WebSocket message:', event.data);
           const data = JSON.parse(event.data);
           if (data.type === "redirect") {
 			gameButtonState.value = "connected";
@@ -290,7 +290,7 @@
           alias: this.alias,
           mode: this.mode,
         });
-        console.log(this.mode);
+        // console.log(this.mode);
         this.socket.send(data);
       }
     },
@@ -302,7 +302,7 @@
           type: 'start_local_game',
           mode: this.mode,
         });
-        console.log(this.mode);
+        // console.log(this.mode);
         this.socket.send(data);
       }
     },
@@ -320,7 +320,7 @@
         if (response.ok) {
           const data = await response.json();
           this.map = data.map;
-          console.log(this.map)
+          // console.log(this.map)
         }
       } catch (error) {
           this.map = '';
@@ -335,7 +335,7 @@
           type: 'start_ranked_game',
           mode: this.mode,
         });
-        console.log(this.mode);
+        // console.log(this.mode);
         this.socket.send(data);
       }
     },
@@ -479,7 +479,7 @@
         this.mode = 'default';
       else
         this.mode = 'gravity';
-      console.log(this.mode);
+      // console.log(this.mode);
     },
   }
 };

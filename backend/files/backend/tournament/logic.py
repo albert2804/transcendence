@@ -151,9 +151,9 @@ def initTournament(request):
           user1 = get_user_by_username(data["player"][match * 2]['name']);
           user2 = get_user_by_username(data["player"][match * 2 + 1]['name']);
           if user1 is None:
-            return JsonResponse({'error': f'Username {data["player"][match * 2]["name"]} does not exist'}, status=400)
+            return JsonResponse({'error': 'Please enter 4 valid player names'}, status=200)
           if user2 is None:
-            return JsonResponse({'error': f'Username {data["player"][match * 2 + 1]["name"]} does not exit'}, status=400)
+            return JsonResponse({'error': 'Please enter 4 valid player names'}, status=200)
           
           game = RemoteGame.objects.create(
                     player1=user1,

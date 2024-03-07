@@ -13,19 +13,8 @@ from chat.consumers import ChatConsumer
 from remote_game.player import Player
 
 #2FA stuff
-# import jwt
-# from django_otp.plugins.otp_totp.models import TOTPDevice
-# from django.conf import settings
-# import datetime
-# from django.contrib.auth.decorators import login_required
-# from django.utils.decorators import method_decorator
-# import pyotp
-# import qrcode
-# import base64
-# from io import BytesIO
+
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 from django_otp.plugins.otp_totp.models import TOTPDevice
 import datetime
 import pyotp
@@ -166,7 +155,6 @@ def userregister(request):
         # check input with CustomUserCreationForm
         # form = CustomUserCreationForm(request.POST)
         data = json.loads(request.body.decode('utf-8'))
-        # print(data)
         form = CustomUserCreationForm(data)
         if form.is_valid():
             # save user to database and login
@@ -185,7 +173,6 @@ def userregister(request):
             else:
                 return JsonResponse({'error': 'Something went wrong'}, status=400)
         else:
-            # print(form.errors)
             # check if username already exists
             if CustomUser.objects.filter(username=data['username']).exists():
                 return JsonResponse({'error': 'Username already exists'}, status=403)
@@ -261,7 +248,6 @@ def enable_2fa(request, *args, **kwargs):
         return JsonResponse({'error': 'No TOTP device found for this user'}, status=400)
 
     # Convert the binary key to a base32-encoded string
-    #print(f"bin_key: {totp_device.bin_key}")
     bin_key_base32 = base64.b32encode(binascii.unhexlify(totp_device.key)).decode()
 
     # Verify the code
@@ -280,21 +266,19 @@ def enable_2fa(request, *args, **kwargs):
 def get_2fa_status(request):
     if request.method == 'GET':
         username = request.GET.get('username')
-        print("username: ", username)
         if username:
             try:
                 user = CustomUser.objects.get(username=username)
-                print("Returning user! 2fa status: ",  user.enabled_2fa )
                 return JsonResponse({'enabled_2fa': user.enabled_2fa})
             except CustomUser.DoesNotExist:
-                print("user not found")
                 return JsonResponse({'error': 'User not found'}, status=404)
         else:
             try:
                 user = request.user
+                if not request.user.is_authenticated:
+                    return JsonResponse({'message': 'Need to be logged in to check 2FA status.'}, status=200)
                 return JsonResponse({'enabled_2fa': user.enabled_2fa})
             except:
-                print("no username provided and not logged in")
                 return JsonResponse({'error': 'No username provided and not logged in'}, status=400)
     return JsonResponse({'error': 'Invalid request'}, status=400)
 

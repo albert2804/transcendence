@@ -44,7 +44,7 @@
       </div>
 
       <h3 style="margin-top: 1.5vh;">Ended Tournaments</h3>
-      <div class="nes-container is-rounded" style="height:1000%">
+      <div class="nes-container is-rounded" style="height:100%">
         <button @click="getTournamets(true)" style="width: 100%; height: 100%; background-color: transparent; border-color: transparent;">
           <progress class="nes-progress is-pattern" value="100" max="100"></progress>
         </button>
@@ -95,6 +95,9 @@ export default {
     this.startPolling()
   },
   beforeDestroy() {
+    this.stopPolling();
+  },
+  beforeUnmount() {
     this.stopPolling();
   },
   methods: {

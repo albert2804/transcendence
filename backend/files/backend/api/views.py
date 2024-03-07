@@ -328,25 +328,15 @@ def add_friend(request):
 					return JsonResponse({'error': 'User not found'}, status=403)
 				if friend == request.user:
 					return JsonResponse({'error': 'You cannot add yourself'}, status=403)
-				#
 				chat_consumer_group_name = 'chat_' + str(request.user.id)
-				# if chat_consumer_group_name not in ChatConsumer.all_consumer_groups:
 				if chat_consumer_group_name not in ChatConsumer.group_to_channels_mapping:
 					return JsonResponse({'error': 'You do not have a connected chat consumer'}, status=403)
-				#
 				channel_layer = get_channel_layer()
-				# channels = async_to_sync(channel_layer.group_channels)(chat_consumer_group_name)
-				# if channels:
-				# first_channel = channels[0]
 				first_channel = ChatConsumer.group_to_channels_mapping[chat_consumer_group_name][0]
 				async_to_sync(channel_layer.send)(first_channel, {
 					'type': 'handle_friend_command',
 					'receiver_id': friend.id,
 				})
-					# async_to_sync(channel_layer.group_send)(f"chat_{request.user.id}", {
-					# 	'type': 'handle_friend_command',
-					# 	'receiver_id': friend.id,
-					# })
 				return JsonResponse({'message': 'success'}, status=200)
 			else:
 				return JsonResponse({'error': 'Friend not specified'}, status=400)
@@ -381,25 +371,16 @@ def remove_friend(request):
 					return JsonResponse({'error': 'User not found'}, status=403)
 				if friend == request.user:
 					return JsonResponse({'error': 'You cannot remove yourself'}, status=403)
-				# 
 				chat_consumer_group_name = 'chat_' + str(request.user.id)
 				if chat_consumer_group_name not in ChatConsumer.all_consumer_groups:
 					return JsonResponse({'error': 'You do not have a connected chat consumer'}, status=403)
-				# 
 				channel_layer = get_channel_layer()
-				channels = async_to_sync(channel_layer.group_channels)(chat_consumer_group_name)
-				if channels:
-					first_channel = channels[0]
-					async_to_sync(channel_layer.send)(first_channel, {
-						'type': 'handle_unfriend_command',
-						'receiver_id': friend.id,
-						'remove': True,
-					})
-				# async_to_sync(channel_layer.group_send)(f"chat_{request.user.id}", {
-				# 	'type': 'handle_unfriend_command',
-				# 	'receiver_id': friend.id,
-				# 	'remove': True,
-				# })
+				first_channel = ChatConsumer.group_to_channels_mapping[chat_consumer_group_name][0]
+				async_to_sync(channel_layer.send)(first_channel, {
+					'type': 'handle_unfriend_command',
+					'receiver_id': friend.id,
+					'remove': True,
+				})
 				return JsonResponse({'message': 'success'}, status=200)
 			else:
 				return JsonResponse({'error': 'Friend not specified'}, status=400)

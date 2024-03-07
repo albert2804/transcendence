@@ -8,20 +8,26 @@ import { isLoggedIn } from '~/store';
 
 <template>
   <div>
-    <div>
-      <h1>Youre on the tournament site</h1>
-      <button @click="callSignUp" class="btn btn-primary"></button>
-      <div v-if="isLoggedIn">
-        <button @click="toggleForm" class="btn btn-primary">
-        {{ formVisible ? 'No Tournament' : 'Create Tournament' }} </button>
-      </div>
-    </div>
-    <div v-if="formVisible">
-      <FormTournament v-bind:local="false" :loggedInUser="loggedInUser"/>
+    <div class="container justify-content-center">
+      <h1>Youre on the tournament site!</h1>
+
+      
     </div>
     <div v-if="isLoggedIn">
       <ListTournament :loggedInUser="loggedInUser"/>
     </div>
+    <div style="align-items: center; margin-top: 4vh;">
+      <p style=""><strong>For Evaluation: </strong>
+        <button @click="callSignUp" class=" nes-btn nes-btn-tour is-error">Create 3 Dummy Accounts</button>
+      </p>
+      <div v-if="isLoggedIn">
+        <button @click="toggleForm" class="nes-btn is-primary row" style="min-width: 300px; margin-top: 3vh;">
+          {{ formVisible ? 'No Tournament' : 'Create Tournament' }} </button>
+        </div>
+      </div>
+      <div v-if="formVisible">
+        <FormTournament v-bind:local="false" :loggedInUser="loggedInUser"/>
+      </div>
   </div>
 </template>
 
@@ -79,3 +85,13 @@ export default {
   }
 }
 </script>
+
+<style>
+.nes-btn-tour {
+  color: black;
+}
+
+.nes-btn-tour:hover {
+  color: white;
+}
+</style>

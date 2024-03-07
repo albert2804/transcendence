@@ -9,7 +9,7 @@ class PongGame:
 		self.isGameExited = False
 		self.countdownSec = 3
 		self.factor = 3 # by raising the factor the game is faster paced
-		self.initialSpeed = 3 / self.factor
+		self.initialSpeed = 4 / self.factor
 		self.canvasWidth = 800
 		self.canvasHeight = 400
 		self.winner = 0
@@ -23,9 +23,9 @@ class PongGame:
 		self.rightPaddle = {'x': self.canvasWidth - 10, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
 
 		# Ball initialization
-		self.acceleration = 1.4
+		self.acceleration = 1.2
 		self.tolerance = 3
-		self.max_velocity = 10
+		self.max_velocity = 8
 		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.initialSpeed, 'dy': self.initialSpeed, 'radius': 6}
 
 		# if there is an intersection of the ball and the paddle, intersection = true(needed for sound)

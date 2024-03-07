@@ -83,6 +83,11 @@ def update_user_alias(user, newUsername):
 			return JsonResponse({'error': 'alias already in use'},
 					status=405)
 	
+	stripped = newUsername.strip()
+	if len(stripped) == 0:
+		return JsonResponse({'error': 'No whitespaces as alias'},
+				status=405)
+	
 	user.alias = newUsername
 	user.save()
 	return JsonResponse({'status': 'Changed username'},

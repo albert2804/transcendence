@@ -157,17 +157,27 @@ class GameHandler:
 			p1_points = int(self.game.pointsP1)
 			p2_points = int(self.game.pointsP2)
 			if self.game.winner == 1:
-				await chat_consumer.show_alert_all(self.player1.get_user().alias + " won against " + self.player2.get_user().alias + " with " + str(p1_points) + " to " + str(p2_points) + " points.")
+				await chat_consumer.show_alert_all(self.player1.get_user().alias + " (" + self.player1.get_user().username + ") won against " + self.player2.get_user().alias + " (" + self.player2.get_user().username + ") with " + str(p1_points) + " to " + str(p2_points) + " points.")
 			elif self.game.winner == 2:
-				await chat_consumer.show_alert_all(self.player2.get_user().alias + " won against " + self.player1.get_user().alias + " with " + str(p2_points) + " to " + str(p1_points) + " points.")
+				await chat_consumer.show_alert_all(self.player2.get_user().alias + " (" + self.player2.get_user().username + ") won against " + self.player1.get_user().alias + " (" + self.player1.get_user().username + ") with " + str(p2_points) + " to " + str(p1_points) + " points.")
 
 	# send the game rusult to the players chat
 	async def send_game_result_to_chat(self):
 		chat_consumer = ChatConsumer()
-		if self.ranked:
-			# get the points of the players
-			p1_points = int(self.game.pointsP1)
-			p2_points = int(self.game.pointsP2)
+		p1_points = int(self.game.pointsP1)
+		p2_points = int(self.game.pointsP2)
+		if self.tournament != None:
+			# send the game result to the chat
+			if self.game.winner == 0:
+				await chat_consumer.save_and_send_message(self.player1.get_user(), self.player2.get_user(), "A Tournament game ended in a tie.", timezone.now(), "info")
+				await chat_consumer.save_and_send_message(self.player2.get_user(), self.player1.get_user(), "A Tournament game ended in a tie.", timezone.now(), "info")
+			elif self.game.winner == 1:
+				await chat_consumer.save_and_send_message(self.player2.get_user(), self.player1.get_user(), "You won a Tournament game with " + str(p1_points) + " to " + str(p2_points) + " points.", timezone.now(), "info")
+				await chat_consumer.save_and_send_message(self.player1.get_user(), self.player2.get_user(), "You lost a Tournament game with " + str(p2_points) + " to " + str(p1_points) + " points.", timezone.now(), "info")
+			elif self.game.winner == 2:
+				await chat_consumer.save_and_send_message(self.player1.get_user(), self.player2.get_user(), "You won a Tournament game with " + str(p2_points) + " to " + str(p1_points) + " points.", timezone.now(), "info")
+				await chat_consumer.save_and_send_message(self.player2.get_user(), self.player1.get_user(), "You lost the game with " + str(p1_points) + " to " + str(p2_points) + " points.", timezone.now(), "info")
+		elif self.ranked:
 			# send the game result to the chat
 			if self.game.winner == 0:
 				await chat_consumer.save_and_send_message(self.player1.get_user(), self.player2.get_user(), "A ranked game ended in a tie.", timezone.now(), "info")

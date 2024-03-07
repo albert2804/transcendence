@@ -194,7 +194,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		if receiver_id:
 			receiver = await database_sync_to_async(lambda: get_user_model().objects.get(id=int(receiver_id)))()
 			if receiver:
-				await self.save_and_send_message(receiver, self.scope["user"], "Commands:\n/play - Invite/Accept user to play game\n/dont_play - Reject game invitation\n/block - Block user\n/unblock - Unblock user\n/friend - Invite/Accept friend request\n/unfriend - Unfriend user", datetime.now(), 'info')
+				await self.save_and_send_message(receiver, self.scope["user"], "Commands:\n/play - Invite/Accept user to play game\n/dont_play - Reject game invitation\n/dont_play_tournament - Reject tournament game invitation\n/block - Block user\n/unblock - Unblock user\n/friend - Invite/Accept friend request\n/unfriend - Unfriend user", datetime.now(), 'info')
 
 	async def handle_unknown_command(self, event):
 		receiver_id = event.get('receiver_id')

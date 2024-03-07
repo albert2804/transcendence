@@ -8,8 +8,10 @@ import json
 from channels.layers import get_channel_layer
 
 class ChatConsumer(AsyncWebsocketConsumer):
-	# all instances of chat consumer
+	# one group for each user
 	all_consumer_groups = []
+	# consumer_group (user) to channels mapping
+	group_to_channels_mapping = {}
     
 	@database_sync_to_async
 	def update_user_status(self, user, status):
@@ -206,13 +208,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		await self.accept()
 		if self.scope["user"].is_authenticated:
+			user_group_name = f"chat_{self.scope['user'].id}"
 			# add user to his own group / create group for the user
 			await self.channel_layer.group_add(
-				f"chat_{self.scope['user'].id}",
+				user_group_name,
 				self.channel_name
 			)
-			if f"chat_{self.scope['user'].id}" not in self.all_consumer_groups:
-				self.all_consumer_groups.append(f"chat_{self.scope['user'].id}")
+			if user_group_name not in self.all_consumer_groups:
+				self.all_consumer_groups.append(user_group_name)
+			# Add the channel to the group mapping
+			if user_group_name not in ChatConsumer.group_to_channels_mapping:
+				ChatConsumer.group_to_channels_mapping[user_group_name] = []
+			ChatConsumer.group_to_channels_mapping[user_group_name].append(self.channel_name)
 			# add user to chat group (general group to update user list etc.)
 			await self.channel_layer.group_add(
 				"chat",
@@ -227,16 +234,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 	async def disconnect(self, close_code):
 		if self.scope["user"].is_authenticated:
+			user_group_name = f"chat_{self.scope['user'].id}"
 			await self.channel_layer.group_discard(
-				f"chat_{self.scope['user'].id}",
+				user_group_name,
 				self.channel_name
 			)
-			if f"chat_{self.scope['user'].id}" in self.all_consumer_groups:
-				self.all_consumer_groups.remove(f"chat_{self.scope['user'].id}")
+			if user_group_name in self.all_consumer_groups:
+				self.all_consumer_groups.remove(user_group_name)
 			await self.channel_layer.group_discard(
 				"chat",
 				self.channel_name
 			)
+			ChatConsumer.group_to_channels_mapping[user_group_name].remove(self.channel_name)
 		await self.update_user_status(self.scope["user"], False)
 		await self.channel_layer.group_send("chat",{'type': 'user_list',})
 

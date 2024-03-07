@@ -132,6 +132,12 @@ export default {
       }
     },
 
+    refreshNames () {
+      this.all_players.forEach((player) => {
+        player.name = '';
+      });
+    },
+
     async startTournament(event) {
       event.preventDefault();
       if (this.tournamentName == "") {
@@ -154,6 +160,7 @@ export default {
         const responseData = await response.json()
         if (responseData.error) {
           this.contentError = responseData.error;
+          this.contentMessage = '';
           this.openPopupMessage();
           return
         }
@@ -166,7 +173,8 @@ export default {
         this.tournamentStarted = true;
         this.contentMessage = "Successfully created tournament";
         this.openPopupMessage();
-
+        this.refreshNames();
+        // this.contentMessage = "";
       } catch (error) {
           console.log('Error sending signal to backend', error);
       }

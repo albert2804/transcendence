@@ -65,7 +65,6 @@ export default {
           this.openPopupMessage();
         }
         if (responseData.message) {
-          console.log('Message from Backend: ', responseData.message);
           this.contentMessage = responseData.message;
           this.openPopupMessage();
         }

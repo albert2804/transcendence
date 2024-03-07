@@ -39,8 +39,10 @@ def signUpTwoDummies(request):
       defaults={'email': "random@ass.de",
       'is_42_login': False,
       'chat_online': True, })
+    print({'message': 'Data received'})
     return JsonResponse({'message': 'Data received'})
   else:
+    print({'error': 'Invalid request'})
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def get_user_by_username(username):
@@ -66,6 +68,7 @@ def getPlayableGames(request):
       # json_data = serializers.serialize('json', games_list, fields=('tournament_name',))
       return JsonResponse({'data': json_data})
   else:
+    print({'error': 'Invalid request'})
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def getTourmaentsGames(request):
@@ -77,6 +80,7 @@ def getTourmaentsGames(request):
 
       return JsonResponse({'data': json_data})
   else:
+    print({'error': 'Invalid request'})
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def getTournaments(request):
@@ -90,6 +94,7 @@ def getTournaments(request):
 
       return JsonResponse({'data': json_data})
   else:
+    print({'error': 'Invalid request'})
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 async def initiateGame(user1, user2, game, tour):
@@ -109,26 +114,31 @@ def inviteOtherPlayer(request):
       user1 = get_user_by_username(data["username"])
       player1_handler = Player.get_player_by_user(user1)
       if player1_handler.game_handler is not None:
+        print({'error': 'You have an active game'})
         return JsonResponse({'error': 'You have an active game'}, status=404)
       tour = Tournament.objects.get(tournament_name=data["tour_name"])
       if tour is None:
+        print({'error': 'Sorry Tournament not Found'})
         return JsonResponse({'error': 'Sorry Tournament not Found'}, status=404)
 
       games = tour.games.all()
       game = games.get(is_match_nbr=data["game_nbr"])
       if game is None:
+        print({'error': 'Sorry Game from Tournament not Found'})
         return JsonResponse({'error': 'Sorry Game from Tournament not Found'}, status=404)
       if data["username"] == game.player1.username:
         user2 = get_user_by_username(game.player2)
       else:
         user2 = get_user_by_username(game.player1)
       if user2 is None:
+        print({'error': 'User is missing in database'})
         return JsonResponse({'error': 'User is missing in database'}, status=404)
       
       async_to_sync(initiateGame)(user1, user2, game, tour)
         
-      
+      print({'message': 'Player is Ready'})
       return JsonResponse({'message': 'Player is Ready'})
+  print({'error': 'Invalid request'})
   return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def initTournament(request):
@@ -185,4 +195,5 @@ def initTournament(request):
       }
       return JsonResponse({'data': data_curr_tour})
   else:
+    print({'error': 'Invalid request'})
     return JsonResponse({'error': 'Invalid request'}, status=400)

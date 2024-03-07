@@ -6,12 +6,12 @@
         <input type="text" id="name_field" class="nes-input" placeholder="Your Tournament Name" @input="setTournamentName($event)">
       </div>
       <div class="mb-3" style="margin-top: 4vh;">
-        <label for="nbrPlayerRange" class="form-label float-start" style="margin-right: 50px;">Total Players: </label>
+        <!-- <label for="nbrPlayerRange" class="form-label float-start" style="margin-right: 50px;">Total Players: </label>
         <div class="d-flex align-items-center">
           <input style="width: 80%; " type="range" class="form-range" min="0" max="3" step="1" id="nbrPlayerRange" 
             v-model.number="selectPos" @input="updatePlayerCount">
           <h6 style="rotate:90deg;" class="ms-3">{{ selectedData }}</h6>
-        </div>
+        </div> -->
       </div>
 
       <div style="margin-bottom: 3%;" class="name-box row flex-wrap">
@@ -66,7 +66,7 @@ export default {
       all_matches: [],
       tournamentSize: [4, 8, 16, 32],
       selectPos: 0,
-      nbr_players: '4',
+      nbr_players: 4,
       tournamentStarted: false,
       PopupMessage: false,
       contentError: null,

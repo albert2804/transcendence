@@ -56,9 +56,6 @@ export default {
   left: 50%; /* Position it in the horizontal center of the viewport */
   transform: translate(-50%, -50%); /* Center the popup exactly */
   padding: 20px; /* Padding around the content */
-  /* border: 1px solid #ccc; Border */
-  /* border-radius: 8px; Border radius */
-  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); Box shadow for a subtle depth effect */
   width: 50vw;
   height: 10vw;
   white-space: normal;
@@ -72,13 +69,9 @@ export default {
 	left: 50%; /* Position it in the horizontal center of the viewport */
 	transform: translate(-50%, -50%); /* Center the popup exactly */
 	padding: 20px; /* Padding around the content */
-	/* border: 1px solid #ccc; /* Border */
-	/* border-radius: 8px; Border radius */
-	/* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); Box shadow for a subtle depth effect */
-	width: 50vw;
+	width: 40vw;
 	height: 10vw;
 	white-space: normal;
-	/* text-align: justify; */
 	z-index: 1000;
 }
 
@@ -89,10 +82,7 @@ export default {
 	left: 50%; /* Position it in the horizontal center of the viewport */
 	transform: translate(-50%, -50%); /* Center the popup exactly */
 	padding: 20px; /* Padding around the content */
-	/* border: 1px solid #ccc; Border */
-	/* border-radius: 8px; Border radius */
-	/* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); Box shadow for a subtle depth effect */
-	width: 50vw;
+	width: 40vw;
 	height: 10vw;
 	white-space: normal;
 	z-index: 1000;

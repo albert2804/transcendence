@@ -187,20 +187,10 @@ def invite_to_game(request):
 					return JsonResponse({'error': 'User not found'}, status=403)
 				if receiver == request.user:
 					return JsonResponse({'error': 'You cannot invite yourself'}, status=403)
-				# 
 				gameconsumer_group_name = 'gameconsumer_' + str(request.user.id)
 				if gameconsumer_group_name not in RemoteGameConsumer.all_consumer_groups:
 					return JsonResponse({'error': 'You do not have a connected game consumer'}, status=403)
-				# 
 				channel_layer = get_channel_layer()
-				# channels = async_to_sync(channel_layer.group_channels)(gameconsumer_group_name)
-				# if channels:
-				# 	first_channel = channels[0]
-				# 	async_to_sync(channel_layer.send)(first_channel, {
-				# 		'type': 'invite_to_game',
-				# 		'user_id_1': request.user.id,
-				# 		'user_id_2': receiver.id,
-				# 	})
 				async_to_sync(channel_layer.group_send)('gameconsumer_' + str(request.user.id), {
 					'type': 'invite_to_game',
 					'user_id_1': request.user.id,

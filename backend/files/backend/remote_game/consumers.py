@@ -22,29 +22,6 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	ranked_waiting_room = []
 	ranked_waiting_room_g = []
 
-	# async def fast_game(self, event): # NOT USED BUT INTERESTING (UNRANKED GAME)
-	# 	print("fast_game called")
-	# 	user_id_1 = event['user_id_1']
-	# 	user_id_2 = event['user_id_2']
-	# 	user_1 = await sync_to_async(get_user_model().objects.get)(id=user_id_1)
-	# 	user_2 = await sync_to_async(get_user_model().objects.get)(id=user_id_2)
-	# 	player1 = Player.get_player_by_user(user_1)
-	# 	player2 = Player.get_player_by_user(user_2)
-	# 	if player1 == None or player2 == None:
-	# 		print("Error: player not found")
-	# 		return
-	# 	game_group = await GameHandler.create(player1, player2)
-	# 	# open the game modal for both players
-	# 	await self.channel_layer.group_send(
-	# 		f"game_{player1.get_user().id}_{player2.get_user().id}",
-	# 		{
-	# 			'type': 'open_game_modal',
-	# 		})
-	# 	await player1.send_state()
-	# 	await player2.send_state()
-	# 	asyncio.ensure_future(game_group.start_game())
-
-
 	# Invites a user to a game (ranked)
 	# Same as sending /play request to a user in the chat
 	# 
@@ -74,8 +51,6 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	# 	'db_game_id': db_game.id,
 	#		'tour_id
 	# })
-  		
-		
 	async def start_tournament_game(self, event):
 		user_1_id = event.get('user_id_1')
 		user_2_id = event.get('user_id_2')

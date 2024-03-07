@@ -33,7 +33,6 @@ export default {
       if (this.searchQuery.trim() === '') {
         this.showResults = true;
         this.noUserFound = false;
-        console.log("hi")
       }
       
       try {
@@ -49,7 +48,6 @@ export default {
             this.noUserFound = true;
             return;
           }
-          console.log(data)
           this.noUserFound = false;
           this.searchResults = data;
         } else {
@@ -66,8 +64,6 @@ export default {
         this.noUserFound = false;
         this.selectedUser = selectedResult;
         this.searchQuery = this.selectedUser.name
-        console.log(this.selectedUser)
-        console.log(this.index)
         this.$emit('user-selected', this.selectedUser.name, this.index)
       }
     },

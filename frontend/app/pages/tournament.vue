@@ -84,14 +84,12 @@ export default {
         body: null,
       });
       const responseData = await response.json()
-      console.log('Backend Response:', responseData.data)
       if (responseData.error) {
         console.log('Error from Backend:' ,responseData.error);          
         this.contentError = responseData.error;
         this.openPopupMessage();
       }
       if (responseData.message) {
-        console.log('Message from Backend: ', responseData.message);
         this.contentMessage = responseData.message;
         this.openPopupMessage();
       }

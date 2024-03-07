@@ -155,8 +155,9 @@ export default {
         if (responseData.error) {
           this.contentError = responseData.error;
           this.openPopupMessage();
+          return
         }
-        if (responseData.message) {
+        else if (responseData.message) {
           this.contentMessage = responseData.message;
           this.openPopupMessage();
         }
@@ -167,12 +168,12 @@ export default {
         this.openPopupMessage();
 
       } catch (error) {
-        console.log('Error sending signal to backend:', error);
+          console.log('Error sending signal to backend', error);
       }
     },
     openPopupMessage() {
       this.PopupMessage = true
-        console.log('Value of PopupMessage: ', this.PopupMessage);
+        // console.log('Value of PopupMessage: ', this.PopupMessage);
     },
   },  
 };

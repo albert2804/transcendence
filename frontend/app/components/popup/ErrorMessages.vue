@@ -1,5 +1,5 @@
 <template>
-	<div v-if="openPopup" class="popup">
+	<div v-if="openPopup" class="MesErrpopup nes-container is-rounded">
 		<div class="content_container">
 			<div v-if="error" class="error_container">
 				<p style="text-align: center; color: white;">{{error}}</p>
@@ -50,16 +50,15 @@ export default {
     background: rgba(255,255,255,0.7);
   }
 
-.popup {
+.MesErrpopup {
   position: fixed; /* Fixed positioning to overlay on top of other content */
-  background-color: #e45c10;
   top: 50%; /* Position it in the vertical center of the viewport */
   left: 50%; /* Position it in the horizontal center of the viewport */
   transform: translate(-50%, -50%); /* Center the popup exactly */
   padding: 20px; /* Padding around the content */
-  border: 1px solid #ccc; /* Border */
-  border-radius: 8px; /* Border radius */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Box shadow for a subtle depth effect */
+  /* border: 1px solid #ccc; Border */
+  /* border-radius: 8px; Border radius */
+  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); Box shadow for a subtle depth effect */
   width: 50vw;
   height: 10vw;
   white-space: normal;
@@ -67,15 +66,15 @@ export default {
 }
 
 .error_container {
-	background-color: #f44336;
+	background-color: #e76e55;
 	position: fixed; /* Fixed positioning to overlay on top of other content */
 	top: 50%; /* Position it in the vertical center of the viewport */
 	left: 50%; /* Position it in the horizontal center of the viewport */
 	transform: translate(-50%, -50%); /* Center the popup exactly */
 	padding: 20px; /* Padding around the content */
-	border: 1px solid #ccc; /* Border */
-	border-radius: 8px; /* Border radius */
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Box shadow for a subtle depth effect */
+	/* border: 1px solid #ccc; /* Border */
+	/* border-radius: 8px; Border radius */
+	/* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); Box shadow for a subtle depth effect */
 	width: 50vw;
 	height: 10vw;
 	white-space: normal;
@@ -84,15 +83,15 @@ export default {
 }
 
 .message_container {
-	background-color: #4CAF50;
+	background-color: #92cc41;
 	position: fixed; /* Fixed positioning to overlay on top of other content */
 	top: 50%; /* Position it in the vertical center of the viewport */
 	left: 50%; /* Position it in the horizontal center of the viewport */
 	transform: translate(-50%, -50%); /* Center the popup exactly */
 	padding: 20px; /* Padding around the content */
-	border: 1px solid #ccc; /* Border */
-	border-radius: 8px; /* Border radius */
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Box shadow for a subtle depth effect */
+	/* border: 1px solid #ccc; Border */
+	/* border-radius: 8px; Border radius */
+	/* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); Box shadow for a subtle depth effect */
 	width: 50vw;
 	height: 10vw;
 	white-space: normal;

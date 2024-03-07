@@ -21,7 +21,7 @@ export default {
   background-image: url('/background_home_big.png');
   background-size: cover;
   height: 150%;
-  width: 98%;
+  width: 100%;
   display: flex;
 }
 

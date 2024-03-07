@@ -1,7 +1,7 @@
 <template>
   <div class="container justify-content-center" style="width:100%;">
     <div class="row" style="width: 100%;">
-      <h3>Quick Tournament Games</h3>
+      <h3 style="margin-top: 3vh;">Quick Tournament Games</h3>
       <div class="nes-container is-rounded carousel-container">
         <div v-if="quickSelect.length == 0">
           <strong>There is no playable tournament Game for you</strong> 
@@ -25,7 +25,7 @@
         </div>
       </div>
       
-      <h3>Ongoing Tournaments</h3>
+      <h3 style="margin-top: 1.5vh;">Ongoing Tournaments</h3>
       <div class="nes-container is-rounded" style="height:100%">
         <button @click="getTournamets(false)" style="width: 100%; height: 100%; background-color: transparent; border-color: transparent;">
           <progress class="nes-progress is-pattern" value="100" max="100"></progress>
@@ -43,7 +43,7 @@
         </div>
       </div>
 
-      <h3>Ended Tournaments</h3>
+      <h3 style="margin-top: 1.5vh;">Ended Tournaments</h3>
       <div class="nes-container is-rounded" style="height:1000%">
         <button @click="getTournamets(true)" style="width: 100%; height: 100%; background-color: transparent; border-color: transparent;">
           <progress class="nes-progress is-pattern" value="100" max="100"></progress>

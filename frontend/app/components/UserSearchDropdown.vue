@@ -2,9 +2,9 @@
   <div class="row">
     <div :class="noUserFound ? 'col-9' : 'col-11'">
       <input class="form-control" :list="'datalistOptions' + index" :id="'exampleDataList' + index" 
-              placeholder="User to search..." v-model="searchQuery" 
-              @input="searchUsers" @change="selectUser" style="min-width: 200px;">
-      <datalist v-if="showResults" :id="'datalistOptions' + index">
+             placeholder="User to search..." v-model="searchQuery" 
+             @input="searchUsers" @change="selectUser" style="min-width: 200px;">
+      <datalist :id="'datalistOptions' + index + Date.now()" v-if="showResults">
         <option v-for="result in searchResults" :value="result.name" :key="result.id"></option>
       </datalist>
     </div>
@@ -32,10 +32,12 @@ export default {
       if (this.searchQuery.trim() === '') {
         this.showResults = true;
         this.noUserFound = false;
+        console.log("hi")
       }
       
       try {
         if (this.searchQuery === "") {
+          console.log("hallo")
           this.noUserFound = false;
           this.showResults = true;
           return;
@@ -47,6 +49,7 @@ export default {
             this.noUserFound = true;
             return;
           }
+          console.log(data)
           this.noUserFound = false;
           this.searchResults = data;
         } else {
@@ -59,9 +62,14 @@ export default {
 
     selectUser(event) {
       this.showResults = false;
-      this.selectedUser = this.searchResults.find(result => result.name === event.target.value);
-      if (this.selectedUser)
+      const selectedResult = this.searchResults.find(result => result.name === event.target.value);
+      if (selectedResult) {
+        this.selectedUser = selectedResult;
+        console.log(this.selectedUser)
+        console.log(this.index)
         this.$emit('user-selected', this.selectedUser.name, this.index)
+        this.selectedUser = null;
+      }
     },
   },
 };

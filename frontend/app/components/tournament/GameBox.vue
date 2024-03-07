@@ -12,7 +12,7 @@
         </div>
         
         <div v-if="(match.player1 == this.loggedInUser || match.player2 == this.loggedInUser) && this.loggedInUser != undefined && match.finished == false" class="play-button-container">
-          <button class="nes-btn is-success" @click="sendInvite($event)"> 
+          <button class="nes-btn nes-btn-gamebox is-success" @click="sendInvite($event)"> 
             <span>Play</span>
           </button>
         </div>
@@ -100,7 +100,7 @@ export default {
   align-items: center; /* New property */
 }
 
-.nes-btn {
+.nes-btn-gamebox {
   height: 50%;
   margin: auto;
 }

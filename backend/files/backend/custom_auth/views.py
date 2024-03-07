@@ -46,13 +46,11 @@ def callback(request):
     if response.status_code == 200:
         user_details = response.json()
     else:
-        login_route = "login"
         error = "Error authenticating with 42 intra."
         return HttpResponseRedirect(f'http://{request.get_host()}/login?error={error}')
 
     user = CustomUser.objects.filter(username=user_details['login']).first()
     if user is not None and user.is_42_login == False:
-        login_route = "login"
         error = "This account is already registered locally, please log in with username and password."
         return HttpResponseRedirect(f'http://{request.get_host()}/login?error={error}')
 

@@ -24,7 +24,7 @@ export default {
         sound.value = true;
         //sound is on
       }
-      console.log(sound.value);
+      // console.log(sound.value);
     }
   }
 }

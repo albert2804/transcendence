@@ -121,7 +121,7 @@ export default {
     async startTournament(event) {
       event.preventDefault();
       if (this.tournamentName == "") {
-        console.log("Error Tournament Name isnt allowed to be empty")
+        // console.log("Error Tournament Name isnt allowed to be empty")
         return
       }
       // this.createMatches()
@@ -138,11 +138,11 @@ export default {
         });
         
         const responseData = await response.json()
-        console.log('Backend Response:', responseData.data)
+        // console.log('Backend Response:', responseData.data)
         this.all_matches = responseData.data.games
         this.tournamentName = responseData.data.tour_name
-        console.log("TourName: ", this.tournamentName)
-        console.log("All Matches:", this.all_matches)
+        // console.log("TourName: ", this.tournamentName)
+        // console.log("All Matches:", this.all_matches)
         this.tournamentStarted = true;
 
       } catch (error) {

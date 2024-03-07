@@ -46,7 +46,7 @@ export default {
 				location.reload();
 				
 			 }
-			 	console.log("Changed username/map worked");
+			 	// console.log("Changed username/map worked");
 			} catch (error) {
 				console.error('Error updating user alias/map:', error);
 			}

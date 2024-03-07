@@ -65,7 +65,7 @@
 				}
 			}
 			else {
-				console.log("Passwords dont match");
+				// console.log("Passwords dont match");
 				this.sendMessagetoParent('', 'Passwords dont match');
 				this.closePopup();
 			}

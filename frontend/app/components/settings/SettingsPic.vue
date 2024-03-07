@@ -63,7 +63,7 @@
 				const fileInput = event.target;
 				this.newPic = fileInput.files[0];
 				if (this.newPic && this.newPic.size > 4000000) {
-					console.log('File size exceeds the maximum allowed size (~4MB)');
+					// console.log('File size exceeds the maximum allowed size (~4MB)');
 					this.sendMessagetoParent('', 'File size exceeds the maximum allowed size (~4MB)');
 					this.closePopup();
 					return ;
@@ -102,7 +102,7 @@
 					location.reload();
 				}
 			} catch (error) {
-				console.log(response.status);
+				// console.log(response.status);
 				if (response.status === 422) {
 					console.log(response.error);
 				}

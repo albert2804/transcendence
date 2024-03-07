@@ -236,8 +236,10 @@ def qr_code(request):
 # enable 2FA for user
 def enable_2fa(request, *args, **kwargs):
     user = request.user
+    if user.is_42_login:
+        return JsonResponse({'error': '42 users cannot enable 2FA'}, status=200)
     if user.enabled_2fa or TOTPDevice.objects.filter(user=user, confirmed=True).exists():
-        return JsonResponse({'error': '2FA is already enabled for this user'}, status=400)
+        return JsonResponse({'error': '2FA is already enabled for this user'}, status=200)
     data = json.loads(request.body)
     code = data.get('code')
 
@@ -245,7 +247,7 @@ def enable_2fa(request, *args, **kwargs):
     totp_device = TOTPDevice.objects.filter(user=user, confirmed=False).first()
 
     if not totp_device:
-        return JsonResponse({'error': 'No TOTP device found for this user'}, status=400)
+        return JsonResponse({'error': 'No TOTP device found for this user'}, status=200)
 
     # Convert the binary key to a base32-encoded string
     bin_key_base32 = base64.b32encode(binascii.unhexlify(totp_device.key)).decode()
@@ -260,7 +262,7 @@ def enable_2fa(request, *args, **kwargs):
         user.save()
         return JsonResponse({'success': '2FA enabled successfully'})
     else:
-        return JsonResponse({'error': 'Invalid code'}, status=400)
+        return JsonResponse({'error': 'Invalid or expired code'}, status=200)
 
 
 def get_2fa_status(request):

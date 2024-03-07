@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 
 class RemoteGameConsumer(AsyncWebsocketConsumer):
 	# all instances of RemoteGameConsumer
+	# one consumer_group contains one channel ! (only one connection can play)
 	all_consumer_groups = []
 
 	# list of players in the waiting group for unranked games (mixed room for guests and registered users)

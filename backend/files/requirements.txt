@@ -18,8 +18,8 @@ daphne==4.0.0
 pytz==2023.3.post1
 requests==2.27.1
 
-# Django image handling
-Pillow==8.4.0
-
-#debug toolbar
-django-debug-toolbar
+# 2FA (Two Factor Authentication) and JWT (JSON Web Token) support
+django-otp
+pyjwt
+pyotp
+qrcode

@@ -43,11 +43,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+	'django_otp',
+	'django_otp.plugins.otp_totp',
     'users',
     'api',
     'chat',
 	'remote_game',
-	'debug_toolbar',
     'tournament',
 ]
 
@@ -69,7 +70,7 @@ MIDDLEWARE = [
 	'django.middleware.csrf.CsrfViewMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+	'django_otp.middleware.OTPMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'

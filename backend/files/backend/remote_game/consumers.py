@@ -168,8 +168,9 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		await self.accept()
 		if self.scope["user"].is_authenticated:
-			await self.channel_layer.group_add(f"gameconsumer_{self.scope['user'].id}", self.channel_name)
+			# await self.channel_layer.group_add(f"gameconsumer_{self.scope['user'].id}", self.channel_name)
 			if "gameconsumer_" + str(self.scope['user'].id) not in RemoteGameConsumer.all_consumer_groups:
+				await self.channel_layer.group_add(f"gameconsumer_{self.scope['user'].id}", self.channel_name)
 				RemoteGameConsumer.all_consumer_groups.append("gameconsumer_" + str(self.scope['user'].id))
 			if Player.get_channel_by_user(self.scope["user"]) != None:
 				await self.send(text_data=json.dumps({

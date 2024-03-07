@@ -60,7 +60,7 @@
           </div>
         </div>
     </div>
-    
+      <ErrorMessages :openPopup="PopupMessage" @close-popup="PopupMessage=false" :error="contentError" :message="contentMessage"/>
     </div>
   </div>
   </template>
@@ -68,9 +68,14 @@
 <script>
 import TournamentBoxes from './TournamentBoxes.vue';
 import GameBox from './GameBox.vue';
+import ErrorMessages from '../popup/ErrorMessages.vue';
 
 export default {
-  components: { TournamentBoxes, GameBox },
+  components: {
+    TournamentBoxes,
+    GameBox,
+    ErrorMessages,
+  },
   name: 'ListTournament',
   props: ['loggedInUser'],
   data() {
@@ -80,6 +85,9 @@ export default {
           ongoingTournaments: [],
           endedTournaments: [],
           quickSelect: [],
+          PopupMessage: false,
+          contentError: null,
+          contentMessage: null,
       };
   },
   mounted() {
@@ -109,6 +117,16 @@ export default {
           },
         });
         const responseData = await response.json();
+        if (responseData.error) {
+          console.log('Error from Backend:' ,responseData.error);
+          this.contentError = responseData.error;
+          this.openPopupMessage();
+        }
+        if (responseData.message) {
+          console.log('Message from Backend: ', responseData.message);
+          this.contentMessage = responseData.message;
+          this.openPopupMessage();
+        }
         this.quickSelect = JSON.parse(responseData.data);
       } catch (error) {
         console.log('Error sending signal to backend:', error);
@@ -127,6 +145,16 @@ export default {
             body: JSON.stringify({ name: this.loggedInUser, ongoingOrEnded: ongoingOrEnded}),
           });
           const responseData = await response.json();
+          if (responseData.error) {
+            console.log('Error from Backend:' ,responseData.error);
+            this.contentError = responseData.error;
+            this.openPopupMessage();
+          }
+          if (responseData.message) {
+            console.log('Message from Backend: ', responseData.message);
+            this.contentMessage = responseData.message;
+            this.openPopupMessage();
+          }
           this.tournaments = JSON.parse(responseData.data);
           this.tournaments.forEach((tournament) => {
             tournament.showTournament = false;
@@ -151,6 +179,10 @@ export default {
         this.ongoingTournaments = [];
         this.endedTournaments = [];
       }
+    },
+    openPopupMessage() {
+      this.PopupMessage = true
+      console.log('Value of PopupMessage: ', this.PopupMessage);
     },
   },
 };

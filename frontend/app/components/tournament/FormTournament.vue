@@ -15,9 +15,9 @@
       </div>
 
       <div style="margin-bottom: 3%;" class="name-box row flex-wrap">
-        <div v-for="index in nbr_players" style="min-width: 50%; margin-bottom: 1%" :key="index" class="d-flex col-12 col-lg-1">
+        <div v-for="index in nbr_players" style="min-width: 50%; margin-bottom: 1%" :key="index" class="name-input d-flex col-12 col-lg-1">
           <!-- this is for bots -->
-          <!-- <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+          <!--<div class="btn-group" role="group" aria-label="Basic radio toggle button group">
             <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio1' + index"
               autocomplete="off" checked @change="setActiveRadio('Player', index)"/>
             <label class="btn btn-outline-primary" :for="'btnradio1' + index">Player</label>
@@ -34,7 +34,8 @@
             <UserSearchDropdown :index="index" @user-selected="handleUserSelected"/>
           </div>
         </div>
-      </div>
+        <ErrorMessages :openPopup="PopupMessage" @close-popup="PopupMessage=false" :error="contentError" :message="contentMessage"/>
+    </div>
 
       <button type="submit" @click="startTournament($event)" class="nes-btn is-primary" style="margin-bottom: 3vh;">Start Tournament</button>
     </form>
@@ -44,15 +45,19 @@
 
 <script>
 import BracketsTournament from './BracketsTournament.vue';
+import ErrorMessages from '../popup/ErrorMessages.vue';
 
 export default {
-  components: { BracketsTournament },
+  components: {
+    BracketsTournament,
+    ErrorMessages,
+  },
   name: 'FormTournament',
   props: ['local', 'loggedInUser'],
   mounted() {
     this.all_players = [];
     this.all_matches = [];
-    this.tournamentName = "Quack";
+    this.tournamentName = '';
     this.updatePlayerCount();
   },
   data() {
@@ -63,6 +68,9 @@ export default {
       selectPos: 0,
       nbr_players: '4',
       tournamentStarted: false,
+      PopupMessage: false,
+      contentError: null,
+      contentMessage: null,
     };
   },
   computed: {
@@ -81,18 +89,18 @@ export default {
     setTournamentName(event) {
       this.tournamentName = event.target.value;
     },
-    // uncomment this function if you wanna add bots to the tournament frontend selection
-    // setActiveRadio(value, index) {
-    //   this.all_players[index - 1].name = value + "-" + index;
-    //   if (value == 'Bot') {
-    //     this.all_players[index - 1].player_or_bot = 'Bot';
-    //   } else {
-    //     this.all_players[index - 1].player_or_bot = 'Player';
-    //   }
-    // },
-    updatePlayerName(index, event) {
+    setActiveRadio(value, index) {
+      this.all_players[index - 1].name = value + "-" + index;
+      if (value == 'Bot') {
+        this.all_players[index - 1].player_or_bot = 'Bot';
+      } else {
+        this.all_players[index - 1].player_or_bot = 'Player';
+      }
+    },
+
+    async updatePlayerName(index, event) {
       if (index >= 0 && index <= this.all_players.length)
-      this.all_players[index - 1].name = event.target.value;
+        this.all_players[index - 1].name = event.target.value;
     },
 
     getPlayerValue(index) {
@@ -127,13 +135,12 @@ export default {
     async startTournament(event) {
       event.preventDefault();
       if (this.tournamentName == "") {
-        console.log("Error Tournament Name isnt allowed to be empty")
+        this.contentError = "Error: Tournament Name isn't allowed to be empty";
+        this.contentMessage = '';
+        this.openPopupMessage();
         return
       }
-      // this.createMatches()
-      // TODO: needs to call backend for tournament handling which is not yet implementet
       const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-      console.log("All Players: ", this.all_players)
       try {
         const response = await fetch('/endpoint/tournament/logic/', {
           method: 'POST',
@@ -145,16 +152,27 @@ export default {
         });
         
         const responseData = await response.json()
-        console.log('Backend Response:', responseData.data)
+        if (responseData.error) {
+          this.contentError = responseData.error;
+          this.openPopupMessage();
+        }
+        if (responseData.message) {
+          this.contentMessage = responseData.message;
+          this.openPopupMessage();
+        }
         this.all_matches = responseData.data.games
         this.tournamentName = responseData.data.tour_name
-        console.log("TourName: ", this.tournamentName)
-        console.log("All Matches:", this.all_matches)
         this.tournamentStarted = true;
-        
+        this.contentMessage = "Successfully created tournament";
+        this.openPopupMessage();
+
       } catch (error) {
         console.log('Error sending signal to backend:', error);
       }
+    },
+    openPopupMessage() {
+      this.PopupMessage = true
+        console.log('Value of PopupMessage: ', this.PopupMessage);
     },
   },  
 };

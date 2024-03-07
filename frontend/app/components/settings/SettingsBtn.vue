@@ -9,20 +9,23 @@
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
-        <!-- <RunningBanner /> -->
-        <!-- ALERTS -->
         <div v-if="recvmessage" class="alert alert-success" style="min-width: 14em" timeout="30s" role="alert">{{ recvmessage }}</div>
         <div v-if="recverror" class="alert alert-danger" style="min-width: 14em" role="alert">{{ recverror }}</div>
         <div v-if="loginStatus === 1">
-          <button type="button" class="nes-btn is-success clickable"  @click="openPopupName" style="width: 100%;">Change Alias</button>
-          <button type="button" class="nes-btn is-success clickable" @click="openPopupPw" style="width: 100%;">Change Password</button>
-          <button type="button" class="nes-btn is-success clickable" @click="openPopupPic" style="width: 100%;">Change Picture</button>
-          <button type="button" class="nes-btn is-success clickable" @click="openPopupMap" style="width: 100%;">Choose Map</button>
-          
-          <SettingsName :openPopup="PopupName" @close-popup="PopupName = false" @message-from-child="handleUpdate" />
-          <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false" @message-from-child="handleUpdate" />
-          <SettingsPw :openPopup="PopupPw" @close-popup="PopupPw = false" @message-from-child="handleUpdate" />
-          <SettingsMap :openPopup="PopupMap" @close-popup="PopupMap = false"/>
+          <div class="button-container">
+              <button type="button" class="nes-btn is-success clickable"  @click="openPopupName" style="width: 100%;">Change Alias</button>
+              <button type="button" class="nes-btn is-success clickable" @click="openPopupPw" style="width: 100%;">Change Password</button>
+              <button type="button" class="nes-btn is-success clickable" @click="openPopupPic" style="width: 100%;">Change Picture</button>
+              <button type="button" class="nes-btn is-success clickable" @click="openPopupMap" style="width: 100%;">Choose Map</button>
+              
+              <button v-if="!enabled_2fa" type="button" class="nes-btn is-success clickable" @click="openPopup2FA">Enable 2FA authentication</button>
+              <button v-if="enabled_2fa" type="button" class="nes-btn is-success clickable" @click="disable2FA">Disable 2FA authentication</button>
+              <SettingsName :openPopup="PopupName" @close-popup="PopupName = false" @message-from-child="handleUpdate" />
+              <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false" @message-from-child="handleUpdate" />
+              <SettingsPw :openPopup="PopupPw" @close-popup="PopupPw = false" @message-from-child="handleUpdate" />
+              <SettingsMap :openPopup="PopupMap" @close-popup="PopupMap = false"/>
+              <SettingsDo2FA :openPopup="Popup2FA" @close-popup="Popup2FA = false"/>
+          </div>
         </div>
         <div v-if="loginStatus != 1">
           <p>Please log in to access settings</p>
@@ -31,10 +34,10 @@
       </div>
     </div>
   </div>
-
 </template>
 
 <script>
+import { useRequestHeader } from '#imports';
 import { ref, watchEffect, watch } from 'vue';
 import { isLoggedIn } from '~/store';
 
@@ -45,6 +48,7 @@ export default {
       loginStatus: isLoggedIn,
       recvmessage:'',
       recverror:'',
+      enabled_2fa: false,
     }
   },
   setup() {
@@ -59,6 +63,7 @@ export default {
     let recverror = ref('');
     const PopupMap = ref(false);
     const loginStatus = ref(isLoggedIn.value);
+    const Popup2FA = ref(false);
 
     const openPopupName = () => {
       PopupName.value = true;
@@ -72,10 +77,18 @@ export default {
     const openPopupMap = () => {
       PopupMap.value = true;
     };
+    const openPopup2FA = () => {
+      Popup2FA.value = true;
+};
 
     watchEffect(() => {
         loginStatus.value = isLoggedIn.value;
       });
+
+    //   watch(() => user.value, (newUser) => {
+    //   // update enabled_2fa when user changes
+    //   this.enabled_2fa = newUser ? newUser.enabled_2fa : false;
+    // });
 
     return {
       handleUpdate,
@@ -86,10 +99,12 @@ export default {
       PopupPic,
       PopupPw,
       PopupMap,
+      Popup2FA,
       openPopupName,
       openPopupPic,
       openPopupPw,
-      openPopupMap
+      openPopupMap,
+      openPopup2FA,
     };
   },
  
@@ -97,6 +112,7 @@ export default {
     openLogin() {
       this.$router.push('/login');
     },
+
     async handleUpdate(message, error) {
       this.recverror = error;
       this.recvmessage = message;
@@ -104,12 +120,56 @@ export default {
       this.$forceUpdate();
       this.resetMessages();
     },
+
     async resetMessages() {
       await new Promise(resolve => setTimeout(resolve, 3000));
       this.recverror = '';
       this.recvmessage = '';
       this.$forceUpdate();
-    }
+    },
+
+    async get2FAStatus() {
+      const response = await fetch('/endpoint/api/get_2fa_status', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      this.enabled_2fa = data.enabled_2fa;
+    },
+
+    async disable2FA() {
+      const csrfToken = useRequestHeader('csrftoken');
+      const response = await fetch('/endpoint/api/disable_2fa', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+        },
+      });
+
+      if (!response.ok) {
+        this.recverror='Failed to disable 2FA';
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.success) {
+        this.recvmessage = '2FA disabled successfully';
+        this.recverror = '';
+      } else {
+        this.recvmessage = '';
+        this.recverror = 'Failed to disable 2FA';
+      }
+      this.get2FAStatus();
+    },
+},
+mounted() {
+  this.get2FAStatus();
   },
 };
 </script>
@@ -121,8 +181,15 @@ export default {
   flex-direction: column; 
 }
 
-.btn-primary {
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.button-container .nes-btn {
   margin-bottom: 10px;
+  width: 100%;
 }
 
 </style>

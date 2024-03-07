@@ -228,7 +228,10 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 					player.alias_2 = data.get('alias')
 					# start local game after both players have chosen an alias
 					if player.get_game_handler() == None and player.alias_2 != None:
-						game_group = await GameHandler.create(player, player, mode='gravity')
+						mode = 'default'
+						if data.get('mode') == 'gravity':
+							mode = 'gravity'
+						game_group = await GameHandler.create(player, player, mode=mode)
 						asyncio.create_task(game_group.start_game())
 					else:
 						await player.send_state()
@@ -259,23 +262,18 @@ class RemoteGameConsumer(AsyncWebsocketConsumer):
 						await self.add_to_ranked_waiting_room(player)
 					elif data.get('type') == 'start_ranked_game' and data.get('mode') == 'gravity':
 						await self.add_to_ranked_waiting_room_g(player)
-					elif data.get('type') == 'start_local_game' and data.get('mode') == 'default':
+					elif data.get('type') == 'start_local_game':
 						if (player.alias_2 != None):
-							game_group = await GameHandler.create(player, player, mode='default')
+							mode = 'default'
+							if data.get('mode') == 'gravity':
+								mode = 'gravity'
+							game_group = await GameHandler.create(player, player, mode=mode)
 							asyncio.create_task(game_group.start_game())
 						else:
 							await self.send(text_data=json.dumps({
 								'type': 'redirect',
 								'page': "alias_screen_2",
-							}))
-					elif data.get('type') == 'start_local_game' and data.get('mode') == 'gravity':
-						if (player.alias_2 != None):
-							game_group = await GameHandler.create(player, player, mode='gravity')
-							asyncio.create_task(game_group.start_game())
-						else:
-							await self.send(text_data=json.dumps({
-								'type': 'redirect',
-								'page': "alias_screen_2",
+								'mode': data.get('mode')
 							}))
 		except json.JSONDecodeError:
 			print(f"Error handling received message from a game-websocket: {text_data}")

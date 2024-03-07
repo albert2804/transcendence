@@ -27,7 +27,7 @@
           <div>{{ message }}</div>
         </div>
         <!-- Checkbox --->
-        <div v-if="showMenu">
+        <div v-if="showMenu || showAliasScreen2">
           <label for="checkbox">
           <input type="checkbox" id="checkbox" v-model="isChecked" @change="changeMode"> Gravity Mode
           </label>
@@ -346,6 +346,7 @@
         const data = JSON.stringify({
           type: 'create_guest_player',
           alias: this.alias,
+          mode: this.mode,
         });
         this.socket.send(data);
       }
@@ -356,6 +357,7 @@
         const data = JSON.stringify({
           type: 'create_guest_player_2',
           alias: this.alias,
+          mode: this.mode,
         });
         this.socket.send(data);
       }

@@ -172,6 +172,8 @@ class GameHandler:
 	async def movePlayerToNextRound(self):
 		next_round_games_db = await database_sync_to_async(lambda: list(self.tournament.games.filter(is_round=self.db_entry.is_round + 1)))()
 		if next_round_games_db == None:
+			self.tournament.finished = True
+			await sync_to_async(self.tournament.save)()
 			return
 		for game in next_round_games_db:
 			player1 = await sync_to_async(lambda: game.player1)()

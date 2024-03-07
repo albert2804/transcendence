@@ -116,10 +116,6 @@ def inviteOtherPlayer(request):
 
       games = tour.games.all()
       game = games.get(is_match_nbr=data["game_nbr"])
-      if int(data["game_nbr"]) == len(games):
-        tour.finished = True
-        tour.save()
-        print("last game")
       if game is None:
         return JsonResponse({'error': 'Sorry Game from Tournament not Found'}, status=404)
       if data["username"] == game.player1.username:
@@ -141,9 +137,7 @@ def initTournament(request):
       data = json.loads(request.body)
       consumer = ChatConsumer()
 
-      print(data)
       tournament_count = Tournament.objects.filter(tournament_name__startswith=data["name"]).count()
-      print(tournament_count)
       if tournament_count == 0:
         curr_tour = Tournament.objects.create(tournament_name=data["name"], start_date=timezone.now(), creator=request.user)
       else:

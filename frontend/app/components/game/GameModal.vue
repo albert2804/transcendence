@@ -79,8 +79,10 @@ export default {
         ponggamefieldRef.value.giveUpGame();
       }
       setTimeout(() => {
-        var bsModal = bootstrap.Modal.getInstance(modalRef.value);
-        bsModal.hide();
+        var bsModal = bootstrap.Modal.getInstance(modalRef.value)
+		if (bsModal) {
+		  bsModal.hide();
+		}
       }, 0);
     }
     // function to handle keypress events

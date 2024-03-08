@@ -123,14 +123,17 @@
 
       async function get2FAStatus() {
         console.log('get2FAStatus')
-        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value;
+        // const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value;
+        const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token=')).split('=')[1];
+
         let response;
         try {
             response = await fetch(`/endpoint/api/get_2fa_status?username=${username.value}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
-              'X-CSRFToken': csrfToken
+              'X-CSRFToken': csrfToken,
+              'Authorization': `Bearer ${jwtToken}`
             },
           });
           if (!response.ok) {
@@ -218,6 +221,8 @@
             password.value = '';
             error.value = '';
             message.value = data.message;
+            const jwtToken = data.jwt_token;
+            document.cookie = `jwt_token=${jwtToken}; path=/;`;
           } else if (response.status === 403 || response.status === 400) {
             error.value = data.error;
             isLoggedIn.value = 0; // Store
@@ -274,14 +279,13 @@
             },
             body: JSON.stringify({
               'username': username.value,
-			  'alias': username.value,
+              'alias': username.value,
               'password1': password.value,
               'password2': password2.value,
             })
           });
           if (response.status === 200) {
             const data = await response.json();
-            isLoggedIn.value = 1; // Store
             userName.value = data.username; // Store
             userId.value = data.userid; // Store
             password.value = '';
@@ -289,7 +293,6 @@
             error.value = '';
             message.value = data.message;
           } else if (response.status === 403 || response.status === 400) {
-            isLoggedIn.value = 0; // Store
             userName.value = ''; // Store
             userId.value = ''; // Store
             password.value = '';

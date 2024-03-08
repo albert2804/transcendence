@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 	'django_otp',
 	'django_otp.plugins.otp_totp',
+	'rest_framework',
     'users',
     'api',
     'chat',
@@ -171,3 +172,8 @@ INTERNAL_IPS = [
 	'localhost',
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}

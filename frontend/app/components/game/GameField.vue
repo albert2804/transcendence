@@ -196,7 +196,7 @@
           const data = JSON.parse(event.data);
           if (data.type === "redirect") {
             this.countdown = 0;
-			      gameButtonState.value = "connected";
+			gameButtonState.value = "connected";
             this.showAliasScreen = false;
             this.showAliasScreen2 = false;
             if (data.page === "playing") {

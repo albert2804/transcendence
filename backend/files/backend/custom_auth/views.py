@@ -5,10 +5,13 @@ import requests
 import os
 from urllib.parse import quote
 from api.models import CustomUser
+from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.backends import ModelBackend
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+import jwt
+import datetime
 
 import logging
 logger = logging.getLogger(__name__)
@@ -72,4 +75,25 @@ def callback(request):
             user.profile_pic.save(f'{user.username}_42avatar.jpeg', image_content)
             user.save()
     message = "Successfully logged in to 42 intra."
-    return HttpResponseRedirect(f'http://{request.get_host()}/login?message={message}')
+
+    user_id = user.id
+        # Create JWT token
+    payload = {
+        'user_id': user.id,
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
+        'iat': datetime.datetime.utcnow()
+    }
+    jwt_token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+
+            # return JsonResponse({
+            #     'message': 'Successfully logged in as ' + request.user.username,
+            #     'username': request.user.username,
+            #     'userid': user_id,
+            #     'jwt_token': jwt_token,
+            #     }, status=200)
+
+
+    # return HttpResponseRedirect(f'http://{request.get_host()}/login?message={message}')
+    response = HttpResponseRedirect(f'http://{request.get_host()}/login?message={message}')
+    response.set_cookie('jwt_token', jwt_token, httponly=True, secure=True, samesite='Strict')
+    return response

@@ -129,12 +129,13 @@ def userlogin(request):
                 'iat': datetime.datetime.utcnow()
             }
             jwt_token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-            return JsonResponse({
+            response = JsonResponse({
                 'message': 'Successfully logged in as ' + request.user.username,
                 'username': request.user.username,
-                'userid': user_id,
-                'jwt_token': jwt_token,
+                'userid': user_id
                 }, status=200)
+            response.set_cookie('jwt_token', jwt_token, httponly=True, secure=True, samesite='Strict')
+            return response
         return JsonResponse({'error': 'Invalid credentials'}, status=403)
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
@@ -184,7 +185,6 @@ def userregister(request):
             password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=password)
             if user is not None:
-                login(request, user)
                 user_id = user.id
                 return JsonResponse({
                     'message': 'Successfully registered as ' + request.user.username,

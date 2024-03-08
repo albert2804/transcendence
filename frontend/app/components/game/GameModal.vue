@@ -83,7 +83,6 @@ export default {
 		if (bsModal) {
 		  bsModal.hide();
 		}
-        // bsModal.hide();
       }, 0);
     }
     // function to handle keypress events

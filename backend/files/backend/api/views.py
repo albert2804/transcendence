@@ -57,6 +57,26 @@ def get_auth_status(request):
     else:
         return JsonResponse({'authenticated': False}, status=200)
 
+# check if user exists (username)
+# 200: user exists / does not exist
+# 400: invalid request
+#
+# As API request call:
+# curl -k -X GET 'https://localhost/endpoint/api/userexists?username=<USERNAME>'
+#
+def userexists(request):
+	if request.method == 'GET':
+		username = request.GET.get('username')
+		if username:
+			try:
+				user = CustomUser.objects.get(username=username)
+				return JsonResponse({'exists': True}, status=200)
+			except CustomUser.DoesNotExist:
+				return JsonResponse({'exists': False}, status=200)
+		else:
+			return JsonResponse({'error': 'No username provided'}, status=401)
+	return JsonResponse({'error': 'Invalid request'}, status=402)
+
 
 # login user
 # 400: invalid json data or request

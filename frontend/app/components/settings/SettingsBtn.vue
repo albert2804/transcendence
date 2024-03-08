@@ -14,12 +14,12 @@
         <div v-if="loginStatus === 1">
           <div class="button-container">
               <button type="button" class="nes-btn is-success clickable"  @click="openPopupName" style="width: 100%;">Change Alias</button>
-              <button type="button" class="nes-btn is-success clickable" @click="openPopupPw" style="width: 100%;">Change Password</button>
+              <button v-show="!is42login" type="button" class="nes-btn is-success clickable" @click="openPopupPw" style="width: 100%;">Change Password</button>
               <button type="button" class="nes-btn is-success clickable" @click="openPopupPic" style="width: 100%;">Change Picture</button>
               <button type="button" class="nes-btn is-success clickable" @click="openPopupMap" style="width: 100%;">Choose Map</button>
               
-              <button v-if="!enabled_2fa" type="button" class="nes-btn is-success clickable" @click="openPopup2FA">Enable 2FA authentication</button>
-              <button v-if="enabled_2fa" type="button" class="nes-btn is-success clickable" @click="disable2FA">Disable 2FA authentication</button>
+              <button v-show="!is42login" v-if="!enabled_2fa" type="button" class="nes-btn is-success clickable" @click="openPopup2FA">Enable 2FA authentication</button>
+              <button v-show="!is42login" v-if="enabled_2fa" type="button" class="nes-btn is-success clickable" @click="disable2FA">Disable 2FA authentication</button>
               <SettingsName :openPopup="PopupName" @close-popup="PopupName = false" @message-from-child="handleUpdate" />
               <SettingsPic :openPopup="PopupPic" @close-popup="PopupPic = false" @message-from-child="handleUpdate" />
               <SettingsPw :openPopup="PopupPw" @close-popup="PopupPw = false" @message-from-child="handleUpdate" />
@@ -39,13 +39,12 @@
 <script>
 import { useRequestHeader } from '#imports';
 import { ref, watchEffect, watch } from 'vue';
-import { isLoggedIn } from '~/store';
+import { isLoggedIn, is_42_login } from '~/store';
 
 export default {
   name: 'SettingsBtn',
   data() {
     return {
-      loginStatus: isLoggedIn,
       recvmessage:'',
       recverror:'',
       enabled_2fa: false,
@@ -63,6 +62,7 @@ export default {
     let recverror = ref('');
     const PopupMap = ref(false);
     const loginStatus = ref(isLoggedIn.value);
+	const is42login = ref(is_42_login.value);
     const Popup2FA = ref(false);
 
     const openPopupName = () => {
@@ -84,11 +84,11 @@ export default {
     watchEffect(() => {
         loginStatus.value = isLoggedIn.value;
       });
-
-    //   watch(() => user.value, (newUser) => {
-    //   // update enabled_2fa when user changes
-    //   this.enabled_2fa = newUser ? newUser.enabled_2fa : false;
-    // });
+	
+	watchEffect(() => {
+		is42login.value = is_42_login.value;
+		console.log('is42login', is42login.value);
+	  });
 
     return {
       handleUpdate,
@@ -105,6 +105,7 @@ export default {
       openPopupPw,
       openPopupMap,
       openPopup2FA,
+	  is42login,
     };
   },
  

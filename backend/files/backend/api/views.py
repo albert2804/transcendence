@@ -53,6 +53,7 @@ def get_auth_status(request):
             'authenticated': True,
             'user_id': request.user.id,
             'username': request.user.username,
+			'is_42_login': request.user.is_42_login,
             }, status=200)
     else:
         return JsonResponse({'authenticated': False}, status=200)

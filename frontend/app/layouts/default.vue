@@ -37,7 +37,7 @@ Example:
 </template>
 
 <script>
-  import { isLoggedIn, userName, userId, alertMessage } from '~/store';
+  import { isLoggedIn, userName, userId, alertMessage, is_42_login } from '~/store';
   export default {
     setup() {
       const pageKey = ref(Date.now())
@@ -68,12 +68,15 @@ Example:
             isLoggedIn.value = 1
             userName.value = data.username
             userId.value = data.user_id
+			is_42_login.value = data.is_42_login
           } else {
             isLoggedIn.value = 0
+			is_42_login.value = false
           }
         } catch (error) {
           console.error('Error:', error);
           isLoggedIn.value = 0
+		  is_42_login.value = false
         }
       })
 

@@ -81,7 +81,7 @@
 <script>
   import { ref, onMounted } from 'vue';
   import { useRoute } from 'vue-router';
-  import { isLoggedIn, userName, userId, alertMessage } from '~/store';
+  import { isLoggedIn, userName, userId, is_42_login } from '~/store';
 
   export default {
     name: 'LoginCard',
@@ -252,6 +252,7 @@
             username.value = '';
             password.value = '';
             message.value = data.message;
+			is_42_login.value = false;
           }
         } catch (error) {
           console.error('Error:', error);

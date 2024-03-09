@@ -34,13 +34,13 @@
         </div>  
         <!-- Menu buttons --->
         <div v-if="showMenu">
-          <button type="button" class="nes-btn btn-primary" @click="startTrainingGame">Start Training Game</button>
+          <button type="button" class="nes-btn btn-primary" @click="fetch_map().then(startTrainingGame)">Start Training Game</button>
         </div>
         <div v-if="showMenu && loginStatus == 1">
           <button type="button" class="nes-btn btn-primary" @click="fetch_map().then(startRankedGame)" >Start Ranked Game</button>
         </div>
         <div v-if="showMenu">
-          <button type="button" class="nes-btn btn-primary" @click="startLocalGame">Start Local Game</button>
+          <button type="button" class="nes-btn btn-primary" @click="fetch_map().then(startLocalGame)">Start Local Game</button>
         </div>
         <!-- play on this device - button --->
         <div v-if="!playOnThisDevice">

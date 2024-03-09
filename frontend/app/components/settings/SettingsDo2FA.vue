@@ -82,12 +82,12 @@ export default {
 				}
 
 				const data = await response.json();
-				if (data.success) {
+				if (data.success && !data.error) {
 					message.value = '2FA enabled successfully';
 					error.value='';
 				} else {
 					message.value='';
-					error.value = 'Failed to enable 2FA';
+					error.value = data.error;
 				}
 			} catch (error) {
 				error.value = error;

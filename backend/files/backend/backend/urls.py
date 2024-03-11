@@ -36,7 +36,5 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-# Enable admin panel if ADMIN_PANEL_ENABLED (in .env-file) is set to True
-admin_panel = os.environ.get('ADMIN_PANEL_ENABLED', 'False').lower() == 'true'
-if admin_panel:
+if 'django.contrib.admin' in settings.INSTALLED_APPS:
     urlpatterns.append(path('endpoint/admin/', admin.site.urls))

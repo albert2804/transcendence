@@ -24,3 +24,5 @@ backend/files/backend/users/migrations
 backend/files/backend/tournament/migrations
 backend/files/backend/user/migrations
 backend/files/backend/users/migrations/
+backend/files/static
+

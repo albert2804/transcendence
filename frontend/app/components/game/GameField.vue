@@ -27,20 +27,20 @@
           <div>{{ message }}</div>
         </div>
         <!-- Checkbox --->
-        <div v-if="showMenu">
+        <div v-if="showMenu || showAliasScreen2">
           <label for="checkbox">
           <input type="checkbox" id="checkbox" v-model="isChecked" @change="changeMode"> Gravity Mode
           </label>
         </div>  
         <!-- Menu buttons --->
         <div v-if="showMenu">
-          <button type="button" class="nes-btn btn-primary" @click="startTrainingGame">Start Training Game</button>
+          <button type="button" class="nes-btn btn-primary" @click="fetch_map().then(startTrainingGame)">Start Training Game</button>
         </div>
         <div v-if="showMenu && loginStatus == 1">
           <button type="button" class="nes-btn btn-primary" @click="fetch_map().then(startRankedGame)" >Start Ranked Game</button>
         </div>
         <div v-if="showMenu">
-          <button type="button" class="nes-btn btn-primary" @click="startLocalGame">Start Local Game</button>
+          <button type="button" class="nes-btn btn-primary" @click="fetch_map().then(startLocalGame)">Start Local Game</button>
         </div>
         <!-- play on this device - button --->
         <div v-if="!playOnThisDevice">
@@ -346,6 +346,7 @@
         const data = JSON.stringify({
           type: 'create_guest_player',
           alias: this.alias,
+          mode: this.mode,
         });
         this.socket.send(data);
       }
@@ -356,6 +357,7 @@
         const data = JSON.stringify({
           type: 'create_guest_player_2',
           alias: this.alias,
+          mode: this.mode,
         });
         this.socket.send(data);
       }

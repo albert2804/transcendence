@@ -144,7 +144,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'endpoint/static/'
-STATIC_ROOT = BASE_DIR / '../../static'
+STATIC_ROOT = BASE_DIR / '../../../static'
 
 # directory where media for example (.jpg)is stored
 MEDIA_URL = '/endpoint/media/'

@@ -1,14 +1,19 @@
 # ft_transcendence
 
 ## Project setup
- - You need to set the DOMAIN from .env file in your /etc/hosts file, so that it points to 127.0.0.1 (or use localhost as DOMAIN)
+
+ - You have to set the environment variables in the .env file.
 
 ## Project run
-After all containers are up and running you maybe need to wait a few more seconds until the frontend is available.
 
 Start all containers:
 ```
 make
+```
+---
+Start all containers in the background:
+```
+make detached
 ```
 ---
 Build containers:
@@ -21,7 +26,7 @@ Stop all containers:
 make stop
 ```
 ---
-Remove all containers:
+Stop and remove all containers:
 ```
 make down
 ```
@@ -36,9 +41,19 @@ Remove volumes (database):
 make vclean
 ```
 ---
+Remove all containers, images and volumes (except the frontend node_modules folder):
+```
+make clean
+```
+---
 Remove all containers, images and volumes:
 ```
 make fclean
+```
+---
+Remove backend Migration files:
+```
+make mclean
 ```
 ---
 Docker prune (remove docker cache...)
@@ -51,23 +66,24 @@ Check the status of the project:
 make status
 ```
 
-## Routes
-- DOMAIN                    -> Frontend
-- DOMAIN/endpoint/api       -> Rest-API
-- DOMAIN/endpoint/admin     -> Django-Admin-Panel
-- DOMAIN/adminer            -> Adminer (Database-Management)
+## Project usage
 
-## Useful for development
-- All containers are named after their service name in the docker-compose.yml file. So you can easily access them with their name.
-    - For example:
-        - docker restart nginx
-        - docker exec -it frontend sh
-        - docker logs backend
-        - etc.
+### Development
 
-## Frontend-Development
-- At the first start of the frontend container you need to wait a while until the node_modules folder is created after container start. (check with docker logs frontend)
-- Development-Server updates live on changes in the frontend volume. So you can just change the code and see the changes in the browser.
+- Set the environment variables in the .env file:
+```
+NODE_ENV=development
+DJANGO_SETTINGS_MODULE=backend.settings.development
+```
+- The development frontend server updates the changes automatically.
+- The backend server needs to be restarted to update the changes.
 
-## Backend-Development
-- Daphne server doesn't update live on changes in the backend volume. So you need to restart the backend container after changes in the backend code.
+### Production
+
+- Set the environment variables in the .env file:
+```
+NODE_ENV=production
+DJANGO_SETTINGS_MODULE=backend.settings.production
+```
+- To update the frontend changes, you need to run 'npm run build' and restart the frontend server.
+- The backend server needs to be restarted to update the changes.

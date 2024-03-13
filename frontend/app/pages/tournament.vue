@@ -1,17 +1,9 @@
-<script setup>
-  // Listen to changes of the isLoggedIn from store/index.js
-import { isLoggedIn } from '~/store';
-  watchEffect(() => {
-    isLoggedIn.value = isLoggedIn.value;
-  })
-</script>
-
 <template>
-  <div>
+  <div v-if="loginStatus === 1">
     <div>
       <h1>Youre on the tournament site</h1>
-      <button @click="callSignUp" class="btn btn-primary"></button>
-      <div v-if="isLoggedIn">
+      <button v-if="isDevelopment" @click="callSignUp" class="btn btn-primary"></button>
+      <div>
         <button @click="toggleForm" class="btn btn-primary">
         {{ formVisible ? 'No Tournament' : 'Create Tournament' }} </button>
       </div>
@@ -19,41 +11,46 @@ import { isLoggedIn } from '~/store';
     <div v-if="formVisible">
       <FormTournament v-bind:local="false" :loggedInUser="loggedInUser"/>
     </div>
-    <div v-if="isLoggedIn">
+    <div>
       <ListTournament :loggedInUser="loggedInUser"/>
+    </div>
+  </div>
+  <div v-else-if="loginStatus === 0" class="center-screen">
+    <div>
+      <div class="nes-container is-rounded" style="width: 50%; margin: 0 auto;">
+        <h3>Only members can see this page</h3>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import FormTournament from '~/components/tournament/FormTournament.vue';
-import ListTournament from '~/components/tournament/ListTournament.vue'
+import ListTournament from '~/components/tournament/ListTournament.vue';
+import { isLoggedIn, userName } from '~/store';
 
 export default {
   components: {FormTournament, ListTournament}, 
   data() {
     return {
       formVisible: false,
-      loggedInUser: "",
+      loginStatus: isLoggedIn,
+      loggedInUser: userName,
+      isDevelopment: process.env.NODE_ENV === 'development'
     };
   },
-  async mounted() {
-    try {
-      const route = useRoute();
-      const username = route.query.username;
-      const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-      const params = new URLSearchParams({ username: username });
-      const response = await fetch(`/endpoint/user/info?${params.toString()}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken,
-        }
-      });
-      const data = await response.json();
-      this.loggedInUser = data.username;
-    } catch (error) {
-      console.error('Error:', error)
+  watch: {
+    isLoggedIn: {
+      handler(newValue) {
+        this.loginStatus = newValue;
+        console.log("loginStatus: " + this.loginStatus);
+      }
+    },
+    userName: {
+      handler(newValue) {
+        this.loggedInUser = newValue;
+        console.log("loggedInUser: " + this.loggedInUser);
+      }
     }
   },
   methods: {
@@ -79,3 +76,13 @@ export default {
   }
 }
 </script>
+
+<style>
+.center-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 75vh;
+}
+</style>

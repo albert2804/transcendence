@@ -1,34 +1,39 @@
 <template>
-  <div v-if="userExists === 1" class="d-flex flex-column">
-    <div class="nes-container container-fluid with-title automargin" style="text-align: left;">
-      <p class="title">User profile</p>
-      <div class="user-info-container">
-        <div v-if="loginStatus === 1" class="col user-info-container">
-          <UserProfilePic />
+  <div v-if="loginStatus === 1">
+    <div v-if="userExists === 1" class="d-flex flex-column">
+      <div class="nes-container container-fluid with-title automargin" style="text-align: left;">
+        <p class="title">User profile</p>
+        <div class="user-info-container">
+          <div class="col user-info-container">
+            <UserProfilePic />
+          </div>
+          <div class="col user-info-container">
+            <UserInfo />
+          </div>
         </div>
-        <div v-if="loginStatus === 1" class="col user-info-container">
-          <UserInfo />
-        </div>
-        <div v-if="loginStatus === 0">
-          <h4>No user statistics available. Please log in to view user profiles.</h4>
+      </div>
+      <div class="user-games-history">
+          <div class="nes-container container-fluid with-title vw-50 automargin" style="text-align: left;">
+          <UserGameHistory />
         </div>
       </div>
     </div>
-    <div v-if="loginStatus === 1" class="user-games-history">
-        <div class="nes-container container-fluid with-title vw-50 automargin" style="text-align: left;">
-        <UserGameHistory />
+    <div v-else-if="userExists === 0" class="center-screen">
+      <i class="bi bi-emoji-frown" style="font-size: 3rem;"></i>
+      <h4 style="margin-top: 20px;">User does not exist.</h4>
+    </div>
+    <div v-else class="center-screen">
+      <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
     </div>
   </div>
-  <div v-if="userExists === 0" class="center-screen">
-    <i class="bi bi-emoji-frown" style="font-size: 3rem;"></i>
-    <h4 style="margin-top: 20px;">User does not exist.</h4>
-	</div>
-  <div v-if="userExists === 2" class="center-screen">
-    <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-      <span class="visually-hidden">Loading...</span>
+  <div v-else-if="loginStatus === 0" class="center-screen">
+    <div>
+      <div class="nes-container is-rounded" style="width: 50%; margin: 0 auto;">
+        <h3>Only members can see this page</h3>
+      </div>
     </div>
-    <h4 style="margin-top: 20px;">Loading user profile...</h4>
   </div>
 </template>
 
@@ -86,7 +91,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 90vh;
+  height: 75vh;
 }
 
 .user-info-container {

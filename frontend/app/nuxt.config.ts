@@ -1,4 +1,10 @@
 export default defineNuxtConfig({
+  vite: {
+    esbuild: {
+      drop: ['debugger'],
+      pure: ['console.log', 'console.error', 'console.warn', 'console.debug', 'console.trace'],
+    },
+  },
   app: {
     head: {
       title: 'ft_transcendence',

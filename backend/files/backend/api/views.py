@@ -48,12 +48,12 @@ def get_csrf(request):
 # returns a json object with a boolean value that indicates if the user is authenticated
 # 200: successfull request
 def get_auth_status(request):
-    if request.user.is_authenticated:
+    if request.user and request.user.is_authenticated:
         return JsonResponse({
             'authenticated': True,
             'user_id': request.user.id,
             'username': request.user.username,
-			'is_42_login': request.user.is_42_login,
+            'is_42_login': request.user.is_42_login,
             }, status=200)
     else:
         return JsonResponse({'authenticated': False}, status=200)

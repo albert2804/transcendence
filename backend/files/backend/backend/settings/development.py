@@ -67,7 +67,9 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-	'backend.middleware.SessionIdHeaderMiddleware', # custom middleware to get session id from header (typical api request)
+	'backend.JWTCookieAuthenticationMiddleware', # custom middleware to get user from jwt token in cookie (for use by browsers)
+	'backend.middleware.JWTAuthenticationMiddleware', # custom middleware to the JWT token from header (for the API)
+	# 'backend.middleware.SessionIdHeaderMiddleware', # custom middleware to get session id from header (typical api request)
 	'django.middleware.csrf.CsrfViewMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

@@ -1,5 +1,6 @@
 from django.contrib.sessions.models import Session
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.views.decorators.csrf import csrf_exempt
 
 import jwt
@@ -30,19 +31,21 @@ class JWTCookieAuthenticationMiddleware:
                 user = get_user_model().objects.get(id=user_id)
                 request.user = user
             except jwt.ExpiredSignatureError:
+                request.User = AnonymousUser()
                 raise ExpiredSignatureError('JWT token has expired')
             except jwt.DecodeError:
+                request.User = AnonymousUser()
                 raise DecodeError('Error decoding JWT token')
             except get_user_model().DoesNotExist:
+                request.User = AnonymousUser()
                 raise UserNotFoundError('User not found')
             except jwt.InvalidTokenError:
+                request.User = AnonymousUser()
                 raise InvalidTokenError('Invalid JWT token')
+        else:
+            request.User = AnonymousUser()
         response = self.get_response(request)
         return response
-    
-    # def process_view(self, request, view_func, view_args, view_kwargs):
-    #     return csrf_exempt(view_func)(request, *view_args, **view_kwargs)
-
 
 class JWTAuthenticationMiddleware:
     def __init__(self, get_response):

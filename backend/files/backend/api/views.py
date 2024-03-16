@@ -101,7 +101,7 @@ def userlogin(request):
             password = data.get('password')
             token = data.get('token')
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Something went wrong'}, status=400)
+            return JsonResponse({'error': 'Error reading JSON'}, status=400)
         # check if user is already logged in
         if request.user.is_authenticated:
             return JsonResponse({
@@ -132,7 +132,8 @@ def userlogin(request):
             response = JsonResponse({
                 'message': 'Successfully logged in as ' + request.user.username,
                 'username': request.user.username,
-                'userid': user_id
+                'userid': user_id,
+                'jwt_token': jwt_token,
                 }, status=200)
             response.set_cookie('jwt_token', jwt_token, httponly=True, secure=True, samesite='Strict')
             return response

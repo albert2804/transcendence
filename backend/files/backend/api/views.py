@@ -160,7 +160,9 @@ def userlogin(request):
 def userlogout(request):
     if request.user.is_authenticated:
         logout(request)
-        return JsonResponse({'message': 'Successfully logged out'}, status=200)
+        response = JsonResponse({'message': 'Successfully logged out'}, status=200)
+        response.delete_cookie('jwt_token')
+        return response
     return JsonResponse({'message': 'You are already logged out'}, status=200)
 
 

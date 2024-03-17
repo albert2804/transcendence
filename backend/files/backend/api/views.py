@@ -220,6 +220,16 @@ def userregister(request):
 
 # get qr code for 2FA
 
+# logout user
+# 200: user logged out
+# 
+# As API request call:
+# curl -k -X POST 'https://localhost/endpoint/api/qr_code' \
+# -H 'Authorization: Bearer <YOUR JWT_TOKEN>' \
+# -H 'Content-Type: application/json'
+# 
+# API request returns base64 encoded qr code
+
 def qr_code(request):
     user = request.user
     if user.enabled_2fa:
@@ -262,7 +272,7 @@ def qr_code(request):
     # Encode the QR code image in base64 and return it in the response
     qr_code_base64 = base64.b64encode(buffered.getvalue()).decode()
 
-    return JsonResponse({'qr_code': qr_code_base64})
+    return JsonResponse({'qr_code': qr_code_base64, 'provisioning_uri': provisioning_uri})
 
 
 # enable 2FA for user
@@ -350,7 +360,7 @@ def disable_2fa(request, *args, **kwargs):
 # This request needs a connected game-consumer (websocket) to work, so its not really useful with curl.
 # curl -k -X POST 'https://localhost/endpoint/api/invite_to_game' \
 # -H 'Content-Type: application/json' \
-# -H 'Authorization: Bearer <YOUR SESSION-ID>' \
+# -H 'Authorization: Bearer <YOUR JWT TOKEN>' \
 # -d '{
 #   "receiver": "<RECEIVER_USERNAME>"
 # }'
@@ -396,7 +406,7 @@ def invite_to_game(request):
 # Send anything else than 'up' or 'down' as direction to stop the paddel movement.
 # curl -k -X POST 'https://localhost/endpoint/api/move_paddle' \
 # -H 'Content-Type: application/json' \
-# -H 'Authorization: Bearer <YOUR SESSION-ID>' \
+# -H 'Authorization: Bearer <YOUR JWT TOKEN>' \
 # -d '{
 #   "direction": "<up or down>"
 # }'sw
@@ -460,7 +470,7 @@ def get_leaderboard(request):
 # As API request call:
 # curl -k -X GET 'https://localhost/endpoint/api/get_friends' \
 # -H 'Content-Type: application/json' \
-# -H 'Authorization: Bearer <YOUR SESSION-ID>'
+# -H 'Authorization: Bearer <YOUR JWT_TOKEN>'
 #
 def get_friends(request):
     if request.method == 'GET':
@@ -481,7 +491,7 @@ def get_friends(request):
 # This request needs a connected chat-consumer (websocket) to work, so its not really useful with curl.
 # curl -k -X POST 'https://localhost/endpoint/api/add_friend' \
 # -H 'Content-Type: application/json' \
-# -H 'Authorization: Bearer <YOUR SESSION-ID>' \
+# -H 'Authorization: Bearer <YOUR JWT_TOKEN>' \
 # -d '{
 #   "receiver": "<RECEIVER_USERNAME>"
 # }'
@@ -524,7 +534,7 @@ def add_friend(request):
 # This request needs a connected chat-consumer (websocket) to work, so its not really useful with curl.
 # curl -k -X POST 'https://localhost/endpoint/api/remove_friend' \
 # -H 'Content-Type: application/json' \
-# -H 'Authorization: Bearer <YOUR SESSION-ID>' \
+# -H 'Authorization: Bearer <YOUR JWT_TOKEN>' \
 # -d '{
 #   "receiver": "<RECEIVER_USERNAME>"
 # }'

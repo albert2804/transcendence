@@ -92,6 +92,14 @@ def userexists(request):
 #   "password": "<YOUR PASSWORD>"
 # }'
 # 
+# or, if 2FA is enabled for the account:
+# # curl -k -X POST 'https://localhost/endpoint/api/userlogin' \
+# -H 'Content-Type: application/json' \
+# -d '{
+#   "username": "<YOUR USERNAME>",
+#   "password": "<YOUR PASSWORD>",
+#   "token": "<YOUR 2FA TOKEN>"
+# }'
 def userlogin(request):
     if request.method == 'POST':
         # validate json data
@@ -146,7 +154,7 @@ def userlogin(request):
 # 
 # As API request call:
 # curl -k -X POST 'https://localhost/endpoint/api/userlogout' \
-# -H 'Authorization: Bearer <YOUR SESSION-ID>' \
+# -H 'Authorization: Bearer <YOUR JWT_TOKEN>' \
 # -H 'Content-Type: application/json'
 # 
 def userlogout(request):

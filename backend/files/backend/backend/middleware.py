@@ -2,6 +2,7 @@ from django.contrib.sessions.models import Session
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
 import jwt
 from django.conf import settings
@@ -55,23 +56,21 @@ class JWTAuthenticationMiddleware:
         authorization_header = request.META.get('HTTP_AUTHORIZATION')
         if authorization_header and authorization_header.startswith('Bearer '):
             jwt_token_parts = authorization_header.split(' ')
-            print("JWT_TOKEN_PARTS: ", jwt_token_parts)
             if len(jwt_token_parts) > 1:  # check if JWT token is present
                 jwt_token = jwt_token_parts[1]  # get JWT token after 'Bearer'
-                print("JWT_TOKEN: ", jwt_token)
                 try:
                     payload = jwt.decode(jwt_token, settings.SECRET_KEY, algorithms=['HS256'])
                     user_id = payload.get('user_id')
                     user = get_user_model().objects.get(id=user_id)
                     request.user = user
                 except jwt.ExpiredSignatureError:
-                    raise ExpiredSignatureError('JWT token has expired')
+                    return JsonResponse({'error': 'JWT token has expired'}, status=401)
                 except jwt.DecodeError:
-                    raise DecodeError('Error decoding JWT token')
+                    return JsonResponse({'error': 'Error decoding JWT token'}, status=400)
                 except get_user_model().DoesNotExist:
-                    raise UserNotFoundError('User not found')
+                    return JsonResponse({'error': 'User not found'}, status=404)
                 except jwt.InvalidTokenError:
-                    raise InvalidTokenError('Invalid JWT token')
+                    return JsonResponse({'error': 'Invalid JWT token'}, status=400)
         response = self.get_response(request)
         return response
     

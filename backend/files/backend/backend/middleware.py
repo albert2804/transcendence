@@ -32,16 +32,16 @@ class JWTCookieAuthenticationMiddleware:
                 request.user = user
             except jwt.ExpiredSignatureError:
                 request.User = AnonymousUser()
-                raise ExpiredSignatureError('JWT token has expired')
+                request.delete_jwt_cookie = True
             except jwt.DecodeError:
                 request.User = AnonymousUser()
                 raise DecodeError('Error decoding JWT token')
             except get_user_model().DoesNotExist:
+                request.delete_jwt_cookie = True
                 request.User = AnonymousUser()
-                raise UserNotFoundError('User not found')
             except jwt.InvalidTokenError:
+                request.delete_jwt_cookie = True
                 request.User = AnonymousUser()
-                raise InvalidTokenError('Invalid JWT token')
         else:
             request.User = AnonymousUser()
         response = self.get_response(request)
@@ -78,6 +78,16 @@ class JWTAuthenticationMiddleware:
     def process_view(self, request, view_func, view_args, view_kwargs):
         return csrf_exempt(view_func)(request, *view_args, **view_kwargs)
 
+
+class DeleteJWTMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if getattr(request, 'jwt_token', False):
+            response.delete_cookie('jwt_cookie_name')
+        return response
 
 # class SessionIdHeaderMiddleware:
 # 	def __init__(self, get_response):

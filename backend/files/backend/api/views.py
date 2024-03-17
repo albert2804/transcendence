@@ -219,8 +219,6 @@ def userregister(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 # get qr code for 2FA
-
-# logout user
 # 200: user logged out
 # 
 # As API request call:
@@ -232,6 +230,8 @@ def userregister(request):
 
 def qr_code(request):
     user = request.user
+    if not user.is_authenticated:
+        return JsonResponse({'error': 'User is not logged in'}, status=401)
     if user.enabled_2fa:
         return JsonResponse({'error': '2FA is already enabled for this user'}, status=400)
 
@@ -278,6 +278,8 @@ def qr_code(request):
 # enable 2FA for user
 def enable_2fa(request, *args, **kwargs):
     user = request.user
+    if not user.is_authenticated:
+        return JsonResponse({'error': 'User is not logged in'}, status=401)
     if user.is_42_login:
         return JsonResponse({'error': '42 users cannot enable 2FA'}, status=200)
     if user.enabled_2fa or TOTPDevice.objects.filter(user=user, confirmed=True).exists():
@@ -306,6 +308,16 @@ def enable_2fa(request, *args, **kwargs):
     else:
         return JsonResponse({'error': 'Invalid or expired code'}, status=200)
 
+
+# get 2FA status for user
+# 200: user logged out
+# 
+# As API request call:
+# curl -k -X POST 'https://localhost/endpoint/api/qr_code' \
+# -H 'Authorization: Bearer <YOUR JWT_TOKEN>' \
+# -H 'Content-Type: application/json'
+# 
+# API request returns base64 encoded qr code
 
 def get_2fa_status(request):
     if request.method == 'GET':

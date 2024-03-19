@@ -27,10 +27,10 @@
         </div>
         <!-- Checkbox --->
         <div v-if="showMenu || showAliasScreen2">
-          <label for="checkbox">
-          <input type="checkbox" id="checkbox" v-model="isChecked" @change="changeMode"> Gravity Mode
+          <label for="checkbox" style="color: black;">
+            <input type="checkbox" id="checkbox" v-model="isChecked" @change="changeMode"> Gravity Mode
           </label>
-        </div>  
+        </div>
         <!-- Menu buttons --->
         <div v-if="showMenu">
           <button type="button" class="nes-btn btn-primary" @click="fetch_map().then(startTrainingGame)">Start Training Game</button>

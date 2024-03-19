@@ -25,13 +25,13 @@
               autocomplete="off" @change="setActiveRadio('Bot', index)"/>
             <label class="btn btn-outline-primary" :for="'btnradio2' + index">Bot</label>
           </div> -->
-          <p style="font-size: 1rem;" class="nes-text is-primary" :for="'btnradio1' + index">P {{ index }}:</p>
+          <!-- <p style="font-size: 1rem;" class="nes-text is-primary" :for="'btnradio1' + index">P {{ index }}:</p> -->
           <div v-if="local">
             <input :id="'name' + index" type="text" class="form-control" :value="getPlayerValue(index)" 
             @input="updatePlayerName(index, $event)">
           </div>
           <div v-else>
-            <UserSearchDropdown :index="index" @user-selected="handleUserSelected"/>
+            <UserSearchDropdown :index="index" :label="'Player' + index" @user-selected="handleUserSelected"/>
           </div>
         </div>
         <ErrorMessages :openPopup="PopupMessage" @close-popup="PopupMessage=false" :error="contentError" :message="contentMessage"/>
@@ -186,3 +186,7 @@ export default {
   },  
 };
 </script>
+
+<style>
+
+</style>

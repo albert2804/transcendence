@@ -1,53 +1,63 @@
 <template>
-  <form style="max-width: 800px; margin: auto; overflow: hidden;">
-    <div>
-      <input type="text" placeholder="Tournament Name" @input="setTournamentName($event)"/>
-    </div>
-    <div class="mb-3">
-      <label for="nbrPlayerRange" class="form-label">Number of Total Players</label>
-      <div class="d-flex align-items-center">
-        <input style="width: 80%; " type="range" class="form-range" min="0" max="3" step="1" id="nbrPlayerRange" 
-          v-model.number="selectPos" @input="updatePlayerCount">
-        <h6 style="rotate:90deg;" class="ms-3">{{ selectedData }}</h6>
+  <div class="nes-container is-rounded">
+    <form style="max-width: 1000px; margin: auto; overflow: hidden;">
+      <div class="nes-field">
+        <label for="name_field" class="float-start" style="margin-top: 3vh;">Tournament Name</label>
+        <input type="text" id="name_field" class="nes-input" placeholder="Your Tournament Name" @input="setTournamentName($event)">
       </div>
+      <div class="mb-3" style="margin-top: 4vh;">
+        <!-- <label for="nbrPlayerRange" class="form-label float-start" style="margin-right: 50px;">Total Players: </label>
+        <div class="d-flex align-items-center">
+          <input style="width: 80%; " type="range" class="form-range" min="0" max="3" step="1" id="nbrPlayerRange" 
+            v-model.number="selectPos" @input="updatePlayerCount">
+          <h6 style="rotate:90deg;" class="ms-3">{{ selectedData }}</h6>
+        </div> -->
+      </div>
+
+      <div style="margin-bottom: 3%;" class="name-box row flex-wrap">
+        <div v-for="index in nbr_players" style="min-width: 50%; margin-bottom: 1%" :key="index" class="name-input d-flex col-12 col-lg-1">
+          <!-- this is for bots -->
+          <!--<div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+            <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio1' + index"
+              autocomplete="off" checked @change="setActiveRadio('Player', index)"/>
+            <label class="btn btn-outline-primary" :for="'btnradio1' + index">Player</label>
+            <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio2' + index"
+              autocomplete="off" @change="setActiveRadio('Bot', index)"/>
+            <label class="btn btn-outline-primary" :for="'btnradio2' + index">Bot</label>
+          </div> -->
+          <p style="font-size: 1rem;" class="nes-text is-primary" :for="'btnradio1' + index">P {{ index }}:</p>
+          <div v-if="local">
+            <input :id="'name' + index" type="text" class="form-control" :value="getPlayerValue(index)" 
+            @input="updatePlayerName(index, $event)">
+          </div>
+          <div v-else>
+            <UserSearchDropdown :index="index" @user-selected="handleUserSelected"/>
+          </div>
+        </div>
+        <ErrorMessages :openPopup="PopupMessage" @close-popup="PopupMessage=false" :error="contentError" :message="contentMessage"/>
     </div>
 
-    <div style="margin-bottom: 3%;" class="name-box row flex-wrap">
-      <div v-for="index in nbr_players" style="min-width: 50%; margin-bottom: 1%" :key="index" class="name-input d-flex col-12 col-lg-1">
-        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-          <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio1' + index"
-            autocomplete="off" checked @change="setActiveRadio('Player', index)"/>
-          <label class="btn btn-outline-primary" :for="'btnradio1' + index">Player</label>
-          <input type="radio" class="btn-check" :name="radioGroupName(index)" :id="'btnradio2' + index"
-            autocomplete="off" @change="setActiveRadio('Bot', index)"/>
-          <label class="btn btn-outline-primary" :for="'btnradio2' + index">Bot</label>
-        </div>
-        <div v-if="local">
-          <input :id="'name' + index" type="text" class="form-control" :value="getPlayerValue(index)" 
-          @input="updatePlayerName(index, $event)">
-        </div>
-        <div v-else>
-          <UserSearchDropdown :index="index" @user-selected="handleUserSelected"/>
-        </div>
-      </div>
-    </div>
-
-    <button type="submit" @click="startTournament($event)" class="btn btn-primary">Start Tournament</button>
-  </form>
+      <button type="submit" @click="startTournament($event)" class="nes-btn is-primary" style="margin-bottom: 3vh;">Start Tournament</button>
+    </form>
+  </div>
 </template>
 
 
 <script>
 import BracketsTournament from './BracketsTournament.vue';
+import ErrorMessages from '../popup/ErrorMessages.vue';
 
 export default {
-  components: { BracketsTournament },
+  components: {
+    BracketsTournament,
+    ErrorMessages,
+  },
   name: 'FormTournament',
   props: ['local', 'loggedInUser'],
   mounted() {
     this.all_players = [];
     this.all_matches = [];
-    this.tournamentName = "Quack";
+    this.tournamentName = '';
     this.updatePlayerCount();
   },
   data() {
@@ -56,8 +66,11 @@ export default {
       all_matches: [],
       tournamentSize: [4, 8, 16, 32],
       selectPos: 0,
-      nbr_players: '4',
+      nbr_players: 4,
       tournamentStarted: false,
+      PopupMessage: false,
+      contentError: null,
+      contentMessage: null,
     };
   },
   computed: {
@@ -84,9 +97,10 @@ export default {
         this.all_players[index - 1].player_or_bot = 'Player';
       }
     },
-    updatePlayerName(index, event) {
+
+    async updatePlayerName(index, event) {
       if (index >= 0 && index <= this.all_players.length)
-      this.all_players[index - 1].name = event.target.value;
+        this.all_players[index - 1].name = event.target.value;
     },
 
     getPlayerValue(index) {
@@ -118,14 +132,20 @@ export default {
       }
     },
 
+    refreshNames () {
+      this.all_players.forEach((player) => {
+        player.name = '';
+      });
+    },
+
     async startTournament(event) {
       event.preventDefault();
       if (this.tournamentName == "") {
-        console.log("Error Tournament Name isnt allowed to be empty")
+        this.contentError = "Error: Tournament Name isn't allowed to be empty";
+        this.contentMessage = '';
+        this.openPopupMessage();
         return
       }
-      // this.createMatches()
-      // TODO: needs to call backend for tournament handling which is not yet implementet
       const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
       try {
         const response = await fetch('/endpoint/tournament/logic/', {
@@ -138,16 +158,30 @@ export default {
         });
         
         const responseData = await response.json()
-        console.log('Backend Response:', responseData.data)
+        if (responseData.error) {
+          this.contentError = responseData.error;
+          this.contentMessage = '';
+          this.openPopupMessage();
+          return
+        }
+        else if (responseData.message) {
+          this.contentMessage = responseData.message;
+          this.openPopupMessage();
+        }
         this.all_matches = responseData.data.games
         this.tournamentName = responseData.data.tour_name
-        console.log("TourName: ", this.tournamentName)
-        console.log("All Matches:", this.all_matches)
         this.tournamentStarted = true;
-
+        this.contentMessage = "Successfully created tournament";
+        this.openPopupMessage();
+        this.refreshNames();
+        // this.contentMessage = "";
       } catch (error) {
-        console.log('Error sending signal to backend:', error);
+          console.log('Error sending signal to backend', error);
       }
+    },
+    openPopupMessage() {
+      this.PopupMessage = true
+        // console.log('Value of PopupMessage: ', this.PopupMessage);
     },
   },  
 };

@@ -1,18 +1,19 @@
 <template>
   <div class="row">
-    <div :class="noUserFound ? 'col-9' : 'col-11'">
-      <input class="form-control" :list="'datalistOptions' + index" :id="'exampleDataList' + index" 
-              placeholder="User to search..." v-model="searchQuery" 
-              @input="searchUsers" @change="selectUser" style="min-width: 200px;">
-      <datalist v-if="showResults" :id="'datalistOptions' + index">
-        <option v-for="result in searchResults" :value="result.name" :key="result.id"></option>
-      </datalist>
-    </div>
-    <div v-if="noUserFound" class="object-fit-contain col-2 tooltip1">!
-      <span class="tooltiptext1">No user named <span style="color:red; font-style: italic;">{{ this.searchQuery }}</span> found</span>
+    <div class="search-container">
+      <input class="form-control" :id="'exampleDataList' + index" 
+             placeholder="User to search..." v-model="searchQuery" 
+             @input="searchUsers" @change="selectUser" style="min-width: 200px;">
+      <div v-if="noUserFound" class="object-fit-contain col-2 tooltip1">!
+        <span class="tooltiptext1">No user named <span style="color:red; font-style: italic;">{{ this.searchQuery }}</span> found</span>
+      </div>
+      <select v-if="showResults" v-model="selectedUser" :id="'datalistOptions' + index" @change="selectUser">
+        <option v-for="result in searchResults" :value="result.name" :key="result.id">{{ result.name }}</option>
+      </select>
     </div>
   </div>
 </template>
+
 
 <script>
 export default {
@@ -58,10 +59,13 @@ export default {
     },
 
     selectUser(event) {
-      this.showResults = false;
-      this.selectedUser = this.searchResults.find(result => result.name === event.target.value);
-      if (this.selectedUser)
+      const selectedResult = this.searchResults.find(result => result.name === event.target.value);
+      if (selectedResult) {
+        this.noUserFound = false;
+        this.selectedUser = selectedResult;
+        this.searchQuery = this.selectedUser.name
         this.$emit('user-selected', this.selectedUser.name, this.index)
+      }
     },
   },
 };
@@ -94,4 +98,16 @@ export default {
 .tooltip1:hover .tooltiptext1 {
   visibility: visible;
 }
+
+.search-container {
+    display: flex;
+    align-items: center;
+  }
+
+.search-container select {
+  margin-left: 10px;
+  height: 100%;
+  width: 150px;
+}
+
 </style>

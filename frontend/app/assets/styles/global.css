@@ -20,7 +20,10 @@ html body {
     }
   }
 
-
+body .nes-container.is-rounded, .nes-container, .nes-progress, .nes-btn, .nes-select select {
+  border-image-repeat: stretch;
+}
+  
 .card-size {
     max-width: 400px;
 	background-color: #b5c7d3;

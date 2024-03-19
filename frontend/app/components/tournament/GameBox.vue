@@ -22,13 +22,25 @@
         </div>
       </div>
     </div>
+     <ErrorMessages :openPopup="PopupMessage" @close-popup="PopupMessage=false" :error="contentError" :message="contentMessage"/>
   </div>
 </template>
 
 <script>
+import ErrorMessages from '../popup/ErrorMessages.vue';
 export default {
+  components: {
+    ErrorMessages,
+  },
   name: 'GameBox',
   props: ['match', "loggedInUser", "tournament_name"],
+  data() {
+    return {
+      PopupMessage: false,
+      contentError: null,
+      contentMessage: null,      
+    };
+  },
   methods: {
     async sendInvite(event) {
       event.preventDefault();
@@ -47,11 +59,23 @@ export default {
           },
           body: JSON.stringify({username: this.loggedInUser, game_nbr: this.match.is_match, tour_name: tour_name}),
         });
-
+        if (responseData.error) {
+          console.log('Error from Backend:' ,responseData.error);
+          this.contentError = responseData.error;
+          this.openPopupMessage();
+        }
+        if (responseData.message) {
+          this.contentMessage = responseData.message;
+          this.openPopupMessage();
+        }
         const responseData = await response.json();
       } catch (error) {
-        console.log('Error sending signal to backend:', error);
+        // console.log('Error sending signal to backend:', error);
       }
+    },
+    openPopupMessage() {
+      this.PopupMessage = true
+      console.log('Value of PopupMessage: ', this.PopupMessage);
     },
   }
 }

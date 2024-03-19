@@ -1,7 +1,7 @@
 <template>
   <div class="container justify-content-center" style="width:100%;">
     <div class="row" style="width: 100%;">
-      <h3>Quick Tournament Games</h3>
+      <h3 style="margin-top: 3vh;">Quick Tournament Games</h3>
       <div class="nes-container is-rounded carousel-container">
         <div v-if="quickSelect.length == 0">
           <strong>There is no playable tournament Game for you</strong> 
@@ -25,7 +25,7 @@
         </div>
       </div>
       
-      <h3>Ongoing Tournaments</h3>
+      <h3 style="margin-top: 1.5vh;">Ongoing Tournaments</h3>
       <div class="nes-container is-rounded" style="height:100%">
         <button @click="getTournamets(false)" style="width: 100%; height: 100%; background-color: transparent; border-color: transparent;">
           <progress class="nes-progress is-pattern" value="100" max="100"></progress>
@@ -43,8 +43,8 @@
         </div>
       </div>
 
-      <h3>Ended Tournaments</h3>
-      <div class="nes-container is-rounded" style="height:1000%">
+      <h3 style="margin-top: 1.5vh;">Ended Tournaments</h3>
+      <div class="nes-container is-rounded" style="height:100%">
         <button @click="getTournamets(true)" style="width: 100%; height: 100%; background-color: transparent; border-color: transparent;">
           <progress class="nes-progress is-pattern" value="100" max="100"></progress>
         </button>
@@ -60,7 +60,7 @@
           </div>
         </div>
     </div>
-    
+      <ErrorMessages :openPopup="PopupMessage" @close-popup="PopupMessage=false" :error="contentError" :message="contentMessage"/>
     </div>
   </div>
   </template>
@@ -68,9 +68,14 @@
 <script>
 import TournamentBoxes from './TournamentBoxes.vue';
 import GameBox from './GameBox.vue';
+import ErrorMessages from '../popup/ErrorMessages.vue';
 
 export default {
-  components: { TournamentBoxes, GameBox },
+  components: {
+    TournamentBoxes,
+    GameBox,
+    ErrorMessages,
+  },
   name: 'ListTournament',
   props: ['loggedInUser'],
   data() {
@@ -80,11 +85,17 @@ export default {
           ongoingTournaments: [],
           endedTournaments: [],
           quickSelect: [],
+          PopupMessage: false,
+          contentError: null,
+          contentMessage: null,
       };
   },
   mounted() {
     this.getQuickSelectGames();
     this.startPolling()
+  },
+  beforeUnmount() {
+    this.stopPolling();
   },
   beforeUnmount() {
     this.stopPolling();
@@ -109,6 +120,15 @@ export default {
           },
         });
         const responseData = await response.json();
+        if (responseData.error) {
+          console.log('Error from Backend:' ,responseData.error);
+          this.contentError = responseData.error;
+          this.openPopupMessage();
+        }
+        if (responseData.message) {
+          this.contentMessage = responseData.message;
+          this.openPopupMessage();
+        }
         this.quickSelect = JSON.parse(responseData.data);
       } catch (error) {
         console.log('Error sending signal to backend:', error);
@@ -127,6 +147,15 @@ export default {
             body: JSON.stringify({ name: this.loggedInUser, ongoingOrEnded: ongoingOrEnded}),
           });
           const responseData = await response.json();
+          if (responseData.error) {
+            console.log('Error from Backend:' ,responseData.error);
+            this.contentError = responseData.error;
+            this.openPopupMessage();
+          }
+          if (responseData.message) {
+            this.contentMessage = responseData.message;
+            this.openPopupMessage();
+          }
           this.tournaments = JSON.parse(responseData.data);
           this.tournaments.forEach((tournament) => {
             tournament.showTournament = false;
@@ -151,6 +180,10 @@ export default {
         this.ongoingTournaments = [];
         this.endedTournaments = [];
       }
+    },
+    openPopupMessage() {
+      this.PopupMessage = true
+      console.log('Value of PopupMessage: ', this.PopupMessage);
     },
   },
 };

@@ -1,19 +1,20 @@
 <template>
   <div v-if="loginStatus === 1">
-    <div>
-      <h1>Youre on the tournament site</h1>
-      <button v-if="isDevelopment" @click="callSignUp" class="btn btn-primary"></button>
-      <div>
-        <button @click="toggleForm" class="btn btn-primary">
-        {{ formVisible ? 'No Tournament' : 'Create Tournament' }} </button>
-      </div>
+    <div class="container justify-content-center">
+      <h1>Youre on the tournament site!</h1> 
+    </div>
+    <ListTournament :loggedInUser="loggedInUser"/>
+    <div style="align-items: center; margin-top: 4vh;">
+      <p style=""><strong>For Evaluation: </strong>
+        <button v-if="isDevelopment" @click="callSignUp" class=" nes-btn nes-btn-tour is-error">Create 3 Dummy Accounts</button>
+      </p>
+      <button @click="toggleForm" class="nes-btn is-primary row" style="min-width: 300px; margin-top: 3vh;">
+          {{ formVisible ? 'No Tournament' : 'Create Tournament' }} </button>
     </div>
     <div v-if="formVisible">
       <FormTournament v-bind:local="false" :loggedInUser="loggedInUser"/>
     </div>
-    <div>
-      <ListTournament :loggedInUser="loggedInUser"/>
-    </div>
+    <ErrorMessages :openPopup="PopupMessage" @close-popup="PopupMessage=false" :error="contentError" :message="contentMessage"/>
   </div>
   <div v-else-if="loginStatus === 0" class="center-screen">
     <div>
@@ -27,16 +28,20 @@
 <script>
 import FormTournament from '~/components/tournament/FormTournament.vue';
 import ListTournament from '~/components/tournament/ListTournament.vue';
-import { isLoggedIn, userName } from '~/store';
+import { isLoggedIn, userName } from '~/store';;
+import ErrorMessages from '../components/popup/ErrorMessages.vue';
 
 export default {
-  components: {FormTournament, ListTournament}, 
+  components: {FormTournament, ListTournament, ErrorMessages}, 
   data() {
     return {
       formVisible: false,
       loginStatus: isLoggedIn,
       loggedInUser: userName,
-      isDevelopment: process.env.NODE_ENV === 'development'
+      isDevelopment: process.env.NODE_ENV === 'development',
+      PopupMessage: false,
+      contentError: null,
+      contentMessage: null,
     };
   },
   watch: {
@@ -51,6 +56,25 @@ export default {
         this.loggedInUser = newValue;
         console.log("loggedInUser: " + this.loggedInUser);
       }
+    },
+  },
+  async mounted() {
+    try {
+      const route = useRoute();
+      const username = route.query.username;
+      const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+      const params = new URLSearchParams({ username: username });
+      const response = await fetch(`/endpoint/user/info?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+        }
+      });
+      const data = await response.json();
+      this.loggedInUser = data.username;
+    } catch (error) {
+      console.error('Error:', error)
     }
   },
   methods: {
@@ -69,15 +93,38 @@ export default {
         },
         body: null,
       });
+      const responseData = await response.json()
+      if (responseData.error) {
+        console.log('Error from Backend:' ,responseData.error);          
+        this.contentError = responseData.error;
+        this.openPopupMessage();
+      }
+      if (responseData.message) {
+        this.contentMessage = responseData.message;
+        this.openPopupMessage();
+      }
       if (!response.ok) {
         throw new Error(`HTTP error! status ${response.status}`);
       }
+    },
+    openPopupMessage() {
+      this.PopupMessage = true
+      console.log('Value of PopupMessage: ', this.PopupMessage);
     },
   }
 }
 </script>
 
 <style>
+.nes-btn-tour {
+  color: black;
+}
+
+.nes-btn-tour:hover {
+  color: white;
+}
+
+
 .center-screen {
   display: flex;
   flex-direction: column;

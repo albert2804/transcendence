@@ -1,13 +1,12 @@
 <template>
   <div
-    class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease" 
-            :style="{ 'background-image': 'url(' + map + ')' ,'background-repeat': 'no-repeat',  'background-position': 'center' }">
+  	class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease" :style="{ 'background-image': 'url(' + map + ')', 'background-repeat': 'no-repeat', 'background-position': 'center', 'background-size': '100% 100%' }">
     <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
 	<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffffff; font-size: 20vh; z-index: 2;" v-if="countdown > 0">
 		{{ countdown }}
 	</div>
-    <div v-show="playing" class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%' }"></div>
-    <div v-show="playing" class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%' }"></div>
+    <div v-show="playing" class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%', border: '2px solid black' }"></div>
+    <div v-show="playing" class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%', border: '2px solid black' }"></div>
     <div v-show="playing" class="midline"></div>
     <div v-show="playing" style="position: absolute; top: 0; left: 2%; font-size: 1.2em; color: #ffffff;">
       {{ p1_name }}
@@ -28,10 +27,10 @@
         </div>
         <!-- Checkbox --->
         <div v-if="showMenu || showAliasScreen2">
-          <label for="checkbox">
-          <input type="checkbox" id="checkbox" v-model="isChecked" @change="changeMode"> Gravity Mode
+          <label for="checkbox" style="color: black;">
+            <input type="checkbox" id="checkbox" v-model="isChecked" @change="changeMode"> Gravity Mode
           </label>
-        </div>  
+        </div>
         <!-- Menu buttons --->
         <div v-if="showMenu">
           <button type="button" class="nes-btn btn-primary" @click="fetch_map().then(startTrainingGame)">Start Training Game</button>
@@ -211,6 +210,7 @@
               this.showMenu = false;
             } else if (data.page === "menu") {
               this.message = '';
+			  this.map = '';
               this.waiting = false;
               this.playing = false;
               this.showMenu = true;
@@ -512,9 +512,10 @@
 }
 
 .midline {
-    /* position: absolute; */
-    position: relative; z-index: 1;
-    width: 1px;
+    position: absolute;
+    z-index: 1;
+    width: 2px;
+    height: 100%;
     top: 0;
     left: 50%;
     transform: translateX(-50%);
@@ -522,11 +523,11 @@
 }
 
 .ball {
-  /* position: absolute; */
-  position: absolute; z-index: 1;
+  position: absolute;
+  z-index: 1;
   width: 1.5%;
   height: 3%;
-  background-color: pink;
+  background-color: rgb(255, 255, 255);
   border-radius: 50%;
 }
 

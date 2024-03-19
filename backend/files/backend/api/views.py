@@ -13,19 +13,8 @@ from chat.consumers import ChatConsumer
 from remote_game.player import Player
 
 #2FA stuff
-# import jwt
-# from django_otp.plugins.otp_totp.models import TOTPDevice
-# from django.conf import settings
-# import datetime
-# from django.contrib.auth.decorators import login_required
-# from django.utils.decorators import method_decorator
-# import pyotp
-# import qrcode
-# import base64
-# from io import BytesIO
+
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 from django_otp.plugins.otp_totp.models import TOTPDevice
 import datetime
 import pyotp
@@ -64,9 +53,30 @@ def get_auth_status(request):
             'authenticated': True,
             'user_id': request.user.id,
             'username': request.user.username,
+			'is_42_login': request.user.is_42_login,
             }, status=200)
     else:
         return JsonResponse({'authenticated': False}, status=200)
+
+# check if user exists (username)
+# 200: user exists / does not exist
+# 400: invalid request
+#
+# As API request call:
+# curl -k -X GET 'https://localhost/endpoint/api/userexists?username=<USERNAME>'
+#
+def userexists(request):
+	if request.method == 'GET':
+		username = request.GET.get('username')
+		if username:
+			try:
+				user = CustomUser.objects.get(username=username)
+				return JsonResponse({'exists': True}, status=200)
+			except CustomUser.DoesNotExist:
+				return JsonResponse({'exists': False}, status=200)
+		else:
+			return JsonResponse({'error': 'No username provided'}, status=401)
+	return JsonResponse({'error': 'Invalid request'}, status=402)
 
 
 # login user
@@ -166,7 +176,6 @@ def userregister(request):
         # check input with CustomUserCreationForm
         # form = CustomUserCreationForm(request.POST)
         data = json.loads(request.body.decode('utf-8'))
-        # print(data)
         form = CustomUserCreationForm(data)
         if form.is_valid():
             # save user to database and login
@@ -185,7 +194,6 @@ def userregister(request):
             else:
                 return JsonResponse({'error': 'Something went wrong'}, status=400)
         else:
-            # print(form.errors)
             # check if username already exists
             if CustomUser.objects.filter(username=data['username']).exists():
                 return JsonResponse({'error': 'Username already exists'}, status=403)
@@ -249,8 +257,10 @@ def qr_code(request):
 # enable 2FA for user
 def enable_2fa(request, *args, **kwargs):
     user = request.user
+    if user.is_42_login:
+        return JsonResponse({'error': '42 users cannot enable 2FA'}, status=200)
     if user.enabled_2fa or TOTPDevice.objects.filter(user=user, confirmed=True).exists():
-        return JsonResponse({'error': '2FA is already enabled for this user'}, status=400)
+        return JsonResponse({'error': '2FA is already enabled for this user'}, status=200)
     data = json.loads(request.body)
     code = data.get('code')
 
@@ -258,10 +268,9 @@ def enable_2fa(request, *args, **kwargs):
     totp_device = TOTPDevice.objects.filter(user=user, confirmed=False).first()
 
     if not totp_device:
-        return JsonResponse({'error': 'No TOTP device found for this user'}, status=400)
+        return JsonResponse({'error': 'No TOTP device found for this user'}, status=200)
 
     # Convert the binary key to a base32-encoded string
-    #print(f"bin_key: {totp_device.bin_key}")
     bin_key_base32 = base64.b32encode(binascii.unhexlify(totp_device.key)).decode()
 
     # Verify the code
@@ -274,27 +283,25 @@ def enable_2fa(request, *args, **kwargs):
         user.save()
         return JsonResponse({'success': '2FA enabled successfully'})
     else:
-        return JsonResponse({'error': 'Invalid code'}, status=400)
+        return JsonResponse({'error': 'Invalid or expired code'}, status=200)
 
 
 def get_2fa_status(request):
     if request.method == 'GET':
         username = request.GET.get('username')
-        print("username: ", username)
         if username:
             try:
                 user = CustomUser.objects.get(username=username)
-                print("Returning user! 2fa status: ",  user.enabled_2fa )
                 return JsonResponse({'enabled_2fa': user.enabled_2fa})
             except CustomUser.DoesNotExist:
-                print("user not found")
                 return JsonResponse({'error': 'User not found'}, status=404)
         else:
             try:
                 user = request.user
+                if not request.user.is_authenticated:
+                    return JsonResponse({'message': 'Need to be logged in to check 2FA status.'}, status=200)
                 return JsonResponse({'enabled_2fa': user.enabled_2fa})
             except:
-                print("no username provided and not logged in")
                 return JsonResponse({'error': 'No username provided and not logged in'}, status=400)
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
@@ -338,34 +345,32 @@ def disable_2fa(request, *args, **kwargs):
 # }'
 # 
 def invite_to_game(request):
-    if request.method == 'POST':
-        try:
-            if not request.user.is_authenticated:
-                return JsonResponse({'error': 'You are not logged in'}, status=403)
-            data = json.loads(request.body.decode('utf-8'))
-            if 'receiver' in data:
-                receiver = CustomUser.objects.get(username=data['receiver'])
-                if receiver == None:
-                    return JsonResponse({'error': 'User not found'}, status=403)
-                if receiver == request.user:
-                    return JsonResponse({'error': 'You cannot invite yourself'}, status=403)
-                # 
-                gameconsumer_group_name = 'gameconsumer_' + str(request.user.id)
-                if gameconsumer_group_name not in RemoteGameConsumer.all_consumer_groups:
-                    return JsonResponse({'error': 'You do not have a connected game consumer'}, status=403)
-                # 
-                channel_layer = get_channel_layer()
-                async_to_sync(channel_layer.group_send)('gameconsumer_' + str(request.user.id), {
-                    'type': 'invite_to_game',
-                    'user_id_1': request.user.id,
-                    'user_id_2': receiver.id,
-                })
-                return JsonResponse({'message': 'success'}, status=200)
-            else:
-                return JsonResponse({'error': 'Receiver not specified'}, status=400)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Something went wrong'}, status=400)
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+	if request.method == 'POST':
+		try:
+			if not request.user.is_authenticated:
+				return JsonResponse({'error': 'You are not logged in'}, status=403)
+			data = json.loads(request.body.decode('utf-8'))
+			if 'receiver' in data:
+				receiver = CustomUser.objects.get(username=data['receiver'])
+				if receiver == None:
+					return JsonResponse({'error': 'User not found'}, status=403)
+				if receiver == request.user:
+					return JsonResponse({'error': 'You cannot invite yourself'}, status=403)
+				gameconsumer_group_name = 'gameconsumer_' + str(request.user.id)
+				if gameconsumer_group_name not in RemoteGameConsumer.all_consumer_groups:
+					return JsonResponse({'error': 'You do not have a connected game consumer'}, status=403)
+				channel_layer = get_channel_layer()
+				async_to_sync(channel_layer.group_send)('gameconsumer_' + str(request.user.id), {
+					'type': 'invite_to_game',
+					'user_id_1': request.user.id,
+					'user_id_2': receiver.id,
+				})
+				return JsonResponse({'message': 'success'}, status=200)
+			else:
+				return JsonResponse({'error': 'Receiver not specified'}, status=400)
+		except json.JSONDecodeError:
+			return JsonResponse({'error': 'Something went wrong'}, status=400)
+	return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
 # move the paddel in the active game
@@ -471,33 +476,32 @@ def get_friends(request):
 # }'
 #
 def add_friend(request):
-    if request.method == 'POST':
-        try:
-            if not request.user.is_authenticated:
-                return JsonResponse({'error': 'You are not logged in'}, status=403)
-            data = json.loads(request.body.decode('utf-8'))
-            if 'receiver' in data:
-                friend = CustomUser.objects.get(username=data['receiver'])
-                if friend == None:
-                    return JsonResponse({'error': 'User not found'}, status=403)
-                if friend == request.user:
-                    return JsonResponse({'error': 'You cannot add yourself'}, status=403)
-                #
-                chat_consumer_group_name = 'chat_' + str(request.user.id)
-                if chat_consumer_group_name not in ChatConsumer.all_consumer_groups:
-                    return JsonResponse({'error': 'You do not have a connected chat consumer'}, status=403)
-                #
-                channel_layer = get_channel_layer()
-                async_to_sync(channel_layer.group_send)(f"chat_{request.user.id}", {
-                    'type': 'handle_friend_command',
-                    'receiver_id': friend.id,
-                })
-                return JsonResponse({'message': 'success'}, status=200)
-            else:
-                return JsonResponse({'error': 'Friend not specified'}, status=400)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Something went wrong'}, status=400)
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+	if request.method == 'POST':
+		try:
+			if not request.user.is_authenticated:
+				return JsonResponse({'error': 'You are not logged in'}, status=403)
+			data = json.loads(request.body.decode('utf-8'))
+			if 'receiver' in data:
+				friend = CustomUser.objects.get(username=data['receiver'])
+				if friend == None:
+					return JsonResponse({'error': 'User not found'}, status=403)
+				if friend == request.user:
+					return JsonResponse({'error': 'You cannot add yourself'}, status=403)
+				chat_consumer_group_name = 'chat_' + str(request.user.id)
+				if chat_consumer_group_name not in ChatConsumer.group_to_channels_mapping:
+					return JsonResponse({'error': 'You do not have a connected chat consumer'}, status=403)
+				channel_layer = get_channel_layer()
+				first_channel = ChatConsumer.group_to_channels_mapping[chat_consumer_group_name][0]
+				async_to_sync(channel_layer.send)(first_channel, {
+					'type': 'handle_friend_command',
+					'receiver_id': friend.id,
+				})
+				return JsonResponse({'message': 'success'}, status=200)
+			else:
+				return JsonResponse({'error': 'Friend not specified'}, status=400)
+		except json.JSONDecodeError:
+			return JsonResponse({'error': 'Something went wrong'}, status=400)
+	return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
 # remove friend
@@ -515,31 +519,30 @@ def add_friend(request):
 # }'
 #
 def remove_friend(request):
-    if request.method == 'POST':
-        try:
-            if not request.user.is_authenticated:
-                return JsonResponse({'error': 'You are not logged in'}, status=403)
-            data = json.loads(request.body.decode('utf-8'))
-            if 'receiver' in data:
-                friend = CustomUser.objects.get(username=data['receiver'])
-                if friend == None:
-                    return JsonResponse({'error': 'User not found'}, status=403)
-                if friend == request.user:
-                    return JsonResponse({'error': 'You cannot remove yourself'}, status=403)
-                # 
-                chat_consumer_group_name = 'chat_' + str(request.user.id)
-                if chat_consumer_group_name not in ChatConsumer.all_consumer_groups:
-                    return JsonResponse({'error': 'You do not have a connected chat consumer'}, status=403)
-                # 
-                channel_layer = get_channel_layer()
-                async_to_sync(channel_layer.group_send)(f"chat_{request.user.id}", {
-                    'type': 'handle_unfriend_command',
-                    'receiver_id': friend.id,
-                    'remove': True,
-                })
-                return JsonResponse({'message': 'success'}, status=200)
-            else:
-                return JsonResponse({'error': 'Friend not specified'}, status=400)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Something went wrong'}, status=400)
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+	if request.method == 'POST':
+		try:
+			if not request.user.is_authenticated:
+				return JsonResponse({'error': 'You are not logged in'}, status=403)
+			data = json.loads(request.body.decode('utf-8'))
+			if 'receiver' in data:
+				friend = CustomUser.objects.get(username=data['receiver'])
+				if friend == None:
+					return JsonResponse({'error': 'User not found'}, status=403)
+				if friend == request.user:
+					return JsonResponse({'error': 'You cannot remove yourself'}, status=403)
+				chat_consumer_group_name = 'chat_' + str(request.user.id)
+				if chat_consumer_group_name not in ChatConsumer.all_consumer_groups:
+					return JsonResponse({'error': 'You do not have a connected chat consumer'}, status=403)
+				channel_layer = get_channel_layer()
+				first_channel = ChatConsumer.group_to_channels_mapping[chat_consumer_group_name][0]
+				async_to_sync(channel_layer.send)(first_channel, {
+					'type': 'handle_unfriend_command',
+					'receiver_id': friend.id,
+					'remove': True,
+				})
+				return JsonResponse({'message': 'success'}, status=200)
+			else:
+				return JsonResponse({'error': 'Friend not specified'}, status=400)
+		except json.JSONDecodeError:
+			return JsonResponse({'error': 'Something went wrong'}, status=400)
+	return JsonResponse({'error': 'Invalid request'}, status=400)

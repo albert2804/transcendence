@@ -94,7 +94,7 @@ export default {
     this.getQuickSelectGames();
     this.startPolling()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.stopPolling();
   },
   beforeUnmount() {

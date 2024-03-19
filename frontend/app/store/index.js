@@ -5,6 +5,8 @@
 export const isLoggedIn = ref(2); // 0 = not logged in, 1 = logged in, 2 = unknown (waiting)
 export const userName = ref("");
 export const userId = ref("");
+export const is_42_login = ref(false);
+
 export let sound = ref(false);
 
 // gameButtonState stores the state of the game button ("disconnected", "connected", "loading")

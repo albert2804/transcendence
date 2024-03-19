@@ -1,40 +1,34 @@
-<script setup>
-  // Listen to changes of the isLoggedIn from store/index.js
-import { isLoggedIn } from '~/store';
-  watchEffect(() => {
-    isLoggedIn.value = isLoggedIn.value;
-  })
-</script>
-
 <template>
-  <div>
+  <div v-if="loginStatus === 1">
     <div class="container justify-content-center">
-      <h1>Youre on the tournament site!</h1>
-
-      
+      <h1>Youre on the tournament site!</h1> 
     </div>
-    <div v-if="isLoggedIn">
-      <ListTournament :loggedInUser="loggedInUser"/>
-    </div>
+    <ListTournament :loggedInUser="loggedInUser"/>
     <div style="align-items: center; margin-top: 4vh;">
       <p style=""><strong>For Evaluation: </strong>
-        <button @click="callSignUp" class=" nes-btn nes-btn-tour is-error">Create 3 Dummy Accounts</button>
+        <button v-if="isDevelopment" @click="callSignUp" class=" nes-btn nes-btn-tour is-error">Create 3 Dummy Accounts</button>
       </p>
-      <div v-if="isLoggedIn">
-        <button @click="toggleForm" class="nes-btn is-primary row" style="min-width: 300px; margin-top: 3vh;">
+      <button @click="toggleForm" class="nes-btn is-primary row" style="min-width: 300px; margin-top: 3vh;">
           {{ formVisible ? 'No Tournament' : 'Create Tournament' }} </button>
-        </div>
-      </div>
-      <div v-if="formVisible">
-        <FormTournament v-bind:local="false" :loggedInUser="loggedInUser"/>
-      </div>
+    </div>
+    <div v-if="formVisible">
+      <FormTournament v-bind:local="false" :loggedInUser="loggedInUser"/>
+    </div>
     <ErrorMessages :openPopup="PopupMessage" @close-popup="PopupMessage=false" :error="contentError" :message="contentMessage"/>
+  </div>
+  <div v-else-if="loginStatus === 0" class="center-screen">
+    <div>
+      <div class="nes-container is-rounded" style="width: 50%; margin: 0 auto;">
+        <h3>Only members can see this page</h3>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import FormTournament from '~/components/tournament/FormTournament.vue';
 import ListTournament from '~/components/tournament/ListTournament.vue';
+import { isLoggedIn, userName } from '~/store';;
 import ErrorMessages from '../components/popup/ErrorMessages.vue';
 
 export default {
@@ -42,11 +36,27 @@ export default {
   data() {
     return {
       formVisible: false,
-      loggedInUser: "",
+      loginStatus: isLoggedIn,
+      loggedInUser: userName,
+      isDevelopment: process.env.NODE_ENV === 'development',
       PopupMessage: false,
       contentError: null,
       contentMessage: null,
     };
+  },
+  watch: {
+    isLoggedIn: {
+      handler(newValue) {
+        this.loginStatus = newValue;
+        console.log("loginStatus: " + this.loginStatus);
+      }
+    },
+    userName: {
+      handler(newValue) {
+        this.loggedInUser = newValue;
+        console.log("loggedInUser: " + this.loggedInUser);
+      }
+    },
   },
   async mounted() {
     try {
@@ -112,5 +122,14 @@ export default {
 
 .nes-btn-tour:hover {
   color: white;
+}
+
+
+.center-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 75vh;
 }
 </style>

@@ -1,15 +1,25 @@
 <template>
-  <div class="row">
-    <div class="search-container">
-      <input class="form-control" :id="'exampleDataList' + index" 
-             placeholder="User to search..." v-model="searchQuery" 
-             @input="searchUsers" @change="selectUser" style="min-width: 200px;">
-      <div v-if="noUserFound" class="object-fit-contain col-2 tooltip1">!
-        <span class="tooltiptext1">No user named <span style="color:red; font-style: italic;">{{ this.searchQuery }}</span> found</span>
+  <div class="row" style="width: 100%; margin: auto;">
+    <div class="nes-container with-title">
+      <p style="color: #209cee;" class="title">{{ label }}</p>
+      <div style="display: flex; width: 100%">
+
+        <input class="form-control input-field" :class="{ 'underline': submitReady}" :id="'exampleDataList' + index" 
+        placeholder="User to search..." v-model="searchQuery" 
+        @input="searchUsers" @change="selectUser" style="width:70%">
+        <div class="nes-select select-field"  style=" width:20%;">
+          <select class="default-select selecti" v-model="selectedUser" :id="'datalistOptions' + index" @change="selectUser">
+            <option value="" selected disabled>Select an User</option>
+            <option v-for="result in searchResults" :value="result.name" :key="result.id">{{ result.name }}</option>
+          </select>
+        </div>
+        <div v-if="noUserFound" class="object-fit-contain tooltip1" style="width: 10%">!
+          <span class="tooltiptext1">No user named <span style="color:red; font-style: italic;">{{ this.searchQuery }}</span> found</span>
+        </div>
+        <div v-else-if="submitReady" style="position: relative; display: inline-block; margin: -7px auto auto auto; color: #99e857; font-size: 220%; font-weight: 900; transform: rotate(310deg)">
+          L
+        </div>
       </div>
-      <select v-if="showResults" v-model="selectedUser" :id="'datalistOptions' + index" @change="selectUser">
-        <option v-for="result in searchResults" :value="result.name" :key="result.id">{{ result.name }}</option>
-      </select>
     </div>
   </div>
 </template>
@@ -17,7 +27,7 @@
 
 <script>
 export default {
-  props: ['index'],
+  props: ['index', 'label'],
   data() {
     return {
       searchQuery: '',
@@ -26,19 +36,19 @@ export default {
       showResults: true,
       noUserFound: false,
       error: '',
+      submitReady: false,
     };
   },
   methods: {
     async searchUsers() {
+      this.submitReady = false;
       if (this.searchQuery.trim() === '') {
-        this.showResults = true;
         this.noUserFound = false;
       }
       
       try {
         if (this.searchQuery === "") {
           this.noUserFound = false;
-          this.showResults = true;
           return;
         }
         const response = await fetch(`/endpoint/user/search/?search=${this.searchQuery}`);
@@ -64,7 +74,9 @@ export default {
         this.noUserFound = false;
         this.selectedUser = selectedResult;
         this.searchQuery = this.selectedUser.name
+        this.submitReady = true;
         this.$emit('user-selected', this.selectedUser.name, this.index)
+
       }
     },
   },
@@ -72,22 +84,22 @@ export default {
 </script>
 
 <style>
+
 .tooltip1 {
   position: relative;
   display: inline-block;
   color: red;
-  font-size: 150%;
+  font-size: 200%;
   font-weight: 900;
 }
 
 .tooltip1 .tooltiptext1 {
   visibility: hidden;
   background-color: black;
-  color: #fff;
   border-radius: 6px;
   padding: 5px 5px;
   font-weight: normal;
-  font-size: 70%;
+  font-size: 1rem;
   white-space: nowrap;
   /* Position the tooltip */
   position: absolute;
@@ -99,15 +111,42 @@ export default {
   visibility: visible;
 }
 
-.search-container {
-    display: flex;
-    align-items: center;
-  }
-
-.search-container select {
-  margin-left: 10px;
-  height: 100%;
-  width: 150px;
+.select-field select {
+  border: none;
+  color: transparent;
+  border-image-slice: 0;
+  background-color: transparent;
+  margin: 0;
 }
+
+option {
+  font-size: 1.3rem;
+}
+
+.selecti:focus-visible select {
+  border:none;
+  outline: none;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.input-field:focus {
+  outline:none;
+}
+
+.input-field {
+ border:none;
+ width: 80%;
+}
+
+.underline {
+  color: black;
+  background-color: #f2f2f2;
+  font-style: italic;
+}
+
+.select-field:hover{
+    top: -3px
+  }
 
 </style>

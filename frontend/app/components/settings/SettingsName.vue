@@ -104,15 +104,15 @@ export default {
     background: rgba(255,255,255,0.7);
   }
 
-.popup {
-  position: fixed; /* Fixed positioning to overlay on top of other content */
-  top: 50%; /* Position it in the vertical center of the viewport */
-  left: 50%; /* Position it in the horizontal center of the viewport */
-  transform: translate(-50%, -50%); /* Center the popup exactly */
-  background-color: white; /* Background color */
-  padding: 20px; /* Padding around the content */
-  border: 1px solid #ccc; /* Border */
-  border-radius: 8px; /* Border radius */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Box shadow for a subtle depth effect */
-}
+  .popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
 </style>

@@ -211,6 +211,7 @@
               this.showMenu = false;
             } else if (data.page === "menu") {
               this.message = '';
+			  this.map = '';
               this.waiting = false;
               this.playing = false;
               this.showMenu = true;

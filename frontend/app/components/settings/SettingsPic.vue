@@ -98,8 +98,9 @@
 				this.message = data.status;
 				this.sendMessagetoParent(this.message, this.error);			
 				if (response.status === 200){
-					await this.$router.push('/userinfopage');
-					location.reload();
+					if (this.$route.path === '/userinfopage') {
+						reloadNuxtApp({ path: '/userinfopage' });
+					}
 				}
 			} catch (error) {
 				console.log(response.status);

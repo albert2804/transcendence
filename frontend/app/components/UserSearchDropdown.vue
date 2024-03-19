@@ -7,7 +7,7 @@
         <input class="form-control input-field" :class="{ 'underline': submitReady}" :id="'exampleDataList' + index" 
         placeholder="User to search..." v-model="searchQuery" 
         @input="searchUsers" @change="selectUser" style="width:70%">
-        <div class="nes-select select-field " style=" width:20%;">
+        <div class="nes-select select-field"  style=" width:20%;">
           <select class="default-select selecti" v-model="selectedUser" :id="'datalistOptions' + index" @change="selectUser">
             <option value="" selected disabled>Select an User</option>
             <option v-for="result in searchResults" :value="result.name" :key="result.id">{{ result.name }}</option>
@@ -15,6 +15,9 @@
         </div>
         <div v-if="noUserFound" class="object-fit-contain tooltip1" style="width: 10%">!
           <span class="tooltiptext1">No user named <span style="color:red; font-style: italic;">{{ this.searchQuery }}</span> found</span>
+        </div>
+        <div v-else-if="submitReady" style="position: relative; display: inline-block; margin: -7px auto auto auto; color: #99e857; font-size: 220%; font-weight: 900; transform: rotate(310deg)">
+          L
         </div>
       </div>
     </div>
@@ -38,15 +41,14 @@ export default {
   },
   methods: {
     async searchUsers() {
+      this.submitReady = false;
       if (this.searchQuery.trim() === '') {
         this.noUserFound = false;
-        this.submitReady = false;
       }
       
       try {
         if (this.searchQuery === "") {
           this.noUserFound = false;
-          this.submitReady = false;
           return;
         }
         const response = await fetch(`/endpoint/user/search/?search=${this.searchQuery}`);
@@ -54,7 +56,6 @@ export default {
           const data = await response.json();
           if (data == 0) {
             this.noUserFound = true;
-            this.submitReady = false;
             return;
           }
           this.noUserFound = false;
@@ -114,7 +115,12 @@ export default {
   border: none;
   color: transparent;
   border-image-slice: 0;
+  background-color: transparent;
   margin: 0;
+}
+
+option {
+  font-size: 1.3rem;
 }
 
 .selecti:focus-visible select {
@@ -138,5 +144,9 @@ export default {
   background-color: #f2f2f2;
   font-style: italic;
 }
+
+.select-field:hover{
+    top: -3px
+  }
 
 </style>

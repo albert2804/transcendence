@@ -5,9 +5,9 @@
     </div>
     <ListTournament :loggedInUser="loggedInUser"/>
     <div style="align-items: center; margin-top: 4vh;">
-      <p style=""><strong>For Evaluation: </strong>
+      <!-- <p style=""><strong>For Evaluation: </strong>
         <button v-if="isDevelopment" @click="callSignUp" class=" nes-btn nes-btn-tour is-error">Create 3 Dummy Accounts</button>
-      </p>
+      </p> -->
       <button @click="toggleForm" class="nes-btn is-primary row" style="min-width: 300px; margin-top: 3vh;">
           {{ formVisible ? 'No Tournament' : 'Create Tournament' }} </button>
     </div>

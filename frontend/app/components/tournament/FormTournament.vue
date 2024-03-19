@@ -2,7 +2,7 @@
   <div class="nes-container is-rounded">
     <form style="max-width: 1000px; margin: auto; overflow: hidden;">
       <div class="nes-field">
-        <label for="name_field" class="float-start" style="margin-top: 3vh;">Tournament Name</label>
+        <label for="name_field" class="float-start" style="margin-top: 3vh; color: #209cee;">Tournament Name</label>
         <input type="text" id="name_field" class="nes-input" placeholder="Your Tournament Name" @input="setTournamentName($event)">
       </div>
       <div class="mb-3" style="margin-top: 4vh;">

@@ -196,7 +196,7 @@ export default {
     transition: linear 0.1s;
   }
   .nes-progress:hover{
-    top: -3px;
+    top: 3px;
   }
 
   h3 {

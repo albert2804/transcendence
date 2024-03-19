@@ -31,7 +31,7 @@ watchEffect(() => {
 import { useRoute } from 'vue-router';
 
 export default {
-  name: 'InfoComponent',
+  name: 'UserInfo',
     data() {
      return {
       userStats: {

@@ -57,8 +57,7 @@
 					this.message = data.status;
 					this.sendMessagetoParent(this.message, this.error);
 					if (response.status === 200){
-						await this.$router.push('/login');
-						location.reload();
+						reloadNuxtApp({ path: '/login' });
 					}
 				} catch (error) {
 					console.error('Error sending data to /endpoint/user/verify/:', error);

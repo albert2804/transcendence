@@ -114,12 +114,12 @@ def handle_profilepic(request):
 				user = CustomUser.objects.get(username=request.user)
 				if 'newPic' in request.FILES:	
 					new_pic = request.FILES['newPic']
-					validators=[FileExtensionValidator(allowed_extensions=['jpeg','png'])]
+					validators=[FileExtensionValidator(allowed_extensions=['jpeg', 'jpg', 'png'])]
 					for validator in validators:
 						validator(new_pic)
 					#validate that this is actually a picture
 					file_type = imghdr.what(new_pic)
-					if file_type not in ['jpeg', 'png']:
+					if file_type not in ['jpeg', 'jpg', 'png']:
 						return JsonResponse({'error': 'File is not a picture'}, status=422)
 					user.profile_pic = new_pic
 					user.save()

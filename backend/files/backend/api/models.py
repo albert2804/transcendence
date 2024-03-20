@@ -148,7 +148,7 @@ class CustomUser(AbstractUser):
 			await sync_to_async(self.tournament_invites.remove)(user)
 			await sync_to_async(user.tournament_invites.remove)(self)
 			# create a new game handler
-			game_handler = await GameHandler.create(player1, player2, ranked=True, db_entry=db_game, tournament=tournament)
+			game_handler = await GameHandler.create(player1, player2, ranked=True, db_entry=db_game, tournament=tournament, directGame=False)
 			# open the game modal for both players
 			asyncio.create_task(self.delayed_game_start(game_handler))
 			return
@@ -208,7 +208,7 @@ class CustomUser(AbstractUser):
 			await sync_to_async(self.game_invites.remove)(user)
 			await sync_to_async(user.game_invites.remove)(self)
 			# create a new game handler
-			game_handler = await GameHandler.create(player1, player2, ranked=True)
+			game_handler = await GameHandler.create(player1, player2, ranked=True, directGame=False)
 			# delay the game start
 			asyncio.create_task(self.delayed_game_start(game_handler))
 			return

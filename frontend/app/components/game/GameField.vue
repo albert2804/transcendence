@@ -33,13 +33,13 @@
         </div>
         <!-- Menu buttons --->
         <div v-if="showMenu">
-          <button type="button" class="nes-btn btn-primary" @click="fetch_map().then(startTrainingGame)">Start Training Game</button>
+          <button type="button" class="nes-btn btn-primary" @click="startTrainingGame">Start Training Game</button>
         </div>
         <div v-if="showMenu && loginStatus == 1">
-          <button type="button" class="nes-btn btn-primary" @click="fetch_map().then(startRankedGame)" >Start Ranked Game</button>
+          <button type="button" class="nes-btn btn-primary" @click="startRankedGame" >Start Ranked Game</button>
         </div>
         <div v-if="showMenu">
-          <button type="button" class="nes-btn btn-primary" @click="fetch_map().then(startLocalGame)">Start Local Game</button>
+          <button type="button" class="nes-btn btn-primary" @click="startLocalGame">Start Local Game</button>
         </div>
         <!-- play on this device - button --->
         <div v-if="!playOnThisDevice">
@@ -160,33 +160,28 @@
   methods: {
     // function to create and handle the websocket
 	  createWebSocket () {
-      
       const currentDomain = window.location.hostname;
       const sockurl = 'wss://' + currentDomain + '/endpoint/remoteGame/';
       this.socket = new WebSocket(sockurl)
-      
       // create sound effects
-
       const intersection = new Audio("endpoint/media/sounds/ball.mp3");
       const randomNumber = Math.floor(Math.random() * 6); 
       console.log(randomNumber);
       const background = new Audio(this.playlist[randomNumber]);
       // const background = new Audio("endpoint/media/sounds/background.mp3");
       const effects = [intersection, background];
-
-
       this.socket.onopen = () => {
-		gameButtonState.value = "loading";
+		    gameButtonState.value = "loading";
       }
 
       this.socket.onclose = () => {
-		gameButtonState.value = "disconnected";
-		this.$emit('closeModal');
+        gameButtonState.value = "disconnected";
+        this.$emit('closeModal');
       }
 
       this.socket.onerror = (error) => {
-		gameButtonState.value = "disconnected";
-		this.$emit('closeModal');
+        gameButtonState.value = "disconnected";
+        this.$emit('closeModal');
       }
 
       this.socket.onmessage = (event) => {
@@ -195,10 +190,11 @@
           const data = JSON.parse(event.data);
           if (data.type === "redirect") {
             this.countdown = 0;
-			gameButtonState.value = "connected";
+			      gameButtonState.value = "connected";
             this.showAliasScreen = false;
             this.showAliasScreen2 = false;
             if (data.page === "playing") {
+              this.fetch_map();
               this.message = '';
               this.waiting = false;
               this.playing = true;
@@ -210,7 +206,7 @@
               this.showMenu = false;
             } else if (data.page === "menu") {
               this.message = '';
-			  this.map = '';
+			        this.map = '';
               this.waiting = false;
               this.playing = false;
               this.showMenu = true;
@@ -265,8 +261,8 @@
           } else if (data.type === "open_game_modal") {
             this.$emit('openModal');
           } else if (data.type === "close_game_modal") {
-			this.$emit('closeModal');
-		  } else {
+			      this.$emit('closeModal');
+		      } else {
             console.error('Received message of unknown type:', data);
           }
         } catch (error) {
@@ -282,7 +278,27 @@
         // console.log('WebSocket connection closed')
       }
     },
-    // function to start the game
+    // function to fetch the map from the server
+    async fetch_map(){
+      try {
+        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
+        const response = await fetch('/endpoint/user/info/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          }
+        })
+        if (response.ok) {
+          const data = await response.json();
+          this.map = data.map;
+          console.log(this.map)
+        }
+      } catch (error) {
+          this.map = '';
+      }
+    },
+    // function to start a training game
     startTrainingGame () {
 
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
@@ -307,28 +323,7 @@
         this.socket.send(data);
       }
     },
-
-    async fetch_map(){
-      try {
-        const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value
-        const response = await fetch('/endpoint/user/info/', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,
-          }
-        })
-        if (response.ok) {
-          const data = await response.json();
-          this.map = data.map;
-          console.log(this.map)
-        }
-      } catch (error) {
-          this.map = '';
-      }
-    },
-    
-
+    // function to start a ranked game
     startRankedGame () {
 
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {

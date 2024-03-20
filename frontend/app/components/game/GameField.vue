@@ -199,6 +199,14 @@
               this.waiting = false;
               this.playing = true;
               this.showMenu = false;
+			  this.p1pos.y = (100 - this.paddleSize) / 2;
+			  this.p2pos.y = (100 - this.paddleSize) / 2;
+			  this.ballPos.x = 49.25;
+			  this.ballPos.y = 48.5;
+			//   this.p1_name = data.p1_name;
+			//   this.p2_name = data.p2_name;
+			//   this.pointsP1 = 0;
+			//   this.pointsP2 = 0;
             } else if (data.page === "waiting") {
               this.message = 'Waiting for opponent...';
               this.waiting = true;

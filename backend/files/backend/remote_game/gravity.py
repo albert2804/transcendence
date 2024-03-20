@@ -22,17 +22,17 @@ class GPongGame:
 		# self.leftPaddle = {'x': 0, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
 		self.leftPaddle = {'x': 0, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
 		self.rightPaddle = {'x': self.canvasWidth - 10, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
-
+		self.paddle_speed = 8
 		# Ball initialization
-		self.acceleration = 0.05
-		self.tolerance = 3
-		self.hor_velocity = 3
-		self.max_velocity = 10
+		self.acceleration = 0.015
+		self.tolerance = 6
+		self.hor_velocity = 8 / self.factor
+		self.max_velocity = 8 / self.factor
 		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.hor_velocity, 'dy': self.ver_velocity, 'radius': 6}
 
 		# if there is an intersection of the ball and the paddle, intersection = true(needed for sound)
 		self.intersection = False
-		self.repel = 2 # the bigger the value the stronger the ball will be accelerated to the top after hitting a paddle
+		self.repel = 1.05 # the bigger the value the stronger the ball will be accelerated to the top after hitting a paddle
 		
 		# Game state saved as json (ready to be sent to the client)
 	def update_game(self):
@@ -102,42 +102,47 @@ class GPongGame:
 	def gravity(self, paddle):
 		
 		angle = (self.ball['dy']) / abs(self.ball['dx'])
-		if (math.degrees(angle)) > 60:
+		if (math.degrees(angle)) >= 60:
 			angle = math.pi / 3 
-		elif (math.degrees(angle)) < -60:
+		elif (math.degrees(angle)) <= -60:
 			angle = -math.pi / 3 
-		print(f"{math.degrees(angle)=}")
+		# print(f"{math.degrees(angle)=}")
 
 		# calculates the relative position of the ball to paddles on intersection -> value between 0 and 1
-		pos = abs(self.ball['y'] - (paddle['y'] + paddle['height']/2)) / (paddle['height'] / 2)
+		# pos = abs(self.ball['y'] - (paddle['y'] + paddle['height']/2)) / (paddle['height'] / 2)
 		
 		# calculates the repel, depending on the intersection point
-		repel = (self.repel - pos)
+		repel = (self.repel)
+		
 	# very small angle ,less then 6 degrees = 0.1
-		if angle <= 0.1 and angle >= -0.1:
-			repel *= 1.5
+		# if angle <= 0.1 and angle >= -0.1:
+		# 	repel *= 1.5
 		self.ball['dy'] = angle * repel * abs(self.ball['dx'])
-		self.ball['dx'] = -self.ball['dx']  # Reverse the horizontal direction
-		print(f"\n({self.ball['y']} - ({paddle['y']} + {paddle['height']/2})) / {paddle['height'] / 2}  = {pos}")
-		print(f"Angle: {angle}")
-		print(f"Repel: {repel}")
-		print(f"\n OLD [DY]{self.ball['dy']}")
-		print(f"\n NEW [DY]{self.ball['dy']}")
-		print(f"\n{self.intersection=}")
+		self.ball['dx'] =-self.ball['dx']
+		if not abs(self.ball['dx']) > self.max_velocity:
+			self.ball['dx'] *= 1.1   # Reverse the horizontal direction
+		if not abs(self.ball['dy']) > self.max_velocity:
+			self.ball['dx'] *= 1.1   # Reverse the horizontal direction
+		# print(f"\n({self.ball['y']} - ({paddle['y']} + {paddle['height']/2})) / {paddle['height'] / 2}  = {pos}")
+		# print(f"Angle: {angle}")
+		# print(f"Repel: {repel}")
+		# print(f"\n OLD [DY]{self.ball['dy']}")
+		# print(f"\n NEW [DY]{self.ball['dy']}")
+		# print(f"\n{self.intersection=}")
 		self.intersection = False
 		
 	
 	def paddle_up(self, player):
 		if player == 1:
-			self.leftPaddle['dy'] = -6 / self.factor
+			self.leftPaddle['dy'] = -self.paddle_speed / self.factor
 		elif player == 2:
-			self.rightPaddle['dy'] = -6 / self.factor
+			self.rightPaddle['dy'] = -self.paddle_speed / self.factor
 	
 	def paddle_down(self, player):
 		if player == 1:
-			self.leftPaddle['dy'] = 6 / self.factor
+			self.leftPaddle['dy'] = self.paddle_speed / self.factor
 		elif player == 2:
-			self.rightPaddle['dy'] = 6 / self.factor
+			self.rightPaddle['dy'] = self.paddle_speed / self.factor
 	
 	def paddle_stop(self, player):
 		if player == 1:
@@ -146,12 +151,12 @@ class GPongGame:
 			self.rightPaddle['dy'] = 0
 
 	def game_loop(self):
-		if self.pointsP1 < 10 and self.pointsP2 < 10:
+		if self.pointsP1 < 7 and self.pointsP2 < 7:
 			self.update_game()
 		else:
-			if self.pointsP1 == 10:
+			if self.pointsP1 == 7:
 				self.winner = 1
-			elif self.pointsP2 == 10:
+			elif self.pointsP2 == 7:
 				self.winner = 2
 			self.isGameExited = True
 

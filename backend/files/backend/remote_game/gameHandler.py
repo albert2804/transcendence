@@ -48,7 +48,7 @@ class GameHandler:
 
 	# Use this function to create a new instance of this class
 	@classmethod
-	async def create(cls, player1, player2, ranked=False, db_entry=None, tournament=None, mode='default'):
+	async def create(cls, player1, player2, ranked=False, db_entry=None, tournament=None, mode='default', directGame=True):
 		instance = cls(player1, player2, ranked, mode)
 		player1.game_handler = instance.game_group
 		await instance.channel_layer.group_add(
@@ -61,11 +61,12 @@ class GameHandler:
 			player2.channel
 		)
 		# send close modal to both players
-		await instance.channel_layer.group_send(
-			instance.game_group,
-			{
-				'type': 'close_game_modal',
-			})
+		if directGame == False:
+			await instance.channel_layer.group_send(
+				instance.game_group,
+				{
+					'type': 'close_game_modal',
+				})
 		# send redirect to playing page
 		await instance.channel_layer.group_send(
 			instance.game_group,

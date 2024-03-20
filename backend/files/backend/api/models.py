@@ -124,12 +124,20 @@ class CustomUser(AbstractUser):
 			game_consumer = RemoteGameConsumer()
 			if player1 in game_consumer.training_waiting_room:
 				game_consumer.training_waiting_room.remove(player1)
+			if player1 in game_consumer.training_waiting_room_g:
+				game_consumer.training_waiting_room_g.remove(player1)
 			if player1 in game_consumer.ranked_waiting_room:
 				game_consumer.ranked_waiting_room.remove(player1)
+			if player1 in game_consumer.ranked_waiting_room_g:
+				game_consumer.ranked_waiting_room_g.remove(player1)
 			if player2 in game_consumer.training_waiting_room:
 				game_consumer.training_waiting_room.remove(player2)
+			if player2 in game_consumer.training_waiting_room_g:
+				game_consumer.training_waiting_room_g.remove(player2)
 			if player2 in game_consumer.ranked_waiting_room:
 				game_consumer.ranked_waiting_room.remove(player2)
+			if player2 in game_consumer.ranked_waiting_room_g:
+				game_consumer.ranked_waiting_room_g.remove(player2)
 			# send info message to both users
 			await consumer.save_and_send_message(user, self, 'You accepted the tournament game invite. The game starts in 10 seconds.', datetime.now(), 'info')
 			await consumer.save_and_send_message(self, user, 'Tournament game invite got accepted. The game starts in 10 seconds.', datetime.now(), 'info')
@@ -176,12 +184,20 @@ class CustomUser(AbstractUser):
 			game_consumer = RemoteGameConsumer()
 			if player1 in game_consumer.training_waiting_room:
 				game_consumer.training_waiting_room.remove(player1)
+			if player1 in game_consumer.training_waiting_room_g:
+				game_consumer.training_waiting_room_g.remove(player1)
 			if player1 in game_consumer.ranked_waiting_room:
 				game_consumer.ranked_waiting_room.remove(player1)
+			if player1 in game_consumer.ranked_waiting_room_g:
+				game_consumer.ranked_waiting_room_g.remove(player1)
 			if player2 in game_consumer.training_waiting_room:
 				game_consumer.training_waiting_room.remove(player2)
+			if player2 in game_consumer.training_waiting_room_g:
+				game_consumer.training_waiting_room_g.remove(player2)
 			if player2 in game_consumer.ranked_waiting_room:
 				game_consumer.ranked_waiting_room.remove(player2)
+			if player2 in game_consumer.ranked_waiting_room_g:
+				game_consumer.ranked_waiting_room_g.remove(player2)
 			# send info message to both users
 			await consumer.save_and_send_message(user, self, 'You accepted the game invite. The game starts in 10 seconds.', datetime.now(), 'info')
 			await consumer.save_and_send_message(self, user, 'Game invite got accepted. The game starts in 10 seconds.', datetime.now(), 'info')

@@ -32,7 +32,6 @@ class GameHandler:
 		else:
 			self.local_game = False
 		self.game_group = f"game_{random.randint(0, 1000000)}"
-		
 		if mode == 'default':
 			self.game = PongGame()
 		elif mode == 'gravity':
@@ -61,6 +60,19 @@ class GameHandler:
 			instance.game_group,
 			player2.channel
 		)
+		# send close modal to both players
+		await instance.channel_layer.group_send(
+			instance.game_group,
+			{
+				'type': 'close_game_modal',
+			})
+		# send redirect to playing page
+		await instance.channel_layer.group_send(
+			instance.game_group,
+			{
+				'type': 'redirect',
+				'page': "playing",
+			})
 		# create db entry if ranked (the rest will be filled after the game is finished)
 		if ranked:
 			from .models import RemoteGame
@@ -224,7 +236,7 @@ class GameHandler:
 			print(f"Started {self.game_group} between {self.player1.get_user().alias} and {self.player2.get_user().alias}.")
 		# send player names to game group
 		await self.send_player_names()
-		# send redirect to playing page
+		# # send redirect to playing page
 		await self.channel_layer.group_send(
 			self.game_group,
 			{
@@ -331,6 +343,8 @@ class GameHandler:
 	# This function is called when a player gives up or disconnects
 	# The other player wins the game
 	def give_up(self, player):
+		if self.game.started == False:
+			return
 		if not self.local_game:
 			if player == self.player1:
 				self.game.winner = 2

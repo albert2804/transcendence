@@ -325,7 +325,6 @@
     },
     // function to start a ranked game
     startRankedGame () {
-
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
           type: 'start_ranked_game',

@@ -19,7 +19,7 @@ export default {
 			mapUrls: [
         'https://as1.ftcdn.net/v2/jpg/05/62/67/14/1000_F_562671472_15eURCB3BIsBsDRTe208yj81EdEJ3pfZ.jpg',
         'https://wallpapercave.com/wp/6nBenYi.jpg',
-        'http://brainden.com/images/cafe-wall-big.gif',
+        'https://img.freepik.com/premium-vector/abstract-seamless-line-pattern-design-simple-graphic-design-fabric-print_754623-288.jpg?w=2000',
         'https://img.freepik.com/premium-vector/vertical-stripes-parallel-straight-monochrome[…]lftone-gradient-line-pattern-background_833685-828.jpg?w=2000',
         'https://c4.wallpaperflare.com/wallpaper/824/904/933/42-the-hitchhiker-s-guide-to-the-galaxy-wallpaper-preview.jpg',
 		  ],

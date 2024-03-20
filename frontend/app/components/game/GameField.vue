@@ -1,6 +1,6 @@
 <template>
   <div
-  	class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease" :style="{ 'background-image': 'url(' + map + ')', 'background-repeat': 'no-repeat', 'background-position': 'center', 'background-size': '100% 100%' }">
+  	class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease" :style="map != '' ? { 'background-image': 'url(' + map + ')', 'background-repeat': 'no-repeat', 'background-position': 'center', 'background-size': '100% 100%' } : {}">
     <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%', border: '1px solid black' }"></div>
 	<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffffff; font-size: 20vh; z-index: 2;" v-if="countdown > 0">
 		{{ countdown }}

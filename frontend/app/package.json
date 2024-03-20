@@ -15,7 +15,6 @@
     "vue-router": "4.3.0"
   },
   "dependencies": {
-    "@vue/cli": "^5.0.8",
-    "@vueuse/nuxt": "^10.9.0"
+    "@vue/cli": "^5.0.8"
   }
 }

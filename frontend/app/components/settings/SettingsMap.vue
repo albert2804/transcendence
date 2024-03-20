@@ -17,11 +17,15 @@ export default {
   data(){
 		return {
 			mapUrls: [
-        'https://as1.ftcdn.net/v2/jpg/05/62/67/14/1000_F_562671472_15eURCB3BIsBsDRTe208yj81EdEJ3pfZ.jpg',
-        'https://wallpapercave.com/wp/6nBenYi.jpg',
-        'https://img.freepik.com/premium-vector/abstract-seamless-line-pattern-design-simple-graphic-design-fabric-print_754623-288.jpg?w=2000',
-        'https://img.freepik.com/premium-vector/vertical-stripes-parallel-straight-monochrome[…]lftone-gradient-line-pattern-background_833685-828.jpg?w=2000',
-        'https://c4.wallpaperflare.com/wallpaper/824/904/933/42-the-hitchhiker-s-guide-to-the-galaxy-wallpaper-preview.jpg',
+			'https://wallpapercave.com/wp/6nBenYi.jpg',
+			'https://img.freepik.com/premium-vector/vertical-stripes-parallel-straight-monochrome[…]lftone-gradient-line-pattern-background_833685-828.jpg?w=2000',
+			'https://c4.wallpaperflare.com/wallpaper/824/904/933/42-the-hitchhiker-s-guide-to-the-galaxy-wallpaper-preview.jpg',
+			'https://r4.wallpaperflare.com/wallpaper/694/517/263/pattern-optical-illusion-wallpaper-e8364cba0f3c07293eb0690212f94be0.jpg',
+			'https://img.freepik.com/free-vector/flat-design-optical-illusion-background_23-2150823400.jpg?w=2000&t=st=1710945213~exp=1710945813~hmac=00c6081a55b3a63419e87b16d4a3c33770099bc8a6479ac31dfd1f00a5ddaec0',
+			'https://img.freepik.com/premium-vector/abstract-seamless-line-pattern-design-simple-graphic-design-fabric-print_754623-288.jpg?w=2000',
+			'https://i.pinimg.com/originals/98/01/84/980184fe0897895825bb2e751d8007f7.gif',
+			'https://i.pinimg.com/originals/f2/52/05/f25205b68f7168fc06a1dc6bdf93246a.gif',
+			'https://i.pinimg.com/originals/b6/84/9b/b6849bba245a533e608908fc3f14a6c5.gif',
 		  ],
 			map: '',
 			error: '',

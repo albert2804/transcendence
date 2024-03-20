@@ -60,9 +60,6 @@ export default defineNuxtConfig({
   },
   css: [
     '~/assets/styles/global.css',
-  ],
-  modules: [
-    '@vueuse/nuxt',
   ]
 })
 

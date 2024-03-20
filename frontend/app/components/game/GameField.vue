@@ -201,6 +201,10 @@
               this.waiting = false;
               this.playing = true;
               this.showMenu = false;
+			  this.p1pos.y = (100 - this.paddleSize) / 2;
+			  this.p2pos.y = (100 - this.paddleSize) / 2;
+			  this.ballPos.x = 49.25;
+			  this.ballPos.y = 48.5;
             } else if (data.page === "waiting") {
               this.message = 'Waiting for opponent...';
               this.waiting = true;
@@ -327,7 +331,6 @@
     },
     // function to start a ranked game
     startRankedGame () {
-
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         const data = JSON.stringify({
           type: 'start_ranked_game',

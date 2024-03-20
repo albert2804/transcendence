@@ -43,19 +43,38 @@ export default {
   setup() {
     const modalRef = ref(null);
     const ponggamefieldRef = ref(null);
-    const { toggle } = useFullscreen(modalRef);
     const fullscreen = ref(false);
 
     // function to open fullscreen
     function openFullscreen() {
-      if (document.fullscreenElement !== modalRef.value) {
-        toggle();
+      if (modalRef.value.requestFullscreen) {
+        modalRef.value.requestFullscreen();
+      } else if (modalRef.value.mozRequestFullScreen) {
+        // Firefox
+        modalRef.value.mozRequestFullScreen();
+      } else if (modalRef.value.webkitRequestFullscreen) {
+        // Chrome, Safari and Opera
+        modalRef.value.webkitRequestFullscreen();
+      } else if (modalRef.value.msRequestFullscreen) {
+        // IE/Edge
+        modalRef.value.msRequestFullscreen();
       }
     }
     // function to close fullscreen
     function closeFullscreen() {
-      if (document.fullscreenElement === modalRef.value) {
-        toggle();
+      if (document.fullscreenElement) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          // Firefox
+          document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+          // Chrome, Safari and Opera
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          // IE/Edge
+          document.msExitFullscreen();
+        }
       }
     }
     // function for the fullscreenchange event (to update the fullscreen variable for the button)

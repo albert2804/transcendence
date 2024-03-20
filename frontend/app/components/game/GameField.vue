@@ -138,7 +138,7 @@
     isLoggedIn: {
       immediate: true,
       handler(newValue) {
-		this.loginStatus = newValue;
+		    this.loginStatus = newValue;
       }
     }
   },
@@ -194,7 +194,9 @@
             this.showAliasScreen = false;
             this.showAliasScreen2 = false;
             if (data.page === "playing") {
-              this.fetch_map();
+              if (this.loginStatus == 1) {
+                this.fetch_map();
+              }
               this.message = '';
               this.waiting = false;
               this.playing = true;

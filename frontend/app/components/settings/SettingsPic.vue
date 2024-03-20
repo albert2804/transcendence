@@ -62,9 +62,9 @@
 			try {
 				const fileInput = event.target;
 				this.newPic = fileInput.files[0];
-				if (this.newPic && this.newPic.size > 4000000) {
-					console.log('File size exceeds the maximum allowed size (~4MB)');
-					this.sendMessagetoParent('', 'File size exceeds the maximum allowed size (~4MB)');
+				if (this.newPic && this.newPic.size > 1000000) {
+					console.log('File size exceeds the maximum allowed size (~1MB)');
+					this.sendMessagetoParent('', 'File size exceeds the maximum allowed size (~1MB)');
 					this.closePopup();
 					return ;
 				}

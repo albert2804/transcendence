@@ -9,7 +9,6 @@ class GPongGame:
 		self.isGameExited = False
 		self.countdownSec = 3
 		self.factor = 3 # by raising the factor the game is faster paced
-		self.ver_velocity = 2 / self.factor
 		self.canvasWidth = 800
 		self.canvasHeight = 400
 		self.winner = 0
@@ -22,21 +21,25 @@ class GPongGame:
 		# self.leftPaddle = {'x': 0, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
 		self.leftPaddle = {'x': 0, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
 		self.rightPaddle = {'x': self.canvasWidth - 10, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
-		self.paddle_speed = 8
+		self.paddle_speed = 12
 		# Ball initialization
-		self.acceleration = 0.015
-		self.tolerance = 6
+		self.acceleration = 0.04
+		self.tolerance = 5
+		self.ver_velocity = 2 / self.factor
 		self.hor_velocity = 8 / self.factor
 		self.max_velocity = 8 / self.factor
 		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.hor_velocity, 'dy': self.ver_velocity, 'radius': 6}
 
 		# if there is an intersection of the ball and the paddle, intersection = true(needed for sound)
 		self.intersection = False
-		self.repel = 1.05 # the bigger the value the stronger the ball will be accelerated to the top after hitting a paddle
+		self.repel = 1.15 # the bigger the value the stronger the ball will be accelerated to the top after hitting a paddle
 		
 		# Game state saved as json (ready to be sent to the client)
 	def update_game(self):
 
+		if self.ball['x'] > self.canvasWidth / 2 - 50 and self.ball['x'] < self.canvasWidth / 2 + 50:
+			self.intersection = False
+			
 		# Update paddle positions
 		self.leftPaddle['y'] += self.leftPaddle['dy']
 		self.rightPaddle['y'] += self.rightPaddle['dy']
@@ -68,15 +71,17 @@ class GPongGame:
 		if ((self.ball['x']) - (self.leftPaddle['x'] + self.leftPaddle['width']) <  tolerance
 				and (self.ball['y'] > self.leftPaddle['y'] and self.ball['y'] < (self.leftPaddle['y'] + self.leftPaddle['height']))
 		):
-			self.intersection = True
-			self.gravity(self.leftPaddle)
+			if not self.intersection:
+				self.gravity(self.leftPaddle)
+				self.intersection = True
 
 		if (
 			self.rightPaddle['x'] - self.ball['x'] < tolerance
 			and (self.ball['y'] > self.rightPaddle['y'] and self.ball['y'] < (self.rightPaddle['y'] + self.rightPaddle['height']))
 		):
-			self.intersection = True
-			self.gravity(self.rightPaddle)
+			if not self.intersection:
+				self.gravity(self.leftPaddle)
+				self.intersection = True
 
 		# Check for scoring
 		if (self.ball['x'] - self.ball['radius'] < 0 ) and not self.intersection or (self.ball['x'] + self.ball['radius'] > self.canvasWidth) and not self.intersection :
@@ -114,22 +119,12 @@ class GPongGame:
 		# calculates the repel, depending on the intersection point
 		repel = (self.repel)
 		
-	# very small angle ,less then 6 degrees = 0.1
-		# if angle <= 0.1 and angle >= -0.1:
-		# 	repel *= 1.5
 		self.ball['dy'] = angle * repel * abs(self.ball['dx'])
 		self.ball['dx'] =-self.ball['dx']
 		if not abs(self.ball['dx']) > self.max_velocity:
 			self.ball['dx'] *= 1.1   # Reverse the horizontal direction
 		if not abs(self.ball['dy']) > self.max_velocity:
 			self.ball['dx'] *= 1.1   # Reverse the horizontal direction
-		# print(f"\n({self.ball['y']} - ({paddle['y']} + {paddle['height']/2})) / {paddle['height'] / 2}  = {pos}")
-		# print(f"Angle: {angle}")
-		# print(f"Repel: {repel}")
-		# print(f"\n OLD [DY]{self.ball['dy']}")
-		# print(f"\n NEW [DY]{self.ball['dy']}")
-		# print(f"\n{self.intersection=}")
-		self.intersection = False
 		
 	
 	def paddle_up(self, player):

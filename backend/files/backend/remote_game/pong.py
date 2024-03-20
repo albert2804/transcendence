@@ -21,10 +21,10 @@ class PongGame:
 		# Paddle initialization
 		self.leftPaddle = {'x': 0, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
 		self.rightPaddle = {'x': self.canvasWidth - 10, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
-		self.paddle_speed = 8
+		self.paddle_speed = 12
 		# Ball initialization
 		self.acceleration = 1.2
-		self.tolerance = 4
+		self.tolerance = 5
 		self.max_velocity = 15 / self.factor
 		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.initialSpeed, 'dy': self.initialSpeed, 'radius': 6}
 
@@ -33,6 +33,9 @@ class PongGame:
 
 		# Game state saved as json (ready to be sent to the client)
 	def update_game(self):
+
+		if self.ball['x'] > self.canvasWidth / 2 - 50 and self.ball['x'] < self.canvasWidth / 2 + 50:
+			self.intersection = False
 
 		# Update paddle positions
 		self.leftPaddle['y'] += self.leftPaddle['dy']
@@ -62,15 +65,17 @@ class PongGame:
 		if ((self.ball['x']) - (self.leftPaddle['x'] + self.leftPaddle['width']) <  tolerance
 				and (self.ball['y'] > self.leftPaddle['y'] and self.ball['y'] < (self.leftPaddle['y'] + self.leftPaddle['height']))
 		):
-			self.intersection = True
-			self.repel()
-
+			if not self.intersection:
+				self.repel()
+				self.intersection = True
+				
 		if (
 			self.rightPaddle['x'] - self.ball['x'] < tolerance
 			and (self.ball['y'] > self.rightPaddle['y'] and self.ball['y'] < (self.rightPaddle['y'] + self.rightPaddle['height']))
 		):
-			self.intersection = True
-			self.repel()
+			if not self.intersection:
+				self.repel()
+				self.intersection = True
 
 		# Check for scoring
 		if (self.ball['x'] - self.ball['radius'] < 0 ) and not self.intersection or (self.ball['x'] + self.ball['radius'] > self.canvasWidth) and not self.intersection :
@@ -101,7 +106,6 @@ class PongGame:
 		self.ball['dx'] =-self.ball['dx']  # Reverse the horizontal direction
 		if not abs(self.ball['dx']) > self.max_velocity:
 			self.ball['dx'] *= self.acceleration # raise the velocity by a factor
-		self.intersection = False
 		
 	
 	def paddle_up(self, player):

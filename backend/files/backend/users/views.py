@@ -131,7 +131,7 @@ def handle_profilepic(request):
 			except ValidationError:
 				return JsonResponse({'error': 'File Extension not allowed'}, status=422)
 			except Exception as e:
-				return JsonResponse({'error': ' '}, status=400) 
+				return JsonResponse({'error': ' '}, status=400)
 	else:
 		return JsonResponse({'error': 'User not authenticated'},
 			status=401)

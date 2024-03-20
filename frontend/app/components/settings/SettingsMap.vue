@@ -26,7 +26,6 @@ export default {
 			'https://i.pinimg.com/originals/98/01/84/980184fe0897895825bb2e751d8007f7.gif',
 			'https://i.pinimg.com/originals/f2/52/05/f25205b68f7168fc06a1dc6bdf93246a.gif',
 			'https://i.pinimg.com/originals/b6/84/9b/b6849bba245a533e608908fc3f14a6c5.gif',
-
 		  ],
 			map: '',
 			error: '',

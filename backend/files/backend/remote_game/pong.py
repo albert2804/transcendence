@@ -8,7 +8,7 @@ class PongGame:
 		self.pointsP2 = 0
 		self.isGameExited = False
 		self.countdownSec = 3
-		self.factor = 3 # by raising the factor the game is faster paced
+		self.factor = 3.5 # by raising the factor the game is faster paced
 		self.initialSpeed = 4 / self.factor
 		self.canvasWidth = 800
 		self.canvasHeight = 400
@@ -21,11 +21,11 @@ class PongGame:
 		# Paddle initialization
 		self.leftPaddle = {'x': 0, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
 		self.rightPaddle = {'x': self.canvasWidth - 10, 'y': self.canvasHeight/2 - 40, 'dy': 0, 'width': 10, 'height': 80}
-
+		self.paddle_speed = 8
 		# Ball initialization
 		self.acceleration = 1.2
-		self.tolerance = 3
-		self.max_velocity = 8
+		self.tolerance = 4
+		self.max_velocity = 15 / self.factor
 		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.initialSpeed, 'dy': self.initialSpeed, 'radius': 6}
 
 		# if there is an intersection of the ball and the paddle, intersection = true(needed for sound)
@@ -96,31 +96,25 @@ class PongGame:
 	def repel(self):
 		
 		angle = (self.ball['dy']) / abs(self.ball['dx'])
-		if (math.degrees(angle)) > 60:
-			angle = math.pi / 3 
-		elif (math.degrees(angle)) < -60:
-			angle = -math.pi / 3 
-		print(f"{math.degrees(angle)=}")
 
 		self.ball['dy'] = angle * abs(self.ball['dx'])
 		self.ball['dx'] =-self.ball['dx']  # Reverse the horizontal direction
-		self.ball['dx'] *= self.acceleration # raise the velocity by a factor
-		if self.ball['dx'] > self.max_velocity:
-			self.ball['dx'] = self.max_velocity
+		if not abs(self.ball['dx']) > self.max_velocity:
+			self.ball['dx'] *= self.acceleration # raise the velocity by a factor
 		self.intersection = False
 		
 	
 	def paddle_up(self, player):
 		if player == 1:
-			self.leftPaddle['dy'] = -6 / self.factor
+			self.leftPaddle['dy'] = -self.paddle_speed / self.factor
 		elif player == 2:
-			self.rightPaddle['dy'] = -6 / self.factor
+			self.rightPaddle['dy'] = -self.paddle_speed / self.factor
 	
 	def paddle_down(self, player):
 		if player == 1:
-			self.leftPaddle['dy'] = 6 / self.factor
+			self.leftPaddle['dy'] = self.paddle_speed / self.factor
 		elif player == 2:
-			self.rightPaddle['dy'] = 6 / self.factor
+			self.rightPaddle['dy'] = self.paddle_speed / self.factor
 	
 	def paddle_stop(self, player):
 		if player == 1:
@@ -129,12 +123,12 @@ class PongGame:
 			self.rightPaddle['dy'] = 0
 
 	def game_loop(self):
-		if self.pointsP1 < 10 and self.pointsP2 < 10:
+		if self.pointsP1 < 7 and self.pointsP2 < 7:
 			self.update_game()
 		else:
-			if self.pointsP1 == 10:
+			if self.pointsP1 == 7:
 				self.winner = 1
-			elif self.pointsP2 == 10:
+			elif self.pointsP2 == 7:
 				self.winner = 2
 			self.isGameExited = True
 

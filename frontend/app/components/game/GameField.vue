@@ -1,23 +1,23 @@
 <template>
   <div
   	class="game-canvas" ref="gameFieldRef" tabindex="0" @touchstart="handleTouchPress" @touchend="handleTouchRelease" :style="{ 'background-image': 'url(' + map + ')', 'background-repeat': 'no-repeat', 'background-position': 'center', 'background-size': '100% 100%' }">
-    <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%' }"></div>
+    <div v-show="playing" class="ball" :style="{ left: ballPos.x + '%', top: ballPos.y + '%', border: '1px solid black' }"></div>
 	<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffffff; font-size: 20vh; z-index: 2;" v-if="countdown > 0">
 		{{ countdown }}
 	</div>
     <div v-show="playing" class="paddle_1" :style="{ left: p1pos.x + 'px', top: p1pos.y + '%', height: paddleSize + '%', border: '2px solid black' }"></div>
     <div v-show="playing" class="paddle_2" :style="{ left: p2pos.x + '%', top: p2pos.y + '%', height: paddleSize + '%', border: '2px solid black' }"></div>
     <div v-show="playing" class="midline"></div>
-    <div v-show="playing" style="position: absolute; top: 0; left: 2%; font-size: 1.2em; color: #ffffff;">
+    <div v-show="playing" style="position: absolute; top: 0; left: 2%; font-size: 1.2em; color: #ffffff; -webkit-text-stroke: 1px black;">
       {{ p1_name }}
     </div>
-    <div v-show="playing" style="position: absolute; top: 0; right: 2%; font-size: 1.2em; color: #ffffff;">
+    <div v-show="playing" style="position: absolute; top: 0; right: 2%; font-size: 1.2em; color: #ffffff; -webkit-text-stroke: 1px black;">
       {{ p2_name }}
     </div>
-    <div v-show="playing" style="position: absolute; bottom: 0; left: 2%; font-size: 2.0em; color: #ffffff;">
+    <div v-show="playing" style="position: absolute; bottom: 0; left: 2%; font-size: 2.0em; color: #ffffff; -webkit-text-stroke: 1px black;">
       {{ pointsP1 }}
     </div>
-    <div v-show="playing" style="position: absolute; bottom: 0; right: 2%; font-size: 2.0em; color: #ffffff;">
+    <div v-show="playing" style="position: absolute; bottom: 0; right: 2%; font-size: 2.0em; color: #ffffff; -webkit-text-stroke: 1px black;">
       {{ pointsP2 }}
     </div>
     <div class="container nes-container is-rounded is-centered menu_box" v-if="!playing" >
@@ -186,7 +186,7 @@
 
       this.socket.onmessage = (event) => {
         try {
-          console.log('Received WebSocket message:', event.data);
+          // console.log('Received WebSocket message:', event.data);
           const data = JSON.parse(event.data);
           if (data.type === "redirect") {
             this.countdown = 0;

@@ -196,7 +196,7 @@
             if (data.page === "playing") {
               if (this.loginStatus == 1) {
                 this.fetch_map();
-              }
+              };
               this.message = '';
               this.waiting = false;
               this.playing = true;

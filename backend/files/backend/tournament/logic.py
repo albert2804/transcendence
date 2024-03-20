@@ -160,16 +160,19 @@ def initTournament(request):
       for i in range(len(data["player"])):
         check_names.add(data["player"][i]["name"])
       if len(check_names) is not len(data["player"]):
-        return JsonResponse({'error': 'User cant be in Tournament Twice'}, status=400)
+        curr_tour.delete()
+        return JsonResponse({'error': 'Please enter 4 valid player names which are unique'}, status=400)
       for match in range(total_games):
         # initiate games of the first round
         if match <= total_games / 2:
           user1 = get_user_by_username(data["player"][match * 2]['name']);
           user2 = get_user_by_username(data["player"][match * 2 + 1]['name']);
           if user1 is None:
-            return JsonResponse({'error': 'Please enter 4 valid player names'}, status=400)
+            curr_tour.delete()
+            return JsonResponse({'error': 'Please enter 4 valid player names which are unique'}, status=400)
           if user2 is None:
-            return JsonResponse({'error': 'Please enter 4 valid player names'}, status=400)
+            curr_tour.delete()
+            return JsonResponse({'error': 'Please enter 4 valid player names which are unique'}, status=400)
           
           game = RemoteGame.objects.create(
                     player1=user1,

@@ -93,7 +93,7 @@ class CustomUser(AbstractUser):
 
 	# delay the game start
 	async def delayed_game_start(self, game_handler):
-		await asyncio.sleep(10)
+		await asyncio.sleep(5)
 		# open the game modal for both players
 		await game_handler.channel_layer.group_send(
 			game_handler.game_group,
@@ -124,23 +124,31 @@ class CustomUser(AbstractUser):
 			game_consumer = RemoteGameConsumer()
 			if player1 in game_consumer.training_waiting_room:
 				game_consumer.training_waiting_room.remove(player1)
+			if player1 in game_consumer.training_waiting_room_g:
+				game_consumer.training_waiting_room_g.remove(player1)
 			if player1 in game_consumer.ranked_waiting_room:
 				game_consumer.ranked_waiting_room.remove(player1)
+			if player1 in game_consumer.ranked_waiting_room_g:
+				game_consumer.ranked_waiting_room_g.remove(player1)
 			if player2 in game_consumer.training_waiting_room:
 				game_consumer.training_waiting_room.remove(player2)
+			if player2 in game_consumer.training_waiting_room_g:
+				game_consumer.training_waiting_room_g.remove(player2)
 			if player2 in game_consumer.ranked_waiting_room:
 				game_consumer.ranked_waiting_room.remove(player2)
+			if player2 in game_consumer.ranked_waiting_room_g:
+				game_consumer.ranked_waiting_room_g.remove(player2)
 			# send info message to both users
-			await consumer.save_and_send_message(user, self, 'You accepted the tournament game invite. The game starts in 10 seconds.', datetime.now(), 'info')
-			await consumer.save_and_send_message(self, user, 'Tournament game invite got accepted. The game starts in 10 seconds.', datetime.now(), 'info')
-			# send alert to the both users that the game is starting in 10 seconds
-			await consumer.show_alert(self, "Tournament Game against " + user.alias + " (" + user.username + ") is starting in 10 seconds.")
-			await consumer.show_alert(user, "Tournament Game against " + self.alias + " (" + self.username + ") is starting in 10 seconds.")
+			await consumer.save_and_send_message(user, self, 'You accepted the tournament game invite. The game starts in 5 seconds.', datetime.now(), 'info')
+			await consumer.save_and_send_message(self, user, 'Tournament game invite got accepted. The game starts in 5 seconds.', datetime.now(), 'info')
+			# send alert to the both users that the game is starting in 5 seconds
+			await consumer.show_alert(self, "Tournament Game against " + user.alias + " (" + user.username + ") is starting in 5 seconds.")
+			await consumer.show_alert(user, "Tournament Game against " + self.alias + " (" + self.username + ") is starting in 5 seconds.")
 			# remove invites from both users
 			await sync_to_async(self.tournament_invites.remove)(user)
 			await sync_to_async(user.tournament_invites.remove)(self)
 			# create a new game handler
-			game_handler = await GameHandler.create(player1, player2, ranked=True, db_entry=db_game, tournament=tournament)
+			game_handler = await GameHandler.create(player1, player2, ranked=True, db_entry=db_game, tournament=tournament, directGame=False)
 			# open the game modal for both players
 			asyncio.create_task(self.delayed_game_start(game_handler))
 			return
@@ -176,23 +184,31 @@ class CustomUser(AbstractUser):
 			game_consumer = RemoteGameConsumer()
 			if player1 in game_consumer.training_waiting_room:
 				game_consumer.training_waiting_room.remove(player1)
+			if player1 in game_consumer.training_waiting_room_g:
+				game_consumer.training_waiting_room_g.remove(player1)
 			if player1 in game_consumer.ranked_waiting_room:
 				game_consumer.ranked_waiting_room.remove(player1)
+			if player1 in game_consumer.ranked_waiting_room_g:
+				game_consumer.ranked_waiting_room_g.remove(player1)
 			if player2 in game_consumer.training_waiting_room:
 				game_consumer.training_waiting_room.remove(player2)
+			if player2 in game_consumer.training_waiting_room_g:
+				game_consumer.training_waiting_room_g.remove(player2)
 			if player2 in game_consumer.ranked_waiting_room:
 				game_consumer.ranked_waiting_room.remove(player2)
+			if player2 in game_consumer.ranked_waiting_room_g:
+				game_consumer.ranked_waiting_room_g.remove(player2)
 			# send info message to both users
-			await consumer.save_and_send_message(user, self, 'You accepted the game invite. The game starts in 10 seconds.', datetime.now(), 'info')
-			await consumer.save_and_send_message(self, user, 'Game invite got accepted. The game starts in 10 seconds.', datetime.now(), 'info')
-			# send alert to the both users that the game is starting in 10 seconds
-			await consumer.show_alert(self, "Game against " + user.alias + " (" + user.username + ") is starting in 10 seconds.")
-			await consumer.show_alert(user, "Game against " + self.alias + " (" + self.username + ") is starting in 10 seconds.")
+			await consumer.save_and_send_message(user, self, 'You accepted the game invite. The game starts in 5 seconds.', datetime.now(), 'info')
+			await consumer.save_and_send_message(self, user, 'Game invite got accepted. The game starts in 5 seconds.', datetime.now(), 'info')
+			# send alert to the both users that the game is starting in 5 seconds
+			await consumer.show_alert(self, "Game against " + user.alias + " (" + user.username + ") is starting in 5 seconds.")
+			await consumer.show_alert(user, "Game against " + self.alias + " (" + self.username + ") is starting in 5 seconds.")
 			# remove invites from both users
 			await sync_to_async(self.game_invites.remove)(user)
 			await sync_to_async(user.game_invites.remove)(self)
 			# create a new game handler
-			game_handler = await GameHandler.create(player1, player2, ranked=True)
+			game_handler = await GameHandler.create(player1, player2, ranked=True, directGame=False)
 			# delay the game start
 			asyncio.create_task(self.delayed_game_start(game_handler))
 			return

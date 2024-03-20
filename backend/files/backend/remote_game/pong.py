@@ -4,6 +4,7 @@ import asyncio
 
 class PongGame:
 	def __init__(self):
+		self.started = False
 		self.pointsP1 = 0
 		self.pointsP2 = 0
 		self.isGameExited = False
@@ -163,7 +164,7 @@ class PongGame:
 			}
 	
 	async def run_game(self):
-
+		self.started = True
 		# start countdown
 		asyncio.create_task(self.countdown())
 		# game loop

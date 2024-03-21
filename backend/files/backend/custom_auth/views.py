@@ -95,5 +95,5 @@ def callback(request):
 
     # return HttpResponseRedirect(f'http://{request.get_host()}/login?message={message}')
     response = HttpResponseRedirect(f'http://{request.get_host()}/login?message={message}')
-    response.set_cookie('jwt_token', jwt_token, httponly=True, secure=True, samesite='Strict')
+    response.set_cookie('jwt_token', jwt_token, httponly=True, secure=True, samesite='None')
     return response

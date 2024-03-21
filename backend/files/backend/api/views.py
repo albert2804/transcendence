@@ -143,7 +143,7 @@ def userlogin(request):
                 'userid': user_id,
                 'jwt_token': jwt_token,
                 }, status=200)
-            response.set_cookie('jwt_token', jwt_token, httponly=True, secure=True, samesite='Strict')
+            response.set_cookie('jwt_token', jwt_token, httponly=True, secure=True, samesite='None')
             return response
         return JsonResponse({'error': 'Invalid credentials'}, status=403)
     return JsonResponse({'error': 'Invalid request'}, status=400)

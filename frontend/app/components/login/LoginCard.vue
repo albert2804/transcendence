@@ -122,7 +122,6 @@
       });
 
       async function get2FAStatus() {
-        console.log('get2FAStatus')
         const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value;
         let response;
         try {
@@ -193,7 +192,6 @@
 
       async function loginWithToken() {
         // Handle the token here
-        console.log(token.value)
         hideTokenDialog();
         try {
           const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value;
@@ -281,13 +279,14 @@
           });
           if (response.status === 200) {
             const data = await response.json();
-            isLoggedIn.value = 1; // Store
-            userName.value = data.username; // Store
-            userId.value = data.userid; // Store
+            isLoggedIn.value = 0; // Store
+            userName.value = ''; // Store
+            userId.value = ''; // Store
             password.value = '';
             password2.value = '';
             error.value = '';
             message.value = data.message;
+            this.reg_form = false;
           } else if (response.status === 403 || response.status === 400) {
             isLoggedIn.value = 0; // Store
             userName.value = ''; // Store

@@ -48,12 +48,12 @@ def get_csrf(request):
 # returns a json object with a boolean value that indicates if the user is authenticated
 # 200: successfull request
 def get_auth_status(request):
-    if request.user.is_authenticated:
+    if request.user and request.user.is_authenticated:
         return JsonResponse({
             'authenticated': True,
             'user_id': request.user.id,
             'username': request.user.username,
-			'is_42_login': request.user.is_42_login,
+            'is_42_login': request.user.is_42_login,
             }, status=200)
     else:
         return JsonResponse({'authenticated': False}, status=200)
@@ -92,6 +92,14 @@ def userexists(request):
 #   "password": "<YOUR PASSWORD>"
 # }'
 # 
+# or, if 2FA is enabled for the account:
+# # curl -k -X POST 'https://localhost/endpoint/api/userlogin' \
+# -H 'Content-Type: application/json' \
+# -d '{
+#   "username": "<YOUR USERNAME>",
+#   "password": "<YOUR PASSWORD>",
+#   "token": "<YOUR 2FA TOKEN>"
+# }'
 def userlogin(request):
     if request.method == 'POST':
         # validate json data
@@ -101,7 +109,7 @@ def userlogin(request):
             password = data.get('password')
             token = data.get('token')
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Something went wrong'}, status=400)
+            return JsonResponse({'error': 'Error reading JSON'}, status=400)
         # check if user is already logged in
         if request.user.is_authenticated:
             return JsonResponse({
@@ -129,12 +137,14 @@ def userlogin(request):
                 'iat': datetime.datetime.utcnow()
             }
             jwt_token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-            return JsonResponse({
+            response = JsonResponse({
                 'message': 'Successfully logged in as ' + request.user.username,
                 'username': request.user.username,
                 'userid': user_id,
                 'jwt_token': jwt_token,
                 }, status=200)
+            response.set_cookie('jwt_token', jwt_token, httponly=True, secure=True, samesite='None')
+            return response
         return JsonResponse({'error': 'Invalid credentials'}, status=403)
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
@@ -144,13 +154,15 @@ def userlogin(request):
 # 
 # As API request call:
 # curl -k -X POST 'https://localhost/endpoint/api/userlogout' \
-# -H 'Authorization: Bearer <YOUR SESSION-ID>' \
+# -H 'Authorization: Bearer <YOUR JWT_TOKEN>' \
 # -H 'Content-Type: application/json'
 # 
 def userlogout(request):
     if request.user.is_authenticated:
         logout(request)
-        return JsonResponse({'message': 'Successfully logged out'}, status=200)
+        response = JsonResponse({'message': 'Successfully logged out'}, status=200)
+        response.delete_cookie('jwt_token')
+        return response
     return JsonResponse({'message': 'You are already logged out'}, status=200)
 
 
@@ -184,10 +196,9 @@ def userregister(request):
             password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=password)
             if user is not None:
-                login(request, user)
                 user_id = user.id
                 return JsonResponse({
-                    'message': 'Successfully registered as ' + request.user.username,
+                    'message': 'Successfully registered as ' + username,
                     'username': request.user.username,
                     'userid': user_id,
                     }, status=200)
@@ -208,9 +219,19 @@ def userregister(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 # get qr code for 2FA
+# 200: user logged out
+# 
+# As API request call:
+# curl -k -X POST 'https://localhost/endpoint/api/qr_code' \
+# -H 'Authorization: Bearer <YOUR JWT_TOKEN>' \
+# -H 'Content-Type: application/json'
+# 
+# API request returns base64 encoded qr code
 
 def qr_code(request):
     user = request.user
+    if not user.is_authenticated:
+        return JsonResponse({'error': 'User is not logged in'}, status=401)
     if user.enabled_2fa:
         return JsonResponse({'error': '2FA is already enabled for this user'}, status=400)
 
@@ -251,12 +272,14 @@ def qr_code(request):
     # Encode the QR code image in base64 and return it in the response
     qr_code_base64 = base64.b64encode(buffered.getvalue()).decode()
 
-    return JsonResponse({'qr_code': qr_code_base64})
+    return JsonResponse({'qr_code': qr_code_base64, 'provisioning_uri': provisioning_uri})
 
 
 # enable 2FA for user
 def enable_2fa(request, *args, **kwargs):
     user = request.user
+    if not user.is_authenticated:
+        return JsonResponse({'error': 'User is not logged in'}, status=401)
     if user.is_42_login:
         return JsonResponse({'error': '42 users cannot enable 2FA'}, status=200)
     if user.enabled_2fa or TOTPDevice.objects.filter(user=user, confirmed=True).exists():
@@ -285,6 +308,16 @@ def enable_2fa(request, *args, **kwargs):
     else:
         return JsonResponse({'error': 'Invalid or expired code'}, status=200)
 
+
+# get 2FA status for user
+# 200: user logged out
+# 
+# As API request call:
+# curl -k -X POST 'https://localhost/endpoint/api/qr_code' \
+# -H 'Authorization: Bearer <YOUR JWT_TOKEN>' \
+# -H 'Content-Type: application/json'
+# 
+# API request returns base64 encoded qr code
 
 def get_2fa_status(request):
     if request.method == 'GET':
@@ -339,7 +372,7 @@ def disable_2fa(request, *args, **kwargs):
 # This request needs a connected game-consumer (websocket) to work, so its not really useful with curl.
 # curl -k -X POST 'https://localhost/endpoint/api/invite_to_game' \
 # -H 'Content-Type: application/json' \
-# -H 'Authorization: Bearer <YOUR SESSION-ID>' \
+# -H 'Authorization: Bearer <YOUR JWT TOKEN>' \
 # -d '{
 #   "receiver": "<RECEIVER_USERNAME>"
 # }'
@@ -385,7 +418,7 @@ def invite_to_game(request):
 # Send anything else than 'up' or 'down' as direction to stop the paddel movement.
 # curl -k -X POST 'https://localhost/endpoint/api/move_paddle' \
 # -H 'Content-Type: application/json' \
-# -H 'Authorization: Bearer <YOUR SESSION-ID>' \
+# -H 'Authorization: Bearer <YOUR JWT TOKEN>' \
 # -d '{
 #   "direction": "<up or down>"
 # }'sw
@@ -449,7 +482,7 @@ def get_leaderboard(request):
 # As API request call:
 # curl -k -X GET 'https://localhost/endpoint/api/get_friends' \
 # -H 'Content-Type: application/json' \
-# -H 'Authorization: Bearer <YOUR SESSION-ID>'
+# -H 'Authorization: Bearer <YOUR JWT_TOKEN>'
 #
 def get_friends(request):
     if request.method == 'GET':
@@ -470,7 +503,7 @@ def get_friends(request):
 # This request needs a connected chat-consumer (websocket) to work, so its not really useful with curl.
 # curl -k -X POST 'https://localhost/endpoint/api/add_friend' \
 # -H 'Content-Type: application/json' \
-# -H 'Authorization: Bearer <YOUR SESSION-ID>' \
+# -H 'Authorization: Bearer <YOUR JWT_TOKEN>' \
 # -d '{
 #   "receiver": "<RECEIVER_USERNAME>"
 # }'
@@ -513,7 +546,7 @@ def add_friend(request):
 # This request needs a connected chat-consumer (websocket) to work, so its not really useful with curl.
 # curl -k -X POST 'https://localhost/endpoint/api/remove_friend' \
 # -H 'Content-Type: application/json' \
-# -H 'Authorization: Bearer <YOUR SESSION-ID>' \
+# -H 'Authorization: Bearer <YOUR JWT_TOKEN>' \
 # -d '{
 #   "receiver": "<RECEIVER_USERNAME>"
 # }'

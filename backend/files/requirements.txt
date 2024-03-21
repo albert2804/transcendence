@@ -23,3 +23,5 @@ django-otp
 pyjwt
 pyotp
 qrcode
+# djangorestframework
+# djangorestframework_simplejwt

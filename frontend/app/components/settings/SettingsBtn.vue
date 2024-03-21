@@ -87,7 +87,6 @@ export default {
 	
 	watchEffect(() => {
 		is42login.value = is_42_login.value;
-		console.log('is42login', is42login.value);
 	  });
 
     return {
@@ -105,7 +104,7 @@ export default {
       openPopupPw,
       openPopupMap,
       openPopup2FA,
-	  is42login,
+      is42login,
     };
   },
  

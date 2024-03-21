@@ -15,6 +15,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
 	@database_sync_to_async
 	def update_user_status(self, user, status):
+		if not user.is_authenticated:
+			return
 		dbuser = get_user_model().objects.get(id=user.id)
 		dbuser.chat_online = status
 		dbuser.save()

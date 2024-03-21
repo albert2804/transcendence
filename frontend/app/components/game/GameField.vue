@@ -381,6 +381,13 @@
           this.socket.send(data);
         }
       }
+	// P for pause
+	  if (event.key === 'p' || event.key === 'P') {
+		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+		  const data = JSON.stringify({ type: 'pause' });
+		  this.socket.send(data);
+		}
+	  }
     },
     // handler for key release
     handleKeyRelease(event){

@@ -22,7 +22,19 @@
   </template>
 
   <script>
+  import { isLoggedIn, userName, userId } from '~/store';
+
   export default{
+
+	watch: {
+    isLoggedIn: {
+      immediate: true,
+      handler(newValue) {
+        this.loginStatus = newValue;
+      }
+    },
+  },
+
 	props: {
     openPopup: Boolean
   },
@@ -57,7 +69,11 @@
 					this.message = data.status;
 					this.sendMessagetoParent(this.message, this.error);
 					if (response.status === 200){
-						reloadNuxtApp({ path: '/login' });
+						isLoggedIn.value = 0; // Store
+						userName.value = ''; // Store
+						userId.value = ''; // Store
+						await fetch('/endpoint/api/userlogout');
+						this.$router.push('/login');
 					}
 				} catch (error) {
 					console.error('Error sending data to /endpoint/user/verify/:', error);

@@ -162,6 +162,11 @@ class GameHandler:
 				'result': 'winner',
 			})
 
+	# pause / resume the game
+	def pause_resume_game(self):
+		if self.game is not None:
+			self.game.paused = not self.game.paused
+
 	# show game result as alert to all players
 	# like a live ticker for ranked games
 	async def show_game_result_as_alert(self):

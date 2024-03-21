@@ -5,6 +5,7 @@ import asyncio
 class GPongGame:
 	def __init__(self):
 		self.started = False
+		self.paused = False
 		self.pointsP1 = 0
 		self.pointsP2 = 0
 		self.isGameExited = False
@@ -188,7 +189,8 @@ class GPongGame:
 		asyncio.create_task(self.countdown())
 		# game loop
 		while not self.isGameExited:
-			self.game_loop()
+			if self.paused == False:
+				self.game_loop()
 			await self.save_game_state()
 			await asyncio.sleep(0.02 / self.factor)
 	

@@ -10,6 +10,7 @@ from django.shortcuts import redirect
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth import logout
 
 import imghdr
 
@@ -146,7 +147,8 @@ def verify(request):
 				if user.check_password(data.get('old_pw')):
 					user.set_password(data.get('password1'))
 					user.save()
-					return JsonResponse({'status': 'Password changed succesfully'},
+					logout(request)
+					return JsonResponse({'status': 'Password changed succesfully. Please log in again.'},
 							status=200)
 				else:
 					return JsonResponse({'error': 'Wrong password'},

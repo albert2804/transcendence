@@ -1,17 +1,17 @@
 <template>
 	<div v-if="openPopup" class="popup">
 		<div class="password_container">
-			<div class="password">
-				<label for="old_pw">Current Password:</label>
-				<input type="password" id="old_pw" name="old_pw" v-model="old_pw">
+			<div class="password nes-field">
+				<label for="old_pw">Current Password</label>
+				<input class="nes-input" type="password" id="old_pw" name="old_pw" v-model="old_pw">
 			</div>
-			<div class="password">
-				<label for="password1">New Password:</label>
-				<input type="password" id="password1" name="password1" v-model="password1">
+			<div class="password nes-field">
+				<label for="password1">New Password</label>
+				<input class="nes-input" type="password" id="password1" name="password1" v-model="password1">
 			</div>
-			<div class="password">
-				<label for="password2">Confirm Password:</label>
-				<input type="password" id="password2" name="password2" v-model="password2">
+			<div class="password nes-field">
+				<label for="password2">Confirm Password</label>
+				<input class="nes-input" type="password" id="password2" name="password2" v-model="password2">
 			</div>
 			<div class="nes-btn nes-btn-pw is-success nav-item" @click="confirm">Confirm new password
 				
@@ -22,7 +22,19 @@
   </template>
 
   <script>
+  import { isLoggedIn, userName, userId } from '~/store';
+
   export default{
+
+	watch: {
+    isLoggedIn: {
+      immediate: true,
+      handler(newValue) {
+        this.loginStatus = newValue;
+      }
+    },
+  },
+
 	props: {
     openPopup: Boolean
   },
@@ -57,7 +69,11 @@
 					this.message = data.status;
 					this.sendMessagetoParent(this.message, this.error);
 					if (response.status === 200){
-						reloadNuxtApp({ path: '/login' });
+						isLoggedIn.value = 0; // Store
+						userName.value = ''; // Store
+						userId.value = ''; // Store
+						await fetch('/endpoint/api/userlogout');
+						this.$router.push('/login');
 					}
 				} catch (error) {
 					console.error('Error sending data to /endpoint/user/verify/:', error);

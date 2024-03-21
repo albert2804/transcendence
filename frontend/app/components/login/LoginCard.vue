@@ -122,7 +122,6 @@
       });
 
       async function get2FAStatus() {
-        console.log('get2FAStatus')
         const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value;
         let response;
         try {
@@ -193,7 +192,6 @@
 
       async function loginWithToken() {
         // Handle the token here
-        console.log(token.value)
         hideTokenDialog();
         try {
           const csrfToken = useCookie('csrftoken', { sameSite: 'strict' }).value;

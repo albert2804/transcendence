@@ -198,7 +198,7 @@ def userregister(request):
             if user is not None:
                 user_id = user.id
                 return JsonResponse({
-                    'message': 'Successfully registered as ' + request.user.username,
+                    'message': 'Successfully registered as ' + username,
                     'username': request.user.username,
                     'userid': user_id,
                     }, status=200)

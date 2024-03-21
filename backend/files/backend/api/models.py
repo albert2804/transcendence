@@ -28,7 +28,7 @@ class CustomUser(AbstractUser):
 	ranking = models.IntegerField(default=0)
 	date_joined = models.DateTimeField(auto_now_add=True)
 	game_history = models.ManyToManyField('remote_game.RemoteGame', related_name='game_history')
-	map = models.TextField(blank=True, null=True)
+	map = models.TextField(blank=True)
 	sound = models.BooleanField(default=False)
 	enabled_2fa = models.BooleanField(default=False)
 	

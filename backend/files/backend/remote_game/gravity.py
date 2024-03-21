@@ -28,7 +28,7 @@ class GPongGame:
 		self.tolerance = 5
 		self.ver_velocity = 2 / self.factor
 		self.hor_velocity = 8 / self.factor
-		self.max_velocity = 8 / self.factor
+		self.max_velocity = 13 / self.factor
 		self.ball = {'x': self.canvasWidth/2, 'y': self.canvasHeight/2, 'dx': self.hor_velocity, 'dy': self.ver_velocity, 'radius': 6}
 
 		# if there is an intersection of the ball and the paddle, intersection = true(needed for sound)
@@ -125,7 +125,7 @@ class GPongGame:
 		if not abs(self.ball['dx']) > self.max_velocity:
 			self.ball['dx'] *= 1.1   # Reverse the horizontal direction
 		if not abs(self.ball['dy']) > self.max_velocity:
-			self.ball['dx'] *= 1.1   # Reverse the horizontal direction
+			self.ball['dy'] *= 1.1   # Reverse the horizontal direction
 		
 	
 	def paddle_up(self, player):

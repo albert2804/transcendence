@@ -457,9 +457,6 @@
       this.ballPos.y = gameState.ball.y - (3/2);   // 3% is the height of the ball
       this.countdown = gameState.countdown;
       
-      if (sound.value && gameState.intersection) {
-        effects[0].play();
-      }
     },
     // function to send information to server that the user wants to play on this device
     changeDevice() {
